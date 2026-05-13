@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ClassTrack — Attendance Clerk Portal Wireframe (V3)</title>
+<style>
+  :root {
+    --c-bg:        #F4F6FA;
+    --c-surface:   #FFFFFF;
+    --c-surface-2: #F8FAFC;
+    --c-border:    #D6DBE2;
+    --c-border-2:  #E5E8EE;
+    --c-ink:       #0F2546;
+    --c-ink-muted: #475467;
+    --c-ink-subtle:#5C6470;
+    --c-brand:     #1B5DAF;
+    --c-brand-ink: #0E2E55;
+    --c-brand-tint:#E8F0FA;
+    --c-success:   #1F7A3F;
+    --c-warning:   #B45309;
+    --c-danger:    #B42318;
+    --c-focus:     #FFB400;
+    --c-focus-ink: #5C3F00;
+    --ff: "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, Roboto, "Helvetica Neue", Arial, sans-serif;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: var(--ff);
+    background: var(--c-bg);
+    color: var(--c-ink);
+    line-height: 1.55;
+  }
+  /* 2-stop halo so the indicator passes 3:1 against both light surfaces and dark gradient header */
+  :focus-visible {
+    outline: 3px solid var(--c-focus);
+    outline-offset: 0;
+    box-shadow: 0 0 0 6px var(--c-ink);
+    border-radius: 2px;
+  }
+  header.site :focus-visible { box-shadow: none; outline-offset: 2px; }
+  a { color: var(--c-brand); }
+
+  header.site {
+    background: linear-gradient(135deg, #0A1B36 0%, #0F2546 60%, #1B5DAF 100%);
+    color: #fff;
+    padding: 56px 32px 80px;
+  }
+  .site__inner { max-width: 1100px; margin: 0 auto; }
+  .site__tag {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: rgba(255,255,255,0.12);
+    border: 1px solid rgba(255,255,255,0.3);
+    padding: 4px 12px; border-radius: 999px;
+    font-size: 12px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase;
+  }
+  .site__title {
+    font-size: 36px; font-weight: 700; margin: 16px 0 8px; letter-spacing: -0.01em;
+  }
+  .site__sub {
+    font-size: 17px; color: rgba(255,255,255,0.85); max-width: 720px;
+  }
+  .site__meta {
+    display: flex; gap: 32px; flex-wrap: wrap;
+    margin-top: 28px;
+    font-size: 13px;
+    color: rgba(255,255,255,0.85);
+  }
+  .site__meta strong { color: #fff; display: block; font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; opacity: 0.65; margin-bottom: 2px; }
+
+  .container { max-width: 1100px; margin: 0 auto; padding: 0 32px; }
+  main { margin-top: -40px; padding-bottom: 80px; }
+
+  .card {
+    background: var(--c-surface);
+    border: 1px solid var(--c-border);
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 8px 28px rgba(15,37,70,0.10);
+    margin-bottom: 24px;
+  }
+  .card__head {
+    padding: 28px 32px 8px;
+    border-bottom: 1px solid var(--c-border-2);
+    display: flex; align-items: flex-start; justify-content: space-between; gap: 16px;
+    flex-wrap: wrap;
+  }
+  .card__head h2 { font-size: 22px; font-weight: 700; }
+  .card__head p { color: var(--c-ink-muted); margin-top: 4px; max-width: 64ch; }
+  .card__chip {
+    background: var(--c-brand-tint); color: var(--c-brand-ink);
+    border: 1px solid #C9DDF1;
+    padding: 6px 14px; border-radius: 999px;
+    font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em;
+  }
+  .card__body { padding: 24px 32px 32px; }
+
+  .preview {
+    background: linear-gradient(180deg, #0F2546 0%, #0A1B36 100%);
+    border-radius: 12px;
+    aspect-ratio: 16 / 9;
+    display: flex; align-items: stretch;
+    overflow: hidden;
+    margin-bottom: 24px;
+    border: 1px solid #0A1B36;
+  }
+  .preview__nav {
+    width: 26%; background: #0A1B36;
+    padding: 16px 12px;
+    display: flex; flex-direction: column; gap: 6px;
+  }
+  .preview__nav-label { color: rgba(255,255,255,0.4); font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; padding: 0 8px; margin-top: 8px; }
+  .preview__nav-item { color: rgba(255,255,255,0.7); font-size: 11px; padding: 6px 8px; border-radius: 4px; }
+  .preview__nav-item.active { background: #1B5DAF; color: #fff; font-weight: 600; }
+  .preview__main { flex: 1; background: var(--c-bg); padding: 16px; display: flex; flex-direction: column; gap: 10px; }
+  .preview__bar { height: 28px; background: #fff; border: 1px solid var(--c-border); border-radius: 6px; }
+  .preview__greeting { background: linear-gradient(120deg, #1B5DAF, #0E2E55); border-radius: 8px; height: 64px; }
+  .preview__kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+  .preview__kpi { background: #fff; border: 1px solid var(--c-border); border-radius: 6px; height: 60px; padding: 8px; display: flex; flex-direction: column; gap: 4px; }
+  .preview__kpi-bar { width: 16px; height: 16px; border-radius: 4px; background: var(--c-warning); }
+  .preview__kpi-bar.b { background: var(--c-brand); }
+  .preview__kpi-bar.c { background: var(--c-danger); }
+  .preview__kpi-bar.d { background: var(--c-warning); opacity: 0.7; }
+  .preview__kpi-num { font-size: 18px; font-weight: 700; color: var(--c-ink); line-height: 1; }
+  .preview__kpi-lbl { font-size: 8px; color: var(--c-ink-subtle); }
+  .preview__work { flex: 1; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .preview__queue, .preview__detail { background: #fff; border: 1px solid var(--c-border); border-radius: 6px; padding: 8px; display: flex; flex-direction: column; gap: 6px; }
+  .preview__row { display: flex; gap: 6px; align-items: center; }
+  .preview__row .bar { background: #EEF2F7; height: 8px; border-radius: 3px; flex: 1; }
+  .preview__row .pill { width: 30px; height: 10px; border-radius: 999px; background: var(--c-warning); }
+  .preview__row .pill.r { background: var(--c-info, #0E5C8A); }
+  .preview__row.sel { background: var(--c-brand-tint); border-radius: 4px; padding: 4px; box-shadow: inset 3px 0 0 var(--c-brand); }
+
+  .actions {
+    display: flex; gap: 12px; flex-wrap: wrap;
+  }
+  .btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-size: 14px; font-weight: 600;
+    border: 1px solid transparent;
+    text-decoration: none;
+    min-height: 44px;
+  }
+  .btn--primary {
+    background: var(--c-brand); color: #fff; border-color: var(--c-brand);
+  }
+  .btn--primary:hover { background: var(--c-brand-ink); border-color: var(--c-brand-ink); }
+  .btn--secondary {
+    background: var(--c-surface); color: var(--c-ink); border-color: #A6ADBB;
+  }
+  .btn--secondary:hover { background: #EEF2F7; }
+
+  .grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-top: 16px;
+  }
+  @media (max-width: 720px) { .grid { grid-template-columns: 1fr; } }
+  .item {
+    display: flex; gap: 12px; padding: 14px 16px;
+    background: var(--c-surface-2);
+    border: 1px solid var(--c-border-2);
+    border-radius: 8px;
+  }
+  .item__icon {
+    width: 32px; height: 32px; border-radius: 6px;
+    background: var(--c-brand-tint); color: var(--c-brand-ink);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; font-weight: 800;
+    flex-shrink: 0;
+  }
+  .item h3 { font-size: 14px; font-weight: 700; }
+  .item p { font-size: 13px; color: var(--c-ink-muted); margin-top: 2px; }
+
+  .traceability {
+    border-collapse: collapse;
+    width: 100%;
+    margin-top: 16px;
+    font-size: 13px;
+  }
+  .traceability th, .traceability td {
+    text-align: left;
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--c-border-2);
+    vertical-align: top;
+  }
+  .traceability th {
+    background: var(--c-surface-2);
+    font-size: 11px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.06em;
+    color: var(--c-ink-muted);
+  }
+  .traceability tr:last-child td { border-bottom: 0; }
+  .traceability code {
+    background: var(--c-brand-tint);
+    color: var(--c-brand-ink);
+    padding: 1px 6px; border-radius: 4px;
+    font-size: 12px;
+  }
+
+  footer.site-foot {
+    margin-top: 48px;
+    padding: 32px;
+    text-align: center;
+    color: var(--c-ink-subtle);
+    font-size: 13px;
+  }
+</style>
+</head>
+<body>
+
+<header class="site">
+  <div class="site__inner">
+    <span class="site__tag">UI Wireframe · V3</span>
+    <h1 class="site__title">ClassTrack — Attendance Clerk Portal</h1>
+    <p class="site__sub">A dashboard wireframe modernizing the previous Principal portal for the new Attendance Clerk role and the v2 functional requirements (September 1, 2026 release). The dashboard is the clerk's single home — situational awareness on top, the day's action-needed items in the middle, broader analytics below.</p>
+    <div class="site__meta">
+      <div><strong>Source</strong>ClassTrack_Functional_Requirements_v2.md</div>
+      <div><strong>Compliance</strong>WCAG 2.2 AA</div>
+      <div><strong>Primary breakpoint</strong>Desktop ≈ 1440px</div>
+      <div><strong>Bilingual</strong>EN / FR (slot reserved)</div>
+      <div><strong>Date</strong>May 7, 2026</div>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="container">
+
+    <!-- Dashboard card (single screen) -->
+    <section class="card" aria-labelledby="dash-h">
+      <div class="card__head">
+        <div>
+          <h2 id="dash-h">Dashboard</h2>
+          <p>The clerk's single home screen. KPIs at the top, all action-needed items in the middle, today's status (donut + per-period submission) alongside, weekly attendance trend, by-grade table, and recent activity. Modernizes the previous Principal admin-dashboard for the new Attendance Clerk role and the v2 functional requirements.</p>
+        </div>
+        <span class="card__chip">Single-screen home</span>
+      </div>
+      <div class="card__body">
+        <div class="actions">
+          <a class="btn btn--primary" href="dashboard.html">Open the dashboard →</a>
+          <a class="btn btn--secondary" href="design-rationale.md">Read the rationale</a>
+        </div>
+
+        <h3 style="margin-top:32px; font-size:16px; font-weight:700;">What lives on the dashboard</h3>
+        <div class="grid">
+          <div class="item">
+            <span class="item__icon">1</span>
+            <div>
+              <h3>Greeting + 4 KPI tiles</h3>
+              <p>Late at sign-in · Parent replies pending · Past 24h · Signed-in-not-in-class. Each is icon + text + color (never color alone).</p>
+            </div>
+          </div>
+          <div class="item">
+            <span class="item__icon">2</span>
+            <div>
+              <h3>Action needed</h3>
+              <p>The clerk's main work surface. All sign-ins, parent replies and follow-ups in one scrollable list with inline CTAs and quick filters. Two-clerk concurrency cues on rows being handled.</p>
+            </div>
+          </div>
+          <div class="item">
+            <span class="item__icon">3</span>
+            <div>
+              <h3>Today's status</h3>
+              <p>Donut breakdown (Present / Late / Absent) plus per-period submission progress bars — directly visualizing §7 missing-attendance alerts.</p>
+            </div>
+          </div>
+          <div class="item">
+            <span class="item__icon">4</span>
+            <div>
+              <h3>Weekly attendance chart</h3>
+              <p>Stacked bars Mon–Fri. Today is highlighted. Friday shown as projected (driven by future-absence declarations).</p>
+            </div>
+          </div>
+          <div class="item">
+            <span class="item__icon">5</span>
+            <div>
+              <h3>Attendance by grade</h3>
+              <p>Real `<table>` with `<th scope>` headers and a percent bar per grade. Outliers flagged with a Watch chip.</p>
+            </div>
+          </div>
+          <div class="item">
+            <span class="item__icon">6</span>
+            <div>
+              <h3>Recent activity feed</h3>
+              <p>Last 30 minutes of clerk and parent actions; deep-link to the full audit log.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- Requirements traceability -->
+    <section class="card" aria-labelledby="trace-h">
+      <div class="card__head">
+        <div>
+          <h2 id="trace-h">Requirements traceability</h2>
+          <p>How this single wireframe answers the v2 functional requirements for the Attendance Clerk role.</p>
+        </div>
+        <span class="card__chip">v2 § 5, 7, 10</span>
+      </div>
+      <div class="card__body">
+        <table class="traceability">
+          <thead>
+            <tr>
+              <th>Requirement (v2 §)</th>
+              <th>Where it lives in V3</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>§5.1</code> Scenario 1 — Late student</td>
+              <td>Queue item "Liam Tremblay" → Detail pane (Audit + pre-loaded teacher note + Sign-in to Period 2 primary action).</td>
+            </tr>
+            <tr>
+              <td><code>§5.2</code> Scenario 2 — No-show</td>
+              <td>Queue item "Sofia Patel" with Past-due chip; KPI #3 surfaces unjustified &gt; 24h with deep-link to record.</td>
+            </tr>
+            <tr>
+              <td><code>§5.3</code> Scenario 3 — Future absence</td>
+              <td>Sidebar: Workflows → Future absences. Queue surfaces "Mei Lin" as informational only, no action required.</td>
+            </tr>
+            <tr>
+              <td><code>§5.4</code> Scenario 4 — Group event</td>
+              <td>Sidebar: Workflows → Group events. Out of the priority queue by design (no action expected of the clerk).</td>
+            </tr>
+            <tr>
+              <td><code>§7</code> Missing attendance</td>
+              <td>Topbar "Period 2 · 10:35–11:50" pill + Search → drives the clerk to teachers who haven't submitted.</td>
+            </tr>
+            <tr>
+              <td><code>§7</code> Late not reconciled</td>
+              <td>Status chip "Did not reach class" on Noah Diallo. Threshold (10 min) shown on KPI #4.</td>
+            </tr>
+            <tr>
+              <td><code>§7</code> Signed in, did not reach class</td>
+              <td>KPI #4 + queue chip. Action: "Locate" button on row.</td>
+            </tr>
+            <tr>
+              <td><code>§7</code> Unjustified pending</td>
+              <td>KPI #3 "Past 24h" → queue "Past due" filter chip.</td>
+            </tr>
+            <tr>
+              <td><code>§10</code> School-wide view</td>
+              <td>Sidebar: Today → School roster (full grid of classes × students; not the landing screen, but one click away).</td>
+            </tr>
+            <tr>
+              <td><code>§10</code> Sign in late students</td>
+              <td>Primary action in detail pane and per-row "Sign in" button.</td>
+            </tr>
+            <tr>
+              <td><code>§10</code> Approve / override</td>
+              <td>Detail-pane "Override teacher mark" secondary action; "Approve" on parent-reply queue items.</td>
+            </tr>
+            <tr>
+              <td><code>§10</code> Two clerks concurrent</td>
+              <td>"Claimed by Jean-Paul · 2m" indicator on queue row.</td>
+            </tr>
+            <tr>
+              <td><code>§13</code> Light messaging</td>
+              <td>Reason picker (structured options) + "Notify parent" action; no free-form chat.</td>
+            </tr>
+            <tr>
+              <td><code>§16</code> Audit log</td>
+              <td>Detail-pane "Audit trail" card; sidebar "Reports → Audit log".</td>
+            </tr>
+            <tr>
+              <td><code>§14.3</code> Identity (SSO)</td>
+              <td>User chip in topbar; no password/login UI exposed (Azure AD path).</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+  </div>
+</main>
+
+<footer class="site-foot">
+  ClassTrack · UI-V3 wireframe · ClassTrack_Functional_Requirements_v2 · WCAG 2.2 AA
+</footer>
+
+</body>
+</html>

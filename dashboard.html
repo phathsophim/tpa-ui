@@ -1,0 +1,1164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ClassTrack — Attendance Clerk Dashboard (V3)</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+  /* ─── Design tokens (modernized Principal palette · WCAG 2.2 AA verified) ─ */
+  :root {
+    --c-bg:           #F4F6FA;
+    --c-surface:      #FFFFFF;
+    --c-surface-2:    #F8FAFC;
+    --c-surface-alt:  #EEF2F7;
+    --c-sidebar:      #0F2546;
+    --c-sidebar-2:    #0A1B36;
+    --c-sidebar-hover:rgba(255,255,255,0.08);
+    --c-sidebar-active:#1B5DAF;
+    --c-border:       #D6DBE2;
+    --c-border-2:     #E5E8EE;
+    --c-border-strong:#A6ADBB;
+    --c-ink:          #0F2546;
+    --c-ink-muted:    #475467;
+    --c-ink-subtle:   #5C6470;
+    --c-brand:        #1B5DAF;
+    --c-brand-ink:    #0E2E55;
+    --c-brand-tint:   #E8F0FA;
+    --c-success:      #1F7A3F;
+    --c-success-tint: #E6F4EC;
+    --c-warning:      #9A4708;
+    --c-warning-tint: #FCF1DD;
+    --c-warning-bord: #B97F38;
+    --c-danger:       #B42318;
+    --c-danger-tint:  #FCE9E7;
+    --c-info:         #0E5C8A;
+    --c-info-tint:    #E0EFF7;
+    --c-neutral-tint: #EEF1F5;
+    --c-focus:        #FFB400;
+    --s-1:4px; --s-2:8px; --s-3:12px; --s-4:16px; --s-5:24px; --s-6:32px;
+    --r-sm:4px; --r-md:6px; --r-lg:10px; --r-xl:14px; --r-pill:999px;
+    --ff: "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, Roboto, "Helvetica Neue", Arial, sans-serif;
+    --fs-xs:12px; --fs-sm:13px; --fs-md:14px; --fs-lg:16px; --fs-xl:20px; --fs-2xl:24px; --fs-3xl:30px;
+    --shadow-md: 0 4px 12px rgba(15,37,70,0.08);
+    --shadow-lg: 0 8px 28px rgba(15,37,70,0.12);
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  body {
+    font-family: var(--ff); background: var(--c-bg); color: var(--c-ink);
+    font-size: var(--fs-md); line-height: 1.55; -webkit-font-smoothing: antialiased;
+  }
+  a { color: var(--c-brand); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  button { font-family: inherit; cursor: pointer; }
+
+  :focus-visible {
+    outline: 3px solid var(--c-focus); outline-offset: 0;
+    box-shadow: 0 0 0 6px var(--c-sidebar);
+    border-radius: 2px;
+  }
+  .sidebar :focus-visible { box-shadow: none; outline-offset: 2px; }
+
+  .skip-link {
+    position: absolute; top: -40px; left: var(--s-3);
+    background: var(--c-focus); color: #5C3F00;
+    padding: var(--s-2) var(--s-3); border-radius: var(--r-md);
+    font-weight: 600; z-index: 200; text-decoration: none;
+  }
+  .skip-link:focus { top: var(--s-2); }
+  .sr-only { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
+
+  /* WF banner */
+  .wf-banner {
+    background: #FFF6DD; border-bottom: 1px solid #F0DA9A; color: #5C3F00;
+    font-size: var(--fs-xs); padding: 6px var(--s-4);
+    display: flex; align-items: center; justify-content: space-between; gap: var(--s-4);
+  }
+  .wf-banner__left { display: flex; align-items: center; gap: var(--s-2); }
+  .wf-banner__right { display: flex; align-items: center; gap: var(--s-3); }
+  .wf-banner a { color: #5C3F00; }
+
+  /* Shell */
+  .app { display: grid; grid-template-columns: 240px 1fr; min-height: calc(100vh - 32px); }
+
+  /* Sidebar — dark navy, modernized from the previous Principal portal */
+  .sidebar {
+    background: linear-gradient(180deg, var(--c-sidebar) 0%, var(--c-sidebar-2) 100%);
+    color: rgba(255,255,255,0.85);
+    display: flex; flex-direction: column;
+    position: sticky; top: 0; height: 100vh; overflow-y: auto;
+  }
+  .sidebar__logo {
+    padding: var(--s-5) var(--s-4) var(--s-4);
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    display: flex; align-items: center; gap: var(--s-3);
+  }
+  .sidebar__logo-mark {
+    width: 36px; height: 36px; background: var(--c-sidebar-active);
+    border-radius: var(--r-lg);
+    display: flex; align-items: center; justify-content: center;
+    color: #fff; font-weight: 800; font-size: var(--fs-lg);
+  }
+  .sidebar__logo-text { color: #fff; font-size: 16px; font-weight: 700; letter-spacing: -0.01em; }
+  .sidebar__logo-sub  { color: rgba(255,255,255,0.6); font-size: 11px; margin-top: 2px; }
+  .sidebar__section { padding: var(--s-4) var(--s-3) var(--s-1); }
+  .sidebar__section-label {
+    text-transform: uppercase; font-size: 10px; font-weight: 700; letter-spacing: 0.12em;
+    color: rgba(255,255,255,0.55); padding: 0 var(--s-3); margin-bottom: var(--s-1);
+  }
+  .nav-item {
+    display: flex; align-items: center; gap: var(--s-3);
+    padding: 10px var(--s-3); border-radius: var(--r-md);
+    color: rgba(255,255,255,0.78);
+    font-size: var(--fs-sm); font-weight: 500; min-height: 36px; text-decoration: none;
+  }
+  .nav-item:hover { background: var(--c-sidebar-hover); color: #fff; text-decoration: none; }
+  .nav-item.is-active { background: var(--c-sidebar-active); color: #fff; font-weight: 600; }
+  .nav-item .nav-icon { width: 20px; text-align: center; font-size: 14px; color: inherit; }
+  .nav-item .nav-badge {
+    margin-left: auto; background: var(--c-danger); color: #fff;
+    font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: var(--r-pill);
+    min-width: 22px; text-align: center;
+  }
+  .nav-item .nav-badge--neutral { background: rgba(255,255,255,0.18); color: #fff; }
+  .sidebar__user {
+    margin-top: auto; padding: var(--s-3) var(--s-4);
+    border-top: 1px solid rgba(255,255,255,0.08);
+    display: flex; align-items: center; gap: var(--s-3);
+  }
+  .avatar {
+    width: 36px; height: 36px; border-radius: var(--r-pill);
+    background: var(--c-brand-tint); color: var(--c-brand-ink);
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: var(--fs-sm); flex-shrink: 0;
+  }
+  .sidebar__user-name { color: #fff; font-size: var(--fs-sm); font-weight: 600; }
+  .sidebar__user-role { color: rgba(255,255,255,0.6); font-size: 11px; }
+
+  /* Main + topbar */
+  .main { display: flex; flex-direction: column; min-width: 0; }
+  .topbar {
+    background: var(--c-surface); border-bottom: 1px solid var(--c-border);
+    display: flex; align-items: center; gap: var(--s-4);
+    padding: var(--s-3) var(--s-5); position: sticky; top: 0; z-index: 50; min-height: 64px;
+  }
+  .topbar__crumbs { display: flex; align-items: center; gap: var(--s-2); color: var(--c-ink-subtle); font-size: var(--fs-xs); }
+  .topbar__crumbs strong { color: var(--c-ink); font-weight: 600; }
+  .topbar__period {
+    margin-left: auto; background: var(--c-brand-tint); color: var(--c-brand-ink);
+    border: 1px solid #6E94BF;
+    padding: 6px var(--s-3); border-radius: var(--r-md);
+    font-size: var(--fs-xs); font-weight: 600;
+    display: inline-flex; align-items: center; gap: var(--s-2);
+  }
+  .topbar__period .dot { width: 8px; height: 8px; background: var(--c-success); border-radius: 50%; }
+  .topbar__actions { display: flex; align-items: center; gap: var(--s-2); }
+  .icon-btn {
+    width: 36px; height: 36px; border-radius: var(--r-md);
+    background: transparent; border: 1px solid transparent; color: var(--c-ink-muted);
+    display: inline-flex; align-items: center; justify-content: center;
+    position: relative; font-size: var(--fs-md);
+  }
+  .icon-btn:hover { background: var(--c-surface-alt); color: var(--c-ink); }
+  .icon-btn__count {
+    position: absolute; top: 2px; right: 2px;
+    background: var(--c-danger); color: #fff;
+    font-size: 10px; font-weight: 700; min-width: 18px; height: 18px;
+    border-radius: var(--r-pill); display: flex; align-items: center; justify-content: center;
+    padding: 0 4px; border: 2px solid var(--c-surface);
+  }
+  .lang-toggle { display: inline-flex; border: 1px solid var(--c-border-strong); border-radius: var(--r-md); overflow: hidden; }
+  .lang-toggle button {
+    background: var(--c-surface); border: 0; padding: 6px var(--s-3);
+    font-size: var(--fs-xs); font-weight: 700; letter-spacing: 0.04em;
+    color: var(--c-ink-muted); min-height: 32px; min-width: 36px;
+  }
+  .lang-toggle button[aria-pressed="true"] { background: var(--c-brand); color: #fff; }
+  .user-chip {
+    display: inline-flex; align-items: center; gap: var(--s-2);
+    padding: 4px 10px 4px 4px; border: 1px solid var(--c-border);
+    border-radius: var(--r-pill); background: var(--c-surface);
+    font-size: var(--fs-xs); color: var(--c-ink-muted); min-height: 36px;
+  }
+  .user-chip .avatar { width: 28px; height: 28px; font-size: 12px; }
+
+  /* Content */
+  .content { padding: var(--s-5); flex: 1; display: flex; flex-direction: column; gap: var(--s-5); }
+  .page-header { display: flex; align-items: flex-end; justify-content: space-between; gap: var(--s-4); flex-wrap: wrap; }
+  .page-header h1 { font-size: var(--fs-2xl); font-weight: 700; letter-spacing: -0.01em; }
+  .page-header p { color: var(--c-ink-muted); font-size: var(--fs-md); margin-top: 4px; }
+  .page-header__actions { display: flex; gap: var(--s-2); flex-wrap: wrap; }
+
+  /* Buttons */
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+    padding: 8px 14px; border-radius: var(--r-md);
+    font-size: var(--fs-sm); font-weight: 600;
+    border: 1px solid transparent; min-height: 36px;
+    transition: background 0.12s, border-color 0.12s; text-decoration: none;
+  }
+  .btn--primary { background: var(--c-brand); color: #fff; border-color: var(--c-brand); }
+  .btn--primary:hover { background: var(--c-brand-ink); border-color: var(--c-brand-ink); }
+  .btn--secondary { background: var(--c-surface); color: var(--c-ink); border-color: var(--c-border-strong); }
+  .btn--secondary:hover { background: var(--c-surface-alt); }
+  .btn--ghost { background: transparent; color: var(--c-brand); border-color: transparent; }
+  .btn--ghost:hover { background: var(--c-brand-tint); }
+  .btn--sm { padding: 4px 10px; min-height: 28px; font-size: var(--fs-xs); }
+
+  /* Greeting (compact) */
+  .greeting {
+    background: linear-gradient(120deg, var(--c-brand) 0%, var(--c-brand-ink) 100%);
+    color: #fff; border-radius: var(--r-xl);
+    padding: var(--s-4) var(--s-5);
+    display: flex; align-items: center; justify-content: space-between;
+    gap: var(--s-4); flex-wrap: wrap; box-shadow: var(--shadow-md);
+  }
+  .greeting h2 { font-size: var(--fs-xl); font-weight: 700; }
+  .greeting__date {
+    background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3);
+    border-radius: var(--r-md); padding: var(--s-2) var(--s-3);
+    font-size: var(--fs-xs); font-weight: 600;
+    display: inline-flex; align-items: center; gap: var(--s-2);
+  }
+
+  /* KPIs — compact horizontal mini-row */
+  .kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--s-3); }
+  @media (max-width: 1100px) { .kpis { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 600px)  { .kpis { grid-template-columns: 1fr; } }
+
+  .kpi {
+    background: var(--c-surface); border: 1px solid var(--c-border);
+    border-radius: var(--r-lg);
+    padding: var(--s-3) var(--s-4);
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: var(--s-3);
+    align-items: center;
+    cursor: pointer;
+    transition: border-color 0.12s, box-shadow 0.12s;
+  }
+  .kpi:hover { border-color: var(--c-border-strong); box-shadow: var(--shadow-md); }
+  .kpi:focus-within { border-color: var(--c-brand); }
+
+  .kpi__icon {
+    width: 32px; height: 32px; border-radius: var(--r-md);
+    display: flex; align-items: center; justify-content: center;
+    font-size: var(--fs-md); flex-shrink: 0;
+  }
+  .kpi__icon--late    { background: var(--c-warning-tint); color: var(--c-warning); }
+  .kpi__icon--reply   { background: var(--c-info-tint);    color: var(--c-info); }
+  .kpi__icon--unjust  { background: var(--c-danger-tint);  color: var(--c-danger); }
+  .kpi__icon--noclass { background: var(--c-warning-tint); color: var(--c-warning); }
+
+  .kpi__body { min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+  .kpi__top  { display: flex; align-items: baseline; gap: 6px; }
+  .kpi__value {
+    font-size: var(--fs-xl); font-weight: 700; color: var(--c-ink); line-height: 1;
+    font-variant-numeric: tabular-nums;
+  }
+  .kpi__label { font-size: var(--fs-xs); color: var(--c-ink-muted); font-weight: 600; }
+  .kpi__meta  { font-size: 11px; color: var(--c-ink-subtle); }
+
+
+  /* Generic card */
+  .card {
+    background: var(--c-surface); border: 1px solid var(--c-border);
+    border-radius: var(--r-lg); overflow: hidden;
+    display: flex; flex-direction: column;
+  }
+  .card__h {
+    padding: var(--s-4); border-bottom: 1px solid var(--c-border-2);
+    display: flex; align-items: center; justify-content: space-between; gap: var(--s-3); flex-wrap: wrap;
+  }
+  .card__title { font-size: var(--fs-lg); font-weight: 700; color: var(--c-ink); display: flex; align-items: center; gap: var(--s-2); }
+  .card__title-count {
+    background: var(--c-neutral-tint); color: var(--c-ink-muted);
+    padding: 2px 10px; border-radius: var(--r-pill); font-size: var(--fs-xs); font-weight: 700;
+  }
+  .card__sub { font-size: var(--fs-xs); color: var(--c-ink-subtle); margin-top: 2px; }
+  .card__b { padding: var(--s-4); }
+  .card__footer {
+    padding: var(--s-2) var(--s-4); background: var(--c-surface-2);
+    border-top: 1px solid var(--c-border-2); text-align: right; font-size: var(--fs-xs);
+  }
+
+  /* Two-column row + right rail */
+  .row-2 { display: grid; grid-template-columns: 2fr 1fr; gap: var(--s-4); align-items: stretch; }
+  @media (max-width: 1100px) { .row-2 { grid-template-columns: 1fr; } }
+  .rail { display: flex; flex-direction: column; gap: var(--s-4); min-width: 0; }
+  .left-stack { display: flex; flex-direction: column; gap: var(--s-4); min-width: 0; }
+  .left-stack > .card[aria-labelledby="qmini-h"] { flex: 1 1 auto; min-height: 0; }
+
+  /* Status chips */
+  .status {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 2px 8px; border-radius: var(--r-pill);
+    font-size: 11px; font-weight: 700; letter-spacing: 0.02em;
+    border: 1px solid transparent;
+  }
+  .status i { font-size: 9px; }
+  .status--late      { background: var(--c-warning-tint); color: var(--c-warning); border-color: var(--c-warning-bord); }
+  .status--noshow    { background: var(--c-danger-tint);  color: var(--c-danger);  border-color: #B0625A; }
+  .status--reply     { background: var(--c-info-tint);    color: var(--c-info);    border-color: #5B96BC; }
+  .status--noclass   { background: var(--c-warning-tint); color: var(--c-warning); border-color: var(--c-warning-bord); }
+  .status--justified { background: var(--c-success-tint); color: var(--c-success); border-color: #4F9A6C; }
+
+  /* Action-needed list */
+  .qmini { list-style: none; overflow-y: auto; flex: 1 1 auto; min-height: 0; }
+  .qmini li + li { border-top: 1px solid var(--c-border-2); }
+  .qmini-item {
+    padding: var(--s-3) var(--s-4);
+    display: grid; grid-template-columns: 1fr auto;
+    align-items: center; gap: var(--s-3);
+  }
+  .qmini-item:hover { background: var(--c-surface-2); cursor: pointer; }
+  .qmini-item__top { display: flex; align-items: center; gap: var(--s-2); flex-wrap: wrap; margin-bottom: 2px; }
+  .qmini-item__name { font-weight: 600; color: var(--c-ink); font-size: var(--fs-sm); }
+  .qmini-item__meta { color: var(--c-ink-subtle); font-size: var(--fs-xs); }
+  .qmini-item__reason { font-size: var(--fs-xs); color: var(--c-ink-muted); }
+  .qmini-item__time { font-size: 11px; color: var(--c-ink-subtle); margin-top: 2px; }
+
+  /* Filter chips */
+  .chip-btn {
+    background: var(--c-surface);
+    border: 1px solid var(--c-border);
+    color: var(--c-ink-muted);
+    padding: 6px 12px; border-radius: var(--r-pill);
+    font-size: var(--fs-xs); font-weight: 600; min-height: 28px;
+    display: inline-flex; align-items: center; gap: 6px;
+    font-family: inherit;
+  }
+  .chip-btn[aria-pressed="true"] {
+    background: var(--c-brand-ink); color: #fff; border-color: var(--c-brand-ink);
+  }
+  .chip-btn .chip-num {
+    background: rgba(0,0,0,0.08); color: inherit;
+    padding: 1px 7px; border-radius: var(--r-pill); font-size: 11px;
+  }
+  .chip-btn[aria-pressed="true"] .chip-num { background: rgba(255,255,255,0.2); }
+
+  /* Two-clerk concurrency cue */
+  .claimed {
+    background: #FFF5E6; color: #804500;
+    border: 1px dashed #B97F38;
+    padding: 2px 8px; border-radius: var(--r-pill);
+    font-size: 11px; font-weight: 600;
+    display: inline-flex; align-items: center; gap: 4px;
+  }
+
+  /* Donut + period progress (Today's status) */
+  .today-stats { display: flex; flex-direction: column; gap: var(--s-3); }
+  .donut-wrap { display: flex; align-items: center; gap: var(--s-4); }
+  .donut-wrap svg { width: 110px; height: 110px; flex-shrink: 0; }
+  .donut-legend { list-style: none; flex: 1; }
+  .donut-legend li {
+    display: grid; grid-template-columns: 12px 1fr auto auto;
+    gap: var(--s-2); align-items: center;
+    padding: 4px 0; font-size: var(--fs-xs);
+  }
+  .donut-legend .dot { width: 12px; height: 12px; border-radius: 3px; }
+  .donut-legend .lbl { color: var(--c-ink-muted); }
+  .donut-legend .num { font-weight: 700; color: var(--c-ink); font-variant-numeric: tabular-nums; }
+  .donut-legend .pct { color: var(--c-ink-subtle); font-size: 11px; min-width: 38px; text-align: right; font-variant-numeric: tabular-nums; }
+
+  .periods { list-style: none; display: flex; flex-direction: column; gap: var(--s-3); }
+  .period-row { display: flex; align-items: center; gap: var(--s-3); }
+  .period-row__label {
+    font-size: var(--fs-xs); font-weight: 700; color: var(--c-ink); min-width: 80px;
+    display: flex; align-items: center; gap: 4px;
+  }
+  .period-bar {
+    flex: 1; height: 12px; background: var(--c-surface-alt);
+    border-radius: var(--r-pill); overflow: hidden; border: 1px solid var(--c-border-2);
+  }
+  .period-bar__fill {
+    height: 100%; background: var(--c-success); border-radius: var(--r-pill) 0 0 var(--r-pill);
+  }
+  .period-bar__fill--partial { background: var(--c-warning); }
+  .period-row__val {
+    font-size: var(--fs-xs); font-weight: 700; color: var(--c-ink-muted);
+    font-variant-numeric: tabular-nums; min-width: 60px; text-align: right;
+  }
+
+  /* Missing-attendance card with per-class Send-reminder actions (§7) */
+  .missing-card {
+    margin-top: var(--s-3);
+    background: var(--c-warning-tint);
+    border: 1px solid var(--c-warning-bord);
+    border-radius: var(--r-md); overflow: hidden;
+  }
+  .missing-card__h {
+    padding: var(--s-3); display: flex; align-items: center; gap: var(--s-2);
+    border-bottom: 1px solid var(--c-warning-bord);
+    font-size: var(--fs-xs); color: var(--c-warning); font-weight: 700;
+  }
+  .missing-card__h .ttl { flex: 1; }
+  .missing-list { list-style: none; }
+  .missing-list li {
+    padding: var(--s-3);
+    display: grid; grid-template-columns: 1fr auto;
+    gap: var(--s-3); align-items: center;
+    border-bottom: 1px solid var(--c-warning-bord);
+    background: rgba(255,255,255,0.45);
+  }
+  .missing-list li:last-child { border-bottom: 0; }
+  .missing-list__name { font-weight: 600; color: var(--c-ink); font-size: var(--fs-sm); }
+  .missing-list__meta { color: var(--c-ink-subtle); font-size: 11px; margin-top: 2px; display: flex; align-items: center; gap: 4px; }
+  .missing-list__meta--sent { color: var(--c-success); }
+
+  /* Compact weekly chart */
+  .chart-wrap { display: flex; flex-direction: column; gap: var(--s-3); }
+  .chart-svg--sm { width: 100%; height: 150px; display: block; }
+  .chart-legend { display: flex; gap: var(--s-3); font-size: var(--fs-xs); color: var(--c-ink-muted); flex-wrap: wrap; }
+  .chart-legend .dot { width: 10px; height: 10px; border-radius: 2px; display: inline-block; vertical-align: middle; margin-right: 4px; }
+
+  /* Activity feed */
+  .activity { list-style: none; }
+  .activity li {
+    padding: var(--s-3) var(--s-4); display: flex; gap: var(--s-3); align-items: flex-start;
+    border-bottom: 1px solid var(--c-border-2);
+  }
+  .activity li:last-child { border-bottom: 0; }
+  .activity__icon {
+    width: 28px; height: 28px; flex-shrink: 0; border-radius: 50%;
+    background: var(--c-surface-2); border: 1px solid var(--c-border-2);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; color: var(--c-ink-muted);
+  }
+  .activity__text { font-size: var(--fs-sm); color: var(--c-ink); }
+  .activity__when { font-size: var(--fs-xs); color: var(--c-ink-subtle); margin-top: 2px; }
+  .activity__who { font-weight: 600; }
+
+  /* By-grade table */
+  table.tbl { width: 100%; border-collapse: collapse; font-size: var(--fs-sm); }
+  table.tbl thead th {
+    text-align: left; padding: var(--s-2) var(--s-3);
+    background: var(--c-surface-2);
+    border-bottom: 1px solid var(--c-border-2);
+    font-size: 11px; font-weight: 700; color: var(--c-ink-muted);
+    text-transform: uppercase; letter-spacing: 0.06em;
+  }
+  table.tbl tbody td {
+    padding: var(--s-3); border-bottom: 1px solid var(--c-border-2);
+    vertical-align: middle;
+  }
+  table.tbl tbody tr:last-child td { border-bottom: 0; }
+  table.tbl .num { font-variant-numeric: tabular-nums; text-align: right; }
+  .rate-bar {
+    display: inline-block; width: 90px; height: 8px; border-radius: var(--r-pill);
+    background: var(--c-surface-alt); overflow: hidden; vertical-align: middle;
+    border: 1px solid var(--c-border-2); margin-right: var(--s-2);
+  }
+  .rate-bar__fill { height: 100%; background: var(--c-success); }
+  .rate-bar__fill--warn { background: var(--c-warning); }
+
+  /* Toast region (live announcements) */
+  .toast-region { position: fixed; bottom: 24px; right: 24px; z-index: 90; display: flex; flex-direction: column; gap: var(--s-2); }
+  .toast {
+    background: var(--c-surface); border: 1px solid var(--c-border);
+    border-left: 4px solid var(--c-success);
+    box-shadow: var(--shadow-lg);
+    padding: var(--s-3) var(--s-4); border-radius: var(--r-md);
+    font-size: var(--fs-sm); display: flex; gap: var(--s-3); align-items: flex-start;
+    max-width: 360px;
+  }
+
+  /* Mobile */
+  @media (max-width: 880px) {
+    .app { grid-template-columns: 1fr; }
+    .sidebar { position: relative; height: auto; flex-direction: row; overflow-x: auto; overflow-y: hidden; }
+    .sidebar__section { padding: var(--s-2); display: flex; flex-direction: row; gap: 4px; }
+    .sidebar__section-label, .sidebar__user, .sidebar__logo-text, .sidebar__logo-sub { display: none; }
+    .nav-item { white-space: nowrap; }
+    .topbar { flex-wrap: wrap; }
+  }
+  @media print { .sidebar, .topbar, .wf-banner, .toast-region { display: none; } .content { padding: 0; } }
+</style>
+</head>
+
+<body>
+<a href="#main" class="skip-link">Skip to main content</a>
+
+<div class="wf-banner" role="region" aria-label="Wireframe context">
+  <div class="wf-banner__left">
+    <i class="fa-solid fa-pencil-ruler" aria-hidden="true"></i>
+    <strong>Wireframe — V3 Dashboard</strong>
+    <span>·  Attendance Clerk Portal · Desktop-first · WCAG 2.2 AA</span>
+  </div>
+  <div class="wf-banner__right">
+    <a href="design-rationale.md">Rationale</a>
+    <a href="index.html">Back to index</a>
+  </div>
+</div>
+
+<div class="app">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" aria-label="Primary navigation">
+    <div class="sidebar__logo">
+      <div class="sidebar__logo-mark" aria-hidden="true">CT</div>
+      <div>
+        <div class="sidebar__logo-text">ClassTrack</div>
+        <div class="sidebar__logo-sub">EC Catholic · Sainte-Croix</div>
+      </div>
+    </div>
+
+    <nav class="sidebar__section" aria-label="Today">
+      <div class="sidebar__section-label">Today</div>
+      <a href="dashboard.html" class="nav-item is-active" aria-current="page">
+        <span class="nav-icon" aria-hidden="true"><i class="fa-solid fa-gauge-high"></i></span>
+        Dashboard
+        <span class="nav-badge" aria-label="9 items needing attention">9</span>
+      </a>
+      <a href="school-roster.html" class="nav-item">
+        <span class="nav-icon" aria-hidden="true"><i class="fa-solid fa-table-list"></i></span>
+        School roster
+      </a>
+    </nav>
+
+    <nav class="sidebar__section" aria-label="Justifications">
+      <div class="sidebar__section-label">Justifications</div>
+      <a href="pending-parent-replies.html" class="nav-item">
+        <span class="nav-icon" aria-hidden="true"><i class="fa-solid fa-envelope-open-text"></i></span>
+        Pending parent replies
+        <span class="nav-badge nav-badge--neutral" aria-label="3 pending">3</span>
+      </a>
+      <a href="disputes.html" class="nav-item">
+        <span class="nav-icon" aria-hidden="true"><i class="fa-solid fa-triangle-exclamation"></i></span>
+        Disputes
+        <span class="nav-badge" aria-label="2 disputes">2</span>
+      </a>
+    </nav>
+
+    <nav class="sidebar__section" aria-label="Workflows">
+      <div class="sidebar__section-label">Workflows</div>
+      <a href="future-absences.html" class="nav-item">
+        <span class="nav-icon" aria-hidden="true"><i class="fa-solid fa-calendar-days"></i></span>
+        Future absences
+      </a>
+      <a href="group-events.html" class="nav-item">
+        <span class="nav-icon" aria-hidden="true"><i class="fa-solid fa-bus"></i></span>
+        Group events
+      </a>
+    </nav>
+
+    <nav class="sidebar__section" aria-label="Directory">
+      <div class="sidebar__section-label">Directory</div>
+      <a href="students.html" class="nav-item">
+        <span class="nav-icon" aria-hidden="true"><i class="fa-solid fa-user-graduate"></i></span>
+        Students
+        <span class="nav-badge nav-badge--neutral" aria-label="412 students">412</span>
+      </a>
+      <a href="classes.html" class="nav-item">
+        <span class="nav-icon" aria-hidden="true"><i class="fa-solid fa-chalkboard"></i></span>
+        Classes
+        <span class="nav-badge nav-badge--neutral" aria-label="18 classes">18</span>
+      </a>
+      <a href="teachers.html" class="nav-item">
+        <span class="nav-icon" aria-hidden="true"><i class="fa-solid fa-chalkboard-user"></i></span>
+        Teachers
+        <span class="nav-badge nav-badge--neutral" aria-label="32 teachers">32</span>
+      </a>
+      <a href="groups.html" class="nav-item">
+        <span class="nav-icon" aria-hidden="true"><i class="fa-solid fa-people-group"></i></span>
+        Groups
+        <span class="nav-badge nav-badge--neutral" aria-label="24 active groups">24</span>
+      </a>
+    </nav>
+
+    <nav class="sidebar__section" aria-label="Reports">
+      <div class="sidebar__section-label">Reports</div>
+      <a href="daily-attendance.html" class="nav-item">
+        <span class="nav-icon" aria-hidden="true"><i class="fa-solid fa-chart-column"></i></span>
+        Daily attendance
+      </a>
+      <a href="#" class="nav-item">
+        <span class="nav-icon" aria-hidden="true"><i class="fa-solid fa-clock-rotate-left"></i></span>
+        Audit log
+      </a>
+    </nav>
+
+    <div class="sidebar__user" aria-label="Signed in user">
+      <div class="avatar" aria-hidden="true">MT</div>
+      <div>
+        <div class="sidebar__user-name">Marguerite T.</div>
+        <div class="sidebar__user-role">Attendance Clerk</div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="main">
+
+    <!-- Topbar -->
+    <header class="topbar" role="banner">
+      <div class="topbar__crumbs">
+        <span>Today</span><span aria-hidden="true">›</span><strong>Dashboard</strong>
+      </div>
+      <div class="topbar__period" role="status" aria-live="polite">
+        <span class="dot" aria-hidden="true"></span>
+        Period 2 · 10:35 – 11:50
+      </div>
+      <div class="topbar__actions">
+        <div class="lang-toggle" role="group" aria-label="Language">
+          <button type="button" aria-pressed="true">EN</button>
+          <button type="button" aria-pressed="false">FR</button>
+        </div>
+        <button class="icon-btn" type="button" aria-label="Search">
+          <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+        </button>
+        <button class="icon-btn" type="button" aria-label="Notifications · 4 unread">
+          <i class="fa-solid fa-bell" aria-hidden="true"></i>
+          <span class="icon-btn__count" aria-hidden="true">4</span>
+        </button>
+        <button class="icon-btn" type="button" aria-label="Help">
+          <i class="fa-solid fa-circle-question" aria-hidden="true"></i>
+        </button>
+        <span class="user-chip" aria-label="Signed in as Marguerite Tremblay, Attendance Clerk">
+          <span class="avatar" aria-hidden="true">MT</span>
+          <span>Marguerite T.</span>
+        </span>
+      </div>
+    </header>
+
+    <!-- CONTENT -->
+    <main id="main" class="content" tabindex="-1">
+
+      <!-- Page header -->
+      <div class="page-header">
+        <div>
+          <h1>Dashboard</h1>
+          <p>Today at École Sainte-Croix — what needs your attention, and the broader picture.</p>
+        </div>
+        <div class="page-header__actions">
+          <button class="btn btn--secondary" type="button">
+            <i class="fa-solid fa-print" aria-hidden="true"></i> Print
+          </button>
+          <button class="btn btn--secondary" type="button">
+            <i class="fa-solid fa-file-export" aria-hidden="true"></i> Export
+          </button>
+        </div>
+      </div>
+
+      <!-- Greeting (compact: greeting + date only) -->
+      <section class="greeting" aria-label="Daily greeting">
+        <h2>Bonjour, Marguerite</h2>
+        <div class="greeting__date" aria-label="Date">
+          <i class="fa-solid fa-calendar-day" aria-hidden="true"></i>
+          Thursday, May 7, 2026
+        </div>
+      </section>
+
+      <!-- KPIs — compact mini-rows -->
+      <section class="kpis" aria-label="Key indicators">
+
+        <article class="kpi" tabindex="0" aria-labelledby="k1l">
+          <span class="kpi__icon kpi__icon--late" aria-hidden="true"><i class="fa-solid fa-door-open"></i></span>
+          <div class="kpi__body">
+            <div class="kpi__top">
+              <span class="kpi__value">4</span>
+              <span id="k1l" class="kpi__label">Late at sign-in</span>
+            </div>
+            <div class="kpi__meta">+1 since 10:00 AM</div>
+          </div>
+        </article>
+
+        <article class="kpi" tabindex="0" aria-labelledby="k2l">
+          <span class="kpi__icon kpi__icon--reply" aria-hidden="true"><i class="fa-solid fa-envelope-open-text"></i></span>
+          <div class="kpi__body">
+            <div class="kpi__top">
+              <span class="kpi__value">3</span>
+              <span id="k2l" class="kpi__label">Replies pending</span>
+            </div>
+            <div class="kpi__meta">2 from last night, 1 today</div>
+          </div>
+        </article>
+
+        <article class="kpi" tabindex="0" aria-labelledby="k3l">
+          <span class="kpi__icon kpi__icon--unjust" aria-hidden="true"><i class="fa-solid fa-clock"></i></span>
+          <div class="kpi__body">
+            <div class="kpi__top">
+              <span class="kpi__value">1</span>
+              <span id="k3l" class="kpi__label">Unjustified &gt; 24h</span>
+            </div>
+            <div class="kpi__meta">Sofia Patel · No-show Wed May 6</div>
+          </div>
+        </article>
+
+        <article class="kpi" tabindex="0" aria-labelledby="k4l">
+          <span class="kpi__icon kpi__icon--noclass" aria-hidden="true"><i class="fa-solid fa-person-circle-exclamation"></i></span>
+          <div class="kpi__body">
+            <div class="kpi__top">
+              <span class="kpi__value">2</span>
+              <span id="k4l" class="kpi__label">Signed-in, not in class</span>
+            </div>
+            <div class="kpi__meta">Threshold: 10 min</div>
+          </div>
+        </article>
+
+      </section>
+
+      <!-- ROW 1: Action needed (left) + right rail (Recent activity → Today's status → Weekly attendance) -->
+      <section class="row-2" aria-label="Today's work and context">
+
+        <!-- LEFT STACK: Action needed (top) + Attendance by grade (below) -->
+        <div class="left-stack">
+          <div class="card" aria-labelledby="qmini-h">
+          <div class="card__h">
+            <div>
+              <h2 id="qmini-h" class="card__title">
+                Action needed
+                <span class="card__title-count">9</span>
+              </h2>
+              <div class="card__sub">Sign-ins, parent replies, and follow-ups. Updated 10:42 AM.</div>
+            </div>
+            <div style="display:flex; gap:6px; flex-wrap:wrap;">
+              <button class="btn btn--secondary btn--sm" type="button"><i class="fa-solid fa-filter" aria-hidden="true"></i> Filter</button>
+              <button class="btn btn--secondary btn--sm" type="button"><i class="fa-solid fa-arrow-down-wide-short" aria-hidden="true"></i> Sort</button>
+              <button class="btn btn--ghost btn--sm" type="button" aria-label="Refresh list">
+                <i class="fa-solid fa-rotate" aria-hidden="true"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Filter chips for quick triage -->
+          <div role="toolbar" aria-label="Filter action items" style="display:flex; flex-wrap:wrap; gap:6px; padding:var(--s-3) var(--s-4); border-bottom:1px solid var(--c-border-2); background:var(--c-surface-2);">
+            <button type="button" aria-pressed="true" class="chip-btn">All <span class="chip-num">9</span></button>
+            <button type="button" aria-pressed="false" class="chip-btn"><i class="fa-solid fa-door-open" aria-hidden="true"></i> Late arrivals <span class="chip-num">4</span></button>
+            <button type="button" aria-pressed="false" class="chip-btn"><i class="fa-solid fa-envelope-open-text" aria-hidden="true"></i> Replies <span class="chip-num">3</span></button>
+            <button type="button" aria-pressed="false" class="chip-btn"><i class="fa-solid fa-person-circle-exclamation" aria-hidden="true"></i> Did not reach class <span class="chip-num">1</span></button>
+            <button type="button" aria-pressed="false" class="chip-btn"><i class="fa-solid fa-clock" aria-hidden="true"></i> Past due <span class="chip-num">1</span></button>
+          </div>
+
+          <ul class="qmini" role="list" aria-label="Items needing your attention">
+
+            <li class="qmini-item" tabindex="0">
+              <div>
+                <div class="qmini-item__top">
+                  <span class="status status--late"><i class="fa-solid fa-door-open" aria-hidden="true"></i> Late arrival</span>
+                  <span class="qmini-item__name">Liam Tremblay</span>
+                  <span class="qmini-item__meta">· Gr 10A</span>
+                </div>
+                <div class="qmini-item__reason">Arrived at office 10:24 AM with parent. Awaiting your sign-in.</div>
+                <div class="qmini-item__time"><i class="fa-regular fa-clock" aria-hidden="true"></i> 18 min ago</div>
+              </div>
+              <button class="btn btn--primary btn--sm" type="button">Sign in</button>
+            </li>
+
+            <li class="qmini-item" tabindex="0">
+              <div>
+                <div class="qmini-item__top">
+                  <span class="status status--noclass"><i class="fa-solid fa-person-circle-exclamation" aria-hidden="true"></i> Did not reach class</span>
+                  <span class="qmini-item__name">Noah Diallo</span>
+                  <span class="qmini-item__meta">· Gr 9B</span>
+                  <span class="claimed" title="Being handled by another clerk"><i class="fa-solid fa-user-tag" aria-hidden="true"></i> Jean-Paul · 2m</span>
+                </div>
+                <div class="qmini-item__reason">Signed in 10:08 AM. Not in Mr. Cardenas's class — 12 min over threshold.</div>
+                <div class="qmini-item__time"><i class="fa-regular fa-clock" aria-hidden="true"></i> 12 min over</div>
+              </div>
+              <button class="btn btn--secondary btn--sm" type="button">Locate</button>
+            </li>
+
+            <li class="qmini-item" tabindex="0">
+              <div>
+                <div class="qmini-item__top">
+                  <span class="status status--noshow"><i class="fa-solid fa-clock" aria-hidden="true"></i> Past due</span>
+                  <span class="qmini-item__name">Sofia Patel</span>
+                  <span class="qmini-item__meta">· Gr 11A</span>
+                </div>
+                <div class="qmini-item__reason">No-show all day Wed May 6. Notification sent, no parent reply.</div>
+                <div class="qmini-item__time"><i class="fa-regular fa-clock" aria-hidden="true"></i> Yesterday · 25h ago</div>
+              </div>
+              <button class="btn btn--secondary btn--sm" type="button">Follow up</button>
+            </li>
+
+            <li class="qmini-item" tabindex="0">
+              <div>
+                <div class="qmini-item__top">
+                  <span class="status status--reply"><i class="fa-solid fa-envelope-open-text" aria-hidden="true"></i> Parent reply</span>
+                  <span class="qmini-item__name">Olivia Martínez</span>
+                  <span class="qmini-item__meta">· Gr 7A</span>
+                </div>
+                <div class="qmini-item__reason">"Doctor's appointment, ran long." Awaiting your approval.</div>
+                <div class="qmini-item__time"><i class="fa-regular fa-clock" aria-hidden="true"></i> Replied 9:55 AM</div>
+              </div>
+              <button class="btn btn--primary btn--sm" type="button">Approve</button>
+            </li>
+
+            <li class="qmini-item" tabindex="0">
+              <div>
+                <div class="qmini-item__top">
+                  <span class="status status--late"><i class="fa-solid fa-door-open" aria-hidden="true"></i> Late arrival</span>
+                  <span class="qmini-item__name">Ahmed Khan</span>
+                  <span class="qmini-item__meta">· Gr 9C</span>
+                </div>
+                <div class="qmini-item__reason">Marked absent Period 2 by Mr. Cardenas. Arrived alone 10:38 AM.</div>
+                <div class="qmini-item__time"><i class="fa-regular fa-clock" aria-hidden="true"></i> 4 min ago</div>
+              </div>
+              <button class="btn btn--primary btn--sm" type="button">Sign in</button>
+            </li>
+
+            <li class="qmini-item" tabindex="0">
+              <div>
+                <div class="qmini-item__top">
+                  <span class="status status--reply"><i class="fa-solid fa-envelope-open-text" aria-hidden="true"></i> Parent reply</span>
+                  <span class="qmini-item__name">Emma Bouchard</span>
+                  <span class="qmini-item__meta">· Gr 8C</span>
+                </div>
+                <div class="qmini-item__reason">"Sick — fever since morning." Justification submitted overnight.</div>
+                <div class="qmini-item__time"><i class="fa-regular fa-clock" aria-hidden="true"></i> Replied 7:48 AM</div>
+              </div>
+              <button class="btn btn--primary btn--sm" type="button">Approve</button>
+            </li>
+
+            <li class="qmini-item" tabindex="0">
+              <div>
+                <div class="qmini-item__top">
+                  <span class="status status--late"><i class="fa-solid fa-door-open" aria-hidden="true"></i> Late arrival</span>
+                  <span class="qmini-item__name">Yuki Tanaka</span>
+                  <span class="qmini-item__meta">· Gr 12B</span>
+                </div>
+                <div class="qmini-item__reason">Bus delay — bus 14 reported 22 min late by transport.</div>
+                <div class="qmini-item__time"><i class="fa-regular fa-clock" aria-hidden="true"></i> 1 min ago</div>
+              </div>
+              <button class="btn btn--primary btn--sm" type="button">Sign in</button>
+            </li>
+
+            <li class="qmini-item" tabindex="0">
+              <div>
+                <div class="qmini-item__top">
+                  <span class="status status--reply"><i class="fa-solid fa-envelope-open-text" aria-hidden="true"></i> Parent reply</span>
+                  <span class="qmini-item__name">Daniel Okafor</span>
+                  <span class="qmini-item__meta">· Gr 9A</span>
+                </div>
+                <div class="qmini-item__reason">"Family emergency — will return tomorrow." Awaiting approval.</div>
+                <div class="qmini-item__time"><i class="fa-regular fa-clock" aria-hidden="true"></i> Replied last night, 9:14 PM</div>
+              </div>
+              <button class="btn btn--primary btn--sm" type="button">Approve</button>
+            </li>
+
+            <li class="qmini-item" tabindex="0">
+              <div>
+                <div class="qmini-item__top">
+                  <span class="status status--late"><i class="fa-solid fa-door-open" aria-hidden="true"></i> Late arrival</span>
+                  <span class="qmini-item__name">Aaliyah Robertson</span>
+                  <span class="qmini-item__meta">· Gr 7B</span>
+                </div>
+                <div class="qmini-item__reason">At office with note from parent. Marked absent Period 1 by Ms. Chen.</div>
+                <div class="qmini-item__time"><i class="fa-regular fa-clock" aria-hidden="true"></i> 6 min ago</div>
+              </div>
+              <button class="btn btn--primary btn--sm" type="button">Sign in</button>
+            </li>
+
+          </ul>
+
+          <div class="card__footer">
+            <span style="color:var(--c-ink-subtle);">Auto-refreshes every minute · Last update 10:42 AM</span>
+          </div>
+          </div><!-- /Action needed card -->
+
+          <!-- Attendance by grade (below Action needed) -->
+          <div class="card" aria-labelledby="grade-h">
+          <div class="card__h">
+            <div>
+              <h2 id="grade-h" class="card__title">Attendance by grade</h2>
+              <div class="card__sub">Today · all periods</div>
+            </div>
+            <button class="btn btn--ghost btn--sm" type="button">Open report <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></button>
+          </div>
+          <table class="tbl">
+            <thead>
+              <tr>
+                <th scope="col">Grade</th>
+                <th scope="col" class="num">Students</th>
+                <th scope="col" class="num">Absent</th>
+                <th scope="col" class="num">Late</th>
+                <th scope="col">Attendance rate</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><th scope="row">Grade 7</th><td class="num">128</td><td class="num">6</td><td class="num">9</td>
+                <td><span class="rate-bar" aria-hidden="true"><span class="rate-bar__fill" style="width:95%"></span></span> <strong>95%</strong></td></tr>
+              <tr><th scope="row">Grade 8</th><td class="num">120</td><td class="num">8</td><td class="num">7</td>
+                <td><span class="rate-bar" aria-hidden="true"><span class="rate-bar__fill" style="width:93%"></span></span> <strong>93%</strong></td></tr>
+              <tr><th scope="row">Grade 9</th><td class="num">142</td><td class="num">12</td><td class="num">14</td>
+                <td><span class="rate-bar" aria-hidden="true"><span class="rate-bar__fill rate-bar__fill--warn" style="width:82%"></span></span> <strong>82%</strong>
+                    <span class="status status--late" style="margin-left:6px"><i class="fa-solid fa-circle" aria-hidden="true"></i> Watch</span></td></tr>
+              <tr><th scope="row">Grade 10</th><td class="num">138</td><td class="num">9</td><td class="num">11</td>
+                <td><span class="rate-bar" aria-hidden="true"><span class="rate-bar__fill" style="width:86%"></span></span> <strong>86%</strong></td></tr>
+              <tr><th scope="row">Grade 11</th><td class="num">132</td><td class="num">8</td><td class="num">10</td>
+                <td><span class="rate-bar" aria-hidden="true"><span class="rate-bar__fill" style="width:88%"></span></span> <strong>88%</strong></td></tr>
+              <tr><th scope="row">Grade 12</th><td class="num">172</td><td class="num">7</td><td class="num">7</td>
+                <td><span class="rate-bar" aria-hidden="true"><span class="rate-bar__fill" style="width:92%"></span></span> <strong>92%</strong></td></tr>
+            </tbody>
+          </table>
+          </div>
+        </div><!-- /.left-stack -->
+
+        <!-- RIGHT: rail (Today's status → Recent activity → Weekly attendance) -->
+        <div class="rail">
+
+          <!-- Today's status (top of rail) -->
+          <div class="card" aria-labelledby="status-h">
+            <div class="card__h">
+              <div>
+                <h2 id="status-h" class="card__title">Today's status</h2>
+                <div class="card__sub">All students · across 4 periods</div>
+              </div>
+            </div>
+            <div class="card__b today-stats">
+
+              <!-- Donut: Today's breakdown -->
+              <div class="donut-wrap">
+                <svg viewBox="0 0 36 36" role="img" aria-labelledby="donut-title donut-desc">
+                  <title id="donut-title">Today's attendance breakdown</title>
+                  <desc id="donut-desc">Present 87 percent, Late 7 percent, Absent 6 percent.</desc>
+                  <circle cx="18" cy="18" r="15.915" fill="none" stroke="#EEF2F7" stroke-width="3.5"></circle>
+                  <circle cx="18" cy="18" r="15.915" fill="none" stroke="#1F7A3F" stroke-width="3.5"
+                          stroke-dasharray="87 13" stroke-dashoffset="25" transform="rotate(-90 18 18)"></circle>
+                  <circle cx="18" cy="18" r="15.915" fill="none" stroke="#9A4708" stroke-width="3.5"
+                          stroke-dasharray="7 93" stroke-dashoffset="-62" transform="rotate(-90 18 18)"></circle>
+                  <circle cx="18" cy="18" r="15.915" fill="none" stroke="#B42318" stroke-width="3.5"
+                          stroke-dasharray="6 94" stroke-dashoffset="-69" transform="rotate(-90 18 18)"></circle>
+                  <text x="18" y="17" text-anchor="middle" font-size="6" font-weight="700" fill="#0F2546">87%</text>
+                  <text x="18" y="23" text-anchor="middle" font-size="2.6" fill="#5C6470">present</text>
+                </svg>
+
+                <ul class="donut-legend" role="list" aria-label="Breakdown by status">
+                  <li><span class="dot" style="background:#1F7A3F" aria-hidden="true"></span><span class="lbl">Present</span><span class="num">724</span><span class="pct">87%</span></li>
+                  <li><span class="dot" style="background:#9A4708" aria-hidden="true"></span><span class="lbl">Late</span><span class="num">58</span><span class="pct">7%</span></li>
+                  <li><span class="dot" style="background:#B42318" aria-hidden="true"></span><span class="lbl">Absent</span><span class="num">50</span><span class="pct">6%</span></li>
+                </ul>
+              </div>
+
+              <hr style="border:0; border-top:1px solid var(--c-border-2); margin:0;">
+
+              <!-- Period submission progress (§7 Missing Attendance) -->
+              <div>
+                <div style="font-size:var(--fs-xs); font-weight:700; text-transform:uppercase; letter-spacing:0.06em; color:var(--c-ink-muted); margin-bottom:var(--s-3);">
+                  Class submission · today
+                </div>
+                <ul class="periods" role="list" aria-label="Per-period attendance submission status">
+                  <li class="period-row">
+                    <div class="period-row__label"><i class="fa-solid fa-circle-check" style="color:var(--c-success)" aria-hidden="true"></i> Period 1</div>
+                    <div class="period-bar" role="progressbar" aria-label="Period 1 submission" aria-valuenow="22" aria-valuemin="0" aria-valuemax="22"><div class="period-bar__fill" style="width:100%"></div></div>
+                    <div class="period-row__val">22 / 22</div>
+                  </li>
+                  <li class="period-row">
+                    <div class="period-row__label"><i class="fa-solid fa-circle-half-stroke" style="color:var(--c-warning)" aria-hidden="true"></i> Period 2</div>
+                    <div class="period-bar" role="progressbar" aria-label="Period 2 submission" aria-valuenow="20" aria-valuemin="0" aria-valuemax="22"><div class="period-bar__fill period-bar__fill--partial" style="width:91%"></div></div>
+                    <div class="period-row__val">20 / 22</div>
+                  </li>
+                  <li class="period-row">
+                    <div class="period-row__label"><i class="fa-regular fa-circle" style="color:var(--c-ink-subtle)" aria-hidden="true"></i> Period 3</div>
+                    <div class="period-bar" role="progressbar" aria-label="Period 3 submission" aria-valuenow="0" aria-valuemin="0" aria-valuemax="22"><div class="period-bar__fill" style="width:0%"></div></div>
+                    <div class="period-row__val">— · 1:05 PM</div>
+                  </li>
+                  <li class="period-row">
+                    <div class="period-row__label"><i class="fa-regular fa-circle" style="color:var(--c-ink-subtle)" aria-hidden="true"></i> Period 4</div>
+                    <div class="period-bar" role="progressbar" aria-label="Period 4 submission" aria-valuenow="0" aria-valuemin="0" aria-valuemax="22"><div class="period-bar__fill" style="width:0%"></div></div>
+                    <div class="period-row__val">— · 2:25 PM</div>
+                  </li>
+                </ul>
+
+                <!-- Missing attendance — actionable card with per-class Send-reminder buttons (§7) -->
+                <div class="missing-card" role="region" aria-label="Missing attendance — Period 2">
+                  <div class="missing-card__h">
+                    <i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i>
+                    <span class="ttl">2 classes missing Period 2</span>
+                    <button class="btn btn--primary btn--sm" type="button" id="remind-all">
+                      <i class="fa-solid fa-paper-plane" aria-hidden="true"></i> Remind all
+                    </button>
+                  </div>
+                  <ul class="missing-list" role="list">
+                    <li>
+                      <div>
+                        <div class="missing-list__name">Mr. Cardenas · Gr 9B</div>
+                        <div class="missing-list__meta missing-list__meta--sent">
+                          <i class="fa-solid fa-check" aria-hidden="true"></i> Reminded 10:35 AM
+                        </div>
+                      </div>
+                      <button class="btn btn--secondary btn--sm" type="button">
+                        <i class="fa-solid fa-rotate-right" aria-hidden="true"></i> Re-send
+                      </button>
+                    </li>
+                    <li>
+                      <div>
+                        <div class="missing-list__name">Ms. Aubin · Gr 7C</div>
+                        <div class="missing-list__meta">
+                          <i class="fa-regular fa-bell" aria-hidden="true"></i> Not yet reminded
+                        </div>
+                      </div>
+                      <button class="btn btn--primary btn--sm" type="button">
+                        <i class="fa-solid fa-paper-plane" aria-hidden="true"></i> Send reminder
+                      </button>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- Recent activity (middle of rail) -->
+          <div class="card" aria-labelledby="act-h">
+            <div class="card__h">
+              <div>
+                <h2 id="act-h" class="card__title">Recent activity</h2>
+                <div class="card__sub">Last 30 minutes</div>
+              </div>
+              <a href="#" class="btn btn--ghost btn--sm">Audit log <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
+            </div>
+            <ul class="activity" role="list">
+              <li>
+                <span class="activity__icon" aria-hidden="true"><i class="fa-solid fa-paper-plane"></i></span>
+                <div>
+                  <div class="activity__text"><span class="activity__who">Jean-Paul C.</span> sent reminder to <strong>Mr. Cardenas</strong> · missing Period 2 attendance.</div>
+                  <div class="activity__when">10:42 AM · 0 min ago</div>
+                </div>
+              </li>
+              <li>
+                <span class="activity__icon" aria-hidden="true" style="color:var(--c-success)"><i class="fa-solid fa-circle-check"></i></span>
+                <div>
+                  <div class="activity__text"><span class="activity__who">Marguerite T.</span> approved parent reply for <strong>Olivia Martínez</strong> (Gr 7A).</div>
+                  <div class="activity__when">10:31 AM · 11 min ago</div>
+                </div>
+              </li>
+              <li>
+                <span class="activity__icon" aria-hidden="true" style="color:var(--c-warning)"><i class="fa-solid fa-door-open"></i></span>
+                <div>
+                  <div class="activity__text"><span class="activity__who">Reception</span> checked in <strong>Liam Tremblay</strong> (Gr 10A) at the office.</div>
+                  <div class="activity__when">10:24 AM · 18 min ago</div>
+                </div>
+              </li>
+              <li>
+                <span class="activity__icon" aria-hidden="true"><i class="fa-solid fa-calendar-days"></i></span>
+                <div>
+                  <div class="activity__text">Parent of <strong>Mei Lin</strong> (Gr 8B) declared absence for May 12–13 (medical).</div>
+                  <div class="activity__when">7:14 AM · 3h ago</div>
+                </div>
+              </li>
+            </ul>
+          </div>
+
+          <!-- Weekly attendance (bottom of rail · compact) -->
+          <div class="card" aria-labelledby="trend-h">
+            <div class="card__h">
+              <div>
+                <h2 id="trend-h" class="card__title">Weekly attendance</h2>
+                <div class="card__sub">May 4 – May 8 · stacked bars</div>
+              </div>
+              <button class="btn btn--ghost btn--sm" type="button" aria-label="View weekly report">
+                <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
+              </button>
+            </div>
+            <div class="card__b chart-wrap">
+              <svg class="chart-svg--sm" viewBox="0 0 280 150" role="img" aria-labelledby="trend-title trend-desc" preserveAspectRatio="xMidYMid meet">
+                <title id="trend-title">Weekly attendance trend</title>
+                <desc id="trend-desc">Stacked bars showing present, late, and absent counts Monday May 4 through Friday May 8.</desc>
+                <line x1="20" y1="120" x2="270" y2="120" stroke="#A6ADBB"></line>
+                <g><rect x="30"  y="34" width="36" height="86" fill="#1F7A3F" rx="2"></rect>
+                   <rect x="30"  y="25" width="36" height="9"  fill="#9A4708" rx="2"></rect>
+                   <rect x="30"  y="20" width="36" height="5"  fill="#B42318" rx="2"></rect></g>
+                <g><rect x="80"  y="34" width="36" height="86" fill="#1F7A3F" rx="2"></rect>
+                   <rect x="80"  y="26" width="36" height="8"  fill="#9A4708" rx="2"></rect>
+                   <rect x="80"  y="20" width="36" height="6"  fill="#B42318" rx="2"></rect></g>
+                <g><rect x="130" y="36" width="36" height="84" fill="#1F7A3F" rx="2"></rect>
+                   <rect x="130" y="28" width="36" height="8"  fill="#9A4708" rx="2"></rect>
+                   <rect x="130" y="20" width="36" height="8"  fill="#B42318" rx="2"></rect></g>
+                <g><rect x="180" y="33" width="36" height="87" fill="#1F7A3F" rx="2"></rect>
+                   <rect x="180" y="26" width="36" height="7"  fill="#9A4708" rx="2"></rect>
+                   <rect x="180" y="20" width="36" height="6"  fill="#B42318" rx="2"></rect>
+                   <text x="198" y="14" text-anchor="middle" font-size="9" font-weight="700" fill="#1B5DAF">Today</text></g>
+                <g opacity="0.55">
+                  <rect x="230" y="34" width="36" height="86" fill="#1F7A3F" rx="2"></rect>
+                  <rect x="230" y="27" width="36" height="7"  fill="#9A4708" rx="2"></rect>
+                  <rect x="230" y="20" width="36" height="7"  fill="#B42318" rx="2"></rect>
+                </g>
+                <g font-family="Segoe UI, sans-serif" font-size="9" fill="#475467" text-anchor="middle" font-weight="600">
+                  <text x="48"  y="135">Mon</text>
+                  <text x="98"  y="135">Tue</text>
+                  <text x="148" y="135">Wed</text>
+                  <text x="198" y="135">Thu</text>
+                  <text x="248" y="135">Fri</text>
+                </g>
+              </svg>
+
+              <div class="chart-legend" style="justify-content:center;" aria-hidden="true">
+                <span><span class="dot" style="background:#1F7A3F"></span> Present</span>
+                <span><span class="dot" style="background:#9A4708"></span> Late</span>
+                <span><span class="dot" style="background:#B42318"></span> Absent</span>
+              </div>
+
+              <table class="sr-only" aria-label="Weekly attendance data">
+                <thead><tr><th>Day</th><th>Present</th><th>Late</th><th>Absent</th></tr></thead>
+                <tbody>
+                  <tr><td>Mon May 4</td><td>715</td><td>75</td><td>42</td></tr>
+                  <tr><td>Tue May 5</td><td>720</td><td>65</td><td>47</td></tr>
+                  <tr><td>Wed May 6</td><td>700</td><td>70</td><td>62</td></tr>
+                  <tr><td>Thu May 7</td><td>724</td><td>58</td><td>50</td></tr>
+                  <tr><td>Fri May 8 (projected)</td><td>—</td><td>—</td><td>—</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+        </div><!-- /.rail -->
+
+      </section><!-- /row-2 -->
+
+
+    </main>
+  </div>
+</div>
+
+<!-- Toast region (live announcements for sent reminders, approvals, etc.) -->
+<div class="toast-region" role="status" aria-live="polite" aria-atomic="false" id="toasts"></div>
+
+<script>
+  document.querySelectorAll('.lang-toggle button').forEach(b => {
+    b.addEventListener('click', () => {
+      document.querySelectorAll('.lang-toggle button').forEach(x => x.setAttribute('aria-pressed', 'false'));
+      b.setAttribute('aria-pressed', 'true');
+    });
+  });
+
+  document.querySelectorAll('.chip-btn').forEach(c => {
+    c.addEventListener('click', () => {
+      const pressed = c.getAttribute('aria-pressed') === 'true';
+      c.setAttribute('aria-pressed', String(!pressed));
+    });
+  });
+
+  document.querySelectorAll('.qmini-item').forEach(row => {
+    row.addEventListener('keydown', e => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        const btn = row.querySelector('button.btn');
+        if (btn) { e.preventDefault(); btn.focus(); }
+      }
+    });
+  });
+
+  function announce(msg, kind) {
+    const t = document.createElement('div');
+    t.className = 'toast';
+    const color = kind === 'success' ? 'var(--c-success)' : 'var(--c-info)';
+    t.style.borderLeftColor = color;
+    t.innerHTML = '<i class="fa-solid fa-circle-check" aria-hidden="true" style="color:'+color+';margin-top:2px"></i><div>' + msg + '</div>';
+    document.getElementById('toasts').appendChild(t);
+    setTimeout(() => t.remove(), 5000);
+  }
+  document.querySelectorAll('.missing-list .btn--primary').forEach(b => {
+    b.addEventListener('click', () => {
+      const name = b.closest('li').querySelector('.missing-list__name').textContent;
+      announce('<strong>Reminder sent</strong> to ' + name + '.<br><span style="color:var(--c-ink-subtle);font-size:12px">Teacher will see an alert in their portal and via email.</span>', 'success');
+    });
+  });
+  document.getElementById('remind-all')?.addEventListener('click', () => {
+    announce('<strong>Reminders sent to 2 teachers.</strong><br><span style="color:var(--c-ink-subtle);font-size:12px">Mr. Cardenas (Gr 9B) · Ms. Aubin (Gr 7C)</span>', 'success');
+  });
+</script>
+
+</body>
+</html>

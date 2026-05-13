@@ -1,0 +1,1006 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ClassTrack — Students (V3)</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+  :root {
+    --c-bg:#F4F6FA; --c-surface:#FFFFFF; --c-surface-2:#F8FAFC; --c-surface-alt:#EEF2F7;
+    --c-sidebar:#0F2546; --c-sidebar-2:#0A1B36; --c-sidebar-hover:rgba(255,255,255,0.08);
+    --c-sidebar-active:#1B5DAF;
+    --c-border:#D6DBE2; --c-border-2:#E5E8EE; --c-border-strong:#A6ADBB;
+    --c-ink:#0F2546; --c-ink-muted:#475467; --c-ink-subtle:#5C6470;
+    --c-brand:#1B5DAF; --c-brand-ink:#0E2E55; --c-brand-tint:#E8F0FA;
+    --c-success:#1F7A3F; --c-success-tint:#E6F4EC;
+    --c-warning:#9A4708; --c-warning-tint:#FCF1DD; --c-warning-bord:#B97F38;
+    --c-danger:#B42318;  --c-danger-tint:#FCE9E7;
+    --c-info:#0E5C8A;    --c-info-tint:#E0EFF7;
+    --c-neutral-tint:#EEF1F5; --c-focus:#FFB400;
+    --c-event-purple:#EEEAFE; --c-event-purple-ink:#3F22A6; --c-event-purple-bord:#7E68DC;
+    --s-1:4px; --s-2:8px; --s-3:12px; --s-4:16px; --s-5:24px; --s-6:32px;
+    --r-sm:4px; --r-md:6px; --r-lg:10px; --r-xl:14px; --r-pill:999px;
+    --ff:"Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, Roboto, "Helvetica Neue", Arial, sans-serif;
+    --fs-xs:12px; --fs-sm:13px; --fs-md:14px; --fs-lg:16px; --fs-xl:20px; --fs-2xl:24px;
+    --shadow-md: 0 4px 12px rgba(15,37,70,0.08);
+    --shadow-lg: 0 8px 28px rgba(15,37,70,0.12);
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  body { font-family: var(--ff); background: var(--c-bg); color: var(--c-ink); font-size: var(--fs-md); line-height: 1.55; -webkit-font-smoothing: antialiased; }
+  a { color: var(--c-brand); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  button { font-family: inherit; cursor: pointer; }
+  :focus-visible { outline: 3px solid var(--c-focus); outline-offset: 0; box-shadow: 0 0 0 6px var(--c-sidebar); border-radius: 2px; }
+  .sidebar :focus-visible { box-shadow: none; outline-offset: 2px; }
+  .skip-link { position:absolute; top:-40px; left:var(--s-3); background:var(--c-focus); color:#5C3F00; padding:var(--s-2) var(--s-3); border-radius:var(--r-md); font-weight:600; z-index:200; }
+  .skip-link:focus { top: var(--s-2); }
+  .sr-only { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
+
+  .wf-banner { background:#FFF6DD; border-bottom:1px solid #F0DA9A; color:#5C3F00; font-size:var(--fs-xs); padding:6px var(--s-4); display:flex; align-items:center; justify-content:space-between; gap:var(--s-4); }
+  .wf-banner__left { display:flex; align-items:center; gap:var(--s-2); }
+  .wf-banner__right { display:flex; align-items:center; gap:var(--s-3); }
+  .wf-banner a { color:#5C3F00; }
+
+  .app { display:grid; grid-template-columns:240px 1fr; min-height:calc(100vh - 32px); }
+  .sidebar { background: linear-gradient(180deg, var(--c-sidebar) 0%, var(--c-sidebar-2) 100%); color: rgba(255,255,255,0.85); display:flex; flex-direction:column; position:sticky; top:0; height:100vh; overflow-y:auto; }
+  .sidebar__logo { padding:var(--s-5) var(--s-4) var(--s-4); border-bottom:1px solid rgba(255,255,255,0.08); display:flex; align-items:center; gap:var(--s-3); }
+  .sidebar__logo-mark { width:36px; height:36px; background: var(--c-sidebar-active); border-radius:var(--r-lg); display:flex; align-items:center; justify-content:center; color:#fff; font-weight:800; font-size:var(--fs-lg); }
+  .sidebar__logo-text { color:#fff; font-size:16px; font-weight:700; letter-spacing:-0.01em; }
+  .sidebar__logo-sub { color: rgba(255,255,255,0.6); font-size:11px; margin-top:2px; }
+  .sidebar__section { padding:var(--s-4) var(--s-3) var(--s-1); }
+  .sidebar__section-label { text-transform:uppercase; font-size:10px; font-weight:700; letter-spacing:0.12em; color: rgba(255,255,255,0.55); padding:0 var(--s-3); margin-bottom:var(--s-1); }
+  .nav-item { display:flex; align-items:center; gap:var(--s-3); padding:10px var(--s-3); border-radius:var(--r-md); color:rgba(255,255,255,0.78); font-size:var(--fs-sm); font-weight:500; min-height:36px; text-decoration:none; }
+  .nav-item:hover { background:var(--c-sidebar-hover); color:#fff; text-decoration:none; }
+  .nav-item.is-active { background:var(--c-sidebar-active); color:#fff; font-weight:600; }
+  .nav-item .nav-icon { width:20px; text-align:center; font-size:14px; color:inherit; }
+  .nav-item .nav-badge { margin-left:auto; background:var(--c-danger); color:#fff; font-size:11px; font-weight:700; padding:2px 8px; border-radius:var(--r-pill); min-width:22px; text-align:center; }
+  .nav-item .nav-badge--neutral { background: rgba(255,255,255,0.18); color:#fff; }
+  .sidebar__user { margin-top:auto; padding:var(--s-3) var(--s-4); border-top:1px solid rgba(255,255,255,0.08); display:flex; align-items:center; gap:var(--s-3); }
+  .avatar { width:36px; height:36px; border-radius:var(--r-pill); background:var(--c-brand-tint); color:var(--c-brand-ink); display:flex; align-items:center; justify-content:center; font-weight:700; font-size:var(--fs-sm); flex-shrink:0; }
+  .sidebar__user-name { color:#fff; font-size:var(--fs-sm); font-weight:600; }
+  .sidebar__user-role { color: rgba(255,255,255,0.6); font-size:11px; }
+
+  .main { display:flex; flex-direction:column; min-width:0; }
+  .topbar { background:var(--c-surface); border-bottom:1px solid var(--c-border); display:flex; align-items:center; gap:var(--s-4); padding:var(--s-3) var(--s-5); position:sticky; top:0; z-index:50; min-height:64px; }
+  .topbar__crumbs { display:flex; align-items:center; gap:var(--s-2); color:var(--c-ink-subtle); font-size:var(--fs-xs); }
+  .topbar__crumbs strong { color:var(--c-ink); font-weight:600; }
+  .topbar__period { margin-left:auto; background:var(--c-brand-tint); color:var(--c-brand-ink); border:1px solid #6E94BF; padding:6px var(--s-3); border-radius:var(--r-md); font-size:var(--fs-xs); font-weight:600; display:inline-flex; align-items:center; gap:var(--s-2); }
+  .topbar__period .dot { width:8px; height:8px; background:var(--c-success); border-radius:50%; }
+  .topbar__actions { display:flex; align-items:center; gap:var(--s-2); }
+  .icon-btn { width:36px; height:36px; border-radius:var(--r-md); background:transparent; border:1px solid transparent; color:var(--c-ink-muted); display:inline-flex; align-items:center; justify-content:center; position:relative; font-size:var(--fs-md); }
+  .icon-btn:hover { background:var(--c-surface-alt); color:var(--c-ink); }
+  .icon-btn__count { position:absolute; top:2px; right:2px; background:var(--c-danger); color:#fff; font-size:10px; font-weight:700; min-width:18px; height:18px; border-radius:var(--r-pill); display:flex; align-items:center; justify-content:center; padding:0 4px; border:2px solid var(--c-surface); }
+  .lang-toggle { display:inline-flex; border:1px solid var(--c-border-strong); border-radius:var(--r-md); overflow:hidden; }
+  .lang-toggle button { background:var(--c-surface); border:0; padding:6px var(--s-3); font-size:var(--fs-xs); font-weight:700; letter-spacing:0.04em; color:var(--c-ink-muted); min-height:32px; min-width:36px; }
+  .lang-toggle button[aria-pressed="true"] { background:var(--c-brand); color:#fff; }
+  .user-chip { display:inline-flex; align-items:center; gap:var(--s-2); padding:4px 10px 4px 4px; border:1px solid var(--c-border); border-radius:var(--r-pill); background:var(--c-surface); font-size:var(--fs-xs); color:var(--c-ink-muted); min-height:36px; }
+  .user-chip .avatar { width:28px; height:28px; font-size:12px; }
+
+  .content { padding:var(--s-5); flex:1; display:flex; flex-direction:column; gap:var(--s-4); }
+  .page-header { display:flex; align-items:flex-end; justify-content:space-between; gap:var(--s-4); flex-wrap:wrap; }
+  .page-header h1 { font-size:var(--fs-2xl); font-weight:700; letter-spacing:-0.01em; }
+  .page-header__sub { color:var(--c-ink-muted); font-size:var(--fs-md); margin-top:4px; max-width:62ch; }
+  .page-header__actions { display:flex; gap: var(--s-2); flex-wrap: wrap; }
+
+  .btn { display:inline-flex; align-items:center; justify-content:center; gap:6px; padding:8px 14px; border-radius:var(--r-md); font-size:var(--fs-sm); font-weight:600; border:1px solid transparent; min-height:36px; transition:background 0.12s, border-color 0.12s; text-decoration:none; }
+  .btn--primary { background:var(--c-brand); color:#fff; border-color:var(--c-brand); }
+  .btn--primary:hover { background:var(--c-brand-ink); border-color:var(--c-brand-ink); }
+  .btn--secondary { background:var(--c-surface); color:var(--c-ink); border-color:var(--c-border-strong); }
+  .btn--secondary:hover { background:var(--c-surface-alt); }
+  .btn--ghost { background:transparent; color:var(--c-brand); border-color:transparent; }
+  .btn--ghost:hover { background:var(--c-brand-tint); }
+  .btn--sm { padding:4px 10px; min-height:28px; font-size:var(--fs-xs); }
+
+  .aspen-banner { background: var(--c-info-tint); border: 1px solid #5B96BC; color: var(--c-info); border-radius: var(--r-lg); padding: var(--s-3) var(--s-4); display:flex; align-items:flex-start; gap:var(--s-3); font-size: var(--fs-sm); }
+  .aspen-banner i { margin-top: 2px; }
+  .aspen-banner__title { font-weight:700; color: var(--c-info); }
+  .aspen-banner__sub { color: var(--c-info); opacity: 0.9; font-size: var(--fs-xs); margin-top:2px; }
+
+  .summary { background: var(--c-surface); border:1px solid var(--c-border); border-radius: var(--r-lg); padding: var(--s-3) var(--s-4); display:flex; gap: var(--s-5); flex-wrap:wrap; align-items:center; font-size: var(--fs-sm); }
+  .summary__stat { display:flex; align-items:baseline; gap:6px; }
+  .summary__stat .v { font-weight:700; color: var(--c-ink); font-variant-numeric:tabular-nums; font-size: var(--fs-lg); }
+  .summary__stat .l { color: var(--c-ink-muted); font-size: var(--fs-xs); }
+  .summary__stat--brand .v  { color: var(--c-brand-ink); }
+  .summary__stat--success .v  { color: var(--c-success); }
+  .summary__stat--warning .v  { color: var(--c-warning); }
+  .summary__stat--danger .v { color: var(--c-danger); }
+
+  .filter-bar { background: var(--c-surface); border: 1px solid var(--c-border); border-radius: var(--r-lg); padding: var(--s-3) var(--s-4); display: flex; align-items: center; gap: var(--s-3); flex-wrap: wrap; }
+  .search-input { display:flex; align-items:center; gap: var(--s-2); background: var(--c-surface); border: 1px solid var(--c-border-strong); border-radius: var(--r-md); padding: 6px 10px; min-width: 260px; flex: 1 1 280px; max-width: 340px; }
+  .search-input input { border:0; outline:0; font:inherit; color: var(--c-ink); background:transparent; flex:1; }
+  .search-input i { color: var(--c-ink-subtle); }
+  .filter-select { background: var(--c-surface); border:1px solid var(--c-border-strong); border-radius: var(--r-md); padding: 6px 10px; font: inherit; font-size: var(--fs-sm); color: var(--c-ink); min-height: 32px; }
+  .filter-bar__sep { width: 1px; height: 24px; background: var(--c-border-2); }
+  .filter-bar__group-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--c-ink-subtle); }
+
+  .panel-area { display: grid; grid-template-columns: 1fr; gap: 0; align-items: stretch; flex: 1 1 auto; min-height: 0; }
+  .panel-area.has-drawer { grid-template-columns: 1fr minmax(380px, 520px); gap: var(--s-4); }
+  .panel-list { display: flex; flex-direction: column; gap: 0; min-width: 0; }
+
+  .table-card { background: var(--c-surface); border:1px solid var(--c-border); border-radius: var(--r-lg); overflow: hidden; display:flex; flex-direction: column; }
+  .table-card__h { padding: var(--s-3) var(--s-4); border-bottom: 1px solid var(--c-border-2); display:flex; align-items:center; justify-content: space-between; font-size: var(--fs-xs); color: var(--c-ink-muted); font-weight: 600; }
+  .table-wrap { overflow:auto; min-height: 280px; }
+  table.list { width: 100%; border-collapse: collapse; font-size: var(--fs-sm); }
+  table.list thead th { position: sticky; top: 0; z-index: 1; background: var(--c-surface-2); border-bottom: 1px solid var(--c-border); text-align: left; padding: 10px var(--s-3); font-size: 11px; font-weight: 700; color: var(--c-ink-muted); text-transform: uppercase; letter-spacing: 0.06em; }
+  table.list tbody tr { border-bottom: 1px solid var(--c-border-2); }
+  table.list tbody tr:hover { background: var(--c-surface-2); cursor: pointer; }
+  table.list tbody tr.is-selected { background: var(--c-brand-tint); box-shadow: inset 4px 0 0 var(--c-brand); }
+  table.list tbody td { padding: var(--s-3); vertical-align: middle; }
+  table.list .col-student { min-width: 220px; }
+  table.list .col-grade   { min-width: 86px; }
+  table.list .col-class   { min-width: 130px; }
+  table.list .col-teacher { min-width: 160px; }
+  table.list .col-today   { min-width: 170px; }
+  table.list .col-ytd     { min-width: 140px; }
+  table.list .col-actions { width: 80px; text-align: right; white-space: nowrap; }
+
+  .student-cell { display: grid; grid-template-columns: 36px 1fr; gap: var(--s-3); align-items: center; min-width: 0; }
+  .student-cell__avatar { width: 36px; height: 36px; border-radius: var(--r-pill); display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; color:#fff; font-weight:700; font-size:13px; }
+  .student-cell__name { font-weight: 700; color: var(--c-ink); }
+  .student-cell__id { font-size: 11px; color: var(--c-ink-subtle); font-variant-numeric: tabular-nums; margin-top: 2px; }
+
+  .grade-chip { display: inline-flex; align-items: center; gap: 4px; padding: 2px 10px; border-radius: var(--r-pill); font-size: 11px; font-weight: 700; background: var(--c-brand-tint); color: var(--c-brand-ink); border: 1px solid #6E94BF; font-variant-numeric: tabular-nums; }
+
+  .status-chip { display: inline-flex; align-items: center; gap: 4px; padding: 2px 10px; border-radius: var(--r-pill); font-size: 11px; font-weight: 700; }
+  .status-chip--present { background: var(--c-success-tint); color: var(--c-success); border: 1px solid #4F9A6C; }
+  .status-chip--late    { background: var(--c-warning-tint); color: var(--c-warning); border: 1px solid var(--c-warning-bord); }
+  .status-chip--absent  { background: var(--c-danger-tint);  color: var(--c-danger); border: 1px solid #B0625A; }
+  .status-chip--pending { background: var(--c-info-tint);    color: var(--c-info); border: 1px solid #5B96BC; }
+  .status-chip--future  { background: var(--c-event-purple); color: var(--c-event-purple-ink); border: 1px solid var(--c-event-purple-bord); }
+  .status-chip--no-mark { background: var(--c-neutral-tint); color: var(--c-ink-muted); border: 1px solid var(--c-border-strong); }
+
+  .ytd-cell { display: flex; flex-direction: column; gap: 4px; min-width: 110px; }
+  .ytd-cell__val { font-weight: 700; color: var(--c-ink); font-variant-numeric: tabular-nums; font-size: var(--fs-sm); }
+  .ytd-cell__val--good { color: var(--c-success); }
+  .ytd-cell__val--ok   { color: var(--c-warning); }
+  .ytd-cell__val--poor { color: var(--c-danger); }
+  .ytd-bar { height: 6px; border-radius: var(--r-pill); background: var(--c-neutral-tint); overflow: hidden; }
+  .ytd-bar__fill { height: 100%; border-radius: var(--r-pill); }
+  .ytd-bar__fill--good { background: var(--c-success); }
+  .ytd-bar__fill--ok   { background: var(--c-warning-bord); }
+  .ytd-bar__fill--poor { background: var(--c-danger); }
+  .ytd-cell__sub { font-size: 11px; color: var(--c-ink-subtle); }
+
+  .issue-indicator { display: inline-flex; align-items: center; gap: 4px; padding: 1px 6px; border-radius: var(--r-pill); font-size: 10px; font-weight: 700; background: var(--c-danger-tint); color: var(--c-danger); border: 1px solid #B0625A; margin-left: 6px; }
+
+  .drawer { background: var(--c-surface); border: 1px solid var(--c-border); border-radius: var(--r-lg); box-shadow: var(--shadow-md); flex-direction: column; overflow: hidden; min-height: 0; display: none; }
+  .drawer.is-on { display: flex; }
+  .drawer__h { padding: var(--s-3) var(--s-4); border-bottom: 1px solid var(--c-border-2); display: flex; align-items: center; justify-content: space-between; gap: var(--s-3); background: var(--c-surface-2); }
+  .drawer__h h2 { font-size: var(--fs-lg); font-weight: 700; }
+  .drawer__b { padding: var(--s-4); flex: 1 1 auto; overflow-y: auto; }
+  .drawer__hero { display:flex; gap: var(--s-3); align-items: center; margin-bottom: var(--s-3); }
+  .drawer__avatar { width:56px; height:56px; border-radius: var(--r-pill); display:flex; align-items:center; justify-content:center; font-weight:700; font-size:20px; flex-shrink:0; color:#fff; }
+  .drawer__name { font-size: var(--fs-xl); font-weight: 700; color: var(--c-ink); line-height: 1.2; }
+  .drawer__meta { font-size: var(--fs-xs); color: var(--c-ink-muted); display:flex; flex-wrap:wrap; gap:6px; margin-top:4px; }
+
+  .drawer-section { margin-top: var(--s-4); }
+  .drawer-section:first-child { margin-top: 0; }
+  .drawer-section h3 { font-size: 11px; font-weight: 700; color: var(--c-ink-muted); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: var(--s-2); display:flex; align-items:center; gap:6px; }
+
+  /* Tabs inside the drawer */
+  .drawer-tabs { display: flex; gap: 2px; padding: 0 var(--s-4); border-bottom: 1px solid var(--c-border-2); background: var(--c-surface-2); overflow-x: auto; flex-shrink: 0; }
+  .drawer-tab { background: transparent; border: 0; padding: 10px var(--s-3); font-family: inherit; font-size: var(--fs-xs); font-weight: 600; color: var(--c-ink-muted); cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; min-height: 40px; }
+  .drawer-tab:hover { color: var(--c-ink); }
+  .drawer-tab[aria-selected="true"] { color: var(--c-brand-ink); border-bottom-color: var(--c-brand); background: var(--c-surface); }
+  .drawer-tab__count { background: var(--c-danger); color: #fff; font-size: 10px; font-weight: 700; padding: 0 6px; border-radius: var(--r-pill); min-width: 18px; text-align: center; }
+  .drawer-tab[aria-selected="false"] .drawer-tab__count { background: var(--c-neutral-tint); color: var(--c-ink-muted); }
+  .drawer-tab:focus-visible { outline: 3px solid var(--c-focus); outline-offset: -3px; border-radius: var(--r-sm); }
+  .tabpanel { display: none; }
+  .tabpanel.is-active { display: block; }
+
+  /* Month picker in Attendance tab */
+  .month-picker { display: flex; align-items: center; gap: var(--s-3); margin-bottom: var(--s-3); }
+  .month-picker__label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--c-ink-subtle); }
+  .month-picker__select { flex: 1; min-width: 0; max-width: 100%; }
+
+  details.drawer-section > summary { list-style: none; cursor: pointer; display: flex; align-items: center; gap: 6px; margin-bottom: var(--s-2); user-select: none; }
+  details.drawer-section > summary::-webkit-details-marker { display: none; }
+  details.drawer-section > summary::marker { content: ''; }
+  details.drawer-section > summary h3 { margin-bottom: 0; display: inline-flex; align-items: center; gap: 6px; flex: 1 1 auto; }
+  .collapsible-chevron { color: var(--c-ink-subtle); font-size: 11px; transition: transform 0.15s ease; }
+  details[open] > summary .collapsible-chevron { transform: rotate(180deg); }
+  details.drawer-section > summary:focus-visible { outline: 3px solid var(--c-focus); outline-offset: 2px; border-radius: var(--r-sm); }
+
+  .source-banner { padding: var(--s-3) var(--s-4); border-radius: var(--r-md); font-size: var(--fs-xs); display: flex; align-items: flex-start; gap: var(--s-2); }
+  .source-banner i { font-size: 14px; margin-top: 2px; }
+  .source-banner--aspen { background: var(--c-info-tint); border: 1px solid #5B96BC; color: var(--c-info); }
+  .source-banner strong { color: inherit; }
+
+  .info-list { display: grid; grid-template-columns: max-content 1fr; gap: var(--s-2) var(--s-4); padding: var(--s-3) var(--s-4); background: var(--c-surface-2); border: 1px solid var(--c-border-2); border-radius: var(--r-md); font-size: var(--fs-sm); margin: 0; }
+  .info-list dt { color: var(--c-ink-subtle); font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; font-weight: 700; align-self: center; }
+  .info-list dd { color: var(--c-ink); font-weight: 500; display: flex; align-items: center; gap: var(--s-2); flex-wrap: wrap; }
+  .info-list dd small { color: var(--c-ink-subtle); font-weight: 500; }
+
+  .stat-strip { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--s-2); }
+  .stat-card { background: var(--c-surface-2); border: 1px solid var(--c-border-2); border-radius: var(--r-md); padding: var(--s-3); text-align: center; }
+  .stat-card__v { font-size: var(--fs-xl); font-weight: 700; color: var(--c-ink); font-variant-numeric: tabular-nums; line-height: 1.1; }
+  .stat-card__v--good { color: var(--c-success); }
+  .stat-card__v--warn { color: var(--c-warning); }
+  .stat-card__v--bad  { color: var(--c-danger); }
+  .stat-card__l { font-size: 10px; font-weight: 600; color: var(--c-ink-subtle); text-transform: uppercase; letter-spacing: 0.06em; margin-top: 4px; }
+
+  .month-row { display: grid; grid-template-columns: repeat(9, 1fr); gap: 4px; margin-top: var(--s-3); }
+  .month-chip { background: var(--c-surface-2); border: 1px solid var(--c-border-2); border-radius: var(--r-sm); padding: 6px 4px; display:flex; flex-direction:column; align-items:center; gap:3px; }
+  .month-chip__m { font-size: 10px; font-weight: 700; color: var(--c-ink-subtle); text-transform: uppercase; }
+  .month-chip__dot { width: 8px; height: 8px; border-radius: 50%; }
+  .month-chip__dot--good { background: var(--c-success); }
+  .month-chip__dot--ok   { background: var(--c-warning-bord); }
+  .month-chip__dot--poor { background: var(--c-danger); }
+  .month-chip__r { font-size: 11px; font-weight: 700; color: var(--c-ink); font-variant-numeric: tabular-nums; }
+
+  .recent-list { list-style:none; display:flex; flex-direction:column; gap:6px; }
+  .recent-list__item { display:grid; grid-template-columns: 90px 1fr auto; gap: var(--s-2); align-items:center; padding: 8px var(--s-3); background: var(--c-surface-2); border:1px solid var(--c-border-2); border-radius: var(--r-md); font-size: var(--fs-sm); }
+  .recent-list__date { font-size: 11px; color: var(--c-ink-subtle); font-variant-numeric: tabular-nums; }
+  .recent-list__what { color: var(--c-ink); font-weight: 500; }
+  .recent-list__link { color: var(--c-brand); font-size: 11px; font-weight: 600; padding: 4px 8px; border-radius: var(--r-sm); text-decoration: none; }
+  .recent-list__link:hover { background: var(--c-brand-tint); text-decoration: none; }
+
+  .issue-list { list-style:none; display:flex; flex-direction:column; gap:6px; }
+  .issue-list__item { display:grid; grid-template-columns: 28px 1fr auto; gap: var(--s-2); align-items:center; padding: 8px var(--s-3); background: var(--c-surface-2); border:1px solid var(--c-border-2); border-radius: var(--r-md); font-size: var(--fs-sm); }
+  .issue-list__icon { width:28px; height:28px; border-radius:var(--r-md); display:flex; align-items:center; justify-content:center; font-size:12px; }
+  .issue-list__icon--danger { background: var(--c-danger-tint); color: var(--c-danger); }
+  .issue-list__icon--info { background: var(--c-info-tint); color: var(--c-info); }
+  .issue-list__icon--warn { background: var(--c-warning-tint); color: var(--c-warning); }
+  .issue-list__icon--purple { background: var(--c-event-purple); color: var(--c-event-purple-ink); }
+  .issue-list__name { font-weight: 600; color: var(--c-ink); }
+  .issue-list__meta { font-size: 11px; color: var(--c-ink-subtle); }
+  .issue-list__link { color: var(--c-brand); font-size: 11px; font-weight: 600; }
+
+  .drawer__actions { padding: var(--s-3) var(--s-4); border-top: 1px solid var(--c-border-2); background: var(--c-surface-2); display: flex; gap: var(--s-2); flex-wrap: wrap; }
+
+  .empty-drawer { padding: var(--s-6) var(--s-4); text-align: center; color: var(--c-ink-subtle); font-size: var(--fs-sm); }
+  .empty-drawer i { font-size: 28px; color: var(--c-border-strong); margin-bottom: var(--s-3); display:block; }
+
+  @media (max-width: 1100px) {
+    .panel-area.has-drawer { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 880px) {
+    .app { grid-template-columns: 1fr; }
+    .sidebar { position:relative; height:auto; flex-direction:row; overflow-x:auto; overflow-y:hidden; }
+    .sidebar__section { padding:var(--s-2); display:flex; flex-direction:row; gap:4px; }
+    .sidebar__section-label, .sidebar__user, .sidebar__logo-text, .sidebar__logo-sub { display:none; }
+    .nav-item { white-space:nowrap; }
+    .topbar { flex-wrap:wrap; }
+  }
+  @media print { .sidebar, .topbar, .wf-banner, .drawer { display:none; } .content { padding:0; } }
+</style>
+</head>
+<body>
+<a href="#main" class="skip-link">Skip to main content</a>
+
+<div class="wf-banner" role="region" aria-label="Wireframe context">
+  <div class="wf-banner__left">
+    <i class="fa-solid fa-pencil-ruler" aria-hidden="true"></i>
+    <strong>Wireframe — V3 Students</strong>
+    <span>·  Master-detail · Aspen read-only · WCAG 2.2 AA</span>
+  </div>
+  <div class="wf-banner__right">
+    <a href="design-rationale.md">Rationale</a>
+    <a href="dashboard.html">Back to dashboard</a>
+  </div>
+</div>
+
+<div class="app">
+
+  <aside class="sidebar" aria-label="Primary navigation">
+    <div class="sidebar__logo">
+      <div class="sidebar__logo-mark" aria-hidden="true">CT</div>
+      <div>
+        <div class="sidebar__logo-text">ClassTrack</div>
+        <div class="sidebar__logo-sub">EC Catholic · Sainte-Croix</div>
+      </div>
+    </div>
+    <nav class="sidebar__section" aria-label="Today">
+      <div class="sidebar__section-label">Today</div>
+      <a href="dashboard.html" class="nav-item">
+        <span class="nav-icon" aria-hidden="true"><i class="fa-solid fa-gauge-high"></i></span>
+        Dashboard
+        <span class="nav-badge" aria-label="9 items needing attention">9</span>
+      </a>
+      <a href="school-roster.html" class="nav-item">
+        <span class="nav-icon" aria-hidden="true"><i class="fa-solid fa-table-list"></i></span>
+        School roster
+      </a>
+    </nav>
+    <nav class="sidebar__section" aria-label="Justifications">
+      <div class="sidebar__section-label">Justifications</div>
+      <a href="pending-parent-replies.html" class="nav-item">
+        <span class="nav-icon" aria-hidden="true"><i class="fa-solid fa-envelope-open-text"></i></span>
+        Pending parent replies
+        <span class="nav-badge nav-badge--neutral" aria-label="3 awaiting your approval">3</span>
+      </a>
+      <a href="disputes.html" class="nav-item">
+        <span class="nav-icon" aria-hidden="true"><i class="fa-solid fa-triangle-exclamation"></i></span>
+        Disputes
+        <span class="nav-badge" aria-label="3 open disputes">3</span>
+      </a>
+    </nav>
+    <nav class="sidebar__section" aria-label="Workflows">
+      <div class="sidebar__section-label">Workflows</div>
+      <a href="future-absences.html" class="nav-item">
+        <span class="nav-icon" aria-hidden="true"><i class="fa-solid fa-calendar-days"></i></span>
+        Future absences
+        <span class="nav-badge nav-badge--neutral" aria-label="12 upcoming">12</span>
+      </a>
+      <a href="group-events.html" class="nav-item">
+        <span class="nav-icon" aria-hidden="true"><i class="fa-solid fa-bus"></i></span>
+        Group events
+        <span class="nav-badge nav-badge--neutral" aria-label="4 upcoming">4</span>
+      </a>
+    </nav>
+    <nav class="sidebar__section" aria-label="Directory">
+      <div class="sidebar__section-label">Directory</div>
+      <a href="students.html" class="nav-item is-active" aria-current="page">
+        <span class="nav-icon" aria-hidden="true"><i class="fa-solid fa-user-graduate"></i></span>
+        Students
+        <span class="nav-badge nav-badge--neutral" aria-label="412 students">412</span>
+      </a>
+      <a href="classes.html" class="nav-item">
+        <span class="nav-icon" aria-hidden="true"><i class="fa-solid fa-chalkboard"></i></span>
+        Classes
+        <span class="nav-badge nav-badge--neutral" aria-label="18 classes">18</span>
+      </a>
+      <a href="teachers.html" class="nav-item">
+        <span class="nav-icon" aria-hidden="true"><i class="fa-solid fa-chalkboard-user"></i></span>
+        Teachers
+        <span class="nav-badge nav-badge--neutral" aria-label="32 teachers">32</span>
+      </a>
+      <a href="groups.html" class="nav-item">
+        <span class="nav-icon" aria-hidden="true"><i class="fa-solid fa-people-group"></i></span>
+        Groups
+        <span class="nav-badge nav-badge--neutral" aria-label="24 active groups">24</span>
+      </a>
+    </nav>
+    <nav class="sidebar__section" aria-label="Reports">
+      <div class="sidebar__section-label">Reports</div>
+      <a href="daily-attendance.html" class="nav-item">
+        <span class="nav-icon" aria-hidden="true"><i class="fa-solid fa-chart-column"></i></span>
+        Daily attendance
+      </a>
+      <a href="#" class="nav-item">
+        <span class="nav-icon" aria-hidden="true"><i class="fa-solid fa-clock-rotate-left"></i></span>
+        Audit log
+      </a>
+    </nav>
+    <div class="sidebar__user" aria-label="Signed in user">
+      <div class="avatar" aria-hidden="true">MT</div>
+      <div>
+        <div class="sidebar__user-name">Marguerite T.</div>
+        <div class="sidebar__user-role">Attendance Clerk</div>
+      </div>
+    </div>
+  </aside>
+
+  <div class="main">
+    <header class="topbar" role="banner">
+      <div class="topbar__crumbs">
+        <a href="dashboard.html">Today</a><span aria-hidden="true">›</span>
+        <span>Directory</span><span aria-hidden="true">›</span>
+        <strong>Students</strong>
+      </div>
+      <div class="topbar__period" role="status" aria-live="polite">
+        <span class="dot" aria-hidden="true"></span>
+        Period 2 · 10:35 – 11:50
+      </div>
+      <div class="topbar__actions">
+        <div class="lang-toggle" role="group" aria-label="Language">
+          <button type="button" aria-pressed="true">EN</button>
+          <button type="button" aria-pressed="false">FR</button>
+        </div>
+        <button class="icon-btn" type="button" aria-label="Notifications · 4 unread">
+          <i class="fa-solid fa-bell" aria-hidden="true"></i>
+          <span class="icon-btn__count" aria-hidden="true">4</span>
+        </button>
+        <button class="icon-btn" type="button" aria-label="Help">
+          <i class="fa-solid fa-circle-question" aria-hidden="true"></i>
+        </button>
+        <span class="user-chip" aria-label="Signed in as Marguerite Tremblay, Attendance Clerk">
+          <span class="avatar" aria-hidden="true">MT</span>
+          <span>Marguerite T.</span>
+        </span>
+      </div>
+    </header>
+
+    <main id="main" class="content" tabindex="-1">
+
+      <div class="page-header">
+        <div>
+          <h1>Students</h1>
+          <div class="page-header__sub">Read-only roster sourced from Aspen. Filter by grade or class, search by name or student ID, and open a profile to review Aspen data and YTD attendance.</div>
+        </div>
+        <div class="page-header__actions">
+          <button class="btn btn--secondary" type="button"><i class="fa-solid fa-arrows-rotate" aria-hidden="true"></i> Sync from Aspen</button>
+          <button class="btn btn--secondary" type="button"><i class="fa-solid fa-file-export" aria-hidden="true"></i> Export</button>
+        </div>
+      </div>
+
+      <div class="aspen-banner" role="note">
+        <i class="fa-solid fa-database" aria-hidden="true"></i>
+        <div>
+          <div class="aspen-banner__title">Read-only · sourced from Aspen</div>
+          <div class="aspen-banner__sub">Student demographics, parent/guardian contacts, and enrolment are maintained in Aspen and synced nightly. To correct a record, edit in Aspen — the change appears here within 24 hours.</div>
+        </div>
+      </div>
+
+      <section class="summary" aria-label="Roster summary">
+        <div class="summary__stat summary__stat--brand"><span class="v">412</span> <span class="l">total students</span></div>
+        <div class="summary__stat summary__stat--success"><span class="v">389</span> <span class="l">present today</span></div>
+        <div class="summary__stat summary__stat--warning"><span class="v">14</span> <span class="l">late or absent</span></div>
+        <div class="summary__stat summary__stat--danger"><span class="v">9</span> <span class="l">with active issues</span></div>
+      </section>
+
+      <div class="filter-bar" role="toolbar" aria-label="Filter students">
+        <label class="search-input" aria-label="Search">
+          <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+          <input type="search" placeholder="Search name or student ID…" />
+        </label>
+        <span class="filter-bar__sep" aria-hidden="true"></span>
+        <span class="filter-bar__group-label">Grade</span>
+        <select class="filter-select" aria-label="Filter by grade">
+          <option>All grades</option>
+          <option>Grade 7</option>
+          <option>Grade 8</option>
+          <option>Grade 9</option>
+          <option>Grade 10</option>
+          <option>Grade 11</option>
+          <option>Grade 12</option>
+        </select>
+        <span class="filter-bar__group-label">Class</span>
+        <select class="filter-select" aria-label="Filter by class">
+          <option>All classes</option>
+          <option>7A · Ms. Tremblay</option>
+          <option>7B · Mr. Patel</option>
+          <option>8A · Ms. Liu</option>
+          <option>9A · Ms. Dubois</option>
+          <option>10A · Ms. Andersen</option>
+          <option>11A · Mr. Singh</option>
+          <option>12A · Ms. Moreau</option>
+        </select>
+        <span class="filter-bar__group-label">Today</span>
+        <select class="filter-select" aria-label="Filter by today's status">
+          <option>Any status</option>
+          <option>Present</option>
+          <option>Late or absent</option>
+          <option>Active issues</option>
+          <option>Future absence today</option>
+        </select>
+      </div>
+
+      <div class="panel-area has-drawer" id="panel-area">
+
+        <div class="panel-list">
+          <div class="table-card">
+            <div class="table-card__h">
+              <div><strong style="color:var(--c-ink);">10 students</strong> · showing all grades</div>
+              <div style="display:flex; gap:6px;">
+                <button class="btn btn--ghost btn--sm" type="button"><i class="fa-solid fa-arrow-down-wide-short" aria-hidden="true"></i> Sort</button>
+                <button class="btn btn--ghost btn--sm" type="button" aria-label="Refresh"><i class="fa-solid fa-rotate" aria-hidden="true"></i></button>
+              </div>
+            </div>
+            <div class="table-wrap">
+              <table class="list" aria-label="Students">
+                <thead>
+                  <tr>
+                    <th class="col-student" scope="col">Student</th>
+                    <th class="col-grade" scope="col">Grade</th>
+                    <th class="col-class" scope="col">Class</th>
+                    <th class="col-teacher" scope="col">Homeroom</th>
+                    <th class="col-ytd" scope="col">YTD attendance</th>
+                    <th class="col-actions" scope="col"><span class="sr-only">Action</span></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr tabindex="0" data-key="liam" class="is-selected">
+                    <td><div class="student-cell"><span class="student-cell__avatar" style="background:#1B5DAF" aria-hidden="true">LK</span><div><div class="student-cell__name">Liam Khoury</div><div class="student-cell__id">ST-2041</div></div></div></td>
+                    <td><span class="grade-chip">Gr 9</span></td>
+                    <td>9A</td>
+                    <td>Ms. Dubois</td>
+                    <td><div class="ytd-cell"><span class="ytd-cell__val ytd-cell__val--ok">87%</span><div class="ytd-bar"><div class="ytd-bar__fill ytd-bar__fill--ok" style="width:87%"></div></div><span class="ytd-cell__sub">9 abs · 6 late</span></div></td>
+                    <td class="col-actions"><button class="btn btn--ghost btn--sm" type="button">View</button></td>
+                  </tr>
+                  <tr tabindex="0" data-key="noah">
+                    <td><div class="student-cell"><span class="student-cell__avatar" style="background:#6366F1" aria-hidden="true">ND</span><div><div class="student-cell__name">Noah Diallo</div><div class="student-cell__id">ST-2078</div></div></div></td>
+                    <td><span class="grade-chip">Gr 10</span></td>
+                    <td>10A</td>
+                    <td>Ms. Andersen</td>
+                    <td><div class="ytd-cell"><span class="ytd-cell__val ytd-cell__val--good">94%</span><div class="ytd-bar"><div class="ytd-bar__fill ytd-bar__fill--good" style="width:94%"></div></div><span class="ytd-cell__sub">4 abs · 3 late</span></div></td>
+                    <td class="col-actions"><button class="btn btn--ghost btn--sm" type="button">View</button></td>
+                  </tr>
+                  <tr tabindex="0" data-key="olivia">
+                    <td><div class="student-cell"><span class="student-cell__avatar" style="background:#10B981" aria-hidden="true">OB</span><div><div class="student-cell__name">Olivia Bernard</div><div class="student-cell__id">ST-2103</div></div></div></td>
+                    <td><span class="grade-chip">Gr 8</span></td>
+                    <td>8A</td>
+                    <td>Ms. Liu</td>
+                    <td><div class="ytd-cell"><span class="ytd-cell__val ytd-cell__val--good">96%</span><div class="ytd-bar"><div class="ytd-bar__fill ytd-bar__fill--good" style="width:96%"></div></div><span class="ytd-cell__sub">3 abs · 2 late</span></div></td>
+                    <td class="col-actions"><button class="btn btn--ghost btn--sm" type="button">View</button></td>
+                  </tr>
+                  <tr tabindex="0" data-key="sofia">
+                    <td><div class="student-cell"><span class="student-cell__avatar" style="background:#F59E0B" aria-hidden="true">SP</span><div><div class="student-cell__name">Sofia Petrov</div><div class="student-cell__id">ST-2155</div></div></div></td>
+                    <td><span class="grade-chip">Gr 11</span></td>
+                    <td>11A</td>
+                    <td>Mr. Singh</td>
+                    <td><div class="ytd-cell"><span class="ytd-cell__val ytd-cell__val--poor">78%</span><div class="ytd-bar"><div class="ytd-bar__fill ytd-bar__fill--poor" style="width:78%"></div></div><span class="ytd-cell__sub">17 abs · 8 late</span></div></td>
+                    <td class="col-actions"><button class="btn btn--ghost btn--sm" type="button">View</button></td>
+                  </tr>
+                  <tr tabindex="0" data-key="mei">
+                    <td><div class="student-cell"><span class="student-cell__avatar" style="background:#EC4899" aria-hidden="true">MZ</span><div><div class="student-cell__name">Mei Zhang</div><div class="student-cell__id">ST-2189</div></div></div></td>
+                    <td><span class="grade-chip">Gr 9</span></td>
+                    <td>9B</td>
+                    <td>Mr. Choi</td>
+                    <td><div class="ytd-cell"><span class="ytd-cell__val ytd-cell__val--good">95%</span><div class="ytd-bar"><div class="ytd-bar__fill ytd-bar__fill--good" style="width:95%"></div></div><span class="ytd-cell__sub">4 abs · 2 late</span></div></td>
+                    <td class="col-actions"><button class="btn btn--ghost btn--sm" type="button">View</button></td>
+                  </tr>
+                  <tr tabindex="0" data-key="theo">
+                    <td><div class="student-cell"><span class="student-cell__avatar" style="background:#8B5CF6" aria-hidden="true">TR</span><div><div class="student-cell__name">Théo Roussel</div><div class="student-cell__id">ST-2214</div></div></div></td>
+                    <td><span class="grade-chip">Gr 12</span></td>
+                    <td>12A</td>
+                    <td>Ms. Moreau</td>
+                    <td><div class="ytd-cell"><span class="ytd-cell__val ytd-cell__val--good">93%</span><div class="ytd-bar"><div class="ytd-bar__fill ytd-bar__fill--good" style="width:93%"></div></div><span class="ytd-cell__sub">6 abs · 3 late</span></div></td>
+                    <td class="col-actions"><button class="btn btn--ghost btn--sm" type="button">View</button></td>
+                  </tr>
+                  <tr tabindex="0" data-key="aaliyah">
+                    <td><div class="student-cell"><span class="student-cell__avatar" style="background:#0891B2" aria-hidden="true">AC</span><div><div class="student-cell__name">Aaliyah Carter</div><div class="student-cell__id">ST-1041</div></div></div></td>
+                    <td><span class="grade-chip">Gr 7</span></td>
+                    <td>7A</td>
+                    <td>Ms. Tremblay</td>
+                    <td><div class="ytd-cell"><span class="ytd-cell__val ytd-cell__val--good">94%</span><div class="ytd-bar"><div class="ytd-bar__fill ytd-bar__fill--good" style="width:94%"></div></div><span class="ytd-cell__sub">5 abs · 3 late</span></div></td>
+                    <td class="col-actions"><button class="btn btn--ghost btn--sm" type="button">View</button></td>
+                  </tr>
+                  <tr tabindex="0" data-key="marcus">
+                    <td><div class="student-cell"><span class="student-cell__avatar" style="background:#EF4444" aria-hidden="true">MW</span><div><div class="student-cell__name">Marcus Wright</div><div class="student-cell__id">ST-2298</div></div></div></td>
+                    <td><span class="grade-chip">Gr 10</span></td>
+                    <td>10A</td>
+                    <td>Ms. Andersen</td>
+                    <td><div class="ytd-cell"><span class="ytd-cell__val ytd-cell__val--good">97%</span><div class="ytd-bar"><div class="ytd-bar__fill ytd-bar__fill--good" style="width:97%"></div></div><span class="ytd-cell__sub">2 abs · 1 late</span></div></td>
+                    <td class="col-actions"><button class="btn btn--ghost btn--sm" type="button">View</button></td>
+                  </tr>
+                  <tr tabindex="0" data-key="emma">
+                    <td><div class="student-cell"><span class="student-cell__avatar" style="background:#2E7DD1" aria-hidden="true">EK</span><div><div class="student-cell__name">Emma Kowalski</div><div class="student-cell__id">ST-1118</div></div></div></td>
+                    <td><span class="grade-chip">Gr 8</span></td>
+                    <td>8A</td>
+                    <td>Ms. Liu</td>
+                    <td><div class="ytd-cell"><span class="ytd-cell__val ytd-cell__val--good">93%</span><div class="ytd-bar"><div class="ytd-bar__fill ytd-bar__fill--good" style="width:93%"></div></div><span class="ytd-cell__sub">6 abs · 2 late</span></div></td>
+                    <td class="col-actions"><button class="btn btn--ghost btn--sm" type="button">View</button></td>
+                  </tr>
+                  <tr tabindex="0" data-key="yuki">
+                    <td><div class="student-cell"><span class="student-cell__avatar" style="background:#7E68DC" aria-hidden="true">YN</span><div><div class="student-cell__name">Yuki Nakamura</div><div class="student-cell__id">ST-1184</div></div></div></td>
+                    <td><span class="grade-chip">Gr 10</span></td>
+                    <td>10A</td>
+                    <td>Ms. Andersen</td>
+                    <td><div class="ytd-cell"><span class="ytd-cell__val ytd-cell__val--good">95%</span><div class="ytd-bar"><div class="ytd-bar__fill ytd-bar__fill--good" style="width:95%"></div></div><span class="ytd-cell__sub">4 abs · 2 late</span></div></td>
+                    <td class="col-actions"><button class="btn btn--ghost btn--sm" type="button">View</button></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <aside class="drawer is-on" id="drawer" aria-label="Student profile">
+          <div class="drawer__h">
+            <h2>Student profile</h2>
+            <button class="icon-btn" type="button" aria-label="Close profile" id="drawer-close"><i class="fa-solid fa-xmark" aria-hidden="true"></i></button>
+          </div>
+
+          <div style="padding: var(--s-4) var(--s-4) 0; flex-shrink: 0;">
+            <div class="drawer__hero">
+              <div class="drawer__avatar" style="background:#1B5DAF" aria-hidden="true">LK</div>
+              <div>
+                <div class="drawer__name">Liam Khoury</div>
+                <div class="drawer__meta">
+                  <span class="grade-chip">Gr 9</span>
+                  <span>9A · Ms. Dubois</span>
+                  <span>· ST-2041</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="drawer-tabs" role="tablist" aria-label="Student profile sections">
+            <button type="button" role="tab" id="tab-active" aria-selected="true" aria-controls="panel-active" class="drawer-tab"><i class="fa-solid fa-bell" aria-hidden="true"></i> Active records <span class="drawer-tab__count">2</span></button>
+            <button type="button" role="tab" id="tab-info" aria-selected="false" aria-controls="panel-info" tabindex="-1" class="drawer-tab"><i class="fa-solid fa-id-card" aria-hidden="true"></i> Student info</button>
+            <button type="button" role="tab" id="tab-att" aria-selected="false" aria-controls="panel-att" tabindex="-1" class="drawer-tab"><i class="fa-solid fa-chart-pie" aria-hidden="true"></i> Attendance</button>
+            <button type="button" role="tab" id="tab-parents" aria-selected="false" aria-controls="panel-parents" tabindex="-1" class="drawer-tab"><i class="fa-solid fa-people-roof" aria-hidden="true"></i> Parents</button>
+            <button type="button" role="tab" id="tab-groups" aria-selected="false" aria-controls="panel-groups" tabindex="-1" class="drawer-tab"><i class="fa-solid fa-people-group" aria-hidden="true"></i> Groups <span class="drawer-tab__count">2</span></button>
+          </div>
+
+          <div class="drawer__b" id="drawer-body">
+
+            <div class="source-banner source-banner--aspen" role="note" style="margin-bottom: var(--s-3);">
+              <i class="fa-solid fa-database" aria-hidden="true"></i>
+              <div><strong>Aspen-sourced.</strong> Demographics, contacts, and enrolment are read-only here. Last sync: Today · 2:00 AM.</div>
+            </div>
+
+            <!-- Tab panel: Student info -->
+            <section role="tabpanel" id="panel-info" aria-labelledby="tab-info" class="tabpanel" hidden>
+              <div class="drawer-section">
+                <h3><i class="fa-solid fa-id-card" aria-hidden="true"></i> Student information</h3>
+                <dl class="info-list">
+                  <dt>Full name</dt><dd>Liam Khoury</dd>
+                  <dt>Student ID</dt><dd>ST-2041</dd>
+                  <dt>Date of birth</dt><dd>Mar 18, 2011 <small>· age 15</small></dd>
+                  <dt>Grade</dt><dd>Grade 9</dd>
+                  <dt>Class</dt><dd>9A · Ms. Dubois</dd>
+                  <dt>Enrolment</dt><dd><i class="fa-solid fa-circle-check" style="color:var(--c-success)" aria-hidden="true"></i> Active · since Sept 3, 2024</dd>
+                  <dt>Preferred language</dt><dd>French</dd>
+                  <dt>Address</dt><dd>418 rue Sainte-Famille, Ottawa, ON</dd>
+                </dl>
+              </div>
+            </section>
+
+            <!-- Tab panel: Attendance summary -->
+            <section role="tabpanel" id="panel-att" aria-labelledby="tab-att" class="tabpanel" hidden>
+              <div class="drawer-section">
+                <h3><i class="fa-solid fa-chart-pie" aria-hidden="true"></i> Attendance summary · YTD 2025/26</h3>
+                <div class="stat-strip">
+                  <div class="stat-card"><div class="stat-card__v stat-card__v--warn">87%</div><div class="stat-card__l">Attendance</div></div>
+                  <div class="stat-card"><div class="stat-card__v stat-card__v--bad">9</div><div class="stat-card__l">Absences</div></div>
+                  <div class="stat-card"><div class="stat-card__v stat-card__v--warn">6</div><div class="stat-card__l">Late</div></div>
+                  <div class="stat-card"><div class="stat-card__v">128</div><div class="stat-card__l">Days present</div></div>
+                </div>
+              </div>
+
+              <div class="drawer-section">
+                <h3><i class="fa-solid fa-calendar" aria-hidden="true"></i> Records by month</h3>
+                <div class="month-picker">
+                  <label for="month-select" class="month-picker__label">Month</label>
+                  <select id="month-select" class="filter-select month-picker__select" aria-controls="month-records">
+                    <option value="2025-09">September 2025 · 96% · 1 record</option>
+                    <option value="2025-10">October 2025 · 94% · 2 records</option>
+                    <option value="2025-11">November 2025 · 88% · 3 records</option>
+                    <option value="2025-12">December 2025 · 85% · 4 records</option>
+                    <option value="2026-01">January 2026 · 86% · 3 records</option>
+                    <option value="2026-02">February 2026 · 78% · 5 records</option>
+                    <option value="2026-03">March 2026 · 85% · 3 records</option>
+                    <option value="2026-04">April 2026 · 87% · 2 records</option>
+                    <option value="2026-05" selected>May 2026 · 88% · 2 records · current month</option>
+                  </select>
+                </div>
+
+                <div id="month-records" aria-live="polite">
+                  <!-- May 2026 (default selected) -->
+                  <ul class="recent-list" data-month="2026-05">
+                    <li class="recent-list__item">
+                      <span class="recent-list__date">May 9, 2026</span>
+                      <span class="recent-list__what">Absent P1 · medical appointment <small style="color:var(--c-ink-subtle)">· §2.1 excluded</small></span>
+                      <a class="recent-list__link" href="school-roster.html">View</a>
+                    </li>
+                    <li class="recent-list__item">
+                      <span class="recent-list__date">May 4, 2026</span>
+                      <span class="recent-list__what">Late · transportation · 8 min</span>
+                      <a class="recent-list__link" href="school-roster.html">View</a>
+                    </li>
+                  </ul>
+
+                  <!-- April 2026 -->
+                  <ul class="recent-list" data-month="2026-04" hidden>
+                    <li class="recent-list__item">
+                      <span class="recent-list__date">Apr 28, 2026</span>
+                      <span class="recent-list__what">Late · transportation · 12 min</span>
+                      <a class="recent-list__link" href="school-roster.html">View</a>
+                    </li>
+                    <li class="recent-list__item">
+                      <span class="recent-list__date">Apr 14, 2026</span>
+                      <span class="recent-list__what">Absent · family emergency</span>
+                      <a class="recent-list__link" href="school-roster.html">View</a>
+                    </li>
+                  </ul>
+
+                  <!-- March 2026 -->
+                  <ul class="recent-list" data-month="2026-03" hidden>
+                    <li class="recent-list__item">
+                      <span class="recent-list__date">Mar 22, 2026</span>
+                      <span class="recent-list__what">Late · justified · medical</span>
+                      <a class="recent-list__link" href="school-roster.html">View</a>
+                    </li>
+                    <li class="recent-list__item">
+                      <span class="recent-list__date">Mar 11, 2026</span>
+                      <span class="recent-list__what">Absent · medical appointment <small style="color:var(--c-ink-subtle)">· §2.1 excluded</small></span>
+                      <a class="recent-list__link" href="school-roster.html">View</a>
+                    </li>
+                    <li class="recent-list__item">
+                      <span class="recent-list__date">Mar 4, 2026</span>
+                      <span class="recent-list__what">Late · 6 min</span>
+                      <a class="recent-list__link" href="school-roster.html">View</a>
+                    </li>
+                  </ul>
+
+                  <!-- February 2026 -->
+                  <ul class="recent-list" data-month="2026-02" hidden>
+                    <li class="recent-list__item">
+                      <span class="recent-list__date">Feb 24, 2026</span>
+                      <span class="recent-list__what">Absent · family commitment</span>
+                      <a class="recent-list__link" href="school-roster.html">View</a>
+                    </li>
+                    <li class="recent-list__item">
+                      <span class="recent-list__date">Feb 18, 2026</span>
+                      <span class="recent-list__what">Late · weather · 14 min</span>
+                      <a class="recent-list__link" href="school-roster.html">View</a>
+                    </li>
+                    <li class="recent-list__item">
+                      <span class="recent-list__date">Feb 11, 2026</span>
+                      <span class="recent-list__what">Absent (2 days) · flu</span>
+                      <a class="recent-list__link" href="school-roster.html">View</a>
+                    </li>
+                    <li class="recent-list__item">
+                      <span class="recent-list__date">Feb 5, 2026</span>
+                      <span class="recent-list__what">Late · 9 min</span>
+                      <a class="recent-list__link" href="school-roster.html">View</a>
+                    </li>
+                    <li class="recent-list__item">
+                      <span class="recent-list__date">Feb 2, 2026</span>
+                      <span class="recent-list__what">Absent · unjustified</span>
+                      <a class="recent-list__link" href="school-roster.html">View</a>
+                    </li>
+                  </ul>
+
+                  <!-- January 2026 -->
+                  <ul class="recent-list" data-month="2026-01" hidden>
+                    <li class="recent-list__item">
+                      <span class="recent-list__date">Jan 27, 2026</span>
+                      <span class="recent-list__what">Late · transportation · 10 min</span>
+                      <a class="recent-list__link" href="school-roster.html">View</a>
+                    </li>
+                    <li class="recent-list__item">
+                      <span class="recent-list__date">Jan 19, 2026</span>
+                      <span class="recent-list__what">Absent · medical appointment <small style="color:var(--c-ink-subtle)">· §2.1 excluded</small></span>
+                      <a class="recent-list__link" href="school-roster.html">View</a>
+                    </li>
+                    <li class="recent-list__item">
+                      <span class="recent-list__date">Jan 8, 2026</span>
+                      <span class="recent-list__what">Late · 11 min</span>
+                      <a class="recent-list__link" href="school-roster.html">View</a>
+                    </li>
+                  </ul>
+
+                  <!-- December 2025 -->
+                  <ul class="recent-list" data-month="2025-12" hidden>
+                    <li class="recent-list__item">
+                      <span class="recent-list__date">Dec 17, 2025</span>
+                      <span class="recent-list__what">Absent · family travel</span>
+                      <a class="recent-list__link" href="school-roster.html">View</a>
+                    </li>
+                    <li class="recent-list__item">
+                      <span class="recent-list__date">Dec 11, 2025</span>
+                      <span class="recent-list__what">Late · 7 min</span>
+                      <a class="recent-list__link" href="school-roster.html">View</a>
+                    </li>
+                    <li class="recent-list__item">
+                      <span class="recent-list__date">Dec 8, 2025</span>
+                      <span class="recent-list__what">Absent · cold</span>
+                      <a class="recent-list__link" href="school-roster.html">View</a>
+                    </li>
+                    <li class="recent-list__item">
+                      <span class="recent-list__date">Dec 3, 2025</span>
+                      <span class="recent-list__what">Late · 13 min</span>
+                      <a class="recent-list__link" href="school-roster.html">View</a>
+                    </li>
+                  </ul>
+
+                  <!-- November 2025 -->
+                  <ul class="recent-list" data-month="2025-11" hidden>
+                    <li class="recent-list__item">
+                      <span class="recent-list__date">Nov 24, 2025</span>
+                      <span class="recent-list__what">Absent · medical appointment <small style="color:var(--c-ink-subtle)">· §2.1 excluded</small></span>
+                      <a class="recent-list__link" href="school-roster.html">View</a>
+                    </li>
+                    <li class="recent-list__item">
+                      <span class="recent-list__date">Nov 14, 2025</span>
+                      <span class="recent-list__what">Late · transportation · 9 min</span>
+                      <a class="recent-list__link" href="school-roster.html">View</a>
+                    </li>
+                    <li class="recent-list__item">
+                      <span class="recent-list__date">Nov 5, 2025</span>
+                      <span class="recent-list__what">Absent · cold</span>
+                      <a class="recent-list__link" href="school-roster.html">View</a>
+                    </li>
+                  </ul>
+
+                  <!-- October 2025 -->
+                  <ul class="recent-list" data-month="2025-10" hidden>
+                    <li class="recent-list__item">
+                      <span class="recent-list__date">Oct 22, 2025</span>
+                      <span class="recent-list__what">Late · 6 min</span>
+                      <a class="recent-list__link" href="school-roster.html">View</a>
+                    </li>
+                    <li class="recent-list__item">
+                      <span class="recent-list__date">Oct 7, 2025</span>
+                      <span class="recent-list__what">Absent · dental appointment <small style="color:var(--c-ink-subtle)">· §2.1 excluded</small></span>
+                      <a class="recent-list__link" href="school-roster.html">View</a>
+                    </li>
+                  </ul>
+
+                  <!-- September 2025 -->
+                  <ul class="recent-list" data-month="2025-09" hidden>
+                    <li class="recent-list__item">
+                      <span class="recent-list__date">Sep 18, 2025</span>
+                      <span class="recent-list__what">Late · 8 min</span>
+                      <a class="recent-list__link" href="school-roster.html">View</a>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </section>
+
+            <!-- Tab panel: Active records (now includes recent absences & late marks) -->
+            <section role="tabpanel" id="panel-active" aria-labelledby="tab-active" class="tabpanel is-active">
+              <div class="drawer-section">
+                <h3><i class="fa-solid fa-bell" aria-hidden="true"></i> Active records · today</h3>
+                <ul class="issue-list">
+                  <li class="issue-list__item">
+                    <span class="issue-list__icon issue-list__icon--danger" aria-hidden="true"><i class="fa-solid fa-triangle-exclamation"></i></span>
+                    <div>
+                      <div class="issue-list__name">Dispute — new evidence post-24h</div>
+                      <div class="issue-list__meta">Filed May 9 · awaiting decision</div>
+                    </div>
+                    <a class="issue-list__link" href="disputes.html">Open</a>
+                  </li>
+                  <li class="issue-list__item">
+                    <span class="issue-list__icon issue-list__icon--warn" aria-hidden="true"><i class="fa-solid fa-clock"></i></span>
+                    <div>
+                      <div class="issue-list__name">Today: late · awaiting sign-in</div>
+                      <div class="issue-list__meta">Period 1 · 8:35 AM</div>
+                    </div>
+                    <a class="issue-list__link" href="school-roster.html">Open</a>
+                  </li>
+                </ul>
+              </div>
+
+              <div class="drawer-section">
+                <h3><i class="fa-solid fa-clock-rotate-left" aria-hidden="true"></i> Recent absences &amp; late marks</h3>
+                <ul class="recent-list">
+                  <li class="recent-list__item">
+                    <span class="recent-list__date">May 9, 2026</span>
+                    <span class="recent-list__what">Absent P1 · medical appointment <small style="color:var(--c-ink-subtle)">· §2.1 excluded</small></span>
+                    <a class="recent-list__link" href="school-roster.html">View</a>
+                  </li>
+                  <li class="recent-list__item">
+                    <span class="recent-list__date">Apr 28, 2026</span>
+                    <span class="recent-list__what">Late · transportation · 12 min</span>
+                    <a class="recent-list__link" href="school-roster.html">View</a>
+                  </li>
+                  <li class="recent-list__item">
+                    <span class="recent-list__date">Apr 14, 2026</span>
+                    <span class="recent-list__what">Absent · family emergency</span>
+                    <a class="recent-list__link" href="school-roster.html">View</a>
+                  </li>
+                  <li class="recent-list__item">
+                    <span class="recent-list__date">Mar 22, 2026</span>
+                    <span class="recent-list__what">Late · justified · medical</span>
+                    <a class="recent-list__link" href="school-roster.html">View</a>
+                  </li>
+                  <li class="recent-list__item">
+                    <span class="recent-list__date">Feb 11, 2026</span>
+                    <span class="recent-list__what">Absent (2 days) · flu</span>
+                    <a class="recent-list__link" href="school-roster.html">View</a>
+                  </li>
+                </ul>
+              </div>
+            </section>
+
+            <!-- Tab panel: Parents & emergency contact -->
+            <section role="tabpanel" id="panel-parents" aria-labelledby="tab-parents" class="tabpanel" hidden>
+              <div class="drawer-section">
+                <h3><i class="fa-solid fa-people-roof" aria-hidden="true"></i> Parents &amp; emergency contacts</h3>
+                <dl class="info-list">
+                  <dt>Primary guardian</dt><dd>Nadine Khoury <small>· mother</small></dd>
+                  <dt>Phone</dt><dd>613-555-0418 <small>· preferred</small></dd>
+                  <dt>Email</dt><dd>nadine.khoury@example.ca</dd>
+                  <dt>Secondary guardian</dt><dd>Samir Khoury <small>· father</small></dd>
+                  <dt>Phone</dt><dd>613-555-0419</dd>
+                  <dt>Emergency contact</dt><dd>Mireille Tremblay <small>· grandmother · 613-555-0732</small></dd>
+                  <dt>Authorized adults</dt><dd>Anne-Marie Bouchard <small>· aunt</small></dd>
+                </dl>
+              </div>
+            </section>
+
+            <!-- Tab panel: Groups -->
+            <section role="tabpanel" id="panel-groups" aria-labelledby="tab-groups" class="tabpanel" hidden>
+              <div class="drawer-section">
+                <h3><i class="fa-solid fa-people-group" aria-hidden="true"></i> Group memberships</h3>
+                <ul class="issue-list">
+                  <li class="issue-list__item">
+                    <span class="issue-list__icon issue-list__icon--info" aria-hidden="true"><i class="fa-solid fa-graduation-cap"></i></span>
+                    <div>
+                      <div class="issue-list__name">Grade 9 — all students</div>
+                      <div class="issue-list__meta">Aspen cohort · 142 members</div>
+                    </div>
+                    <a class="issue-list__link" href="groups.html">Open</a>
+                  </li>
+                  <li class="issue-list__item">
+                    <span class="issue-list__icon issue-list__icon--purple" aria-hidden="true"><i class="fa-solid fa-comments"></i></span>
+                    <div>
+                      <div class="issue-list__name">Debate club</div>
+                      <div class="issue-list__meta">Manual · 14 members</div>
+                    </div>
+                    <a class="issue-list__link" href="groups.html">Open</a>
+                  </li>
+                </ul>
+              </div>
+            </section>
+
+          </div>
+
+          <div class="drawer__actions">
+            <a class="btn btn--primary" href="school-roster.html"><i class="fa-solid fa-table-list" aria-hidden="true"></i> Open in roster</a>
+            <button class="btn btn--secondary" type="button"><i class="fa-solid fa-envelope" aria-hidden="true"></i> Message parent</button>
+            <button class="btn btn--secondary" type="button"><i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i> Open in Aspen</button>
+          </div>
+        </aside>
+
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<script>
+  // Row selection toggles drawer
+  const rows = document.querySelectorAll('table.list tbody tr');
+  const drawer = document.getElementById('drawer');
+  const closeBtn = document.getElementById('drawer-close');
+  const panelArea = document.getElementById('panel-area');
+
+  rows.forEach(row => {
+    row.addEventListener('click', () => {
+      rows.forEach(r => r.classList.remove('is-selected'));
+      row.classList.add('is-selected');
+      drawer.classList.add('is-on');
+      panelArea.classList.add('has-drawer');
+    });
+    row.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); row.click(); }
+    });
+  });
+  closeBtn.addEventListener('click', () => {
+    drawer.classList.remove('is-on');
+    panelArea.classList.remove('has-drawer');
+    rows.forEach(r => r.classList.remove('is-selected'));
+  });
+
+  // Tabs — WCAG 2.2 tablist with arrow-key navigation
+  const tabs = Array.from(document.querySelectorAll('[role="tab"]'));
+  const panels = Array.from(document.querySelectorAll('[role="tabpanel"]'));
+
+  function activateTab(tab) {
+    tabs.forEach(t => {
+      const isActive = t === tab;
+      t.setAttribute('aria-selected', String(isActive));
+      t.setAttribute('tabindex', isActive ? '0' : '-1');
+    });
+    panels.forEach(p => {
+      const isActive = p.id === tab.getAttribute('aria-controls');
+      p.classList.toggle('is-active', isActive);
+      if (isActive) { p.removeAttribute('hidden'); } else { p.setAttribute('hidden', ''); }
+    });
+  }
+
+  tabs.forEach((tab, idx) => {
+    tab.addEventListener('click', () => activateTab(tab));
+    tab.addEventListener('keydown', (e) => {
+      let next = null;
+      if (e.key === 'ArrowRight') next = tabs[(idx + 1) % tabs.length];
+      else if (e.key === 'ArrowLeft') next = tabs[(idx - 1 + tabs.length) % tabs.length];
+      else if (e.key === 'Home') next = tabs[0];
+      else if (e.key === 'End') next = tabs[tabs.length - 1];
+      if (next) { e.preventDefault(); activateTab(next); next.focus(); }
+    });
+  });
+
+  // Month picker — swap visible record list based on selected month
+  const monthSelect = document.getElementById('month-select');
+  if (monthSelect) {
+    const lists = document.querySelectorAll('#month-records [data-month]');
+    monthSelect.addEventListener('change', () => {
+      const v = monthSelect.value;
+      lists.forEach(list => {
+        if (list.getAttribute('data-month') === v) list.removeAttribute('hidden');
+        else list.setAttribute('hidden', '');
+      });
+    });
+  }
+</script>
+</body>
+</html>
