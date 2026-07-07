@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ClassTrack — Active Records</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="stylesheet" href="assets/styles.css">
+</head>
+<body>
+<a href="#main" class="skip-link" data-en="Skip to content" data-fr="Aller au contenu">Skip to content</a>
+
+<div class="app">
+<aside id="sidebar"></aside>
+<main id="main" class="shell">
+
+  <!-- ── Hero ──────────────────────────────────────────────────────────────── -->
+  <section class="hero-row">
+    <div>
+      <h1 class="hero-row__title" data-en="Active Records" data-fr="Dossiers actifs">Active Records</h1>
+      <p class="hero-row__sub" data-en="Ongoing absent and late records for your children — open until the school closes them." data-fr="Dossiers d'absence et de retard en cours pour vos enfants — ouverts jusqu'à ce que l'école les ferme.">Ongoing absent and late records for your children — open until the school closes them.</p>
+    </div>
+  </section>
+
+  <!-- ── Urgent banner ─────────────────────────────────────────────────────── -->
+  <div class="banner banner--warning" role="alert">
+    <div class="banner__icon"><i class="fa-solid fa-hourglass-half"></i></div>
+    <div class="banner__body">
+      <div class="banner__title" data-en="2 records need your reply" data-fr="2 dossiers nécessitent votre réponse">2 records need your reply</div>
+      <div class="banner__sub" data-en="Records without a reply within 24 hours are automatically closed as unjustified and affect your child's grade." data-fr="Les dossiers sans réponse dans les 24 heures sont automatiquement fermés comme non motivés et peuvent affecter la note.">Records without a reply within 24 hours are automatically closed as unjustified and affect your child's grade.</div>
+    </div>
+  </div>
+
+  <!-- ── Filter chips ───────────────────────────────────────────────────────── -->
+  <div class="chip-filter" id="recordFilter">
+    <button class="chip is-active" data-filter="needs-reply" onclick="setFilter('needs-reply')">
+      <i class="fa-solid fa-triangle-exclamation" style="color:var(--c-danger);font-size:11px;"></i>
+      <span data-en="Needs your reply" data-fr="Votre réponse est requise">Needs your reply</span>
+      <span class="num" style="background:var(--c-danger);color:#fff;">2</span>
+    </button>
+    <button class="chip" data-filter="awaiting-review" onclick="setFilter('awaiting-review')">
+      <i class="fa-solid fa-paper-plane" style="color:var(--c-info);font-size:11px;"></i>
+      <span data-en="Awaiting school review" data-fr="En attente de révision">Awaiting school review</span>
+      <span class="num">1</span>
+    </button>
+    <button class="chip" data-filter="disputed" onclick="setFilter('disputed')">
+      <i class="fa-solid fa-flag" style="color:#ea580c;font-size:11px;"></i>
+      <span data-en="Disputed" data-fr="Contestés">Disputed</span>
+      <span class="num" style="background:#ea580c;color:#fff;">1</span>
+    </button>
+    <button class="chip" data-filter="closed" onclick="setFilter('closed')">
+      <i class="fa-solid fa-circle-check" style="color:var(--c-success);font-size:11px;"></i>
+      <span data-en="Closed" data-fr="Fermés">Closed</span>
+      <span class="num">1</span>
+    </button>
+  </div>
+
+  <!-- ── Master-detail split pane ──────────────────────────────────────────── -->
+  <!--
+    Same pattern as teacher-attendance.html:
+    • .split is a 1-column grid by default
+    • .split.has-drawer becomes a 2-column grid (records | drawer)
+    • The drawer-card is sticky + max-height so it never overflows the viewport
+    • No fixed/absolute positioning needed — it's part of the document flow
+  -->
+  <div class="split" id="splitPane">
+
+    <!-- LEFT: record list + info callout -->
+    <div>
+      <div class="stack--lg" id="recordSections">
+
+        <!-- NEEDS YOUR REPLY -->
+        <div class="rec-section" data-section="needs-reply">
+
+          <div class="rec-card2" data-record-id="jaylen-absent" onclick="openDrawer('jaylen-absent')">
+            <div class="rec-card2__icon rec-card2__icon--absent"><i class="fa-solid fa-circle-minus"></i></div>
+            <div class="rec-card2__body">
+              <div class="rec-card2__title" data-en="Jaylen has been marked as &lt;strong&gt;Absent&lt;/strong&gt; for P2 (Reading) on May 11" data-fr="Jaylen a été marqué comme &lt;strong&gt;Absent&lt;/strong&gt; pour P2 (Lecture) le 11 mai" data-html>Jaylen has been marked as <strong>Absent</strong> for P2 (Reading) on May 11</div>
+              <div class="rec-card2__sub" data-en="Marked absent by Mr. Côté at 1:45 PM. School has sent a notification — they are awaiting your reply." data-fr="Marqué absent par M. Côté à 13 h 45. L'école a envoyé une notification — ils attendent votre réponse.">Marked absent by Mr. Côté at 1:45 PM. School has sent a notification — they are awaiting your reply.</div>
+              <div class="rec-card2__chips">
+                <span class="status-pill status-pill--absent"><i class="fa-solid fa-circle-minus"></i> <span data-en="Absent" data-fr="Absent">Absent</span></span>
+                <span class="status-pill status-pill--awaiting"><i class="fa-regular fa-clock"></i> <span data-en="Awaiting your reply" data-fr="En attente de votre réponse">Awaiting your reply</span></span>
+                <span class="rec-card2__deadline"><i class="fa-regular fa-clock"></i> <strong data-en="14 h left" data-fr="14 h restantes" style="color:var(--c-danger);">14 h left</strong></span>
+              </div>
+            </div>
+            <button class="btn btn--primary btn--sm rec-card2__cta" onclick="openDrawer('jaylen-absent');event.stopPropagation();">
+              <span data-en="Open record" data-fr="Ouvrir le dossier">Open record</span> <i class="fa-solid fa-arrow-right"></i>
+            </button>
+          </div>
+
+          <div class="rec-card2" data-record-id="jaylen-late" onclick="openDrawer('jaylen-late')">
+            <div class="rec-card2__icon rec-card2__icon--late"><i class="fa-solid fa-clock"></i></div>
+            <div class="rec-card2__body">
+              <div class="rec-card2__title" data-en="Jaylen has been marked as &lt;strong&gt;Late&lt;/strong&gt; for P1 (Math) on May 12" data-fr="Jaylen a été marqué comme &lt;strong&gt;En retard&lt;/strong&gt; pour P1 (Maths) le 12 mai" data-html>Jaylen has been marked as <strong>Late</strong> for P1 (Math) on May 12</div>
+              <div class="rec-card2__sub" data-en="Signed in at the office at 9:02 AM. Confirmed in class by Mr. Côté at 9:24 AM. School has sent a notification — they are awaiting your reply." data-fr="Connecté au bureau à 9 h 02. Confirmé en classe par M. Côté à 9 h 24. L'école a envoyé une notification — ils attendent votre réponse.">Signed in at the office at 9:02 AM. Confirmed in class by Mr. Côté at 9:24 AM. School has sent a notification — they are awaiting your reply.</div>
+              <div class="rec-card2__chips">
+                <span class="status-pill status-pill--late"><i class="fa-solid fa-clock"></i> <span data-en="Late" data-fr="En retard">Late</span></span>
+                <span class="status-pill status-pill--awaiting"><i class="fa-regular fa-clock"></i> <span data-en="Awaiting your reply" data-fr="En attente de votre réponse">Awaiting your reply</span></span>
+              </div>
+            </div>
+            <button class="btn btn--secondary btn--sm rec-card2__cta" onclick="openDrawer('jaylen-late');event.stopPropagation();">
+              <span data-en="Open record" data-fr="Ouvrir le dossier">Open record</span> <i class="fa-solid fa-arrow-right"></i>
+            </button>
+          </div>
+
+        </div><!-- /needs-reply -->
+
+        <!-- AWAITING SCHOOL REVIEW -->
+        <div class="rec-section" data-section="awaiting-review" style="display:none;">
+
+          <div class="rec-card2" data-record-id="aaliyah-pending" onclick="openDrawer('aaliyah-pending')">
+            <div class="rec-card2__icon rec-card2__icon--info"><i class="fa-solid fa-paper-plane"></i></div>
+            <div class="rec-card2__body">
+              <div class="rec-card2__title" data-en="Aaliyah has been marked as &lt;strong&gt;Absent&lt;/strong&gt; for Full day on May 4" data-fr="Aaliyah a été marquée comme &lt;strong&gt;Absente&lt;/strong&gt; pour la journée complète le 4 mai" data-html>Aaliyah has been marked as <strong>Absent</strong> for Full day on May 4</div>
+              <div class="rec-card2__sub" data-en="Marked absent by Ms. Tremblay on May 4. You submitted a medical appointment justification with a doctor's note on May 5." data-fr="Marquée absente par Mme Tremblay le 4 mai. Vous avez soumis une justification de rendez-vous médical avec un billet médical le 5 mai.">Marked absent by Ms. Tremblay on May 4. You submitted a medical appointment justification with a doctor's note on May 5.</div>
+              <div class="rec-card2__chips">
+                <span class="status-pill status-pill--absent"><i class="fa-solid fa-circle-minus"></i> <span data-en="Absent" data-fr="Absent">Absent</span></span>
+                <span class="status-pill status-pill--pending-approval"><i class="fa-solid fa-paper-plane"></i> <span data-en="Pending approval" data-fr="En attente d'approbation">Pending approval</span></span>
+              </div>
+            </div>
+            <button class="btn btn--ghost btn--sm rec-card2__cta" onclick="openDrawer('aaliyah-pending');event.stopPropagation();">
+              <span data-en="Open record" data-fr="Ouvrir le dossier">Open record</span> <i class="fa-solid fa-arrow-right"></i>
+            </button>
+          </div>
+
+        </div><!-- /awaiting-review -->
+
+        <!-- DISPUTED -->
+        <div class="rec-section" data-section="disputed" style="display:none;">
+
+          <div class="rec-card2" data-record-id="jaylen-disputed" onclick="openDrawer('jaylen-disputed')">
+            <div class="rec-card2__icon rec-card2__icon--disputed"><i class="fa-solid fa-flag"></i></div>
+            <div class="rec-card2__body">
+              <div class="rec-card2__title" data-en="Jaylen's &lt;strong&gt;Absent&lt;/strong&gt; record for Full day on May 5 is being &lt;strong&gt;disputed&lt;/strong&gt;" data-fr="Le dossier d'&lt;strong&gt;Absent&lt;/strong&gt; de Jaylen pour la journée complète le 5 mai est en &lt;strong&gt;contestation&lt;/strong&gt;" data-html>Jaylen's <strong>Absent</strong> record for Full day on May 5 is being <strong>disputed</strong></div>
+              <div class="rec-card2__sub" data-en="Record was closed as unjustified after no reply was received within 24 hours. You filed a dispute on May 12. The Attendance Clerk is reviewing your dispute." data-fr="Le dossier a été fermé comme non motivé après l'absence de réponse sous 24 heures. Vous avez déposé une contestation le 12 mai. Le responsable des présences examine votre contestation.">Record was closed as unjustified after no reply was received within 24 hours. You filed a dispute on May 12. The Attendance Clerk is reviewing your dispute.</div>
+              <div class="rec-card2__chips">
+                <span class="status-pill status-pill--absent"><i class="fa-solid fa-circle-minus"></i> <span data-en="Absent" data-fr="Absent">Absent</span></span>
+                <span class="status-pill status-pill--unjustified"><i class="fa-solid fa-lock"></i> <span data-en="Unjustified" data-fr="Non motivé">Unjustified</span></span>
+                <span class="status-pill status-pill--disputed"><i class="fa-solid fa-flag"></i> <span data-en="Disputed" data-fr="Contesté">Disputed</span></span>
+              </div>
+            </div>
+            <button class="btn btn--ghost btn--sm rec-card2__cta" onclick="openDrawer('jaylen-disputed');event.stopPropagation();">
+              <span data-en="Open record" data-fr="Ouvrir le dossier">Open record</span> <i class="fa-solid fa-arrow-right"></i>
+            </button>
+          </div>
+
+        </div><!-- /disputed -->
+
+        <!-- CLOSED -->
+        <div class="rec-section" data-section="closed" style="display:none;">
+
+          <div class="rec-card2 rec-card2--closed" data-record-id="aaliyah-justified" onclick="openDrawer('aaliyah-justified')">
+            <div class="rec-card2__icon rec-card2__icon--approve"><i class="fa-solid fa-circle-check"></i></div>
+            <div class="rec-card2__body">
+              <div class="rec-card2__title" data-en="Aaliyah has been marked as &lt;strong&gt;Late&lt;/strong&gt; for P1 (Math) on Apr 22" data-fr="Aaliyah a été marquée comme &lt;strong&gt;En retard&lt;/strong&gt; pour P1 (Maths) le 22 avr" data-html>Aaliyah has been marked as <strong>Late</strong> for P1 (Math) on Apr 22</div>
+              <div class="rec-card2__sub" data-en="12 min late · Bus delay. Transportation reason accepted by the Attendance Clerk. Record closed." data-fr="12 min de retard · Retard de bus. Motif transport accepté par le responsable des présences. Dossier fermé.">12 min late · Bus delay. Transportation reason accepted by the Attendance Clerk. Record closed.</div>
+              <div class="rec-card2__chips">
+                <span class="status-pill status-pill--late"><i class="fa-solid fa-clock"></i> <span data-en="Late" data-fr="En retard">Late</span></span>
+                <span class="status-pill status-pill--justified"><i class="fa-solid fa-circle-check"></i> <span data-en="Justified" data-fr="Justifié">Justified</span></span>
+                <span class="rec-card2__closed-tag"><i class="fa-solid fa-lock"></i> <span data-en="Closed — no grade impact" data-fr="Fermé — aucun impact sur la note">Closed — no grade impact</span></span>
+              </div>
+            </div>
+            <button class="btn btn--ghost btn--sm rec-card2__cta" onclick="openDrawer('aaliyah-justified');event.stopPropagation();">
+              <span data-en="Open record" data-fr="Ouvrir le dossier">Open record</span> <i class="fa-solid fa-arrow-right"></i>
+            </button>
+          </div>
+
+        </div><!-- /closed -->
+
+      </div><!-- /stack -->
+
+      <!-- Info callout -->
+      <div class="banner banner--info" style="margin-top:var(--s-5);">
+        <div class="banner__icon"><i class="fa-solid fa-circle-info"></i></div>
+        <div class="banner__body">
+          <div class="banner__title" data-en="How records work" data-fr="Comment fonctionnent les dossiers">How records work</div>
+          <div class="banner__sub" data-en="When a teacher marks your child absent or late, a record opens here. You have 24 hours to reply. Once the Attendance Clerk reviews your reply, the record closes. Closed records with a justified reason have no grade impact." data-fr="Quand un enseignant marque votre enfant absent ou en retard, un dossier s'ouvre ici. Vous avez 24 heures pour répondre. Une fois que le Surveillant examine votre réponse, le dossier se ferme. Les dossiers justifiés n'ont aucune incidence sur la note.">When a teacher marks your child absent or late, a record opens here. You have 24 hours to reply. Once the Attendance Clerk reviews your reply, the record closes. Closed records with a justified reason have no grade impact.</div>
+        </div>
+        <div class="banner__action">
+          <a href="attendance-history.html" class="btn btn--secondary">
+            <span data-en="Full history" data-fr="Historique complet">Full history</span>
+          </a>
+        </div>
+      </div>
+    </div><!-- /left column -->
+
+    <!-- RIGHT: detail drawer card (hidden until a record is opened) -->
+    <aside class="rec-drawer-card" id="drawerCard" style="display:none;" aria-label="Record detail">
+      <div id="drawerContent"></div>
+    </aside>
+
+  </div><!-- /split -->
+
+</main>
+</div>
+
+<!-- ── Styles ──────────────────────────────────────────────────────────────── -->
+<style>
+  /* ── Layout: keep sidebar flush against the left screen edge ──────────────
+     assets/styles.css sets .app { max-width:1680px; margin:0 auto } which
+     centres the whole shell on wide monitors, creating a gap to the left of
+     the sidebar. Removing the left auto-margin fixes it for this page.       */
+  .app { margin-left: 0 !important; }
+
+  .hero-row { display:flex; align-items:center; justify-content:space-between; gap:var(--s-4); flex-wrap:wrap; }
+  .hero-row__title { font-size:var(--fs-3xl); font-weight:700; letter-spacing:-0.015em; }
+  .hero-row__sub { color:var(--c-ink-muted); font-size:var(--fs-lg); margin-top:6px; }
+
+  /* ── Record card v2 ─────────────────────────────────────────────────────── */
+  .rec-card2 {
+    display: flex; align-items: flex-start; gap: var(--s-4);
+    padding: var(--s-4) var(--s-5);
+    background: var(--c-surface); border: 1px solid var(--c-border);
+    border-radius: var(--r-lg); cursor: pointer;
+    transition: box-shadow 0.15s, border-color 0.15s;
+    margin-bottom: var(--s-5);
+  }
+  .rec-card2:last-child { margin-bottom: 0; }
+  .rec-card2:hover { box-shadow: 0 2px 12px rgba(0,0,0,.08); border-color: var(--c-border-strong); }
+  .rec-card2--closed { opacity: 0.85; }
+  /* Selected state — matches teacher-attendance pattern */
+  .rec-card2.is-selected {
+    border-color: var(--c-info);
+    background: rgba(59,130,246,.04);
+    box-shadow: inset 4px 0 0 var(--c-info), 0 2px 12px rgba(59,130,246,.1);
+  }
+
+  .rec-card2__icon { width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:18px; flex-shrink:0; margin-top:2px; }
+  .rec-card2__icon--absent   { background:rgba(220,38,38,.1);  color:var(--c-danger); }
+  .rec-card2__icon--late     { background:rgba(217,119,6,.1);   color:var(--c-warning); }
+  .rec-card2__icon--info     { background:rgba(59,130,246,.1);  color:var(--c-info); }
+  .rec-card2__icon--approve  { background:rgba(22,163,74,.1);   color:var(--c-success); }
+  .rec-card2__icon--disputed { background:rgba(234,88,12,.1);   color:#ea580c; }
+
+  .rec-card2__body  { flex:1; min-width:0; }
+  .rec-card2__title { font-size:var(--fs-base); font-weight:500; color:var(--c-ink); line-height:1.4; margin-bottom:var(--s-1); }
+  .rec-card2__sub   { font-size:var(--fs-sm); color:var(--c-ink-muted); margin-bottom:var(--s-2); line-height:1.5; }
+  .rec-card2__chips { display:flex; align-items:center; gap:var(--s-2); flex-wrap:wrap; }
+  .rec-card2__cta   { flex-shrink:0; align-self:center; }
+  .rec-card2__deadline { font-size:12px; color:var(--c-ink-muted); display:flex; align-items:center; gap:4px; }
+  .rec-card2__closed-tag { font-size:11px; font-weight:600; color:var(--c-success); background:rgba(22,163,74,.08); border-radius:20px; padding:2px 10px; display:flex; align-items:center; gap:4px; }
+
+  /* ── Status pills ────────────────────────────────────────────────────────── */
+  .status-pill { display:inline-flex; align-items:center; gap:5px; font-size:11px; font-weight:600; border-radius:20px; padding:3px 10px; white-space:nowrap; }
+  .status-pill--absent           { background:rgba(220,38,38,.1);   color:var(--c-danger); }
+  .status-pill--late             { background:rgba(217,119,6,.1);    color:var(--c-warning); }
+  .status-pill--awaiting         { background:rgba(59,130,246,.08);  color:var(--c-info); border:1px solid rgba(59,130,246,.2); }
+  .status-pill--pending-approval { background:rgba(124,58,237,.08);  color:#7c3aed; border:1px solid rgba(124,58,237,.2); }
+  .status-pill--justified        { background:rgba(22,163,74,.1);    color:var(--c-success); }
+  .status-pill--unjustified      { background:rgba(220,38,38,.08);   color:var(--c-danger); border:1px solid rgba(220,38,38,.2); }
+  .status-pill--disputed         { background:rgba(234,88,12,.1);    color:#ea580c; border:1px solid rgba(234,88,12,.3); }
+
+  /* ── Master-detail split pane ─────────────────────────────────────────────
+     Mirrors teacher-attendance.html's .split / .split.has-drawer pattern.
+     The grid transition animates the drawer sliding in from the right.       */
+  .split { display:grid; grid-template-columns:1fr; gap:var(--s-4); transition:grid-template-columns .25s cubic-bezier(.4,0,.2,1); align-items:start; }
+  .split.has-drawer { grid-template-columns: 1fr minmax(360px, 440px); }
+  @media (max-width: 900px) { .split.has-drawer { grid-template-columns: 1fr; } }
+
+  /* ── Drawer card — inline sticky panel ──────────────────────────────────── */
+  .rec-drawer-card {
+    background: var(--c-bg);
+    border-radius: var(--r-lg);
+    border: 1px solid var(--c-border);
+    box-shadow: 0 4px 24px rgba(0,0,0,.08);
+    display: flex; flex-direction: column;
+    /* sticky keeps it visible while the left column scrolls */
+    position: sticky; top: 24px;
+    /* max-height prevents it from going taller than the viewport */
+    max-height: calc(100vh - 48px);
+    overflow: hidden;
+    align-self: start;
+  }
+
+  /* Drawer inner layout — header / scrollable body / action footer */
+  #drawerContent { display:flex; flex-direction:column; flex:1; min-height:0; overflow:hidden; }
+  .drawer-h { padding:14px 18px; border-bottom:1px solid var(--c-border); display:flex; align-items:center; justify-content:space-between; background:var(--c-surface); flex-shrink:0; }
+  .drawer-h h3 { font-size:var(--fs-base); font-weight:700; color:var(--c-ink); }
+  .drawer-close { background:transparent; border:none; color:var(--c-ink-muted); font-size:16px; cursor:pointer; padding:4px 8px; border-radius:6px; line-height:1; }
+  .drawer-close:hover { background:var(--c-border); }
+  .drawer-b { padding:18px; flex:1; overflow-y:auto; min-height:0; display:flex; flex-direction:column; gap:var(--s-4); }
+  .drawer-footer { padding:14px 18px; border-top:1px solid var(--c-border); background:var(--c-surface); display:flex; gap:var(--s-2); flex-shrink:0; }
+
+  /* Drawer hero */
+  .drawer-hero { display:flex; gap:14px; align-items:center; padding-bottom:16px; border-bottom:1px solid var(--c-border); }
+  .drawer-hero .avatar { width:44px; height:44px; font-size:15px; flex-shrink:0; }
+  .drawer-name { font-size:var(--fs-lg); font-weight:700; color:var(--c-ink); }
+  .drawer-meta { font-size:var(--fs-sm); color:var(--c-ink-muted); margin-top:2px; }
+
+  /* Drawer sections */
+  .drawer-section-title { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--c-ink-muted); display:flex; align-items:center; gap:7px; margin-bottom:10px; }
+  .drawer-section-title i { color:var(--c-ink-muted); font-size:10px; }
+
+  /* Period strip (inside drawer) */
+  .dperiods { display:flex; gap:var(--s-2); flex-wrap:wrap; }
+  .dperiod {
+    display:flex; flex-direction:column; align-items:center; gap:4px;
+    padding:var(--s-2) var(--s-3); border-radius:var(--r-md);
+    border:1px solid var(--c-border); min-width:72px; text-align:center;
+  }
+  .dperiod__label { font-size:11px; font-weight:700; color:var(--c-ink-muted); }
+  .dperiod__subject {
+    display:inline-flex; align-items:center; gap:3px;
+    font-size:11px; font-weight:600; color:var(--c-ink);
+    background:var(--c-surface-alt); border-radius:var(--r-pill);
+    padding:2px 7px; white-space:nowrap;
+  }
+  .dperiod__subject i { font-size:9px; color:var(--c-ink-muted); }
+  .dperiod__subject--none { color:var(--c-ink-muted); background:none; font-weight:400; font-style:italic; font-size:10px; }
+  .dperiod__pill { font-size:10px; font-weight:600; border-radius:20px; padding:2px 8px; }
+  .dperiod--present { background:rgba(22,163,74,.06);  border-color:rgba(22,163,74,.2); }
+  .dperiod--present .dperiod__pill { background:rgba(22,163,74,.12); color:var(--c-success); }
+  .dperiod--absent  { background:rgba(220,38,38,.06);  border-color:rgba(220,38,38,.2); }
+  .dperiod--absent  .dperiod__pill { background:rgba(220,38,38,.12); color:var(--c-danger); }
+  .dperiod--late    { background:rgba(217,119,6,.06);   border-color:rgba(217,119,6,.2); }
+  .dperiod--late    .dperiod__pill { background:rgba(217,119,6,.12); color:var(--c-warning); }
+
+  /* Context text */
+  .dcontext { font-size:var(--fs-sm); color:var(--c-ink); line-height:1.6; overflow-wrap:break-word; }
+
+  /* Closed tag (inside drawer) */
+  .drawer-closed-tag { display:flex; align-items:center; gap:var(--s-2); padding:var(--s-3) var(--s-4); background:rgba(22,163,74,.06); border:1px solid rgba(22,163,74,.2); border-radius:var(--r-md); font-size:var(--fs-sm); font-weight:600; color:var(--c-success); }
+  .drawer-closed-tag--unjustified { background:rgba(220,38,38,.05); border-color:rgba(220,38,38,.2); color:var(--c-danger); }
+  .drawer-closed-tag--disputed    { background:rgba(234,88,12,.06);  border-color:rgba(234,88,12,.25); color:#ea580c; }
+
+  /* Form */
+  .dform { display:flex; flex-direction:column; gap:var(--s-3); }
+
+  /* Scale form controls down to match the drawer's compact UI.
+     Scoped to #drawerContent so nothing else on the page is affected. */
+  #drawerContent .field__label {
+    font-size: var(--fs-sm);
+    font-weight: 600;
+  }
+  #drawerContent .field__hint {
+    font-size: 11px;
+  }
+  #drawerContent .select,
+  #drawerContent .textarea {
+    padding: 8px 10px;
+    font-size: var(--fs-sm);
+  }
+  #drawerContent .select {
+    padding-right: 32px; /* keep room for the dropdown arrow */
+  }
+  #drawerContent .textarea {
+    min-height: 80px;
+  }
+  #drawerContent .attach-btn {
+    font-size: var(--fs-sm);
+    padding: 8px 12px;
+  }
+
+  @media (max-width: 600px) {
+    .rec-card2 { flex-wrap:wrap; }
+    .rec-card2__cta { width:100%; }
+  }
+</style>
+
+<!-- ── Logic ──────────────────────────────────────────────────────────────── -->
+<script src="assets/app.js"></script>
+<script>
+
+/* ── Filter chips ─────────────────────────────────────────────────────────── */
+function setFilter(filter) {
+  document.querySelectorAll('#recordFilter .chip').forEach(function(c) {
+    c.classList.toggle('is-active', c.getAttribute('data-filter') === filter);
+  });
+  document.querySelectorAll('.rec-section').forEach(function(s) {
+    s.style.display = s.getAttribute('data-section') === filter ? 'block' : 'none';
+  });
+  // Close drawer when switching filter — the selected record may not be visible
+  closeDrawer();
+}
+
+/* ── Drawer data ─────────────────────────────────────────────────────────── */
+var DRAWER_DATA = {
+  'jaylen-absent': {
+    title: 'Jaylen — Absent · May 11', title_fr: 'Jaylen — Absent · 11 mai',
+    student: { name:'Jaylen Carter', grade:'Grade 4B · Elementary', teacher:'Mr. P. Côté', initials:'JC', avatarClass:'avatar--orange' },
+    periods: [
+      { label:'P1', subject:'Math',    status:'present', statusLabel:'Present', statusLabel_fr:'Présent' },
+      { label:'P2', subject:'Reading', status:'absent',  statusLabel:'Absent',  statusLabel_fr:'Absent'  },
+      { label:'P3', subject:'—',       status:'present', statusLabel:'Present', statusLabel_fr:'Présent' },
+      { label:'P4', subject:'—',       status:'present', statusLabel:'Present', statusLabel_fr:'Présent' }
+    ],
+    context: 'Jaylen has been marked <strong>Absent</strong> for P2 (Reading) on May 11 by Mr. Côté at 1:45 PM. The school sent a notification and is awaiting your reply. You have <strong style="color:var(--c-danger);">14 hours</strong> left to reply before this record closes as unjustified.', context_fr: 'Jaylen a été marqué <strong>Absent</strong> pour P2 (Lecture) le 11 mai par M. Côté à 13 h 45. L\'école a envoyé une notification et attend votre réponse. Il vous reste <strong style="color:var(--c-danger);">14 heures</strong> pour répondre avant que ce dossier ne soit fermé comme non motivé.',
+    studentStatus:'absent', workflowStage:'awaiting',
+    studentStatusLabel:'Absent', studentStatusLabel_fr:'Absent', workflowStageLabel:'Awaiting your reply', workflowStageLabel_fr:'En attente de votre réponse',
+    closed:false, showForm:true
+  },
+  'jaylen-late': {
+    title: 'Jaylen — Late · May 12', title_fr: 'Jaylen — En retard · 12 mai',
+    student: { name:'Jaylen Carter', grade:'Grade 4B · Elementary', teacher:'Mr. P. Côté', initials:'JC', avatarClass:'avatar--orange' },
+    periods: [
+      { label:'P1', subject:'Math',    status:'late',    statusLabel:'Late',    statusLabel_fr:'En retard'    },
+      { label:'P2', subject:'Reading', status:'present', statusLabel:'Present', statusLabel_fr:'Présent' },
+      { label:'P3', subject:'—',       status:'present', statusLabel:'Present', statusLabel_fr:'Présent' },
+      { label:'P4', subject:'—',       status:'present', statusLabel:'Present', statusLabel_fr:'Présent' }
+    ],
+    context: 'Jaylen has been marked <strong>Late</strong> for P1 (Math) on May 12 by Mr. Côté. He signed in at the office at 9:02 AM and was confirmed in class at 9:24 AM (22 min late). The school sent a notification and is awaiting your reply.', context_fr: 'Jaylen a été marqué <strong>En retard</strong> pour P1 (Maths) le 12 mai par M. Côté. Il s\'est connecté au bureau à 9 h 02 et a été confirmé en classe à 9 h 24 (22 min de retard). L\'école a envoyé une notification et attend votre réponse.',
+    studentStatus:'late', workflowStage:'awaiting',
+    studentStatusLabel:'Late',   studentStatusLabel_fr:'En retard', workflowStageLabel:'Awaiting your reply', workflowStageLabel_fr:'En attente de votre réponse',
+    closed:false, showForm:true
+  },
+  'aaliyah-pending': {
+    title: 'Aaliyah — Absent · May 4', title_fr: 'Aaliyah — Absente · 4 mai',
+    student: { name:'Aaliyah Carter', grade:'Grade 7A · Secondary', teacher:'Ms. S. Tremblay', initials:'AC', avatarClass:'avatar--blue' },
+    periods: [
+      { label:'P1', subject:'Math',    status:'absent', statusLabel:'Absent',  statusLabel_fr:'Absent' },
+      { label:'P2', subject:'French',  status:'absent', statusLabel:'Absent',  statusLabel_fr:'Absent' },
+      { label:'P3', subject:'Science', status:'absent', statusLabel:'Absent',  statusLabel_fr:'Absent' },
+      { label:'P4', subject:'Phys Ed', status:'absent', statusLabel:'Absent',  statusLabel_fr:'Absent' }
+    ],
+    context: 'Aaliyah has been marked <strong>Absent</strong> for the full day on May 4 by Ms. Tremblay. You submitted a medical appointment justification with a doctor\'s note on May 5. The Attendance Clerk is reviewing your submission.', context_fr: 'Aaliyah a été marquée <strong>Absente</strong> pour la journée complète le 4 mai par Mme Tremblay. Vous avez soumis une justification de rendez-vous médical avec un billet médical le 5 mai. Le responsable des présences examine votre soumission.',
+    studentStatus:'absent', workflowStage:'pending-approval',
+    studentStatusLabel:'Absent', studentStatusLabel_fr:'Absent', workflowStageLabel:'Pending approval', workflowStageLabel_fr:'En attente d\'approbation',
+    closed:false, showForm:false
+  },
+  'aaliyah-justified': {
+    title: 'Aaliyah — Late · Apr 22', title_fr: 'Aaliyah — En retard · 22 avr',
+    student: { name:'Aaliyah Carter', grade:'Grade 7A · Secondary', teacher:'Ms. S. Tremblay', initials:'AC', avatarClass:'avatar--blue' },
+    periods: [
+      { label:'P1', subject:'Math',    status:'late',    statusLabel:'Late',    statusLabel_fr:'En retard'    },
+      { label:'P2', subject:'French',  status:'present', statusLabel:'Present', statusLabel_fr:'Présent' },
+      { label:'P3', subject:'Science', status:'present', statusLabel:'Present', statusLabel_fr:'Présent' },
+      { label:'P4', subject:'Phys Ed', status:'present', statusLabel:'Present', statusLabel_fr:'Présent' }
+    ],
+    context: 'Aaliyah has been marked <strong>Late</strong> for P1 (Math) on Apr 22 by Ms. Tremblay. Arrived 12 min late due to a bus delay. Reason category: Transportation. The Attendance Clerk accepted the justification.', context_fr: 'Aaliyah a été marquée <strong>En retard</strong> pour P1 (Maths) le 22 avr par Mme Tremblay. Arrivée 12 min en retard en raison d\'un retard de bus. Catégorie de motif : Transport. Le responsable des présences a accepté la justification.',
+    studentStatus:'late', workflowStage:'justified',
+    studentStatusLabel:'Late',   studentStatusLabel_fr:'En retard', workflowStageLabel:'Justified', workflowStageLabel_fr:'Justifié',
+    closed:true, closedLabel:'Record closed — Justified · No grade impact', closedLabel_fr:'Dossier fermé — Justifié · Aucun impact sur la note', closedType:'justified',
+    showForm:false
+  },
+  'jaylen-disputed': {
+    title: 'Jaylen — Absent · May 5 · Disputed', title_fr: 'Jaylen — Absent · 5 mai · Contesté',
+    student: { name:'Jaylen Carter', grade:'Grade 4B · Elementary', teacher:'Mr. P. Côté', initials:'JC', avatarClass:'avatar--orange' },
+    periods: [
+      { label:'P1', subject:'Math',    status:'absent', statusLabel:'Absent',  statusLabel_fr:'Absent' },
+      { label:'P2', subject:'Reading', status:'absent', statusLabel:'Absent',  statusLabel_fr:'Absent' },
+      { label:'P3', subject:'—',       status:'absent', statusLabel:'Absent',  statusLabel_fr:'Absent' },
+      { label:'P4', subject:'—',       status:'absent', statusLabel:'Absent',  statusLabel_fr:'Absent' }
+    ],
+    context: 'Jaylen was marked <strong>Absent</strong> for the full day on May 5 by Mr. Côté. No reply was received within 24 hours, and the record was automatically closed as <strong>Unjustified</strong> on May 6. You disputed this record on May 12 citing a family emergency. The Attendance Clerk is now reviewing your dispute — you will receive a notification once a decision is made.', context_fr: 'Jaylen a été marqué <strong>Absent</strong> pour la journée complète le 5 mai par M. Côté. Aucune réponse n\'a été reçue sous 24 heures, et le dossier a été automatiquement fermé comme <strong>Non motivé</strong> le 6 mai. Vous avez contesté ce dossier le 12 mai en invoquant une urgence familiale. Le responsable des présences examine maintenant votre contestation — vous recevrez une notification dès qu\'une décision sera prise.',
+    studentStatus:'absent', workflowStage:'disputed',
+    studentStatusLabel:'Absent', studentStatusLabel_fr:'Absent', workflowStageLabel:'Disputed', workflowStageLabel_fr:'Contesté',
+    closed:true, closedLabel:'Dispute filed — awaiting school review', closedLabel_fr:'Contestation déposée — en attente de la révision scolaire', closedType:'disputed',
+    showForm:false
+  }
+};
+
+/* ── Open drawer ─────────────────────────────────────────────────────────────
+   Mirrors teacher-attendance.html's selectStudent() / renderDrawer() pattern:
+   add 'has-drawer' to the split grid → right column becomes visible.
+   No fixed positioning, no syncDrawerBounds, no JS geometry needed.           */
+function openDrawer(recordId) {
+  var d = DRAWER_DATA[recordId];
+  if (!d) return;
+  var lang = window.__ct_i18n ? window.__ct_i18n.getLang() : 'en';
+  var T = function(en, fr){ return lang === 'fr' ? fr : en; };
+
+  // Activate split layout
+  var card  = document.getElementById('drawerCard');
+  var split = document.getElementById('splitPane');
+  card.style.display = 'flex';
+  split.classList.add('has-drawer');
+
+  // Highlight selected record card
+  document.querySelectorAll('.rec-card2').forEach(function(c) {
+    c.classList.toggle('is-selected', c.getAttribute('data-record-id') === recordId);
+  });
+
+  /* ── Build drawer content ─────────────────────────────────────────────── */
+  var html = '';
+
+  /* Header */
+  html += '<div class="drawer-h">'
+    + '<h3>' + (lang==='fr' && d.title_fr ? d.title_fr : d.title) + '</h3>'
+    + "<button class='drawer-close' onclick='closeDrawer()' aria-label='" + T('Close','Fermer') + "'><i class='fa-solid fa-xmark'></i></button>"
+    + '</div>';
+
+  /* Scrollable body */
+  html += '<div class="drawer-b">';
+
+  /* Hero — student info + status chips */
+  html += '<div class="drawer-hero">'
+    + '<div class="avatar ' + d.student.avatarClass + '" style="width:44px;height:44px;font-size:15px;flex-shrink:0;">' + d.student.initials + '</div>'
+    + '<div style="flex:1;min-width:0;">'
+    + '<div class="drawer-name">' + d.student.name + '</div>'
+    + '<div class="drawer-meta">' + d.student.grade + ' · ' + d.student.teacher + '</div>'
+    + '<div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap;">'
+    + '<span class="status-pill status-pill--' + d.studentStatus + '">' + statusIcon(d.studentStatus) + ' ' + (lang==='fr' && d.studentStatusLabel_fr ? d.studentStatusLabel_fr : d.studentStatusLabel) + '</span>'
+    + '<span class="status-pill status-pill--' + d.workflowStage + '">' + workflowIcon(d.workflowStage) + ' ' + (lang==='fr' && d.workflowStageLabel_fr ? d.workflowStageLabel_fr : d.workflowStageLabel) + '</span>'
+    + '</div>'
+    + '</div>'
+    + '</div>';
+
+  /* Periods + subjects */
+  html += '<div>'
+    + "<div class='drawer-section-title'><i class='fa-solid fa-calendar-day'></i> " + T('Periods, subjects & status','Périodes, matières et statut') + "</div>"
+    + '<div class="dperiods">';
+  d.periods.forEach(function(p) {
+    var hasSubject = p.subject && p.subject !== '—';
+    html += '<div class="dperiod dperiod--' + p.status + '">'
+      + '<div class="dperiod__label">' + p.label + '</div>'
+      + (hasSubject
+          ? '<span class="dperiod__subject"><i class="fa-solid fa-book-open"></i>' + p.subject + '</span>'
+          : '<span class="dperiod__subject dperiod__subject--none">—</span>')
+      + '<span class="dperiod__pill">' + (lang==='fr' && p.statusLabel_fr ? p.statusLabel_fr : p.statusLabel) + '</span>'
+      + '</div>';
+  });
+  html += '</div></div>';
+
+  /* Context */
+  html += '<div>'
+    + "<div class='drawer-section-title'><i class='fa-solid fa-circle-info'></i> " + T('Context','Contexte') + "</div>"
+    + '<div class="dcontext">' + (lang==='fr' && d.context_fr ? d.context_fr : d.context) + '</div>'
+    + '</div>';
+
+  /* Closed tag */
+  if (d.closed) {
+    var closedClass = d.closedType === 'unjustified' ? ' drawer-closed-tag--unjustified'
+                    : d.closedType === 'disputed'    ? ' drawer-closed-tag--disputed'
+                    : '';
+    var closedIcon  = d.closedType === 'justified'   ? 'circle-check'
+                    : d.closedType === 'disputed'    ? 'flag'
+                    : 'lock';
+    html += '<div class="drawer-closed-tag' + closedClass + '">'
+      + '<i class="fa-solid fa-' + closedIcon + '"></i>'
+      + '<span>' + (lang==='fr' && d.closedLabel_fr ? d.closedLabel_fr : d.closedLabel) + '</span></div>';
+  }
+
+  /* "What happened?" form */
+  if (d.showForm) {
+    html += '<div>'
+      + "<div class='drawer-section-title'><i class='fa-solid fa-pen-to-square'></i> " + T('What happened?','Que s\'est-il passé ?') + "</div>"
+      + '<div class="dform">'
+      + '<div class="field">'
+      + "<label class='field__label' for='dReasonType'>" + T('Reason category','Catégorie de motif') + " <span class='req'>*</span></label>"
+      + '<select class="select" id="dReasonType" onchange="checkDrawerForm()">'
+      + "<option value=''>" + T('Choose a reason…','Choisir un motif…') + "</option>"
+      + "<option value='illness'>" + T('Illness / Sick','Maladie / Malade') + "</option>"
+      + "<option value='medical-appointment'>" + T('Medical appointment','Rendez-vous médical') + "</option>"
+      + "<option value='bereavement'>" + T('Bereavement','Décès') + "</option>"
+      + "<option value='religious-observance'>" + T('Religious observance','Observance religieuse') + "</option>"
+      + "<option value='family-personal'>" + T('Family / personal','Famille / personnel') + "</option>"
+      + "<option value='transportation'>" + T('Transportation / weather','Transport / météo') + "</option>"
+      + "<option value='other'>" + T('Other','Autre') + "</option>"
+      + '</select></div>'
+      + '<div class="field">'
+      + "<label class='field__label' for='dReasonText'>" + T('A few words for the school','Quelques mots pour l\'école') + "</label>"
+      + "<div class='field__hint'>" + T('Visible to school staff only.','Visible seulement par le personnel scolaire.') + "</div>"
+      + '<textarea class="textarea" id="dReasonText" rows="4" maxlength="400" placeholder="' + T('e.g. Jaylen had a fever and saw his doctor.','p. ex. Jaylen avait de la fièvre et a vu son médecin.') + '" oninput="checkDrawerForm();updateDrawerCount();"></textarea>'
+      + '<div style="display:flex;justify-content:space-between;">'
+      + "<span class='field__hint'>" + T('Minimum 10 characters','Minimum 10 caractères') + "</span>"
+      + '<span class="field__hint" id="dCharCount">0 / 400</span>'
+      + '</div></div>'
+      + '<div class="field">'
+      + "<label class='field__label'>" + T('Doctor\'s note','Billet médical') + " <span class='text-muted' style='font-weight:500;'>(" + T('optional','facultatif') + ")</span></label>"
+      + "<button type='button' class='attach-btn' id='dAttachBtn' onclick='simulateDrawerAttach()'><i class='fa-solid fa-paperclip'></i> " + T('Click to attach a file','Cliquez pour joindre un fichier') + "</button>"
+      + '<div class="attach-preview" id="dAttachPreview" style="display:none;">'
+      + '<i class="fa-solid fa-file-pdf" style="color:var(--c-danger);font-size:20px;"></i>'
+      + '<div><div class="font-semibold">doctors-note.pdf</div><div class="fs-xs text-muted">142 KB · PDF</div></div>'
+      + '<button type="button" class="remove" onclick="removeDrawerAttach()" aria-label="Remove"><i class="fa-solid fa-xmark"></i></button>'
+      + '</div></div>'
+      + '</div></div>';
+  }
+
+  html += '</div>'; /* end .drawer-b */
+
+  /* Action footer */
+  if (d.showForm) {
+    html += '<div class="drawer-footer">'
+      + "<button class='btn btn--ghost' style='flex:1;' onclick='closeDrawer()'>" + T('Cancel','Annuler') + "</button>"
+      + "<button class='btn btn--primary' id='dSubmitBtn' style='flex:2;' disabled onclick='handleDrawerSubmit()'><i class='fa-solid fa-paper-plane'></i> " + T('Send to school','Envoyer à l\'école') + "</button>"
+      + '</div>';
+  }
+
+  document.getElementById('drawerContent').innerHTML = html;
+  if(window.__ct_i18n) window.__ct_i18n.applyLang(document.getElementById('drawerContent'));
+}
+
+function closeDrawer() {
+  document.getElementById('drawerCard').style.display = 'none';
+  document.getElementById('splitPane').classList.remove('has-drawer');
+  document.querySelectorAll('.rec-card2').forEach(function(c) { c.classList.remove('is-selected'); });
+}
+
+/* ── Helpers ─────────────────────────────────────────────────────────────── */
+function statusIcon(s) {
+  return s === 'absent' ? '<i class="fa-solid fa-circle-minus"></i>'
+       : s === 'late'   ? '<i class="fa-solid fa-clock"></i>'
+       :                  '<i class="fa-solid fa-circle-check"></i>';
+}
+function workflowIcon(s) {
+  return s === 'awaiting'         ? '<i class="fa-regular fa-clock"></i>'
+       : s === 'pending-approval' ? '<i class="fa-solid fa-paper-plane"></i>'
+       : s === 'justified'        ? '<i class="fa-solid fa-circle-check"></i>'
+       : s === 'unjustified'      ? '<i class="fa-solid fa-lock"></i>'
+       : s === 'disputed'         ? '<i class="fa-solid fa-flag"></i>'
+       :                            '';
+}
+function checkDrawerForm() {
+  var t   = document.getElementById('dReasonType');
+  var txt = document.getElementById('dReasonText');
+  var btn = document.getElementById('dSubmitBtn');
+  if (t && txt && btn) btn.disabled = !(t.value && txt.value.trim().length >= 10);
+}
+function updateDrawerCount() {
+  var ta = document.getElementById('dReasonText');
+  var cc = document.getElementById('dCharCount');
+  if (ta && cc) { cc.textContent = ta.value.length + ' / 400'; cc.style.color = ta.value.length > 380 ? 'var(--c-danger)' : 'var(--c-ink-muted)'; }
+}
+function simulateDrawerAttach() {
+  document.getElementById('dAttachBtn').style.display = 'none';
+  document.getElementById('dAttachPreview').style.display = 'flex';
+  showToast('File attached', 'success');
+}
+function removeDrawerAttach() {
+  document.getElementById('dAttachBtn').style.display = 'flex';
+  document.getElementById('dAttachPreview').style.display = 'none';
+}
+function handleDrawerSubmit() {
+  var btn = document.getElementById('dSubmitBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Sending…';
+  setTimeout(function() {
+    closeDrawer();
+    showToast('Justification sent — the clerk will review it shortly.', 'success');
+  }, 900);
+}
+
+__ct_mountSidebar('active-records');
+__ct_mountProtoSwitcher('parent');
+</script>
+</body>
+</html>

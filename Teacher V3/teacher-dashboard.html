@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ClassTrack — Teacher Dashboard</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: #F0F4F9; color: #1A2B45;
+      display: flex; min-height: 100vh; font-size: 14px;
+    }
+
+    /* ─── Sidebar ─────────────────────────────────────────────────── */
+    .sidebar {
+      width: 240px; min-height: 100vh; background: #0F2546;
+      display: flex; flex-direction: column; flex-shrink: 0;
+      position: fixed; top: 0; left: 0; bottom: 0; z-index: 100;
+    }
+    .sidebar-logo { padding: 28px 24px 20px; border-bottom: 1px solid rgba(255,255,255,0.08); }
+    .logo-mark { display: flex; align-items: center; gap: 10px; }
+    .logo-icon {
+      width: 36px; height: 36px; background: #2E7DD1; border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 800; font-size: 16px; color: #fff;
+    }
+    .logo-text { color: #fff; font-size: 17px; font-weight: 700; letter-spacing: -0.3px; }
+    .logo-sub { color: rgba(255,255,255,0.45); font-size: 11px; margin-top: 2px; }
+    .sidebar-nav { flex: 1; overflow-y: auto; padding: 12px 0; }
+    .sidebar-section { padding: 18px 12px 6px; }
+    .sidebar-section-label {
+      text-transform: uppercase; font-size: 10px; font-weight: 600;
+      letter-spacing: 1.2px; color: rgba(255,255,255,0.35); padding: 0 12px; margin-bottom: 6px;
+    }
+    .nav-item {
+      display: flex; align-items: center; gap: 12px; padding: 10px 12px;
+      border-radius: 8px; cursor: pointer; color: rgba(255,255,255,0.6);
+      font-size: 13.5px; font-weight: 500; transition: all 0.15s;
+      text-decoration: none; margin-bottom: 2px;
+    }
+    .nav-item:hover { background: rgba(255,255,255,0.07); color: #fff; }
+    .nav-item.active { background: #2E7DD1; color: #fff; }
+    .nav-item .nav-icon { font-size: 15px; width: 20px; text-align: center; color: inherit; }
+    .nav-badge {
+      margin-left: auto; background: #E53E3E; color: #fff;
+      font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 10px;
+    }
+    .sidebar-footer { margin-top: auto; padding: 16px 12px; border-top: 1px solid rgba(255,255,255,0.08); }
+    .user-info {
+      display: flex; align-items: center; gap: 10px; padding: 8px 12px;
+      border-radius: 8px; cursor: pointer; transition: background 0.15s;
+    }
+    .user-info:hover { background: rgba(255,255,255,0.07); }
+    .user-avatar {
+      width: 32px; height: 32px; border-radius: 50%;
+      background: linear-gradient(135deg, #2E7DD1, #1A5FA8);
+      color: #fff; font-weight: 700; font-size: 13px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .user-name { color: #fff; font-size: 13px; font-weight: 600; }
+    .user-role { color: rgba(255,255,255,0.45); font-size: 11px; }
+
+    /* ─── Main ────────────────────────────────────────────────────── */
+    .main { margin-left: 240px; flex: 1; display: flex; flex-direction: column; min-height: 100vh; }
+
+    /* ─── Topbar ──────────────────────────────────────────────────── */
+    .topbar {
+      background: #fff; border-bottom: 1px solid #E2E8F0;
+      padding: 0 32px; height: 64px; display: flex; align-items: center; gap: 16px;
+      position: sticky; top: 0; z-index: 90;
+    }
+    .topbar-left h1 { font-size: 18px; font-weight: 700; color: #0F2546; }
+    .topbar-left p { font-size: 12px; color: #718096; margin-top: 1px; }
+    .topbar-right { margin-left: auto; display: flex; align-items: center; gap: 12px; }
+    .icon-btn {
+      width: 36px; height: 36px; border-radius: 8px; border: 1px solid #E2E8F0;
+      background: #fff; display: flex; align-items: center; justify-content: center;
+      color: #4A5568; cursor: pointer; position: relative; font-size: 15px;
+    }
+    .icon-btn:hover { background: #F7FAFC; }
+    .notif-dot {
+      position: absolute; top: 7px; right: 7px;
+      width: 7px; height: 7px; border-radius: 50%; background: #E53E3E; border: 1.5px solid #fff;
+    }
+    .term-badge {
+      display: flex; align-items: center; gap: 6px; padding: 6px 12px;
+      border: 1px solid #E2E8F0; border-radius: 8px; background: #fff;
+      font-size: 13px; font-weight: 500; color: #1A2B45; cursor: pointer;
+    }
+    .term-badge i { color: #718096; font-size: 12px; }
+
+    /* ─── Page body ───────────────────────────────────────────────── */
+    .page-body { padding: 28px 32px; flex: 1; }
+
+    /* ─── Greeting ────────────────────────────────────────────────── */
+    .greeting { margin-bottom: 24px; }
+    .greeting h2 { font-size: 22px; font-weight: 700; color: #0F2546; }
+    .greeting p { font-size: 13.5px; color: #718096; margin-top: 4px; }
+
+    /* ─── KPI Row ─────────────────────────────────────────────────── */
+    .kpi-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
+    .kpi-card {
+      background: #fff; border-radius: 12px; border: 1px solid #E2E8F0;
+      padding: 18px 20px; display: flex; align-items: flex-start; justify-content: space-between;
+    }
+    .kpi-label { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: .05em; color: #718096; margin-bottom: 8px; }
+    .kpi-value { font-size: 30px; font-weight: 700; color: #0F2546; line-height: 1; }
+    .kpi-sub { font-size: 12px; color: #718096; margin-top: 4px; }
+    .kpi-icon {
+      width: 40px; height: 40px; border-radius: 10px;
+      display: flex; align-items: center; justify-content: center; font-size: 17px; flex-shrink: 0;
+    }
+    .ic-blue { background: #EBF4FF; color: #2E7DD1; }
+    .ic-green { background: #ECFDF5; color: #059669; }
+    .ic-red { background: #FEF2F2; color: #DC2626; }
+    .ic-amber { background: #FFFBEB; color: #D97706; }
+
+    /* ─── Two-column layout ───────────────────────────────────────── */
+    .two-col { display: grid; grid-template-columns: 1fr 340px; gap: 20px; align-items: start; }
+
+    /* ─── Card ────────────────────────────────────────────────────── */
+    .card { background: #fff; border-radius: 12px; border: 1px solid #E2E8F0; overflow: hidden; }
+    .card-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 16px 20px; border-bottom: 1px solid #F1F5F9;
+    }
+    .card-title { font-size: 14px; font-weight: 700; color: #0F2546; }
+    .card-link { font-size: 13px; color: #2E7DD1; text-decoration: none; cursor: pointer; }
+    .card-link:hover { text-decoration: underline; }
+
+    /* ─── Classes table ───────────────────────────────────────────── */
+    .classes-table { width: 100%; border-collapse: collapse; }
+    .classes-table thead th {
+      padding: 11px 16px; text-align: left; font-size: 11.5px; font-weight: 700;
+      letter-spacing: .05em; text-transform: uppercase; color: #718096;
+      background: #F8FAFC; border-bottom: 1px solid #E2E8F0;
+    }
+    .classes-table tbody tr { border-bottom: 1px solid #F1F5F9; transition: background .12s; }
+    .classes-table tbody tr:last-child { border-bottom: none; }
+    .classes-table tbody tr:hover { background: #F7FAFC; }
+    .classes-table td { padding: 14px 16px; font-size: 13.5px; color: #2D3748; vertical-align: middle; }
+    .class-name { font-weight: 600; color: #1A2B45; }
+    .class-period { font-size: 12px; color: #A0AEC0; margin-top: 1px; }
+    .progress-bar-wrap { width: 80px; height: 6px; background: #E2E8F0; border-radius: 99px; overflow: hidden; }
+    .progress-bar-fill { height: 100%; border-radius: 99px; }
+
+    /* ─── Status badges ───────────────────────────────────────────── */
+    .status-badge {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 600;
+    }
+    .status-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+    .badge-submitted { background: #ECFDF5; color: #059669; }
+    .badge-submitted .status-dot { background: #059669; }
+    .badge-progress { background: #EBF4FF; color: #2E7DD1; }
+    .badge-progress .status-dot { background: #2E7DD1; }
+    .badge-pending { background: #FFFBEB; color: #D97706; }
+    .badge-pending .status-dot { background: #D97706; }
+    .badge-absent { background: #FEF2F2; color: #DC2626; }
+    .badge-absent .status-dot { background: #DC2626; }
+    .badge-late { background: #FFFBEB; color: #D97706; }
+    .badge-late .status-dot { background: #D97706; }
+    .badge-present { background: #ECFDF5; color: #059669; }
+    .badge-present .status-dot { background: #059669; }
+
+    .action-btn {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 6px 12px; border-radius: 8px; font-size: 12.5px; font-weight: 500;
+      border: 1px solid #E2E8F0; background: #fff; color: #1A2B45; cursor: pointer; text-decoration: none;
+      transition: all .15s; white-space: nowrap;
+    }
+    .action-btn:hover { background: #F7FAFC; border-color: #CBD5E0; }
+    .action-btn.primary { background: #2E7DD1; color: #fff; border-color: #2E7DD1; }
+    .action-btn.primary:hover { background: #2563EB; border-color: #2563EB; }
+
+    /* ─── Notifications panel ─────────────────────────────────────── */
+    .notif-list { padding: 0; }
+    .notif-item {
+      display: flex; align-items: flex-start; gap: 12px;
+      padding: 14px 20px; border-bottom: 1px solid #F1F5F9; cursor: pointer; transition: background .12s;
+    }
+    .notif-item:last-child { border-bottom: none; }
+    .notif-item:hover { background: #F7FAFC; }
+    .notif-icon {
+      width: 34px; height: 34px; border-radius: 10px; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center; font-size: 14px;
+    }
+    .ni-red { background: #FEF2F2; color: #DC2626; }
+    .ni-blue { background: #EBF4FF; color: #2E7DD1; }
+    .ni-green { background: #ECFDF5; color: #059669; }
+    .ni-amber { background: #FFFBEB; color: #D97706; }
+    .notif-body { flex: 1; min-width: 0; }
+    .notif-title { font-size: 13px; font-weight: 600; color: #1A2B45; }
+    .notif-desc { font-size: 12px; color: #718096; margin-top: 2px; line-height: 1.5; }
+    .notif-time { font-size: 11px; color: #A0AEC0; margin-top: 4px; }
+    .notif-unread { width: 7px; height: 7px; border-radius: 50%; background: #2E7DD1; flex-shrink: 0; margin-top: 5px; }
+
+    /* ─── Toast ───────────────────────────────────────────────────── */
+    .toast {
+      position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%) translateY(20px);
+      background: #1A2B45; color: #fff; padding: 10px 20px; border-radius: 8px;
+      font-size: 13px; opacity: 0; transition: all .25s; pointer-events: none; z-index: 999;
+    }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    /* ─── HERO: current period card ─────────────────────────────────── */
+    .hero { background:#fff; border-radius:14px; border:1px solid #E2E8F0; padding:24px 28px; display:grid; grid-template-columns:auto 1fr auto; gap:20px; align-items:center; margin-bottom:20px; position:relative; overflow:hidden; }
+    .hero::before { content:''; position:absolute; left:0; top:0; bottom:0; width:5px; background:#D97706; }
+    .hero.urgency-green::before { background:#059669; }
+    .hero.urgency-yellow::before { background:#EAB308; }
+    .hero.urgency-orange::before { background:#D97706; }
+    .hero.urgency-red::before { background:#DC2626; }
+    .hero-time { display:flex; flex-direction:column; align-items:center; padding-right:24px; border-right:1px solid #F1F5F9; min-width:120px; }
+    .hero-time .live-tag { font-size:10px; font-weight:800; letter-spacing:.12em; color:#fff; background:#DC2626; padding:3px 10px; border-radius:99px; margin-bottom:6px; display:inline-flex; align-items:center; gap:5px; }
+    .hero-time .live-tag .pulse { width:6px; height:6px; border-radius:50%; background:#fff; animation: pulse 2s infinite; }
+    @keyframes pulse { 0%,100% { opacity:1 } 50% { opacity:.3 } }
+    .hero-time .period-label { font-size:13px; font-weight:600; color:#0F2546; }
+    .hero-time .period-clock { font-size:22px; font-weight:700; color:#0F2546; letter-spacing:-.5px; margin-top:2px; }
+    .hero-time .period-elapsed { font-size:11px; color:#718096; margin-top:3px; }
+    .hero-info .hero-class { font-size:20px; font-weight:700; color:#0F2546; }
+    .hero-info .hero-meta { font-size:13px; color:#718096; margin-top:4px; display:flex; gap:14px; flex-wrap:wrap; }
+    .hero-info .hero-meta span { display:inline-flex; align-items:center; gap:5px; }
+    .hero-info .hero-meta i { color:#A0AEC0; font-size:11px; }
+    .hero-status { margin-top:10px; display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+    .urgency-pill { display:inline-flex; align-items:center; gap:6px; padding:5px 12px; border-radius:99px; font-size:12px; font-weight:700; }
+    .urgency-pill.green { background:#ECFDF5; color:#065F46; }
+    .urgency-pill.yellow { background:#FEF9C3; color:#854D0E; }
+    .urgency-pill.orange { background:#FFEDD5; color:#9A3412; }
+    .urgency-pill.red { background:#FEE2E2; color:#991B1B; }
+    .hero-action { display:flex; flex-direction:column; gap:8px; }
+    .btn-primary { padding:11px 22px; background:#2E7DD1; color:#fff; border:none; border-radius:9px; font-size:14px; font-weight:600; cursor:pointer; display:inline-flex; align-items:center; gap:8px; text-decoration:none; transition:background .15s; }
+    .btn-primary:hover { background:#2563EB; }
+    .btn-secondary { padding:9px 18px; background:#fff; color:#1A2B45; border:1px solid #E2E8F0; border-radius:9px; font-size:13px; font-weight:600; cursor:pointer; display:inline-flex; align-items:center; gap:6px; text-decoration:none; transition:all .15s; }
+    .btn-secondary:hover { background:#F7FAFC; border-color:#CBD5E0; }
+
+    /* ─── ALERTS ROW (3 tiles) ───────────────────────────────────────── */
+    .alerts-row { display:grid; grid-template-columns:repeat(3, 1fr); gap:16px; margin-bottom:20px; }
+    .alert-tile { background:#fff; border-radius:12px; border:1px solid #E2E8F0; padding:16px 18px; display:flex; gap:14px; align-items:flex-start; }
+    .alert-tile.empty { opacity:.6; }
+    .alert-tile .at-icon { width:38px; height:38px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:15px; flex-shrink:0; }
+    .at-icon.amber { background:#FFFBEB; color:#D97706; }
+    .at-icon.red { background:#FEF2F2; color:#DC2626; }
+    .at-icon.blue { background:#EBF4FF; color:#2E7DD1; }
+    .at-icon.green { background:#ECFDF5; color:#059669; }
+    .at-icon.indigo { background:#F3F4FF; color:#4F46E5; }
+    .at-body { flex:1; min-width:0; }
+    .at-label { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:#718096; }
+    .at-title { font-size:14px; font-weight:700; color:#0F2546; margin-top:3px; }
+    .at-desc { font-size:12px; color:#718096; margin-top:3px; line-height:1.5; }
+    .at-action { margin-top:10px; }
+    .at-action a { font-size:12.5px; font-weight:600; color:#2E7DD1; text-decoration:none; display:inline-flex; align-items:center; gap:4px; }
+    .at-action a:hover { text-decoration:underline; }
+
+    /* ─── TIMELINE (today's periods) ─────────────────────────────────── */
+    .timeline { padding:18px 22px; }
+    .tl-row { display:grid; grid-template-columns:80px 22px 1fr auto; gap:14px; align-items:center; padding:12px 0; border-bottom:1px solid #F1F5F9; }
+    .tl-row:last-child { border-bottom:none; }
+    .tl-time { font-size:13px; font-weight:600; color:#1A2B45; text-align:right; }
+    .tl-time-sub { font-size:11px; color:#A0AEC0; }
+    .tl-marker { position:relative; width:22px; height:22px; display:flex; align-items:center; justify-content:center; }
+    .tl-marker .dot { width:14px; height:14px; border-radius:50%; }
+    .tl-marker .dot.done { background:#059669; }
+    .tl-marker .dot.active { background:#2E7DD1; box-shadow:0 0 0 4px rgba(46,125,209,.2); }
+    .tl-marker .dot.upcoming { background:#fff; border:2px solid #CBD5E0; }
+    .tl-name { font-size:14px; font-weight:600; color:#0F2546; }
+    .tl-sub { font-size:12px; color:#718096; margin-top:1px; }
+    .tl-pill { font-size:11.5px; font-weight:600; padding:4px 10px; border-radius:99px; white-space:nowrap; }
+    .tl-pill.done { background:#ECFDF5; color:#059669; }
+    .tl-pill.active { background:#EBF4FF; color:#1D4ED8; }
+    .tl-pill.upcoming { background:#F8FAFC; color:#718096; border:1px solid #E2E8F0; }
+
+    /* ─── CORRECTIONS list ─────────────────────────────────────────── */
+    .corr-item { display:flex; align-items:center; gap:14px; padding:12px 22px; border-bottom:1px solid #F1F5F9; cursor:pointer; transition:background .12s; }
+    .corr-item:last-child { border-bottom:none; }
+    .corr-item:hover { background:#F7FAFC; }
+    .corr-icon { width:34px; height:34px; border-radius:10px; background:#F3F4FF; color:#4F46E5; display:flex; align-items:center; justify-content:center; font-size:13px; flex-shrink:0; }
+    .corr-body { flex:1; min-width:0; }
+    .corr-title { font-size:13px; font-weight:600; color:#1A2B45; }
+    .corr-change { font-size:12px; color:#718096; margin-top:2px; display:flex; align-items:center; gap:5px; }
+    .corr-change .old { color:#A0AEC0; text-decoration:line-through; }
+    .corr-change i.fa-arrow-right { font-size:9px; color:#CBD5E0; }
+    .corr-change .new { color:#059669; font-weight:600; }
+    .corr-time { font-size:11.5px; color:#A0AEC0; }
+
+    /* ─── Two-col layout for timeline + corrections ─────────────────── */
+    .dash-row { display:grid; grid-template-columns:1fr 1fr; gap:20px; }
+    @media (max-width: 1100px) { .dash-row { grid-template-columns:1fr; } .alerts-row { grid-template-columns:1fr; } .hero { grid-template-columns:1fr; } .hero-time { border-right:none; border-bottom:1px solid #F1F5F9; padding:0 0 16px; flex-direction:row; gap:14px; } }
+  </style>
+</head>
+<body>
+
+<!-- ═══ SIDEBAR ══════════════════════════════════════════════════════════ -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-mark">
+      <div class="logo-icon">CT</div>
+      <div>
+        <div class="logo-text">ClassTrack</div>
+        <div class="logo-sub" data-en="Teacher Portal" data-fr="Portail enseignant">Teacher Portal</div>
+      </div>
+    </div>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="sidebar-section">
+      <div class="sidebar-section-label" data-en="Overview" data-fr="Vue d'ensemble">Overview</div>
+      <a class="nav-item active" href="teacher-dashboard.html">
+        <span class="nav-icon"><i class="fa-solid fa-gauge-high"></i></span> <span data-en="Dashboard" data-fr="Tableau de bord">Dashboard</span>
+      </a>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-section-label" data-en="Teaching" data-fr="Enseignement">Teaching</div>
+      <a class="nav-item" href="teacher-attendance.html">
+        <span class="nav-icon"><i class="fa-solid fa-clipboard-check"></i></span> <span data-en="Mark Attendance" data-fr="Saisir les présences">Mark Attendance</span>
+        <span class="nav-badge">1</span>
+      </a>
+      <a class="nav-item" href="teacher-schedule-axon file.html">
+        <span class="nav-icon"><i class="fa-solid fa-calendar-week"></i></span> <span data-en="My Classes" data-fr="Mes classes">My Classes</span>
+      </a>
+      <a class="nav-item" href="teacher-history.html">
+        <span class="nav-icon"><i class="fa-solid fa-calendar-days"></i></span> <span data-en="Attendance History" data-fr="Historique des présences">Attendance History</span>
+      </a>
+      <a class="nav-item" href="teacher-disputes.html">
+        <span class="nav-icon"><i class="fa-solid fa-scale-balanced"></i></span> <span data-en="Disputes" data-fr="Contestations">Disputes</span>
+        <span class="nav-badge" style="background:#4F46E5">2</span>
+      </a>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-section-label" data-en="System" data-fr="Système">System</div>
+      <a class="nav-item" onclick="showToast(T('settings_soon'))">
+        <span class="nav-icon"><i class="fa-solid fa-gear"></i></span> <span data-en="Settings" data-fr="Paramètres">Settings</span>
+      </a>
+    </div>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="user-info">
+      <div class="user-avatar">ST</div>
+      <div>
+        <div class="user-name" data-en="Ms. S. Tremblay" data-fr="Mme S. Tremblay">Ms. S. Tremblay</div>
+        <div class="user-role" data-en="Science Dept · Grade 7A" data-fr="Dépt. Sciences · 7e A">Science Dept · Grade 7A</div>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<!-- ═══ MAIN ══════════════════════════════════════════════════════════════ -->
+<div class="main">
+
+  <!-- Topbar -->
+  <div class="topbar">
+    <div class="topbar-left">
+      <h1 data-en="Dashboard" data-fr="Tableau de bord">Dashboard</h1>
+      <p data-en="Monday, March 23, 2026" data-fr="lundi 23 mars 2026">Monday, March 23, 2026</p>
+    </div>
+    <div class="topbar-right">
+      <div class="term-badge">
+        <i class="fa-solid fa-calendar-alt"></i> <span data-en="Term 2 — 2025/26" data-fr="Étape 2 — 2025/26">Term 2 — 2025/26</span>
+        <i class="fa-solid fa-chevron-down"></i>
+      </div>
+      <div class="icon-btn" onclick="window.location='teacher-attendance.html'" data-title-en="Mark Attendance" data-title-fr="Saisir les présences" title="Mark Attendance">
+        <i class="fa-solid fa-clipboard-check"></i>
+        <span class="notif-dot"></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Page body -->
+  <div class="page-body">
+
+    <!-- Greeting -->
+    <div class="greeting">
+      <h2 data-en="Good morning, Ms. Tremblay" data-fr="Bonjour, Mme Tremblay">Good morning, Ms. Tremblay</h2>
+      <p data-en="Operational summary for Monday, March 23, 2026" data-fr="Résumé opérationnel — lundi 23 mars 2026">Operational summary for Monday, March 23, 2026</p>
+    </div>
+
+    <!-- HERO: Current period -->
+    <div id="heroCard"></div>
+
+    <!-- Alerts row -->
+    <div class="alerts-row" id="alertsRow"></div>
+
+    <!-- Today's schedule timeline + Recent corrections -->
+    <div class="dash-row">
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title" data-en="Today's Classes" data-fr="Cours d'aujourd'hui">Today's Classes</span>
+          <a class="card-link" href="teacher-schedule-axon file.html" data-en="Full schedule →" data-fr="Horaire complet →">Full schedule →</a>
+        </div>
+        <div class="timeline" id="timelineList"></div>
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title" data-en="Recent Attendance Corrections" data-fr="Corrections récentes">Recent Attendance Corrections</span>
+          <a class="card-link" href="teacher-history.html" data-en="View all →" data-fr="Tout voir →">View all →</a>
+        </div>
+        <div id="correctionsList"></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  const AVATAR_COLORS = ['#2E7DD1','#6366F1','#10B981','#F59E0B','#EF4444','#8B5CF6','#EC4899','#0891B2'];
+
+  const STRINGS = {
+    en: {
+      live:'LIVE', current_period:'Period 3', period_clock:'10:45 AM',
+      period_elapsed:'started 15 min ago',
+      current_class:'Grade 7A · Science', current_room:'Room 204', students_count:'15 students',
+      not_submitted_yet:'Not submitted yet', submit_attendance:'Submit attendance',
+      mark_now:'Mark Now', open_attendance:'Open Attendance',
+      open_drawer:'Open',
+      urgency_yellow_label:'Reminder',
+      urgency_orange_label:'Urgent · Period started 15 min ago',
+      urgency_red_label:'Critical · Period ending in 10 min',
+      meta_15_students:'15 students',
+      meta_1_awaiting:'1 awaiting check-in', meta_pre_just:'3 pre-justified',
+      alert_checkin_label:'Late check-in', alert_checkin_title:'Emma Kowalski signed in',
+      alert_checkin_desc:'Authorized by Attendance Clerk at 9:08 AM. Accept her back into class.',
+      alert_checkin_action:'Accept in class',
+      alert_missing_label:'Missing attendance', alert_missing_title:'Period 2 not submitted',
+      alert_missing_desc:'Period 2 ended 25 minutes ago. Grade 7A · Math.',
+      alert_missing_action:'Submit now',
+      alert_corr_label:'Recent correction', alert_corr_title:'Ben Okafor record updated',
+      alert_corr_desc:'Mar 19 P3 changed from Absent to Late by you, 2 hr ago.',
+      alert_corr_action:'View record',
+      submitted:'Submitted', in_progress:'In progress', upcoming:'Upcoming',
+      period_1:'Period 1', period_2:'Period 2', period_3:'Period 3', period_5:'Period 5',
+      time_830:'8:30 AM', time_945:'9:45 AM', time_1045:'10:45 AM', time_115:'1:15 PM',
+      science_7a:'Grade 7A · Science', math_7a:'Grade 7A · Math', science_8b:'Grade 8B · Science',
+      summary_p1:'13 P · 1 A · 1 L', summary_p2:'Not submitted', summary_p5:'12 P · 2 A · 0 L',
+      corr_aaliyah_title:'Aaliyah Carter — Mar 21 · Period 1',
+      corr_ben_title:'Ben Okafor — Mar 19 · Period 3',
+      corr_grace_title:'Grace Osei — Mar 18 · Period 3',
+      corr_time_2hr:'2 hr ago', corr_time_yest:'Yesterday', corr_time_2d:'2 days ago',
+      st_present:'Present', st_absent:'Absent', st_late:'Late',
+      no_action:'No action available', settings_soon:'Settings coming soon', all_notif_cleared:'All notifications cleared',
+    },
+    fr: {
+      live:'EN COURS', current_period:'Période 3', period_clock:'10 h 45',
+      period_elapsed:'commencée il y a 15 min',
+      current_class:'7e A · Sciences', current_room:'Salle 204', students_count:'15 élèves',
+      not_submitted_yet:'Non saisie', submit_attendance:'Saisir les présences',
+      mark_now:'Saisir', open_attendance:'Ouvrir les présences',
+      open_drawer:'Ouvrir',
+      urgency_yellow_label:'Rappel',
+      urgency_orange_label:'Urgent · Commencée il y a 15 min',
+      urgency_red_label:'Critique · Se termine dans 10 min',
+      meta_15_students:'15 élèves',
+      meta_1_awaiting:'1 à accepter en classe', meta_pre_just:'3 pré-motivées',
+      alert_checkin_label:'À accepter en classe', alert_checkin_title:'Emma Kowalski autorisée',
+      alert_checkin_desc:'Autorisée par la surveillante à 9 h 08. Accepte-la en classe.',
+      alert_checkin_action:'Accepter en classe',
+      alert_missing_label:'Présence manquante', alert_missing_title:'Période 2 non saisie',
+      alert_missing_desc:'La période 2 s\'est terminée il y a 25 min. 7e A · Maths.',
+      alert_missing_action:'Saisir maintenant',
+      alert_corr_label:'Correction récente', alert_corr_title:'Ben Okafor — dossier modifié',
+      alert_corr_desc:'19 mars P3 — changé de Absent à En retard par vous, il y a 2 h.',
+      alert_corr_action:'Voir le dossier',
+      submitted:'Saisie', in_progress:'En cours', upcoming:'À venir',
+      period_1:'Période 1', period_2:'Période 2', period_3:'Période 3', period_5:'Période 5',
+      time_830:'08 h 30', time_945:'09 h 45', time_1045:'10 h 45', time_115:'13 h 15',
+      science_7a:'7e A · Sciences', math_7a:'7e A · Maths', science_8b:'8e B · Sciences',
+      summary_p1:'13 P · 1 A · 1 R', summary_p2:'Non saisie', summary_p5:'12 P · 2 A · 0 R',
+      corr_aaliyah_title:'Aaliyah Carter — 21 mars · Période 1',
+      corr_ben_title:'Ben Okafor — 19 mars · Période 3',
+      corr_grace_title:'Grace Osei — 18 mars · Période 3',
+      corr_time_2hr:'il y a 2 h', corr_time_yest:'Hier', corr_time_2d:'il y a 2 j',
+      st_present:'Présent', st_absent:'Absent', st_late:'En retard',
+      no_action:'Aucune action disponible', settings_soon:'Paramètres — bientôt disponibles', all_notif_cleared:'Toutes les notifications effacées',
+    }
+  };
+  function T(k){ var lang=(window.__ct_i18n&&window.__ct_i18n.getLang())||'en'; return (STRINGS[lang]&&STRINGS[lang][k])||STRINGS.en[k]||k; }
+
+  // Hero urgency level — 'green' | 'yellow' | 'orange' | 'red'
+  const HERO_URGENCY = 'orange';
+
+  const TIMELINE = [
+    { timeKey:'time_830', periodKey:'period_1', classKey:'science_7a', state:'done',     summaryKey:'summary_p1' },
+    { timeKey:'time_945', periodKey:'period_2', classKey:'math_7a',    state:'done',     summaryKey:'summary_p2', miss:true },
+    { timeKey:'time_1045',periodKey:'period_3', classKey:'science_7a', state:'active',   summaryKey:'' },
+    { timeKey:'time_115', periodKey:'period_5', classKey:'science_8b', state:'upcoming', summaryKey:'' },
+  ];
+
+  const CORRECTIONS = [
+    { id:'c1', titleKey:'corr_aaliyah_title', oldKey:'st_late',  newKey:'st_present', timeKey:'corr_time_2hr', studentId:'ST-1041' },
+    { id:'c2', titleKey:'corr_ben_title',     oldKey:'st_absent',newKey:'st_late',    timeKey:'corr_time_yest',studentId:'ST-1082' },
+    { id:'c3', titleKey:'corr_grace_title',   oldKey:'st_absent',newKey:'st_present', timeKey:'corr_time_2d',  studentId:'ST-1083' },
+  ];
+
+  function renderHero() {
+    const urgencyLabelKey =
+      HERO_URGENCY === 'red' ? 'urgency_red_label' :
+      HERO_URGENCY === 'orange' ? 'urgency_orange_label' :
+      HERO_URGENCY === 'yellow' ? 'urgency_yellow_label' : 'urgency_yellow_label';
+    document.getElementById('heroCard').innerHTML =
+      '<div class="hero urgency-' + HERO_URGENCY + '">' +
+        '<div class="hero-time">' +
+          '<span class="live-tag"><span class="pulse"></span> ' + T('live') + '</span>' +
+          '<div class="period-label">' + T('current_period') + '</div>' +
+          '<div class="period-clock">' + T('period_clock') + '</div>' +
+          '<div class="period-elapsed">' + T('period_elapsed') + '</div>' +
+        '</div>' +
+        '<div class="hero-info">' +
+          '<div class="hero-class">' + T('current_class') + '</div>' +
+          '<div class="hero-meta">' +
+            '<span><i class="fa-solid fa-door-open"></i> ' + T('current_room') + '</span>' +
+            '<span><i class="fa-solid fa-users"></i> ' + T('meta_15_students') + '</span>' +
+            '<span><i class="fa-solid fa-clock"></i> ' + T('meta_1_awaiting') + '</span>' +
+            '<span><i class="fa-solid fa-lock"></i> ' + T('meta_pre_just') + '</span>' +
+          '</div>' +
+          '<div class="hero-status">' +
+            '<span class="urgency-pill ' + HERO_URGENCY + '"><i class="fa-solid fa-circle-exclamation"></i> ' + T(urgencyLabelKey) + '</span>' +
+            '<span style="font-size:12.5px;color:#718096">' + T('not_submitted_yet') + '</span>' +
+          '</div>' +
+        '</div>' +
+        '<div class="hero-action">' +
+          '<a class="btn-primary" href="teacher-attendance.html"><i class="fa-solid fa-clipboard-check"></i> ' + T('open_attendance') + '</a>' +
+          '<a class="btn-secondary" href="teacher-schedule-axon file.html"><i class="fa-solid fa-calendar-week"></i> ' + T('current_period') + ' →</a>' +
+        '</div>' +
+      '</div>';
+  }
+
+  function renderAlerts() {
+    document.getElementById('alertsRow').innerHTML =
+      '<div class="alert-tile" onclick="window.location=\'teacher-attendance.html\'" style="cursor:pointer">' +
+        '<div class="at-icon amber"><i class="fa-solid fa-door-open"></i></div>' +
+        '<div class="at-body">' +
+          '<div class="at-label">' + T('alert_checkin_label') + '</div>' +
+          '<div class="at-title">' + T('alert_checkin_title') + '</div>' +
+          '<div class="at-desc">' + T('alert_checkin_desc') + '</div>' +
+          '<div class="at-action"><a>' + T('alert_checkin_action') + ' <i class="fa-solid fa-arrow-right"></i></a></div>' +
+        '</div>' +
+      '</div>' +
+      '<div class="alert-tile" onclick="window.location=\'teacher-attendance.html\'" style="cursor:pointer">' +
+        '<div class="at-icon red"><i class="fa-solid fa-triangle-exclamation"></i></div>' +
+        '<div class="at-body">' +
+          '<div class="at-label">' + T('alert_missing_label') + '</div>' +
+          '<div class="at-title">' + T('alert_missing_title') + '</div>' +
+          '<div class="at-desc">' + T('alert_missing_desc') + '</div>' +
+          '<div class="at-action"><a>' + T('alert_missing_action') + ' <i class="fa-solid fa-arrow-right"></i></a></div>' +
+        '</div>' +
+      '</div>' +
+      '<div class="alert-tile" onclick="window.location=\'teacher-absence-details.html?id=ST-1082\'" style="cursor:pointer">' +
+        '<div class="at-icon indigo"><i class="fa-solid fa-pen-to-square"></i></div>' +
+        '<div class="at-body">' +
+          '<div class="at-label">' + T('alert_corr_label') + '</div>' +
+          '<div class="at-title">' + T('alert_corr_title') + '</div>' +
+          '<div class="at-desc">' + T('alert_corr_desc') + '</div>' +
+          '<div class="at-action"><a>' + T('alert_corr_action') + ' <i class="fa-solid fa-arrow-right"></i></a></div>' +
+        '</div>' +
+      '</div>';
+  }
+
+  function renderTimeline() {
+    document.getElementById('timelineList').innerHTML = TIMELINE.map(function(p){
+      var pillClass = p.state === 'done' ? 'done' : p.state === 'active' ? 'active' : 'upcoming';
+      var pillLabel = p.state === 'done' ? T('submitted') : p.state === 'active' ? T('in_progress') : T('upcoming');
+      var summary = p.summaryKey ? T(p.summaryKey) : '—';
+      var summaryStyle = p.miss ? 'color:#DC2626;font-weight:600' : 'color:#718096';
+      return '<div class="tl-row">' +
+        '<div><div class="tl-time">' + T(p.timeKey) + '</div><div class="tl-time-sub">' + T(p.periodKey) + '</div></div>' +
+        '<div class="tl-marker"><span class="dot ' + p.state + '"></span></div>' +
+        '<div>' +
+          '<div class="tl-name">' + T(p.classKey) + '</div>' +
+          '<div class="tl-sub" style="' + summaryStyle + '">' + summary + '</div>' +
+        '</div>' +
+        '<span class="tl-pill ' + pillClass + '">' + pillLabel + '</span>' +
+      '</div>';
+    }).join('');
+  }
+
+  function renderCorrections() {
+    document.getElementById('correctionsList').innerHTML = CORRECTIONS.map(function(c){
+      return '<div class="corr-item" onclick="window.location=\'teacher-absence-details.html?id=' + c.studentId + '\'">' +
+        '<div class="corr-icon"><i class="fa-solid fa-pen-to-square"></i></div>' +
+        '<div class="corr-body">' +
+          '<div class="corr-title">' + T(c.titleKey) + '</div>' +
+          '<div class="corr-change">' +
+            '<span class="old">' + T(c.oldKey) + '</span>' +
+            '<i class="fa-solid fa-arrow-right"></i>' +
+            '<span class="new">' + T(c.newKey) + '</span>' +
+          '</div>' +
+        '</div>' +
+        '<div class="corr-time">' + T(c.timeKey) + '</div>' +
+      '</div>';
+    }).join('');
+  }
+
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg; t.classList.add('show');
+    setTimeout(function(){ t.classList.remove('show'); }, 2500);
+  }
+
+  function ctRerender(){ renderHero(); renderAlerts(); renderTimeline(); renderCorrections(); }
+  window.__ct_page_rerender = ctRerender;
+
+  renderHero();
+  renderAlerts();
+  renderTimeline();
+  renderCorrections();
+</script>
+<!-- Prototype cross-portal switcher -->
+<div id="proto-switcher" style="position:fixed;bottom:16px;right:16px;z-index:9999;background:rgba(15,37,70,.95);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.1);padding:5px;border-radius:999px;box-shadow:0 8px 24px rgba(0,0,0,.25);font-family:'Segoe UI',system-ui,sans-serif;display:flex;gap:2px;align-items:center;"><span style="color:rgba(255,255,255,.4);font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:0 6px 0 10px;">Prototype</span><a href="index.html" style="display:inline-flex;align-items:center;gap:4px;padding:6px 12px;border-radius:999px;font-size:12px;font-weight:600;text-decoration:none;letter-spacing:.02em;transition:all .15s;background:transparent;color:#CBD5E0;">Index</a><a href="admin-dashboard.html" style="display:inline-flex;align-items:center;gap:4px;padding:6px 12px;border-radius:999px;font-size:12px;font-weight:600;text-decoration:none;letter-spacing:.02em;transition:all .15s;background:transparent;color:#CBD5E0;">Admin</a><a href="teacher-dashboard.html" style="display:inline-flex;align-items:center;gap:4px;padding:6px 12px;border-radius:999px;font-size:12px;font-weight:600;text-decoration:none;letter-spacing:.02em;transition:all .15s;background:#2E7DD1;color:#fff;">Teacher</a><a href="parent-app.html" style="display:inline-flex;align-items:center;gap:4px;padding:6px 12px;border-radius:999px;font-size:12px;font-weight:600;text-decoration:none;letter-spacing:.02em;transition:all .15s;background:transparent;color:#CBD5E0;">Parent</a><span style="color:rgba(255,255,255,.2);padding:0 4px;">|</span><a href="#" class="lang-btn" data-lang="en" onclick="event.preventDefault();window.__ct_i18n.setLang('en');" style="display:inline-flex;align-items:center;gap:4px;padding:6px 10px;border-radius:999px;font-size:11px;font-weight:700;text-decoration:none;letter-spacing:.04em;background:#2E7DD1;color:#fff;">EN</a><a href="#" class="lang-btn" data-lang="fr" onclick="event.preventDefault();window.__ct_i18n.setLang('fr');" style="display:inline-flex;align-items:center;gap:4px;padding:6px 10px;border-radius:999px;font-size:11px;font-weight:700;text-decoration:none;letter-spacing:.04em;background:transparent;color:#CBD5E0;">FR</a></div>
+
+<script id="i18n-core">
+(function(){
+  function getLang(){
+    var p = new URLSearchParams(window.location.search);
+    return p.get('lang') === 'fr' ? 'fr' : 'en';
+  }
+  function setLangUrl(href, lang){
+    if(!href || href.startsWith('http') || href.startsWith('#') || href.startsWith('javascript:')) return href;
+    var base = href.split('?')[0].split('#')[0];
+    var hash = href.indexOf('#') >= 0 ? href.substring(href.indexOf('#')) : '';
+    if(!base.endsWith('.html')) return href;
+    return base + (lang === 'fr' ? '?lang=fr' : '') + hash;
+  }
+  function applyLang(){
+    var lang = getLang();
+    document.documentElement.lang = lang;
+    document.body && (document.body.dataset.lang = lang);
+    // Swap text content based on data-en / data-fr
+    document.querySelectorAll('[data-en]').forEach(function(el){
+      var val = el.getAttribute('data-' + lang);
+      if(val !== null){
+        if(el.hasAttribute('data-html')) el.innerHTML = val;
+        else el.textContent = val;
+      }
+    });
+    // Swap placeholders
+    document.querySelectorAll('[data-placeholder-en]').forEach(function(el){
+      var val = el.getAttribute('data-placeholder-' + lang);
+      if(val !== null) el.setAttribute('placeholder', val);
+    });
+    // Swap attributes (title, aria-label)
+    document.querySelectorAll('[data-title-en]').forEach(function(el){
+      var val = el.getAttribute('data-title-' + lang);
+      if(val !== null) el.setAttribute('title', val);
+    });
+    // Update all internal HTML links to carry the lang param
+    document.querySelectorAll('a[href]').forEach(function(a){
+      a.setAttribute('href', setLangUrl(a.getAttribute('href'), lang));
+    });
+    // Update toggle visual state
+    document.querySelectorAll('.lang-btn').forEach(function(btn){
+      var on = btn.getAttribute('data-lang') === lang;
+      btn.style.background = on ? '#2E7DD1' : 'transparent';
+      btn.style.color = on ? '#fff' : '#CBD5E0';
+    });
+    // Page-specific dynamic re-render (tables, lists, etc.)
+    if(typeof window.__ct_page_rerender === 'function') window.__ct_page_rerender();
+  }
+  function setLang(lang){
+    var p = new URLSearchParams(window.location.search);
+    if(lang === 'fr') p.set('lang', 'fr'); else p.delete('lang');
+    var qs = p.toString();
+    var newUrl = window.location.pathname + (qs ? '?' + qs : '') + window.location.hash;
+    window.history.replaceState({}, '', newUrl);
+    applyLang();
+  }
+  window.__ct_i18n = { getLang: getLang, applyLang: applyLang, setLang: setLang };
+  if(document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', applyLang);
+  } else {
+    applyLang();
+  }
+})();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ClassTrack — Declare a future absence</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="stylesheet" href="assets/styles.css">
+</head>
+<body>
+
+<a href="#main" class="skip-link" data-en="Skip to content" data-fr="Aller au contenu">Skip to content</a>
+
+<div class="app">
+<aside id="sidebar"></aside>
+<main id="main" class="shell" data-state="form">
+
+  <a href="future-absences.html" class="back-link">
+    <i class="fa-solid fa-arrow-left"></i>
+    <span data-en="Future absences" data-fr="Absences futures">Future absences</span>
+  </a>
+
+  <section class="hero-row">
+    <div>
+      <h1 class="hero-row__title" data-en="Declare a future absence" data-fr="Déclarer une absence future">Declare a future absence</h1>
+      <p class="hero-row__sub" data-en="Letting the school know in advance saves you a notification on the day and pre-justifies the absence." data-fr="Prévenir à l'avance évite une notification le jour même et pré-justifie l'absence.">Letting the school know in advance saves you a notification on the day and pre-justifies the absence.</p>
+    </div>
+  </section>
+
+  <div class="grid-2-1">
+
+    <div class="stack">
+
+      <section class="card">
+        <div class="card__h">
+          <div>
+            <div class="card__title" data-en="Who will be absent?" data-fr="Qui sera absent ?">Who will be absent?</div>
+            <div class="card__sub" data-en="Pick one or more — useful for sibling appointments." data-fr="Choisissez un ou plusieurs.">Pick one or more — useful for sibling appointments.</div>
+          </div>
+        </div>
+        <div class="card__b">
+          <div class="who-grid">
+            <label class="pick-card is-active">
+              <input type="checkbox" checked style="position: absolute; opacity: 0;">
+              <div class="avatar avatar--blue avatar--lg">AC</div>
+              <div class="pick-card__body">
+                <div class="font-bold">Aaliyah Carter</div>
+                <div class="fs-sm text-muted" data-en="Grade 7A · Secondary" data-fr="7e A · Secondaire">Grade 7A · Secondary</div>
+              </div>
+              <i class="fa-solid fa-circle-check pick-card__check"></i>
+            </label>
+            <label class="pick-card">
+              <input type="checkbox" style="position: absolute; opacity: 0;">
+              <div class="avatar avatar--orange avatar--lg">JC</div>
+              <div class="pick-card__body">
+                <div class="font-bold">Jaylen Carter</div>
+                <div class="fs-sm text-muted" data-en="Grade 4B · Elementary" data-fr="4e B · Primaire">Grade 4B · Elementary</div>
+              </div>
+              <i class="fa-regular fa-circle pick-card__check pick-card__check--empty"></i>
+            </label>
+          </div>
+        </div>
+      </section>
+
+      <div class="grid-2">
+        <section class="card">
+          <div class="card__h">
+            <div class="card__title" data-en="When?" data-fr="Quand ?">When?</div>
+          </div>
+          <div class="card__b">
+            <div class="stack">
+              <div class="row gap-2">
+                <button class="chip is-active" type="button" data-en="Single day" data-fr="Une journée">Single day</button>
+                <button class="chip" type="button" data-en="Date range" data-fr="Plage">Date range</button>
+              </div>
+              <div class="field">
+                <label class="field__label" for="date1" data-en="Date" data-fr="Date">Date</label>
+                <input id="date1" class="input" type="date" value="2026-05-22">
+              </div>
+              <div class="field">
+                <label class="field__label" data-en="How long?" data-fr="Combien de temps ?">How long?</label>
+                <div class="row gap-2" style="flex-wrap: wrap;">
+                  <button class="chip is-active" type="button" data-en="Full day" data-fr="Journée complète">Full day</button>
+                  <button class="chip" type="button" data-en="Morning only" data-fr="Matin">Morning only</button>
+                  <button class="chip" type="button" data-en="Afternoon only" data-fr="Après-midi">Afternoon only</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="card">
+          <div class="card__h">
+            <div class="card__title" data-en="Why?" data-fr="Pourquoi ?">Why?</div>
+          </div>
+          <div class="card__b">
+            <div class="stack">
+              <div class="field">
+                <label class="field__label" for="reasonType2" data-en="Reason" data-fr="Motif">Reason</label>
+                <select class="select" id="reasonType2">
+                  <option value="medical-appointment" selected data-en="Medical appointment" data-fr="Rendez-vous médical">Medical appointment</option>
+                  <option value="illness" data-en="Planned sick day" data-fr="Journée maladie">Planned sick day</option>
+                  <option value="family-personal" data-en="Family event" data-fr="Événement familial">Family event</option>
+                  <option value="religious-observance" data-en="Religious observance" data-fr="Observance religieuse">Religious observance</option>
+                  <option value="bereavement" data-en="Bereavement" data-fr="Décès">Bereavement</option>
+                  <option value="travel" data-en="Family travel" data-fr="Voyage familial">Family travel</option>
+                  <option value="other" data-en="Other" data-fr="Autre">Other</option>
+                </select>
+              </div>
+              <div class="field">
+                <label class="field__label" for="reasonText2" data-en="A short note (optional)" data-fr="Un mot (facultatif)">A short note (optional)</label>
+                <textarea class="textarea" id="reasonText2" rows="4" data-placeholder-en="e.g. Family medical appointment at 10 AM." data-placeholder-fr="p. ex. Rendez-vous médical à 10 h." placeholder="">Family medical appointment at 10:00 AM.</textarea>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <div class="form-actions">
+        <a href="dashboard.html" class="btn btn--ghost" data-en="Cancel" data-fr="Annuler">Cancel</a>
+        <button type="button" class="btn btn--primary btn--lg" onclick="handleSubmit()">
+          <i class="fa-solid fa-calendar-check"></i>
+          <span data-en="Send to school" data-fr="Envoyer à l'école">Send to school</span>
+        </button>
+      </div>
+
+    </div>
+
+    <aside class="rail" style="position: sticky; top: var(--s-4); align-self: flex-start;">
+      <div class="card">
+        <div class="rail-card__h">
+          <div class="rail-card__title" data-en="You're declaring" data-fr="Vous déclarez">You're declaring</div>
+        </div>
+        <div class="card__b" style="padding: var(--s-4); display: flex; flex-direction: column; gap: var(--s-3);">
+          <div class="summary-row">
+            <div class="summary-row__l" data-en="Child" data-fr="Enfant">Child</div>
+            <div class="summary-row__r row gap-2">
+              <div class="avatar avatar--blue avatar--sm">AC</div>
+              <strong>Aaliyah</strong>
+            </div>
+          </div>
+          <div class="summary-row">
+            <div class="summary-row__l" data-en="Date" data-fr="Date">Date</div>
+            <div class="summary-row__r font-semibold" data-en="Fri, May 22, 2026" data-fr="Ven. 22 mai 2026">Fri, May 22, 2026</div>
+          </div>
+          <div class="summary-row">
+            <div class="summary-row__l" data-en="Duration" data-fr="Durée">Duration</div>
+            <div class="summary-row__r font-semibold" data-en="Full day · 4 periods" data-fr="Journée · 4 périodes">Full day · 4 periods</div>
+          </div>
+          <div class="summary-row">
+            <div class="summary-row__l" data-en="Reason" data-fr="Motif">Reason</div>
+            <div class="summary-row__r font-semibold" data-en="Medical appointment" data-fr="Rendez-vous médical">Medical appointment</div>
+          </div>
+          <div class="summary-row">
+            <div class="summary-row__l" data-en="Status" data-fr="Statut">Status</div>
+            <div class="summary-row__r"><span class="status status--excused"><i class="fa-solid fa-check"></i> <span data-en="Pre-justified" data-fr="Pré-motivée">Pre-justified</span></span></div>
+          </div>
+          <div class="divider"></div>
+          <div class="banner banner--success" style="padding: var(--s-3); font-size: var(--fs-sm);">
+            <div class="banner__icon" style="width: 32px; height: 32px; font-size: var(--fs-md);"><i class="fa-solid fa-circle-check"></i></div>
+            <div class="banner__body">
+              <div class="banner__title fs-sm" data-en="No notification on the day" data-fr="Aucune notification le jour même">No notification on the day</div>
+              <div class="banner__sub fs-xs" data-en="Because you declared in advance." data-fr="Parce que vous avez déclaré à l'avance.">Because you declared in advance.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+  </div>
+
+</main>
+
+<main id="successState" class="shell shell--narrow" style="display: none;">
+  <section class="card" style="text-align: center;">
+    <div class="card__b" style="padding: var(--s-7) var(--s-5);">
+      <div style="width: 80px; height: 80px; border-radius: 50%; background: var(--c-success-tint); color: var(--c-success); display: flex; align-items: center; justify-content: center; margin: 0 auto var(--s-4); font-size: 36px;">
+        <i class="fa-solid fa-calendar-check"></i>
+      </div>
+      <h2 style="font-size: var(--fs-2xl); font-weight: 700; margin-bottom: var(--s-2);" data-en="All set!" data-fr="C'est fait !">All set!</h2>
+      <p class="text-muted" style="max-width: 460px; margin: 0 auto var(--s-5);" data-en="Aaliyah's absence on Friday, May 22 is now pre-recorded with your reason. You won't get a notification that day." data-fr="L'absence d'Aaliyah du vendredi 22 mai est maintenant pré-enregistrée avec votre motif.">Aaliyah's absence on Friday, May 22 is now pre-recorded with your reason. You won't get a notification that day.</p>
+      <div class="row gap-2" style="justify-content: center;">
+        <a href="future-absences.html" class="btn btn--secondary" data-en="View future absences" data-fr="Voir les absences">View future absences</a>
+        <a href="dashboard.html" class="btn btn--primary" data-en="Back to home" data-fr="Retour à l'accueil">Back to home</a>
+      </div>
+    </div>
+  </section>
+</main>
+</div>
+
+<style>
+  .hero-row { display: flex; align-items: center; justify-content: space-between; gap: var(--s-4); flex-wrap: wrap; }
+  .hero-row__title { font-size: var(--fs-3xl); font-weight: 700; letter-spacing: -0.015em; }
+  .hero-row__sub { color: var(--c-ink-muted); font-size: var(--fs-lg); margin-top: 6px; max-width: 720px; }
+  .who-grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s-3); }
+  @media (max-width: 600px) { .who-grid { grid-template-columns: 1fr; } }
+  .pick-card { position: relative; display: flex; align-items: center; gap: var(--s-3); padding: var(--s-3); border: 1.5px solid var(--c-border); border-radius: var(--r-md); background: var(--c-surface); cursor: pointer; }
+  .pick-card:hover { border-color: var(--c-border-strong); }
+  .pick-card.is-active { border-color: var(--c-brand); background: var(--c-brand-tint); }
+  .pick-card__body { flex: 1; min-width: 0; }
+  .pick-card__check { color: var(--c-brand); font-size: 20px; flex-shrink: 0; }
+  .pick-card__check--empty { color: var(--c-border-strong); }
+  .form-actions { display: flex; justify-content: space-between; align-items: center; gap: var(--s-3); flex-wrap: wrap; }
+  .form-actions > .btn:first-child { margin-right: auto; }
+  .summary-row { display: flex; align-items: center; justify-content: space-between; gap: var(--s-3); font-size: var(--fs-sm); }
+  .summary-row__l { color: var(--c-ink-muted); }
+  .summary-row__r { text-align: right; }
+</style>
+
+<script src="assets/app.js"></script>
+<script>
+  document.querySelectorAll('.pick-card').forEach(function(el){
+    el.addEventListener('click', function(e){
+      e.preventDefault();
+      el.classList.toggle('is-active');
+      var c=el.querySelector('.pick-card__check');
+      if(el.classList.contains('is-active')) c.className='fa-solid fa-circle-check pick-card__check';
+      else c.className='fa-regular fa-circle pick-card__check pick-card__check--empty';
+    });
+  });
+  document.querySelectorAll('.chip').forEach(function(el){
+    el.addEventListener('click', function(){
+      var group=el.parentElement;
+      if(group){group.querySelectorAll('.chip').forEach(function(c){c.classList.remove('is-active');}); el.classList.add('is-active');}
+    });
+  });
+  function handleSubmit(){
+    showToast(window.__ct_i18n.getLang()==='fr'?'Envoi…':'Sending…');
+    setTimeout(function(){
+      document.querySelector('[data-state="form"]').style.display='none';
+      document.getElementById('successState').style.display='flex';
+      window.scrollTo({top:0,behavior:'smooth'});
+    },800);
+  }
+  __ct_mountSidebar('declare');
+  __ct_mountProtoSwitcher('parent');
+</script>
+</body>
+</html>

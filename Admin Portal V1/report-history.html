@@ -1,0 +1,2726 @@
+<!DOCTYPE html>
+<html lang="en-CA">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ClassTrack — Board Admin · Report History</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+  :root{--c-bg:#F4F6FA;--c-surface:#FFFFFF;--c-surface-2:#F8FAFC;--c-surface-alt:#EEF2F7;--c-sidebar:#0F2546;--c-sidebar-2:#0A1B36;--c-sidebar-hover:rgba(255,255,255,0.08);--c-sidebar-active:#1B5DAF;--c-border:#D6DBE2;--c-border-2:#E5E8EE;--c-border-strong:#A6ADBB;--c-ink:#0F2546;--c-ink-muted:#475467;--c-ink-subtle:#5C6470;--c-brand:#1B5DAF;--c-brand-ink:#0E2E55;--c-brand-tint:#E8F0FA;--c-success:#1F7A3F;--c-success-tint:#E6F4EC;--c-warning:#9A4708;--c-warning-tint:#FCF1DD;--c-warning-bord:#B97F38;--c-danger:#B42318;--c-danger-tint:#FCE9E7;--c-info:#0E5C8A;--c-info-tint:#E0EFF7;--c-neutral-tint:#EEF1F5;--c-purple-tint:#EEEAFE;--c-purple:#3F22A6;--c-focus:#FFB400;--ff:"Segoe UI",system-ui,-apple-system,sans-serif;--fs-xs:12px;--fs-sm:13px;--fs-md:14px;--fs-lg:16px;--shadow-md:0 4px 12px rgba(15,37,70,0.08);}
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}html,body{height:100%;}
+  body{font-family:var(--ff);background:var(--c-bg);color:var(--c-ink);font-size:var(--fs-md);line-height:1.55;-webkit-font-smoothing:antialiased;}
+  a{color:var(--c-brand);text-decoration:none;}a:hover{text-decoration:underline;}button{font-family:inherit;cursor:pointer;}
+  .wf-banner{background:#F0EFFE;border-bottom:1px solid #C8C0F0;color:#3F22A6;font-size:12px;padding:6px 16px;display:flex;align-items:center;justify-content:space-between;gap:16px;}
+  .wf-banner__left{display:flex;align-items:center;gap:8px;}.wf-banner a{color:#3F22A6;}
+  .app{display:grid;grid-template-columns:240px 1fr;min-height:calc(100vh - 32px);}
+  .sidebar{background:linear-gradient(180deg,var(--c-sidebar) 0%,var(--c-sidebar-2) 100%);color:rgba(255,255,255,0.85);display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow-y:auto;}
+  .sidebar__logo{padding:24px 16px 16px;border-bottom:1px solid rgba(255,255,255,0.08);display:flex;align-items:center;gap:12px;}
+  .sidebar__logo-mark{width:36px;height:36px;background:var(--c-sidebar-active);border-radius:10px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:16px;}
+  .sidebar__logo-text{color:#fff;font-size:16px;font-weight:700;}.sidebar__logo-sub{color:rgba(255,255,255,0.6);font-size:11px;margin-top:2px;}
+  .sidebar__role-badge{margin:8px 16px 0;background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.2);border-radius:999px;padding:3px 10px;font-size:10px;font-weight:700;color:rgba(255,255,255,0.9);letter-spacing:0.06em;text-transform:uppercase;text-align:center;}
+  .sidebar__section{padding:16px 12px 4px;}.sidebar__section-label{text-transform:uppercase;font-size:10px;font-weight:700;letter-spacing:0.12em;color:rgba(255,255,255,0.45);padding:0 12px;margin-bottom:4px;}
+  .nav-item{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:6px;color:rgba(255,255,255,0.78);font-size:13px;font-weight:500;min-height:36px;text-decoration:none;}
+  .nav-item:hover{background:var(--c-sidebar-hover);color:#fff;text-decoration:none;}.nav-item.is-active{background:var(--c-sidebar-active);color:#fff;font-weight:600;}
+  .nav-item .nav-icon{width:20px;text-align:center;font-size:14px;}.nav-item .nav-badge{margin-left:auto;background:var(--c-danger);color:#fff;font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px;}.nav-item .nav-badge--neutral{background:rgba(255,255,255,0.18);color:#fff;}.nav-item .nav-badge--warn{background:var(--c-warning);color:#fff;}
+  .sidebar__user{margin-top:auto;padding:12px 16px;border-top:1px solid rgba(255,255,255,0.08);display:flex;align-items:center;gap:12px;}
+  .avatar{width:36px;height:36px;border-radius:999px;background:var(--c-brand-tint);color:var(--c-brand-ink);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;flex-shrink:0;}
+  .sidebar__user-name{color:#fff;font-size:13px;font-weight:600;}.sidebar__user-role{color:rgba(255,255,255,0.6);font-size:11px;}
+  .main{display:flex;flex-direction:column;min-width:0;}
+  .topbar{background:var(--c-surface);border-bottom:1px solid var(--c-border);display:flex;align-items:center;gap:16px;padding:12px 24px;position:sticky;top:0;z-index:50;min-height:64px;}
+  .topbar__crumbs{display:flex;align-items:center;gap:8px;color:var(--c-ink-subtle);font-size:12px;}.topbar__crumbs strong{color:var(--c-ink);font-weight:600;}
+  .topbar__scope{margin-left:auto;background:var(--c-purple-tint);color:var(--c-purple);border:1px solid #C8C0F0;padding:6px 12px;border-radius:6px;font-size:12px;font-weight:600;display:inline-flex;align-items:center;gap:8px;}
+  .topbar__actions{display:flex;align-items:center;gap:8px;}
+  .icon-btn{width:36px;height:36px;border-radius:6px;background:transparent;border:none;color:var(--c-ink-muted);display:inline-flex;align-items:center;justify-content:center;position:relative;font-size:14px;cursor:pointer;}.icon-btn:hover{background:var(--c-surface-alt);}
+  .icon-btn__count{position:absolute;top:2px;right:2px;background:var(--c-danger);color:#fff;font-size:10px;font-weight:700;min-width:18px;height:18px;border-radius:999px;display:flex;align-items:center;justify-content:center;padding:0 4px;border:2px solid var(--c-surface);}
+  .lang-toggle{display:inline-flex;border:1px solid var(--c-border-strong);border-radius:6px;overflow:hidden;}.lang-toggle button{background:var(--c-surface);border:0;padding:6px 12px;font-size:12px;font-weight:700;color:var(--c-ink-muted);min-height:32px;}.lang-toggle button[aria-pressed="true"]{background:var(--c-brand);color:#fff;}
+  .user-chip{display:inline-flex;align-items:center;gap:8px;padding:4px 10px 4px 4px;border:1px solid var(--c-border);border-radius:999px;font-size:12px;color:var(--c-ink-muted);min-height:36px;}
+  .content{padding:24px;flex:1;display:flex;flex-direction:column;gap:16px;}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:8px 14px;border-radius:6px;font-size:13px;font-weight:600;border:1px solid transparent;min-height:36px;transition:background 0.12s;text-decoration:none;cursor:pointer;}
+  .btn--primary{background:var(--c-brand);color:#fff;border-color:var(--c-brand);}.btn--primary:hover{background:var(--c-brand-ink);}
+  .btn--secondary{background:var(--c-surface);color:var(--c-ink);border-color:var(--c-border-strong);}.btn--secondary:hover{background:var(--c-surface-alt);}
+  .btn--ghost{background:transparent;color:var(--c-brand);}.btn--ghost:hover{background:var(--c-brand-tint);}
+  .btn--sm{padding:4px 10px;min-height:28px;font-size:12px;}
+  .btn--danger{background:var(--c-danger);color:#fff;border-color:var(--c-danger);}
+  .card{background:var(--c-surface);border:1px solid var(--c-border);border-radius:10px;overflow:hidden;display:flex;flex-direction:column;}
+  .card__h{padding:12px 16px;border-bottom:1px solid var(--c-border-2);display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;}
+  .card__title{font-size:14px;font-weight:700;color:var(--c-ink);display:flex;align-items:center;gap:8px;}
+  .card__sub{font-size:12px;color:var(--c-ink-subtle);margin-top:2px;}
+  .card__footer{padding:8px 16px;background:var(--c-surface-2);border-top:1px solid var(--c-border-2);display:flex;align-items:center;justify-content:space-between;font-size:12px;color:var(--c-ink-subtle);}
+  .status{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:999px;font-size:11px;font-weight:700;border:1px solid transparent;}
+  .status--ok{background:var(--c-success-tint);color:var(--c-success);border-color:#4F9A6C;}
+  .status--warn{background:var(--c-warning-tint);color:var(--c-warning);border-color:var(--c-warning-bord);}
+  .status--alert{background:var(--c-danger-tint);color:var(--c-danger);border-color:#B0625A;}
+  .status--info{background:var(--c-info-tint);color:var(--c-info);border-color:#5B96BC;}
+  .status--neutral{background:var(--c-neutral-tint);color:var(--c-ink-muted);border-color:var(--c-border-strong);}
+  .data-table{width:100%;border-collapse:collapse;font-size:13px;}
+  .data-table thead tr{border-bottom:2px solid var(--c-border);}
+  .data-table thead th{padding:8px 12px;text-align:left;font-size:12px;font-weight:700;color:var(--c-ink-muted);background:var(--c-surface-2);white-space:nowrap;}
+  .data-table tbody tr{border-bottom:1px solid var(--c-border-2);}
+  .data-table tbody tr:hover{background:var(--c-surface-2);}
+  .data-table td{padding:10px 12px;vertical-align:middle;}
+  .cell-primary{font-weight:600;color:var(--c-ink);}
+  .cell-sub{font-size:11px;color:var(--c-ink-subtle);margin-top:2px;}
+  .filter-bar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:12px 16px;border-bottom:1px solid var(--c-border-2);background:var(--c-surface-2);}
+  .filter-bar select,.filter-bar input{padding:7px 12px;border:1px solid var(--c-border-strong);border-radius:6px;font-size:13px;background:var(--c-surface);color:var(--c-ink);}
+  .report-icon{width:40px;height:40px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;}
+  .empty-state{padding:48px 24px;text-align:center;color:var(--c-ink-subtle);}
+  .empty-state i{font-size:32px;color:var(--c-border-strong);margin-bottom:12px;}
+  .empty-state p{font-size:14px;margin-top:4px;}
+  /* Modal */
+  .modal-backdrop{position:fixed;inset:0;background:rgba(15,37,70,0.48);z-index:100;display:flex;align-items:center;justify-content:center;padding:16px;}
+  .modal{background:var(--c-surface);border-radius:14px;box-shadow:0 8px 28px rgba(15,37,70,0.18);width:100%;max-width:920px;display:flex;flex-direction:column;max-height:92vh;}
+  .modal__b{padding:20px 24px;display:flex;flex-direction:column;gap:16px;overflow-y:auto;}
+  .modal__f{padding:12px 24px;border-top:1px solid #E5E8EE;display:flex;justify-content:space-between;align-items:center;flex-shrink:0;}
+  .icon-btn{width:36px;height:36px;border-radius:6px;background:transparent;border:none;color:var(--c-ink-muted);display:inline-flex;align-items:center;justify-content:center;font-size:14px;cursor:pointer;}
+  .icon-btn:hover{background:var(--c-surface-alt);}
+  .kpi-card{background:var(--c-surface-2);border:1px solid var(--c-border-2);border-radius:8px;padding:12px 14px;}
+  .kpi-label{font-size:10px;font-weight:700;color:var(--c-ink-muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px;}
+  .kpi-value{font-size:24px;font-weight:800;color:var(--c-ink);line-height:1.1;}
+  .kpi-sub{font-size:11px;color:var(--c-ink-subtle);margin-top:2px;}
+</style>
+<script>
+  var reportDefs = {
+    'unjustified-absences':{
+      title:'Unjustified Absences',
+      sub:'Board-wide · unresolved >24h · current term',
+      iconClass:'fa-clock', iconBg:'#FCE9E7', iconColor:'#B42318'
+    },
+    'attendance-summary':{
+      title:'Attendance Summary',
+      sub:'Board-wide · by date range · student level',
+      iconClass:'fa-chart-column', iconBg:'#E8F0FA', iconColor:'#1B5DAF'
+    },
+    'teacher-submission':{
+      title:'Teacher Submission Compliance',
+      sub:'Board-wide · on-time submission rate · current term',
+      iconClass:'fa-chalkboard-user', iconBg:'#FCF1DD', iconColor:'#9A4708'
+    },
+            'chronic-absenteeism':{
+      title:'Chronic Absenteeism',
+      sub:'Board-wide · students missing 10% or more of school days · current term',
+      iconClass:'fa-user-clock', iconBg:'#FCE9E7', iconColor:'#B42318'
+    },
+    'absence-trends':{
+      title:'Absence Trends',
+      sub:'Board-wide · week-over-week attendance rate · current term',
+      iconClass:'fa-arrow-trend-up', iconBg:'#E0EFF7', iconColor:'#0E5C8A'
+    },
+        'open-disputes':{
+      title:'Open Disputes',
+      sub:'Board-wide · unresolved absence disputes · current term',
+      iconClass:'fa-triangle-exclamation', iconBg:'#FCE9E7', iconColor:'#B42318'
+    },
+    'grade-threshold':{
+      title:'Grade Threshold',
+      sub:'Board-wide · Grades 7–12 · Ontario §2.1 absence-to-grade impact · current term',
+      iconClass:'fa-chart-line', iconBg:'#FCF1DD', iconColor:'#9A4708'
+    }
+  };
+
+  var historyData = {
+    'unjustified-absences':[
+      {date:'Jun 19, 2026',time:'10:15 AM',term:'Term 1 · 2025–26',scope:'All Schools',status:'ready'},
+      {date:'Jun 12, 2026',time:'2:30 PM', term:'Term 1 · 2025–26',scope:'All Schools',status:'ready'},
+      {date:'Jun 5, 2026', time:'9:00 AM', term:'Term 1 · 2025–26',scope:'École Notre-Dame',schoolKey:'Notre-Dame',status:'ready'},
+      {date:'May 29, 2026',time:'11:45 AM',term:'Term 1 · 2025–26',scope:'All Schools',status:'ready'},
+      {date:'May 22, 2026',time:'3:15 PM', term:'Term 1 · 2025–26',scope:'All Schools',status:'ready'},
+      {date:'May 8, 2026', time:'10:00 AM',term:'Term 2 · 2024–25',scope:'All Schools',status:'ready'}
+    ],
+    'attendance-summary':[
+      {date:'Jun 19, 2026',time:'9:00 AM', term:'Term 1 · 2025–26',scope:'All Schools',       dateFrom:'Jun 1, 2026', dateTo:'Jun 19, 2026',status:'ready'},
+      {date:'Jun 6, 2026', time:'9:00 AM', term:'Term 1 · 2025–26',scope:'All Schools',       dateFrom:'May 1, 2026',dateTo:'Jun 6, 2026', status:'ready'},
+      {date:'May 9, 2026', time:'9:00 AM', term:'Term 1 · 2025–26',scope:'École Notre-Dame',  dateFrom:'May 1, 2026',dateTo:'May 9, 2026', schoolKey:'Notre-Dame',status:'ready'},
+      {date:'May 2, 2026', time:'9:00 AM', term:'Term 1 · 2025–26',scope:'All Schools',       dateFrom:'Apr 1, 2026',dateTo:'May 2, 2026', status:'ready'},
+      {date:'Apr 4, 2026', time:'9:00 AM', term:'Term 1 · 2025–26',scope:'École Sainte-Croix',dateFrom:'Mar 1, 2026',dateTo:'Apr 4, 2026', schoolKey:'Sainte-Croix',status:'ready'},
+      {date:'Jan 9, 2026', time:'9:00 AM', term:'Term 2 · 2024–25',scope:'All Schools',       dateFrom:'Sep 2, 2025',dateTo:'Jan 9, 2026', status:'ready'}
+    ],
+    'teacher-submission':[
+      {date:'Jun 19, 2026',time:'4:00 PM', term:'Term 1 · 2025–26',scope:'All Schools',status:'ready'},
+      {date:'Jun 12, 2026',time:'4:00 PM', term:'Term 1 · 2025–26',scope:'All Schools',status:'ready'},
+      {date:'Jun 5, 2026', time:'4:00 PM', term:'Term 1 · 2025–26',scope:'All Schools',status:'ready'},
+      {date:'May 29, 2026',time:'4:00 PM', term:'Term 1 · 2025–26',scope:'All Schools',status:'ready'},
+      {date:'May 22, 2026',time:'4:00 PM', term:'Term 1 · 2025–26',scope:'École Sainte-Croix',schoolKey:'Sainte-Croix',dateFrom:'May 1, 2026',dateTo:'May 22, 2026',status:'ready'}
+    ],
+            'chronic-absenteeism':[
+      {date:'Jun 19, 2026',time:'11:00 AM',term:'Term 1 · 2025–26',scope:'All Schools',      dateFrom:'Sep 2, 2025', dateTo:'Jun 19, 2026',status:'ready'},
+      {date:'Jun 1, 2026', time:'11:00 AM',term:'Term 1 · 2025–26',scope:'École Notre-Dame', dateFrom:'Sep 2, 2025', dateTo:'Jun 1, 2026', schoolKey:'Notre-Dame',status:'ready'},
+      {date:'May 1, 2026', time:'11:00 AM',term:'Term 1 · 2025–26',scope:'All Schools',      dateFrom:'Sep 2, 2025', dateTo:'May 1, 2026', status:'ready'},
+      {date:'Jan 20, 2026',time:'11:00 AM',term:'Term 2 · 2024–25',scope:'All Schools',      dateFrom:'Sep 2, 2024', dateTo:'Jan 20, 2026',status:'ready'}
+    ],
+    'absence-trends':[
+      {date:'Jun 19, 2026',time:'9:00 AM', term:'Term 1 · 2025–26',scope:'All Schools',      dateFrom:'Sep 2, 2025', dateTo:'Jun 19, 2026',status:'ready'},
+      {date:'Jun 5, 2026', time:'9:00 AM', term:'Term 1 · 2025–26',scope:'École Saint-Michel',schoolKey:'Saint-Michel',dateFrom:'Sep 2, 2025', dateTo:'Jun 5, 2026', status:'ready'},
+      {date:'May 1, 2026', time:'9:00 AM', term:'Term 1 · 2025–26',scope:'All Schools',      dateFrom:'Sep 2, 2025', dateTo:'May 1, 2026', status:'ready'},
+      {date:'Jan 15, 2026',time:'9:00 AM', term:'Term 2 · 2024–25',scope:'All Schools',      dateFrom:'Sep 2, 2025', dateTo:'Jan 15, 2026',status:'ready'}
+    ],
+        'open-disputes':[
+      {date:'Jun 19, 2026',time:'10:00 AM',term:'Term 1 · 2025–26',scope:'All Schools',     dateFrom:'Jun 1, 2026', dateTo:'Jun 19, 2026',status:'ready'},
+      {date:'Jun 12, 2026',time:'10:00 AM',term:'Term 1 · 2025–26',scope:'All Schools',     dateFrom:'Jun 1, 2026', dateTo:'Jun 12, 2026',status:'ready'},
+      {date:'Jun 5, 2026', time:'10:00 AM',term:'Term 1 · 2025–26',scope:'École Notre-Dame',schoolKey:'Notre-Dame',dateFrom:'May 1, 2026',dateTo:'Jun 5, 2026', status:'ready'},
+      {date:'May 29, 2026',time:'10:00 AM',term:'Term 1 · 2025–26',scope:'All Schools',     dateFrom:'May 1, 2026', dateTo:'May 29, 2026',status:'ready'},
+      {date:'May 22, 2026',time:'10:00 AM',term:'Term 1 · 2025–26',scope:'All Schools',     dateFrom:'May 1, 2026', dateTo:'May 22, 2026',status:'ready'}
+    ],
+    'grade-threshold':[
+      {date:'Jun 19, 2026',time:'8:00 AM', term:'Term 1 · 2025–26',scope:'All Schools',     status:'ready'},
+      {date:'Jun 1, 2026', time:'8:00 AM', term:'Term 1 · 2025–26',scope:'École Notre-Dame',  schoolKey:'Notre-Dame',status:'ready'},
+      {date:'May 1, 2026', time:'8:00 AM', term:'Term 1 · 2025–26',scope:'All Schools',     status:'ready'},
+      {date:'Jan 15, 2026',time:'8:00 AM', term:'Term 2 · 2024–25',scope:'All Schools',     status:'ready'}
+    ]
+  };
+
+  var scopeToKey = {
+    'All Schools':'all',
+    'École Notre-Dame':'Notre-Dame',
+    'École Sainte-Croix':'Sainte-Croix',
+    'École Saint-Michel':'Saint-Michel',
+    'École Saint-Luc':'Saint-Luc'
+  };
+
+  var unjustifiedData = {
+    'Notre-Dame':{
+      full:'École Notre-Dame',
+      records:[
+        {student:'Lena Bergeron',     id:'STD-2294',grade:'Gr 11',date:'Jun 18, 2026',subject:'Mathematics',          daysOpen:1,status:'unresolved'},
+        {student:'Lena Bergeron',     id:'STD-2294',grade:'Gr 11',date:'Jun 13, 2026',subject:'French Language Arts', daysOpen:6,status:'pending'},
+        {student:'Marcus Okonkwo',    id:'STD-1882',grade:'Gr 10',date:'Jun 18, 2026',subject:'Geography',            daysOpen:1,status:'unresolved'},
+        {student:'Aisha Ndiaye',      id:'STD-3340',grade:'Gr 9', date:'Jun 17, 2026',subject:'Mathematics',          daysOpen:2,status:'unresolved'},
+        {student:'Aisha Ndiaye',      id:'STD-3340',grade:'Gr 9', date:'Jun 16, 2026',subject:'Science',              daysOpen:3,status:'pending'}
+      ]
+    },
+    'Sainte-Croix':{
+      full:'École Sainte-Croix',
+      records:[
+        {student:'Omar Hassane',     id:'STD-1560',grade:'Gr 10',date:'Jun 18, 2026',subject:'Mathematics',           daysOpen:1,status:'unresolved'},
+        {student:'Camille Dubois',   id:'STD-2413',grade:'Gr 11',date:'Jun 17, 2026',subject:'English Language Arts', daysOpen:2,status:'pending'},
+        {student:'Priya Natarajan',  id:'STD-3107',grade:'Gr 9', date:'Jun 16, 2026',subject:'Science',               daysOpen:3,status:'unresolved'},
+        {student:'Elise Carrier',    id:'STD-3881',grade:'Gr 9', date:'Jun 15, 2026',subject:'French Language Arts',  daysOpen:4,status:'pending'}
+      ]
+    },
+    'Saint-Michel':{
+      full:'École Saint-Michel',
+      records:[
+        {student:'Fatou Diallo',      id:'STD-1723',grade:'Gr 11',date:'Jun 18, 2026',subject:'Science',  daysOpen:1,status:'unresolved'},
+        {student:'Thomas Villeneuve', id:'STD-0891',grade:'Gr 12',date:'Jun 17, 2026',subject:'History',  daysOpen:2,status:'pending'}
+      ]
+    },
+    'Saint-Luc':{
+      full:'École Saint-Luc',
+      records:[
+        {student:'Anais Cote-Leblanc',id:'STD-4412',grade:'Gr 8',date:'Jun 18, 2026',subject:'Mathematics',daysOpen:1,status:'unresolved'}
+      ]
+    }
+  };
+
+  function getSchoolStats(key){
+    var d = unjustifiedData[key];
+    if(!d) return null;
+    var students = {};
+    var totalDays = 0;
+    var maxDays = 0;
+    for(var i=0;i<d.records.length;i++){
+      var r = d.records[i];
+      students[r.id] = true;
+      totalDays += r.daysOpen;
+      if(r.daysOpen > maxDays) maxDays = r.daysOpen;
+    }
+    return {
+      full: d.full,
+      studentsAffected: Object.keys(students).length,
+      totalRecords: d.records.length,
+      avgDays: d.records.length > 0 ? (totalDays / d.records.length).toFixed(1) : '0.0',
+      longestDays: maxDays
+    };
+  }
+
+  function renderSchoolStatCells(stats){
+    var h = '';
+    h += '<div style="display:grid;grid-template-columns:repeat(4,1fr);border:1px solid #ccc;border-top:none;">';
+    h += '<div style="padding:10px 14px;border-right:1px solid #ccc;"><div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#555;margin-bottom:3px;">Students Affected</div><div style="font-size:22px;font-weight:800;color:#111;">' + stats.studentsAffected + '</div></div>';
+    h += '<div style="padding:10px 14px;border-right:1px solid #ccc;"><div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#555;margin-bottom:3px;">Unresolved Records</div><div style="font-size:22px;font-weight:800;color:#111;">' + stats.totalRecords + '</div></div>';
+    h += '<div style="padding:10px 14px;border-right:1px solid #ccc;"><div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#555;margin-bottom:3px;">Avg. Days Open</div><div style="font-size:22px;font-weight:800;color:#111;">' + stats.avgDays + '</div></div>';
+    h += '<div style="padding:10px 14px;"><div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#555;margin-bottom:3px;">Longest Outstanding</div><div style="font-size:22px;font-weight:800;color:#111;">' + stats.longestDays + ' days</div></div>';
+    h += '</div>';
+    return h;
+  }
+
+  function renderStudentSections(records){
+    if(records.length === 0){
+      return '<div style="border:1px solid #ccc;border-top:none;border-radius:0 0 6px 6px;padding:14px 16px;text-align:center;color:#333;font-size:12px;">No unresolved unjustified absences.</div>';
+    }
+
+    // Group records by student id, preserving first-seen order
+    var order = [];
+    var byStudent = {};
+    for(var i=0;i<records.length;i++){
+      var rec = records[i];
+      if(!byStudent[rec.id]){
+        order.push(rec.id);
+        byStudent[rec.id] = {student:rec.student, id:rec.id, grade:rec.grade, records:[]};
+      }
+      byStudent[rec.id].records.push(rec);
+    }
+
+    // Sort students by longest single absence desc
+    order.sort(function(a,b){
+      var maxA=0, maxB=0;
+      for(var j=0;j<byStudent[a].records.length;j++) if(byStudent[a].records[j].daysOpen>maxA) maxA=byStudent[a].records[j].daysOpen;
+      for(var j=0;j<byStudent[b].records.length;j++) if(byStudent[b].records[j].daysOpen>maxB) maxB=byStudent[b].records[j].daysOpen;
+      return maxB - maxA;
+    });
+
+    var h = '';
+
+    // ── Student summary table ──────────────────────────────────
+    h += '<div style="margin-bottom:16px;">';
+    h += '<div style="font-size:12px;font-weight:700;color:#111;padding:8px 0 6px;border-bottom:2px solid #111;margin-bottom:0;">Student Summary</div>';
+    h += '<div style="border:1px solid #ccc;border-top:none;border-radius:0 0 6px 6px;overflow:hidden;">';
+    h += '<table class="data-table" style="font-size:12px;"><thead><tr>';
+    h += '<th>Student</th><th>Grade</th><th style="text-align:center;">Unresolved Absences</th><th style="text-align:center;">Longest Open (days)</th><th>Most Recent Date</th>';
+    h += '</tr></thead><tbody>';
+    for(var s=0;s<order.length;s++){
+      var stu = byStudent[order[s]];
+      var maxDays=0, mostRecent='';
+      for(var j=0;j<stu.records.length;j++){
+        if(stu.records[j].daysOpen>maxDays) maxDays=stu.records[j].daysOpen;
+        if(!mostRecent || stu.records[j].date > mostRecent) mostRecent=stu.records[j].date;
+      }
+      h += '<tr>';
+      h += '<td><div style="font-weight:600;color:#111;">' + stu.student + '</div><div style="font-size:11px;color:#555;">' + stu.id + '</div></td>';
+      h += '<td style="color:#333;">' + stu.grade + '</td>';
+      h += '<td style="text-align:center;font-weight:700;color:#111;">' + stu.records.length + '</td>';
+      h += '<td style="text-align:center;font-weight:' + (maxDays>=5?'700':'400') + ';color:#111;">' + maxDays + '</td>';
+      h += '<td style="white-space:nowrap;color:#333;">' + mostRecent + '</td>';
+      h += '</tr>';
+    }
+    h += '</tbody></table></div></div>';
+
+    // ── Per-student record detail ──────────────────────────────
+    h += '<div style="font-size:12px;font-weight:700;color:#111;padding:4px 0 8px;border-bottom:2px solid #111;margin-bottom:8px;">Absence Records by Student</div>';
+    for(var s=0;s<order.length;s++){
+      var stu = byStudent[order[s]];
+
+      h += '<div style="margin-bottom:14px;">';
+      // Student header bar — plain dark
+      h += '<div style="background:#1a1a1a;color:#fff;padding:7px 14px;border-radius:4px 4px 0 0;display:flex;align-items:center;justify-content:space-between;">';
+      h += '<div><span style="font-weight:700;font-size:13px;">' + stu.student + '</span><span style="font-size:11px;color:rgba(255,255,255,0.6);margin-left:10px;">' + stu.id + ' · ' + stu.grade + '</span></div>';
+      h += '<span style="font-size:11px;color:rgba(255,255,255,0.7);">' + stu.records.length + ' record' + (stu.records.length>1?'s':'') + '</span>';
+      h += '</div>';
+      // Records table
+      h += '<div style="border:1px solid #ccc;border-top:none;border-radius:0 0 4px 4px;overflow:hidden;">';
+      h += '<table class="data-table" style="font-size:12px;"><thead><tr>';
+      h += '<th>Date</th><th>Subject</th><th style="text-align:center;">Days Unresolved</th><th>Status</th><th>Notes</th>';
+      h += '</tr></thead><tbody>';
+      for(var r=0;r<stu.records.length;r++){
+        var rec = stu.records[r];
+        var statusLabel = rec.status==='unresolved' ? 'Unresolved' : 'Pending Response';
+        h += '<tr>';
+        h += '<td style="white-space:nowrap;color:#333;">' + rec.date + '</td>';
+        h += '<td style="color:#333;">' + rec.subject + '</td>';
+        h += '<td style="text-align:center;font-weight:' + (rec.daysOpen>=5?'700':'400') + ';color:#111;">' + rec.daysOpen + '</td>';
+        h += '<td style="color:#333;">' + statusLabel + '</td>';
+        h += '<td style="color:#666;font-size:11px;">—</td>';
+        h += '</tr>';
+      }
+      h += '</tbody></table></div></div>';
+    }
+
+    return h;
+  }
+
+  function showUnjustifiedReport(scopeKey, term, dateGenerated){
+    var allKeys = ['Notre-Dame','Sainte-Croix','Saint-Michel','Saint-Luc'];
+    var isAll = (scopeKey === 'all');
+    var keysToUse = isAll ? allKeys : [scopeKey];
+
+    // Set header fields
+    document.getElementById('ujr-school').textContent = isAll ? 'All Schools — Board-Wide' : unjustifiedData[scopeKey].full;
+    document.getElementById('ujr-term').textContent = term || 'Term 1 · 2025–26';
+    document.getElementById('ujr-date').textContent = dateGenerated || 'Jun 19, 2026';
+
+    var content = '';
+
+    if(isAll){
+      // --- ALL SCHOOLS: board-level KPIs + summary table per school ---
+      var grandStudents = 0, grandRecords = 0, grandMaxDays = 0;
+      var schoolStats = [];
+      for(var k=0;k<keysToUse.length;k++){
+        var st = getSchoolStats(keysToUse[k]);
+        if(st){
+          grandStudents += st.studentsAffected;
+          grandRecords += st.totalRecords;
+          if(st.longestDays > grandMaxDays) grandMaxDays = st.longestDays;
+          schoolStats.push(st);
+        }
+      }
+
+      // Board KPIs
+      content += '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:4px;">';
+      content += '<div class="kpi-card" style="border:1px solid #ccc;background:#fff;"><div class="kpi-label" style="color:#555;">Total Unresolved</div><div class="kpi-value" style="color:#111;">' + grandRecords + '</div><div class="kpi-sub" style="color:#555;">across all schools</div></div>';
+      content += '<div class="kpi-card" style="border:1px solid #ccc;background:#fff;"><div class="kpi-label" style="color:#555;">Schools with Open Cases</div><div class="kpi-value" style="color:#111;">' + schoolStats.length + '</div><div class="kpi-sub" style="color:#555;">of ' + allKeys.length + ' schools</div></div>';
+      content += '<div class="kpi-card" style="border:1px solid #ccc;background:#fff;"><div class="kpi-label" style="color:#555;">Students Affected</div><div class="kpi-value" style="color:#111;">' + grandStudents + '</div><div class="kpi-sub" style="color:#555;">board-wide</div></div>';
+      content += '<div class="kpi-card" style="border:1px solid #ccc;background:#fff;"><div class="kpi-label" style="color:#555;">Longest Outstanding</div><div class="kpi-value" style="color:#111;">' + grandMaxDays + ' days</div><div class="kpi-sub" style="color:#555;">board-wide maximum</div></div>';
+      content += '</div>';
+
+      // School summary table
+      content += '<div>';
+      content += '<div style="font-size:12px;font-weight:700;color:#111;padding:8px 0 0;border-bottom:2px solid #111;margin-bottom:0;">School Summary</div>';
+      content += '<div style="font-size:11px;color:#555;padding:4px 0 8px;">One row per school. For individual absence records, generate this report scoped to a specific school.</div>';
+      content += '<div style="border:1px solid #ccc;border-radius:0 0 6px 6px;overflow:hidden;"><div style="overflow-x:auto;">';
+      content += '<table class="data-table" style="font-size:12px;"><thead><tr>';
+      content += '<th>School</th><th style="text-align:center;">Students Affected</th><th style="text-align:center;">Unresolved Records</th><th style="text-align:center;">Avg. Days Open</th><th style="text-align:center;">Longest Outstanding</th>';
+      content += '</tr></thead><tbody>';
+      for(var s=0;s<schoolStats.length;s++){
+        var ss = schoolStats[s];
+        content += '<tr>';
+        content += '<td><div style="font-weight:600;color:#111;">' + ss.full + '</div></td>';
+        content += '<td style="text-align:center;font-variant-numeric:tabular-nums;color:#333;">' + ss.studentsAffected + '</td>';
+        content += '<td style="text-align:center;font-variant-numeric:tabular-nums;font-weight:700;color:#111;">' + ss.totalRecords + '</td>';
+        content += '<td style="text-align:center;font-variant-numeric:tabular-nums;color:#333;">' + ss.avgDays + '</td>';
+        content += '<td style="text-align:center;font-variant-numeric:tabular-nums;font-weight:' + (ss.longestDays>=5?'700':'400') + ';color:#111;">' + ss.longestDays + ' days</td>';
+        content += '</tr>';
+      }
+      content += '</tbody></table></div></div></div>';
+
+    } else {
+      // --- SINGLE SCHOOL: school stats + per-record table ---
+      var stats = getSchoolStats(scopeKey);
+      if(!stats){ document.getElementById('ujr-content').innerHTML = ''; return; }
+      var d = unjustifiedData[scopeKey];
+
+      // School section
+      content += '<div>';
+      content += '<div style="background:#1a1a1a;color:#fff;padding:11px 16px;border-radius:6px 6px 0 0;"><div style="font-weight:700;font-size:14px;">' + stats.full + '</div></div>';
+      content += renderSchoolStatCells(stats);
+      content += '</div>';
+      content += renderStudentSections(d.records);
+    }
+
+    document.getElementById('ujr-content').innerHTML = content;
+    document.getElementById('unjustified-modal').style.display = 'flex';
+  }
+
+  function hideUnjustifiedReport(){
+    document.getElementById('unjustified-modal').style.display = 'none';
+  }
+
+  var _ujrRows = [];
+
+  function showGenerateModal(){
+    document.getElementById('gen-modal').style.display = 'flex';
+  }
+
+  function hideGenerateModal(){
+    document.getElementById('gen-modal').style.display = 'none';
+  }
+
+  function generateReport(){
+    var term  = document.getElementById('gen-term').value;
+    var scope = document.getElementById('gen-scope').value;
+    var dateFrom = document.getElementById('gen-date-from').value;
+    var dateTo   = document.getElementById('gen-date-to').value;
+
+    // Resolve scope to school key
+    var sk = scope || 'all';
+
+    // Build a display date string
+    var today = new Date();
+    var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    var displayDate = months[today.getMonth()] + ' ' + today.getDate() + ', ' + today.getFullYear();
+    var displayTime = today.toLocaleTimeString('en-CA', {hour:'2-digit',minute:'2-digit'});
+
+    // Map school key back to full name for scope display
+    var scopeLabels = {
+      'all':'All Schools',
+      'Notre-Dame':'École Notre-Dame',
+      'Sainte-Croix':'École Sainte-Croix',
+      'Saint-Michel':'École Saint-Michel',
+      'Saint-Luc':'École Saint-Luc'
+    };
+    var scopeLabel = scopeLabels[sk] || 'All Schools';
+
+    // Prepend new row to the history table
+    var tbody = document.getElementById('history-tbody');
+    // Store new row in _ujrRows so the Open button can use index-based call
+    var newRowIdx = _ujrRows.length;
+    _ujrRows.push({date: displayDate, time: displayTime, term: term, scope: scopeLabel, schoolKey: sk, status: 'ready'});
+
+    var newRow = '<tr style="background:#EEF5FF;">' +
+      '<td><div class="cell-primary">' + displayDate + '</div>' +
+      '<div class="cell-sub">' + displayTime + ' &nbsp;<span class="status status--ok" style="font-size:10px;padding:1px 6px;">Latest</span></div></td>' +
+      '<td style="font-size:13px;">' + term + '</td>' +
+      '<td style="font-size:13px;">' + scopeLabel + '</td>' +
+      '<td><span class="status status--ok"><i class="fa-solid fa-circle-check" style="font-size:10px;"></i> Ready</span></td>' +
+      '<td><div style="display:flex;gap:6px;">' +
+        '<button class="btn btn--secondary btn--sm" onclick="openUnjReportRow(' + newRowIdx + ')"><i class="fa-solid fa-eye"></i> Open</button>' +
+        '<button class="btn btn--ghost btn--sm"><i class="fa-solid fa-file-pdf"></i> PDF</button>' +
+        '<button class="btn btn--ghost btn--sm"><i class="fa-solid fa-file-csv"></i> CSV</button>' +
+      '</div></td></tr>';
+
+    var countEl = document.getElementById('history-count');
+    var count = parseInt(countEl.textContent || '0') + 1;
+    countEl.textContent = count;
+
+    // Remove any existing "Latest" badges from old rows
+    var oldBadges = tbody.querySelectorAll('.status--ok');
+    for(var b=0; b<oldBadges.length; b++){
+      var txt = oldBadges[b].textContent.trim();
+      if(txt === 'Latest') oldBadges[b].parentNode.removeChild(oldBadges[b]);
+    }
+
+    tbody.insertAdjacentHTML('afterbegin', newRow);
+
+    var currentKey = getParam('r') || '';
+    hideGenerateModal();
+    var dateFrom = document.getElementById('gen-date-from').value;
+    var dateTo   = document.getElementById('gen-date-to').value;
+    if(currentKey === 'attendance-summary'){
+      showAttendanceSummary(sk, term, displayDate, dateFrom, dateTo);
+    } else if(currentKey === 'teacher-submission'){
+      showTeacherCompliance(sk, term, displayDate, dateFrom, dateTo);
+    } else if(currentKey === 'chronic-absenteeism'){
+      showChronicAbsenteeism(sk, term, displayDate, dateFrom, dateTo);
+    } else if(currentKey === 'absence-trends'){
+      showAbsenceTrends(sk, term, displayDate, dateFrom, dateTo);
+    } else if(currentKey === 'open-disputes'){
+      showOpenDisputes(sk, term, displayDate, dateFrom, dateTo);
+    } else {
+      showUnjustifiedReport(sk, term, displayDate);
+    }
+  }
+
+  function openUnjReportRow(idx){
+    var r = _ujrRows[idx];
+    if(!r) return;
+    var sk = r.schoolKey || 'all';
+    showUnjustifiedReport(sk, r.term, r.date);
+  }
+
+  // ── Attendance Summary data ────────────────────────────────
+  var attendanceData = {
+    'Notre-Dame':{
+      full:'École Notre-Dame', enrolled:245,
+      days:[
+        {date:'Jun 2, 2026', day:'Mon',present:231,absent:11,late:3},
+        {date:'Jun 3, 2026', day:'Tue',present:234,absent:9, late:2},
+        {date:'Jun 4, 2026', day:'Wed',present:229,absent:13,late:3},
+        {date:'Jun 5, 2026', day:'Thu',present:236,absent:7, late:2},
+        {date:'Jun 6, 2026', day:'Fri',present:228,absent:14,late:3}
+      ],
+      students:[
+        {student:'Lena Bergeron',    id:'STD-2294',grade:'Gr 11',totalDays:5,present:3,absent:2,late:0,rate:'60.0'},
+        {student:'Marcus Okonkwo',   id:'STD-1882',grade:'Gr 10',totalDays:5,present:5,absent:0,late:0,rate:'100.0'},
+        {student:'Aisha Ndiaye',     id:'STD-3340',grade:'Gr 9', totalDays:5,present:4,absent:1,late:0,rate:'80.0'},
+        {student:'Julien Tremblay',  id:'STD-2901',grade:'Gr 12',totalDays:5,present:5,absent:0,late:0,rate:'100.0'},
+        {student:'Sophie Lafortune', id:'STD-3112',grade:'Gr 10',totalDays:5,present:4,absent:0,late:1,rate:'80.0'},
+        {student:'Émile Beaumont',   id:'STD-1445',grade:'Gr 11',totalDays:5,present:3,absent:1,late:1,rate:'60.0'}
+      ]
+    },
+    'Sainte-Croix':{
+      full:'École Sainte-Croix', enrolled:198,
+      days:[
+        {date:'Jun 2, 2026', day:'Mon',present:186,absent:10,late:2},
+        {date:'Jun 3, 2026', day:'Tue',present:189,absent:8, late:1},
+        {date:'Jun 4, 2026', day:'Wed',present:184,absent:12,late:2},
+        {date:'Jun 5, 2026', day:'Thu',present:191,absent:6, late:1},
+        {date:'Jun 6, 2026', day:'Fri',present:183,absent:13,late:2}
+      ],
+      students:[
+        {student:'Omar Hassane',    id:'STD-1560',grade:'Gr 10',totalDays:5,present:5,absent:0,late:0,rate:'100.0'},
+        {student:'Camille Dubois',  id:'STD-2413',grade:'Gr 11',totalDays:5,present:4,absent:1,late:0,rate:'80.0'},
+        {student:'Priya Natarajan', id:'STD-3107',grade:'Gr 9', totalDays:5,present:3,absent:2,late:0,rate:'60.0'},
+        {student:'Elise Carrier',   id:'STD-3881',grade:'Gr 9', totalDays:5,present:5,absent:0,late:0,rate:'100.0'},
+        {student:'Noah Gagnon',     id:'STD-2244',grade:'Gr 12',totalDays:5,present:4,absent:0,late:1,rate:'80.0'}
+      ]
+    },
+    'Saint-Michel':{
+      full:'École Saint-Michel', enrolled:176,
+      days:[
+        {date:'Jun 2, 2026', day:'Mon',present:166,absent:8, late:2},
+        {date:'Jun 3, 2026', day:'Tue',present:168,absent:7, late:1},
+        {date:'Jun 4, 2026', day:'Wed',present:163,absent:11,late:2},
+        {date:'Jun 5, 2026', day:'Thu',present:170,absent:5, late:1},
+        {date:'Jun 6, 2026', day:'Fri',present:162,absent:12,late:2}
+      ],
+      students:[
+        {student:'Fatou Diallo',       id:'STD-1723',grade:'Gr 11',totalDays:5,present:4,absent:1,late:0,rate:'80.0'},
+        {student:'Thomas Villeneuve',  id:'STD-0891',grade:'Gr 12',totalDays:5,present:5,absent:0,late:0,rate:'100.0'},
+        {student:'Isabelle Marchand',  id:'STD-2659',grade:'Gr 10',totalDays:5,present:3,absent:2,late:0,rate:'60.0'},
+        {student:'Samuel Osei',        id:'STD-3384',grade:'Gr 9', totalDays:5,present:5,absent:0,late:0,rate:'100.0'}
+      ]
+    },
+    'Saint-Luc':{
+      full:'École Saint-Luc', enrolled:134,
+      days:[
+        {date:'Jun 2, 2026', day:'Mon',present:127,absent:6, late:1},
+        {date:'Jun 3, 2026', day:'Tue',present:128,absent:5, late:1},
+        {date:'Jun 4, 2026', day:'Wed',present:125,absent:8, late:1},
+        {date:'Jun 5, 2026', day:'Thu',present:129,absent:4, late:1},
+        {date:'Jun 6, 2026', day:'Fri',present:124,absent:9, late:1}
+      ],
+      students:[
+        {student:'Anais Cote-Leblanc', id:'STD-4412',grade:'Gr 8', totalDays:5,present:5,absent:0,late:0,rate:'100.0'},
+        {student:'Mikael Fortin',      id:'STD-4101',grade:'Gr 9', totalDays:5,present:4,absent:1,late:0,rate:'80.0'},
+        {student:'Chloe Arsenault',    id:'STD-4788',grade:'Gr 8', totalDays:5,present:3,absent:1,late:1,rate:'60.0'}
+      ]
+    }
+  };
+
+  var _attRows = [];
+
+  function openAttReportRow(idx){
+    var r = _attRows[idx];
+    if(!r) return;
+    var sk = r.schoolKey || 'all';
+    showAttendanceSummary(sk, r.term, r.date, r.dateFrom, r.dateTo);
+  }
+
+  function showAttendanceSummary(scopeKey, term, dateGenerated, dateFrom, dateTo){
+    var allKeys = ['Notre-Dame','Sainte-Croix','Saint-Michel','Saint-Luc'];
+    var isAll = (scopeKey === 'all');
+    var rangeLabel = (dateFrom && dateTo) ? dateFrom + ' – ' + dateTo : term;
+
+    document.getElementById('att-school').textContent = isAll ? 'All Schools — Board-Wide' : attendanceData[scopeKey].full;
+    document.getElementById('att-range').textContent  = rangeLabel;
+    document.getElementById('att-date').textContent   = dateGenerated || 'Jun 19, 2026';
+
+    var content = '';
+
+    if(isAll){
+      // ── Board KPIs ───────────────────────────────────────────
+      var totEnrolled=0, totPresent=0, totAbsent=0, totLate=0;
+      var schoolRows = [];
+      for(var k=0;k<allKeys.length;k++){
+        var sd = attendanceData[allKeys[k]];
+        if(!sd) continue;
+        var sPresent=0,sAbsent=0,sLate=0;
+        for(var d=0;d<sd.days.length;d++){
+          sPresent+=sd.days[d].present; sAbsent+=sd.days[d].absent; sLate+=sd.days[d].late;
+        }
+        var sDays = sd.days.length;
+        var sRate = sDays>0 ? ((sPresent/(sd.enrolled*sDays))*100).toFixed(1) : '—';
+        totEnrolled+=sd.enrolled; totPresent+=sPresent; totAbsent+=sAbsent; totLate+=sLate;
+        schoolRows.push({full:sd.full,enrolled:sd.enrolled,present:sPresent,absent:sAbsent,late:sLate,days:sDays,rate:sRate});
+      }
+      var boardRate = totEnrolled>0 ? ((totPresent/(totEnrolled*5))*100).toFixed(1) : '—';
+
+      content += '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:4px;">';
+      content += '<div class="kpi-card" style="border:1px solid #ccc;background:#fff;"><div class="kpi-label" style="color:#555;">Total Enrolled</div><div class="kpi-value" style="color:#111;">' + totEnrolled + '</div><div class="kpi-sub" style="color:#555;">board-wide</div></div>';
+      content += '<div class="kpi-card" style="border:1px solid #ccc;background:#fff;"><div class="kpi-label" style="color:#555;">Avg. Attendance Rate</div><div class="kpi-value" style="color:#111;">' + boardRate + '%</div><div class="kpi-sub" style="color:#555;">across all schools</div></div>';
+      content += '<div class="kpi-card" style="border:1px solid #ccc;background:#fff;"><div class="kpi-label" style="color:#555;">Total Absences</div><div class="kpi-value" style="color:#111;">' + totAbsent + '</div><div class="kpi-sub" style="color:#555;">across date range</div></div>';
+      content += '<div class="kpi-card" style="border:1px solid #ccc;background:#fff;"><div class="kpi-label" style="color:#555;">Total Late Arrivals</div><div class="kpi-value" style="color:#111;">' + totLate + '</div><div class="kpi-sub" style="color:#555;">across date range</div></div>';
+      content += '</div>';
+
+      // ── School summary table ─────────────────────────────────
+      content += '<div style="font-size:12px;font-weight:700;color:#111;padding:8px 0 0;border-bottom:2px solid #111;margin-bottom:0;">School Summary</div>';
+      content += '<div style="font-size:11px;color:#555;padding:4px 0 8px;">Aggregated over the selected date range. For student-level detail, generate scoped to a specific school.</div>';
+      content += '<div style="border:1px solid #ccc;border-radius:0 0 6px 6px;overflow:hidden;"><table class="data-table" style="font-size:12px;"><thead><tr>';
+      content += '<th>School</th><th style="text-align:center;">Enrolled</th><th style="text-align:center;">Days in Range</th><th style="text-align:center;">Total Absences</th><th style="text-align:center;">Total Late</th><th style="text-align:center;">Attendance Rate</th>';
+      content += '</tr></thead><tbody>';
+      for(var s=0;s<schoolRows.length;s++){
+        var sr = schoolRows[s];
+        var belowTarget = parseFloat(sr.rate) < 90;
+        content += '<tr>';
+        content += '<td style="font-weight:600;color:#111;">' + sr.full + '</td>';
+        content += '<td style="text-align:center;color:#333;">' + sr.enrolled + '</td>';
+        content += '<td style="text-align:center;color:#333;">' + sr.days + '</td>';
+        content += '<td style="text-align:center;color:#333;">' + sr.absent + '</td>';
+        content += '<td style="text-align:center;color:#333;">' + sr.late + '</td>';
+        content += '<td style="text-align:center;font-weight:' + (belowTarget?'700':'400') + ';color:#111;">' + sr.rate + '%' + (belowTarget?' *':'') + '</td>';
+        content += '</tr>';
+      }
+      content += '</tbody></table></div>';
+      content += '<div style="font-size:10px;color:#555;margin-top:6px;">* Below 90% attendance target</div>';
+
+    } else {
+      // ── Single school ────────────────────────────────────────
+      var sd = attendanceData[scopeKey];
+      if(!sd){ document.getElementById('att-content').innerHTML=''; return; }
+
+      // School KPIs
+      var totP=0,totA=0,totL=0;
+      for(var d=0;d<sd.days.length;d++){ totP+=sd.days[d].present; totA+=sd.days[d].absent; totL+=sd.days[d].late; }
+      var schRate = sd.days.length>0 ? ((totP/(sd.enrolled*sd.days.length))*100).toFixed(1) : '—';
+
+      content += '<div style="background:#1a1a1a;color:#fff;padding:11px 16px;border-radius:6px 6px 0 0;"><div style="font-weight:700;font-size:14px;">' + sd.full + '</div></div>';
+      content += '<div style="display:grid;grid-template-columns:repeat(4,1fr);border:1px solid #ccc;border-top:none;margin-bottom:16px;">';
+      content += '<div style="padding:10px 14px;border-right:1px solid #ccc;"><div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#555;margin-bottom:3px;">Enrolled</div><div style="font-size:22px;font-weight:800;color:#111;">' + sd.enrolled + '</div></div>';
+      content += '<div style="padding:10px 14px;border-right:1px solid #ccc;"><div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#555;margin-bottom:3px;">Attendance Rate</div><div style="font-size:22px;font-weight:800;color:#111;">' + schRate + '%</div></div>';
+      content += '<div style="padding:10px 14px;border-right:1px solid #ccc;"><div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#555;margin-bottom:3px;">Total Absences</div><div style="font-size:22px;font-weight:800;color:#111;">' + totA + '</div></div>';
+      content += '<div style="padding:10px 14px;"><div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#555;margin-bottom:3px;">Late Arrivals</div><div style="font-size:22px;font-weight:800;color:#111;">' + totL + '</div></div>';
+      content += '</div>';
+
+      // Day-by-day breakdown
+      content += '<div style="font-size:12px;font-weight:700;color:#111;border-bottom:2px solid #111;padding-bottom:4px;margin-bottom:0;">Daily Breakdown</div>';
+      content += '<div style="border:1px solid #ccc;border-top:none;border-radius:0 0 6px 6px;overflow:hidden;margin-bottom:16px;">';
+      content += '<table class="data-table" style="font-size:12px;"><thead><tr>';
+      content += '<th>Date</th><th>Day</th><th style="text-align:center;">Present</th><th style="text-align:center;">Absent</th><th style="text-align:center;">Late</th><th style="text-align:center;">Rate</th>';
+      content += '</tr></thead><tbody>';
+      for(var d=0;d<sd.days.length;d++){
+        var day = sd.days[d];
+        var dayRate = ((day.present/sd.enrolled)*100).toFixed(1);
+        var low = parseFloat(dayRate) < 90;
+        content += '<tr>';
+        content += '<td style="white-space:nowrap;color:#333;">' + day.date + '</td>';
+        content += '<td style="color:#555;">' + day.day + '</td>';
+        content += '<td style="text-align:center;color:#333;">' + day.present + '</td>';
+        content += '<td style="text-align:center;color:#333;">' + day.absent + '</td>';
+        content += '<td style="text-align:center;color:#333;">' + day.late + '</td>';
+        content += '<td style="text-align:center;font-weight:' + (low?'700':'400') + ';color:#111;">' + dayRate + '%' + (low?' *':'') + '</td>';
+        content += '</tr>';
+      }
+      content += '</tbody></table></div>';
+
+      // Student summary — sorted by rate asc
+      var stuSorted = sd.students.slice().sort(function(a,b){ return parseFloat(a.rate)-parseFloat(b.rate); });
+      content += '<div style="font-size:12px;font-weight:700;color:#111;border-bottom:2px solid #111;padding-bottom:4px;margin-bottom:0;">Student Attendance Summary</div>';
+      content += '<div style="font-size:11px;color:#555;padding:4px 0 6px;">Sorted by attendance rate, lowest first.</div>';
+      content += '<div style="border:1px solid #ccc;border-radius:0 0 6px 6px;overflow:hidden;">';
+      content += '<table class="data-table" style="font-size:12px;"><thead><tr>';
+      content += '<th>Student</th><th>Grade</th><th style="text-align:center;">Days in Range</th><th style="text-align:center;">Present</th><th style="text-align:center;">Absent</th><th style="text-align:center;">Late</th><th style="text-align:center;">Rate</th>';
+      content += '</tr></thead><tbody>';
+      for(var st=0;st<stuSorted.length;st++){
+        var stu = stuSorted[st];
+        var lowStu = parseFloat(stu.rate) < 80;
+        content += '<tr>';
+        content += '<td><div style="font-weight:600;color:#111;">' + stu.student + '</div><div style="font-size:11px;color:#555;">' + stu.id + '</div></td>';
+        content += '<td style="color:#333;">' + stu.grade + '</td>';
+        content += '<td style="text-align:center;color:#333;">' + stu.totalDays + '</td>';
+        content += '<td style="text-align:center;color:#333;">' + stu.present + '</td>';
+        content += '<td style="text-align:center;color:#333;">' + stu.absent + '</td>';
+        content += '<td style="text-align:center;color:#333;">' + stu.late + '</td>';
+        content += '<td style="text-align:center;font-weight:' + (lowStu?'700':'400') + ';color:#111;">' + stu.rate + '%' + (lowStu?' *':'') + '</td>';
+        content += '</tr>';
+      }
+      content += '</tbody></table></div>';
+      content += '<div style="font-size:10px;color:#555;margin-top:6px;">* Below 80% individual attendance threshold</div>';
+    }
+
+    document.getElementById('att-content').innerHTML = content;
+    document.getElementById('att-modal').style.display = 'flex';
+  }
+
+  function hideAttendanceSummary(){
+    document.getElementById('att-modal').style.display = 'none';
+  }
+
+  // ── Teacher Submission Compliance data ──────────────────────
+  var teacherData = {
+    'Notre-Dame':{
+      full:'École Notre-Dame',
+      staff:[
+        {teacher:'M. Bouchard',   dept:'Mathematics',          periodsPerDay:4,days:5,expected:20,onTime:20,late:0,missing:0, rate:'100.0'},
+        {teacher:'Mme. Gagnon',   dept:'French Language Arts', periodsPerDay:5,days:5,expected:25,onTime:24,late:1,missing:0, rate:'96.0'},
+        {teacher:'M. Fontaine',   dept:'Science',              periodsPerDay:4,days:5,expected:20,onTime:19,late:0,missing:1, rate:'95.0'},
+        {teacher:'Mme. Bélanger', dept:'History',              periodsPerDay:3,days:5,expected:15,onTime:15,late:0,missing:0, rate:'100.0'},
+        {teacher:'M. Caron',      dept:'Geography',            periodsPerDay:2,days:5,expected:10,onTime:10,late:0,missing:0, rate:'100.0'},
+        {teacher:'Mme. Picard',   dept:'Physical Education',   periodsPerDay:3,days:5,expected:15,onTime:13,late:1,missing:1, rate:'86.7'},
+        {teacher:'M. Vachon',     dept:'Computer Science',     periodsPerDay:2,days:5,expected:10,onTime:10,late:0,missing:0, rate:'100.0'}
+      ]
+    },
+    'Sainte-Croix':{
+      full:'École Sainte-Croix',
+      staff:[
+        {teacher:'Mme. Leclerc',  dept:'French Language Arts', periodsPerDay:5,days:5,expected:25,onTime:25,late:0,missing:0, rate:'100.0'},
+        {teacher:'M. Bergeron',   dept:'Mathematics',          periodsPerDay:4,days:5,expected:20,onTime:18,late:1,missing:1, rate:'90.0'},
+        {teacher:'Mme. Okonkwo',  dept:'Science',              periodsPerDay:4,days:5,expected:20,onTime:20,late:0,missing:0, rate:'100.0'},
+        {teacher:'M. Tremblay',   dept:'History',              periodsPerDay:3,days:5,expected:15,onTime:11,late:2,missing:2, rate:'73.3'},
+        {teacher:'Mme. Côté',     dept:'Physical Education',   periodsPerDay:3,days:5,expected:15,onTime:14,late:1,missing:0, rate:'93.3'},
+        {teacher:'M. Diallo',     dept:'English Language Arts',periodsPerDay:2,days:5,expected:10,onTime:7, late:0,missing:3, rate:'70.0'},
+        {teacher:'Mme. Arsenault',dept:'Religious Education',  periodsPerDay:2,days:5,expected:10,onTime:10,late:0,missing:0, rate:'100.0'}
+      ]
+    },
+    'Saint-Michel':{
+      full:'École Saint-Michel',
+      staff:[
+        {teacher:'Mme. Fortin',   dept:'French Language Arts', periodsPerDay:5,days:5,expected:25,onTime:25,late:0,missing:0, rate:'100.0'},
+        {teacher:'M. Poirier',    dept:'Mathematics',          periodsPerDay:4,days:5,expected:20,onTime:20,late:0,missing:0, rate:'100.0'},
+        {teacher:'Mme. Leblanc',  dept:'Science',              periodsPerDay:4,days:5,expected:20,onTime:19,late:1,missing:0, rate:'95.0'},
+        {teacher:'M. Dupuis',     dept:'History',              periodsPerDay:3,days:5,expected:15,onTime:15,late:0,missing:0, rate:'100.0'},
+        {teacher:'Mme. Roy',      dept:'Arts',                 periodsPerDay:2,days:5,expected:10,onTime:9, late:0,missing:1, rate:'90.0'}
+      ]
+    },
+    'Saint-Luc':{
+      full:'École Saint-Luc',
+      staff:[
+        {teacher:'M. Morin',      dept:'Mathematics',          periodsPerDay:4,days:5,expected:20,onTime:20,late:0,missing:0, rate:'100.0'},
+        {teacher:'Mme. Gauthier', dept:'French Language Arts', periodsPerDay:5,days:5,expected:25,onTime:25,late:0,missing:0, rate:'100.0'},
+        {teacher:'M. Simard',     dept:'Science',              periodsPerDay:4,days:5,expected:20,onTime:20,late:0,missing:0, rate:'100.0'},
+        {teacher:'Mme. Lévesque', dept:'History',              periodsPerDay:3,days:5,expected:15,onTime:14,late:1,missing:0, rate:'93.3'}
+      ]
+    }
+  };
+
+  var _tcrRows = [];
+
+  function openTcrReportRow(idx){
+    var r = _tcrRows[idx];
+    if(!r) return;
+    showTeacherCompliance(r.schoolKey || 'all', r.term, r.date, r.dateFrom, r.dateTo);
+  }
+
+  function showTeacherCompliance(scopeKey, term, dateGenerated, dateFrom, dateTo){
+    var allKeys = ['Notre-Dame','Sainte-Croix','Saint-Michel','Saint-Luc'];
+    var isAll   = (scopeKey === 'all');
+    var rangeLabel = (dateFrom && dateTo) ? dateFrom + ' – ' + dateTo : term;
+
+    document.getElementById('tcr-school').textContent = isAll ? 'All Schools — Board-Wide' : teacherData[scopeKey].full;
+    document.getElementById('tcr-range').textContent  = rangeLabel;
+    document.getElementById('tcr-date').textContent   = dateGenerated || 'Jun 19, 2026';
+
+    var content = '';
+
+    if(isAll){
+      // ── Board KPIs ───────────────────────────────────────────
+      var totTeachers=0, totExpected=0, totOnTime=0, totLate=0, totMissing=0;
+      var schoolRows = [];
+      for(var k=0;k<allKeys.length;k++){
+        var sd = teacherData[allKeys[k]];
+        if(!sd) continue;
+        var sExp=0,sOn=0,sLate=0,sMiss=0;
+        for(var t=0;t<sd.staff.length;t++){
+          sExp+=sd.staff[t].expected; sOn+=sd.staff[t].onTime;
+          sLate+=sd.staff[t].late;    sMiss+=sd.staff[t].missing;
+        }
+        var sRate = sExp>0 ? ((sOn/sExp)*100).toFixed(1) : '—';
+        totTeachers+=sd.staff.length; totExpected+=sExp;
+        totOnTime+=sOn; totLate+=sLate; totMissing+=sMiss;
+        schoolRows.push({full:sd.full, teachers:sd.staff.length, expected:sExp, onTime:sOn, late:sLate, missing:sMiss, rate:sRate});
+      }
+      var boardRate = totExpected>0 ? ((totOnTime/totExpected)*100).toFixed(1) : '—';
+
+      content += '<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:4px;">';
+      content += '<div class="kpi-card" style="border:1px solid #ccc;background:#fff;"><div class="kpi-label" style="color:#555;">Total Teachers</div><div class="kpi-value" style="color:#111;">' + totTeachers + '</div><div class="kpi-sub" style="color:#555;">board-wide</div></div>';
+      content += '<div class="kpi-card" style="border:1px solid #ccc;background:#fff;"><div class="kpi-label" style="color:#555;">Expected Submissions</div><div class="kpi-value" style="color:#111;">' + totExpected + '</div><div class="kpi-sub" style="color:#555;">periods in range</div></div>';
+      content += '<div class="kpi-card" style="border:1px solid #ccc;background:#fff;"><div class="kpi-label" style="color:#555;">On Time</div><div class="kpi-value" style="color:#111;">' + totOnTime + '</div><div class="kpi-sub" style="color:#555;">submitted on time</div></div>';
+      content += '<div class="kpi-card" style="border:1px solid #ccc;background:#fff;"><div class="kpi-label" style="color:#555;">Missing</div><div class="kpi-value" style="color:#111;">' + totMissing + '</div><div class="kpi-sub" style="color:#555;">never submitted</div></div>';
+      content += '<div class="kpi-card" style="border:1px solid #ccc;background:#fff;"><div class="kpi-label" style="color:#555;">Compliance Rate</div><div class="kpi-value" style="color:#111;">' + boardRate + '%</div><div class="kpi-sub" style="color:#555;">board-wide</div></div>';
+      content += '</div>';
+
+      content += '<div style="font-size:12px;font-weight:700;color:#111;border-bottom:2px solid #111;padding-bottom:4px;margin-bottom:0;">School Summary</div>';
+      content += '<div style="font-size:11px;color:#555;padding:4px 0 8px;">Aggregated over the selected date range. For teacher-level detail, generate scoped to a specific school.</div>';
+      content += '<div style="border:1px solid #ccc;border-radius:0 0 6px 6px;overflow:hidden;"><table class="data-table" style="font-size:12px;"><thead><tr>';
+      content += '<th>School</th><th style="text-align:center;">Teachers</th><th style="text-align:center;">Expected</th><th style="text-align:center;">On Time</th><th style="text-align:center;">Late</th><th style="text-align:center;">Missing</th><th style="text-align:center;">Compliance Rate</th>';
+      content += '</tr></thead><tbody>';
+      for(var s=0;s<schoolRows.length;s++){
+        var sr = schoolRows[s];
+        var below = parseFloat(sr.rate) < 95;
+        content += '<tr>';
+        content += '<td style="font-weight:600;color:#111;">' + sr.full + '</td>';
+        content += '<td style="text-align:center;color:#333;">' + sr.teachers + '</td>';
+        content += '<td style="text-align:center;color:#333;">' + sr.expected + '</td>';
+        content += '<td style="text-align:center;color:#333;">' + sr.onTime + '</td>';
+        content += '<td style="text-align:center;color:#333;">' + sr.late + '</td>';
+        content += '<td style="text-align:center;font-weight:' + (sr.missing>0?'700':'400') + ';color:#111;">' + sr.missing + '</td>';
+        content += '<td style="text-align:center;font-weight:' + (below?'700':'400') + ';color:#111;">' + sr.rate + '%' + (below?' *':'') + '</td>';
+        content += '</tr>';
+      }
+      content += '</tbody></table></div>';
+      content += '<div style="font-size:10px;color:#555;margin-top:6px;">* Below 95% compliance target</div>';
+
+    } else {
+      // ── Single school ────────────────────────────────────────
+      var sd = teacherData[scopeKey];
+      if(!sd){ document.getElementById('tcr-content').innerHTML=''; return; }
+
+      var totExp=0,totOn=0,totLate=0,totMiss=0;
+      for(var t=0;t<sd.staff.length;t++){
+        totExp+=sd.staff[t].expected; totOn+=sd.staff[t].onTime;
+        totLate+=sd.staff[t].late;    totMiss+=sd.staff[t].missing;
+      }
+      var schRate = totExp>0 ? ((totOn/totExp)*100).toFixed(1) : '—';
+
+      content += '<div style="background:#1a1a1a;color:#fff;padding:11px 16px;border-radius:6px 6px 0 0;"><div style="font-weight:700;font-size:14px;">' + sd.full + '</div></div>';
+      content += '<div style="display:grid;grid-template-columns:repeat(5,1fr);border:1px solid #ccc;border-top:none;margin-bottom:16px;">';
+      content += '<div style="padding:10px 14px;border-right:1px solid #ccc;"><div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#555;margin-bottom:3px;">Teachers</div><div style="font-size:22px;font-weight:800;color:#111;">' + sd.staff.length + '</div></div>';
+      content += '<div style="padding:10px 14px;border-right:1px solid #ccc;"><div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#555;margin-bottom:3px;">Expected</div><div style="font-size:22px;font-weight:800;color:#111;">' + totExp + '</div></div>';
+      content += '<div style="padding:10px 14px;border-right:1px solid #ccc;"><div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#555;margin-bottom:3px;">On Time</div><div style="font-size:22px;font-weight:800;color:#111;">' + totOn + '</div></div>';
+      content += '<div style="padding:10px 14px;border-right:1px solid #ccc;"><div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#555;margin-bottom:3px;">Missing</div><div style="font-size:22px;font-weight:800;color:#111;">' + totMiss + '</div></div>';
+      content += '<div style="padding:10px 14px;"><div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#555;margin-bottom:3px;">Compliance Rate</div><div style="font-size:22px;font-weight:800;color:#111;">' + schRate + '%</div></div>';
+      content += '</div>';
+
+      // Teacher detail table — sorted by rate asc
+      var staffSorted = sd.staff.slice().sort(function(a,b){ return parseFloat(a.rate)-parseFloat(b.rate); });
+      content += '<div style="font-size:12px;font-weight:700;color:#111;border-bottom:2px solid #111;padding-bottom:4px;margin-bottom:0;">Teacher Detail</div>';
+      content += '<div style="font-size:11px;color:#555;padding:4px 0 6px;">Per period · sorted by compliance rate, lowest first.</div>';
+      content += '<div style="border:1px solid #ccc;border-radius:0 0 6px 6px;overflow:hidden;">';
+      content += '<table class="data-table" style="font-size:12px;"><thead><tr>';
+      content += '<th>Teacher</th><th>Department</th><th style="text-align:center;">Periods/Day</th><th style="text-align:center;">Expected</th><th style="text-align:center;">On Time</th><th style="text-align:center;">Late</th><th style="text-align:center;">Missing</th><th style="text-align:center;">Rate</th>';
+      content += '</tr></thead><tbody>';
+      for(var t=0;t<staffSorted.length;t++){
+        var st = staffSorted[t];
+        var below = parseFloat(st.rate) < 95;
+        content += '<tr>';
+        content += '<td style="font-weight:600;color:#111;">' + st.teacher + '</td>';
+        content += '<td style="color:#333;">' + st.dept + '</td>';
+        content += '<td style="text-align:center;color:#333;">' + st.periodsPerDay + '</td>';
+        content += '<td style="text-align:center;color:#333;">' + st.expected + '</td>';
+        content += '<td style="text-align:center;color:#333;">' + st.onTime + '</td>';
+        content += '<td style="text-align:center;color:#333;">' + st.late + '</td>';
+        content += '<td style="text-align:center;font-weight:' + (st.missing>0?'700':'400') + ';color:#111;">' + st.missing + '</td>';
+        content += '<td style="text-align:center;font-weight:' + (below?'700':'400') + ';color:#111;">' + st.rate + '%' + (below?' *':'') + '</td>';
+        content += '</tr>';
+      }
+      content += '</tbody></table></div>';
+      content += '<div style="font-size:10px;color:#555;margin-top:6px;">* Below 95% compliance target</div>';
+    }
+
+    document.getElementById('tcr-content').innerHTML = content;
+    document.getElementById('tcr-modal').style.display = 'flex';
+  }
+
+  function hideTeacherCompliance(){
+    document.getElementById('tcr-modal').style.display = 'none';
+  }
+
+  // ── Chronic Absenteeism data ─────────────────────────────────
+  // Chronic = ≥10% of school days absent · At-Risk = ≥7%
+  var chronicData = {
+    'Notre-Dame':{
+      full:'École Notre-Dame', enrolled:245, totalDays:170,
+      students:[
+        {student:'Lena Bergeron',    id:'STD-2294',grade:'Gr 11',daysAbsent:24,rate:'14.1',status:'chronic'},
+        {student:'Sophie Lafortune', id:'STD-3112',grade:'Gr 10',daysAbsent:20,rate:'11.8',status:'chronic'},
+        {student:'Aisha Ndiaye',     id:'STD-3340',grade:'Gr 9', daysAbsent:18,rate:'10.6',status:'chronic'},
+        {student:'Émile Beaumont',   id:'STD-1445',grade:'Gr 11',daysAbsent:14,rate:'8.2', status:'at-risk'},
+        {student:'Marcus Okonkwo',   id:'STD-1882',grade:'Gr 10',daysAbsent:12,rate:'7.1', status:'at-risk'}
+      ]
+    },
+    'Sainte-Croix':{
+      full:'École Sainte-Croix', enrolled:198, totalDays:170,
+      students:[
+        {student:'Priya Natarajan',  id:'STD-3107',grade:'Gr 9', daysAbsent:21,rate:'12.4',status:'chronic'},
+        {student:'Elise Carrier',    id:'STD-3881',grade:'Gr 9', daysAbsent:19,rate:'11.2',status:'chronic'},
+        {student:'Camille Dubois',   id:'STD-2413',grade:'Gr 11',daysAbsent:14,rate:'8.2', status:'at-risk'},
+        {student:'Noah Gagnon',      id:'STD-2244',grade:'Gr 12',daysAbsent:12,rate:'7.1', status:'at-risk'}
+      ]
+    },
+    'Saint-Michel':{
+      full:'École Saint-Michel', enrolled:176, totalDays:170,
+      students:[
+        {student:'Isabelle Marchand', id:'STD-2659',grade:'Gr 10',daysAbsent:18,rate:'10.6',status:'chronic'},
+        {student:'Fatou Diallo',      id:'STD-1723',grade:'Gr 11',daysAbsent:13,rate:'7.6', status:'at-risk'},
+        {student:'Samuel Osei',       id:'STD-3384',grade:'Gr 9', daysAbsent:12,rate:'7.1', status:'at-risk'}
+      ]
+    },
+    'Saint-Luc':{
+      full:'École Saint-Luc', enrolled:134, totalDays:170,
+      students:[
+        {student:'Chloe Arsenault',   id:'STD-4788',grade:'Gr 8',daysAbsent:17,rate:'10.0',status:'chronic'},
+        {student:'Mikael Fortin',     id:'STD-4101',grade:'Gr 9',daysAbsent:12,rate:'7.1', status:'at-risk'}
+      ]
+    }
+  };
+
+  var _chrRows = [];
+
+  function openChrReportRow(idx){
+    var r = _chrRows[idx];
+    if(!r) return;
+    showChronicAbsenteeism(r.schoolKey || 'all', r.term, r.date, r.dateFrom, r.dateTo);
+  }
+
+  function showChronicAbsenteeism(scopeKey, term, dateGenerated, dateFrom, dateTo){
+    var allKeys  = ['Notre-Dame','Sainte-Croix','Saint-Michel','Saint-Luc'];
+    var isAll    = (scopeKey === 'all');
+    var rangeLabel = (dateFrom && dateTo) ? dateFrom + ' – ' + dateTo : term;
+
+    document.getElementById('chr-school').textContent = isAll ? 'All Schools — Board-Wide' : chronicData[scopeKey].full;
+    document.getElementById('chr-range').textContent  = rangeLabel;
+    document.getElementById('chr-date').textContent   = dateGenerated || 'Jun 19, 2026';
+
+    var content = '';
+
+    if(isAll){
+      var totEnrolled=0, totChronic=0, totAtRisk=0;
+      var schoolRows = [];
+      for(var k=0;k<allKeys.length;k++){
+        var sd = chronicData[allKeys[k]];
+        if(!sd) continue;
+        var sChr=0, sRisk=0;
+        for(var i=0;i<sd.students.length;i++){
+          if(sd.students[i].status==='chronic') sChr++;
+          else if(sd.students[i].status==='at-risk') sRisk++;
+        }
+        var chrRate = ((sChr/sd.enrolled)*100).toFixed(1);
+        totEnrolled+=sd.enrolled; totChronic+=sChr; totAtRisk+=sRisk;
+        schoolRows.push({full:sd.full, enrolled:sd.enrolled, chronic:sChr, atRisk:sRisk, rate:chrRate});
+      }
+      var boardRate = ((totChronic/totEnrolled)*100).toFixed(1);
+
+      content += '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:4px;">';
+      content += '<div class="kpi-card" style="border:1px solid #ccc;background:#fff;"><div class="kpi-label" style="color:#555;">Total Enrolled</div><div class="kpi-value" style="color:#111;">' + totEnrolled + '</div><div class="kpi-sub" style="color:#555;">board-wide</div></div>';
+      content += '<div class="kpi-card" style="border:1px solid #ccc;background:#fff;"><div class="kpi-label" style="color:#555;">Chronically Absent</div><div class="kpi-value" style="color:#111;">' + totChronic + '</div><div class="kpi-sub" style="color:#555;">≥10% days missed</div></div>';
+      content += '<div class="kpi-card" style="border:1px solid #ccc;background:#fff;"><div class="kpi-label" style="color:#555;">At-Risk</div><div class="kpi-value" style="color:#111;">' + totAtRisk + '</div><div class="kpi-sub" style="color:#555;">≥7% — approaching threshold</div></div>';
+      content += '<div class="kpi-card" style="border:1px solid #ccc;background:#fff;"><div class="kpi-label" style="color:#555;">Board Chronic Rate</div><div class="kpi-value" style="color:#111;">' + boardRate + '%</div><div class="kpi-sub" style="color:#555;">of enrolled students</div></div>';
+      content += '</div>';
+
+      content += '<div style="font-size:12px;font-weight:700;color:#111;border-bottom:2px solid #111;padding-bottom:4px;margin-bottom:0;">School Summary</div>';
+      content += '<div style="font-size:11px;color:#555;padding:4px 0 8px;">For student-level detail, generate scoped to a specific school.</div>';
+      content += '<div style="border:1px solid #ccc;border-radius:0 0 6px 6px;overflow:hidden;"><table class="data-table" style="font-size:12px;"><thead><tr>';
+      content += '<th>School</th><th style="text-align:center;">Enrolled</th><th style="text-align:center;">Chronically Absent (≥10%)</th><th style="text-align:center;">At-Risk (≥7%)</th><th style="text-align:center;">Chronic Rate</th>';
+      content += '</tr></thead><tbody>';
+      for(var s=0;s<schoolRows.length;s++){
+        var sr = schoolRows[s];
+        var flag = parseFloat(sr.rate) >= 5;
+        content += '<tr>';
+        content += '<td style="font-weight:600;color:#111;">' + sr.full + '</td>';
+        content += '<td style="text-align:center;color:#333;">' + sr.enrolled + '</td>';
+        content += '<td style="text-align:center;font-weight:700;color:#111;">' + sr.chronic + '</td>';
+        content += '<td style="text-align:center;color:#333;">' + sr.atRisk + '</td>';
+        content += '<td style="text-align:center;font-weight:' + (flag?'700':'400') + ';color:#111;">' + sr.rate + '%' + (flag?' *':'') + '</td>';
+        content += '</tr>';
+      }
+      content += '</tbody></table></div>';
+      content += '<div style="font-size:10px;color:#555;margin-top:6px;">* Chronic rate above 5% board target</div>';
+
+    } else {
+      var sd = chronicData[scopeKey];
+      if(!sd){ document.getElementById('chr-content').innerHTML=''; return; }
+
+      var sChr=0, sRisk=0;
+      for(var i=0;i<sd.students.length;i++){
+        if(sd.students[i].status==='chronic') sChr++;
+        else if(sd.students[i].status==='at-risk') sRisk++;
+      }
+      var schRate = ((sChr/sd.enrolled)*100).toFixed(1);
+
+      content += '<div style="background:#1a1a1a;color:#fff;padding:11px 16px;border-radius:6px 6px 0 0;"><div style="font-weight:700;font-size:14px;">' + sd.full + '</div></div>';
+      content += '<div style="display:grid;grid-template-columns:repeat(4,1fr);border:1px solid #ccc;border-top:none;margin-bottom:16px;">';
+      content += '<div style="padding:10px 14px;border-right:1px solid #ccc;"><div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#555;margin-bottom:3px;">Enrolled</div><div style="font-size:22px;font-weight:800;color:#111;">' + sd.enrolled + '</div></div>';
+      content += '<div style="padding:10px 14px;border-right:1px solid #ccc;"><div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#555;margin-bottom:3px;">Chronically Absent</div><div style="font-size:22px;font-weight:800;color:#111;">' + sChr + '</div></div>';
+      content += '<div style="padding:10px 14px;border-right:1px solid #ccc;"><div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#555;margin-bottom:3px;">At-Risk</div><div style="font-size:22px;font-weight:800;color:#111;">' + sRisk + '</div></div>';
+      content += '<div style="padding:10px 14px;"><div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#555;margin-bottom:3px;">Chronic Rate</div><div style="font-size:22px;font-weight:800;color:#111;">' + schRate + '%</div></div>';
+      content += '</div>';
+
+      var stuSorted = sd.students.slice().sort(function(a,b){ return parseFloat(b.rate)-parseFloat(a.rate); });
+      content += '<div style="font-size:12px;font-weight:700;color:#111;border-bottom:2px solid #111;padding-bottom:4px;margin-bottom:0;">Student Detail</div>';
+      content += '<div style="font-size:11px;color:#555;padding:4px 0 6px;">Sorted by absence rate, highest first. School year: ' + (dateFrom||'Sep 2, 2025') + ' – ' + (dateTo||'Jun 19, 2026') + ' (' + sd.totalDays + ' days).</div>';
+      content += '<div style="border:1px solid #ccc;border-radius:0 0 6px 6px;overflow:hidden;"><table class="data-table" style="font-size:12px;"><thead><tr>';
+      content += '<th>Student</th><th>Grade</th><th style="text-align:center;">Days Absent</th><th style="text-align:center;">Absence Rate</th><th>Status</th>';
+      content += '</tr></thead><tbody>';
+      for(var t=0;t<stuSorted.length;t++){
+        var stu = stuSorted[t];
+        var isChr = stu.status==='chronic';
+        content += '<tr>';
+        content += '<td><div style="font-weight:600;color:#111;">' + stu.student + '</div><div style="font-size:11px;color:#555;">' + stu.id + '</div></td>';
+        content += '<td style="color:#333;">' + stu.grade + '</td>';
+        content += '<td style="text-align:center;font-weight:' + (isChr?'700':'400') + ';color:#111;">' + stu.daysAbsent + '</td>';
+        content += '<td style="text-align:center;font-weight:' + (isChr?'700':'400') + ';color:#111;">' + stu.rate + '%</td>';
+        content += '<td style="font-weight:' + (isChr?'700':'400') + ';color:#111;">' + (isChr?'Chronic (≥10%)':'At-Risk (≥7%)') + '</td>';
+        content += '</tr>';
+      }
+      content += '</tbody></table></div>';
+      content += '<div style="font-size:10px;color:#555;margin-top:6px;">Chronic: ≥10% of school days absent &nbsp;·&nbsp; At-Risk: ≥7%</div>';
+    }
+
+    document.getElementById('chr-content').innerHTML = content;
+    document.getElementById('chr-modal').style.display = 'flex';
+  }
+
+  function hideChronicAbsenteeism(){
+    document.getElementById('chr-modal').style.display = 'none';
+  }
+
+  // ── Absence Trends data ────────────────────────────────
+  var absenceTrendsData = {
+    'all':{
+      months:[
+        {period:'Sep 2025',absences:421,rate:'8.6',change:null},
+        {period:'Oct 2025',absences:489,rate:'8.5',change:'-0.1'},
+        {period:'Nov 2025',absences:512,rate:'10.4',change:'+1.9'},
+        {period:'Dec 2025',absences:398,rate:'10.6',change:'+0.2'},
+        {period:'Jan 2026',absences:547,rate:'10.4',change:'-0.2'},
+        {period:'Feb 2026',absences:489,rate:'9.8',change:'-0.6'},
+        {period:'Mar 2026',absences:452,rate:'8.3',change:'-1.5'},
+        {period:'Apr 2026',absences:409,rate:'7.8',change:'-0.5'},
+        {period:'May 2026',absences:378,rate:'7.6',change:'-0.2'},
+        {period:'Jun 2026',absences:221,rate:'6.8',change:'-0.8'}
+      ],
+      schools:[
+        {key:'Notre-Dame',  full:'École Notre-Dame',   enrolled:245,absences:1055,avgRate:'9.2',peak:'Jan 2026',trend:'Improving'},
+        {key:'Sainte-Croix',full:'École Sainte-Croix', enrolled:218,absences:853, avgRate:'7.8',peak:'Nov 2025',trend:'Stable'},
+        {key:'Saint-Michel',full:'École Saint-Michel', enrolled:189,absences:1230,avgRate:'11.4',peak:'Feb 2026',trend:'Worsening'},
+        {key:'Saint-Luc',   full:'École Saint-Luc',    enrolled:156,absences:587, avgRate:'6.9',peak:'Jan 2026',trend:'Improving'}
+      ]
+    },
+    'Notre-Dame':{
+      full:'École Notre-Dame',enrolled:245,
+      months:[
+        {period:'Sep 2025',absences:98, rate:'8.0', excused:62,unexcused:36,late:26,change:null},
+        {period:'Oct 2025',absences:113,rate:'9.2', excused:71,unexcused:42,late:29,change:'+1.2'},
+        {period:'Nov 2025',absences:128,rate:'10.4',excused:79,unexcused:49,late:32,change:'+1.2'},
+        {period:'Dec 2025',absences:105,rate:'8.6', excused:68,unexcused:37,late:24,change:'-1.8'},
+        {period:'Jan 2026',absences:139,rate:'11.3',excused:84,unexcused:55,late:37,change:'+2.7'},
+        {period:'Feb 2026',absences:121,rate:'9.9', excused:77,unexcused:44,late:31,change:'-1.4'},
+        {period:'Mar 2026',absences:109,rate:'8.9', excused:70,unexcused:39,late:27,change:'-1.0'},
+        {period:'Apr 2026',absences:97, rate:'7.9', excused:64,unexcused:33,late:22,change:'-1.0'},
+        {period:'May 2026',absences:88, rate:'7.2', excused:60,unexcused:28,late:19,change:'-0.7'},
+        {period:'Jun 2026',absences:57, rate:'5.9', excused:41,unexcused:16,late:13,change:'-1.3'}
+      ],
+      grades:[
+        {grade:'Grade 9', enrolled:62,absences:262,rate:'9.4'},
+        {grade:'Grade 10',enrolled:60,absences:241,rate:'8.9'},
+        {grade:'Grade 11',enrolled:63,absences:287,rate:'10.2'},
+        {grade:'Grade 12',enrolled:60,absences:265,rate:'9.8'}
+      ]
+    },
+    'Sainte-Croix':{
+      full:'École Sainte-Croix',enrolled:218,
+      months:[
+        {period:'Sep 2025',absences:81,rate:'7.4',excused:52,unexcused:29,late:21,change:null},
+        {period:'Oct 2025',absences:88,rate:'8.1',excused:57,unexcused:31,late:23,change:'+0.7'},
+        {period:'Nov 2025',absences:94,rate:'8.6',excused:61,unexcused:33,late:25,change:'+0.5'},
+        {period:'Dec 2025',absences:79,rate:'7.2',excused:52,unexcused:27,late:20,change:'-1.4'},
+        {period:'Jan 2026',absences:96,rate:'8.8',excused:62,unexcused:34,late:26,change:'+1.6'},
+        {period:'Feb 2026',absences:89,rate:'8.1',excused:58,unexcused:31,late:23,change:'-0.7'},
+        {period:'Mar 2026',absences:82,rate:'7.5',excused:55,unexcused:27,late:21,change:'-0.6'},
+        {period:'Apr 2026',absences:77,rate:'7.0',excused:52,unexcused:25,late:19,change:'-0.5'},
+        {period:'May 2026',absences:72,rate:'6.6',excused:49,unexcused:23,late:17,change:'-0.4'},
+        {period:'Jun 2026',absences:45,rate:'5.5',excused:32,unexcused:13,late:11,change:'-1.1'}
+      ],
+      grades:[
+        {grade:'Grade 9', enrolled:55,absences:211,rate:'8.1'},
+        {grade:'Grade 10',enrolled:54,absences:198,rate:'7.7'},
+        {grade:'Grade 11',enrolled:57,absences:227,rate:'8.4'},
+        {grade:'Grade 12',enrolled:52,absences:217,rate:'8.8'}
+      ]
+    },
+    'Saint-Michel':{
+      full:'École Saint-Michel',enrolled:189,
+      months:[
+        {period:'Sep 2025',absences:112,rate:'11.8',excused:68,unexcused:44,late:34,change:null},
+        {period:'Oct 2025',absences:128,rate:'13.5',excused:77,unexcused:51,late:39,change:'+1.7'},
+        {period:'Nov 2025',absences:135,rate:'14.3',excused:81,unexcused:54,late:41,change:'+0.8'},
+        {period:'Dec 2025',absences:108,rate:'11.4',excused:66,unexcused:42,late:32,change:'-2.9'},
+        {period:'Jan 2026',absences:141,rate:'14.9',excused:84,unexcused:57,late:43,change:'+3.5'},
+        {period:'Feb 2026',absences:148,rate:'15.6',excused:89,unexcused:59,late:45,change:'+0.7'},
+        {period:'Mar 2026',absences:139,rate:'14.7',excused:84,unexcused:55,late:42,change:'-0.9'},
+        {period:'Apr 2026',absences:127,rate:'13.4',excused:78,unexcused:49,late:38,change:'-1.3'},
+        {period:'May 2026',absences:118,rate:'12.5',excused:73,unexcused:45,late:35,change:'-0.9'},
+        {period:'Jun 2026',absences:74, rate:'10.4',excused:48,unexcused:26,late:22,change:'-2.1'}
+      ],
+      grades:[
+        {grade:'Grade 9', enrolled:49,absences:328,rate:'14.1'},
+        {grade:'Grade 10',enrolled:47,absences:302,rate:'13.6'},
+        {grade:'Grade 11',enrolled:48,absences:319,rate:'14.0'},
+        {grade:'Grade 12',enrolled:45,absences:281,rate:'13.2'}
+      ]
+    },
+    'Saint-Luc':{
+      full:'École Saint-Luc',enrolled:156,
+      months:[
+        {period:'Sep 2025',absences:58,rate:'7.4',excused:38,unexcused:20,late:16,change:null},
+        {period:'Oct 2025',absences:62,rate:'7.9',excused:41,unexcused:21,late:17,change:'+0.5'},
+        {period:'Nov 2025',absences:68,rate:'8.7',excused:44,unexcused:24,late:19,change:'+0.8'},
+        {period:'Dec 2025',absences:54,rate:'6.9',excused:36,unexcused:18,late:14,change:'-1.8'},
+        {period:'Jan 2026',absences:71,rate:'9.1',excused:46,unexcused:25,late:20,change:'+2.2'},
+        {period:'Feb 2026',absences:65,rate:'8.3',excused:43,unexcused:22,late:18,change:'-0.8'},
+        {period:'Mar 2026',absences:59,rate:'7.5',excused:39,unexcused:20,late:16,change:'-0.8'},
+        {period:'Apr 2026',absences:53,rate:'6.8',excused:36,unexcused:17,late:14,change:'-0.7'},
+        {period:'May 2026',absences:48,rate:'6.1',excused:33,unexcused:15,late:13,change:'-0.7'},
+        {period:'Jun 2026',absences:29,rate:'4.9',excused:21,unexcused:8, late:9, change:'-1.2'}
+      ],
+      grades:[
+        {grade:'Grade 9', enrolled:40,absences:155,rate:'8.2'},
+        {grade:'Grade 10',enrolled:39,absences:143,rate:'7.7'},
+        {grade:'Grade 11',enrolled:38,absences:152,rate:'8.4'},
+        {grade:'Grade 12',enrolled:39,absences:117,rate:'6.3'}
+      ]
+    }
+  };
+
+  var _atrRows = [];
+
+  function openAtrReportRow(idx){
+    var r = _atrRows[idx];
+    if(!r) return;
+    showAbsenceTrends(r.schoolKey || 'all', r.term, r.date, r.dateFrom, r.dateTo);
+  }
+
+  function showAbsenceTrends(scopeKey, term, dateGenerated, dateFrom, dateTo){
+    var isAll = (scopeKey === 'all');
+    var rangeLabel = (dateFrom && dateTo) ? dateFrom + ' – ' + dateTo : term;
+
+    document.getElementById('atr-school').textContent = isAll ? 'All Schools — Board-Wide' : absenceTrendsData[scopeKey].full;
+    document.getElementById('atr-range').textContent  = rangeLabel;
+    document.getElementById('atr-date').textContent   = dateGenerated;
+
+    var content = '';
+
+    if(isAll){
+      var d = absenceTrendsData['all'];
+      var totalAbs = 0;
+      for(var i=0; i<d.months.length; i++) totalAbs += d.months[i].absences;
+      var firstRate = parseFloat(d.months[0].rate);
+      var lastRate  = parseFloat(d.months[d.months.length-1].rate);
+      var trendDir  = lastRate < firstRate ? 'Improving' : lastRate > firstRate ? 'Worsening' : 'Stable';
+      var peakM = d.months[0];
+      for(var i=1; i<d.months.length; i++){
+        if(parseFloat(d.months[i].rate) > parseFloat(peakM.rate)) peakM = d.months[i];
+      }
+      var highS = d.schools[0];
+      for(var i=1; i<d.schools.length; i++){
+        if(parseFloat(d.schools[i].avgRate) > parseFloat(highS.avgRate)) highS = d.schools[i];
+      }
+
+      // KPIs
+      content += '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px;">';
+      content += '<div class="kpi-card" style="border:1px solid #ccc;background:#fff;"><div class="kpi-label" style="color:#555;">Board-Wide Absences</div><div class="kpi-value" style="color:#111;">' + totalAbs.toLocaleString() + '</div><div class="kpi-sub" style="color:#555;">all schools \xb7 period total</div></div>';
+      content += '<div class="kpi-card" style="border:1px solid #ccc;background:#fff;"><div class="kpi-label" style="color:#555;">Current Rate</div><div class="kpi-value" style="color:#111;">' + lastRate + '%</div><div class="kpi-sub" style="color:#555;">most recent month (board avg)</div></div>';
+      content += '<div class="kpi-card" style="border:1px solid #ccc;background:#fff;"><div class="kpi-label" style="color:#555;">Highest Rate School</div><div class="kpi-value" style="font-size:15px;color:#111;">' + highS.full + '</div><div class="kpi-sub" style="color:#555;">' + highS.avgRate + '% avg \xb7 ' + highS.trend + '</div></div>';
+      content += '<div class="kpi-card" style="border:1px solid #ccc;background:#fff;"><div class="kpi-label" style="color:#555;">Overall Trend</div><div class="kpi-value" style="font-size:18px;color:#111;">' + trendDir + '</div><div class="kpi-sub" style="color:#555;">' + firstRate + '% → ' + lastRate + '%</div></div>';
+      content += '</div>';
+
+      // Board-wide monthly trend table
+      content += '<div style="font-weight:700;font-size:12px;color:#333;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px;">Board-Wide Monthly Trend</div>';
+      content += '<div style="overflow-x:auto;margin-bottom:20px;"><table style="width:100%;border-collapse:collapse;font-size:13px;">';
+      content += '<thead><tr style="background:#1a1a1a;color:#fff;">';
+      content += '<th style="padding:8px 10px;border-right:1px solid rgba(255,255,255,0.2);text-align:left;font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:0.05em;">Month</th>';
+      content += '<th style="padding:8px 10px;border-right:1px solid rgba(255,255,255,0.2);text-align:right;font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:0.05em;">Total Absences</th>';
+      content += '<th style="padding:8px 10px;border-right:1px solid rgba(255,255,255,0.2);text-align:right;font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:0.05em;">Board Rate</th>';
+      content += '<th style="padding:8px 10px;border-right:1px solid rgba(255,255,255,0.2);text-align:right;font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:0.05em;">vs Prev Month</th>';
+      content += '</tr></thead><tbody>';
+      for(var i=0; i<d.months.length; i++){
+        var m = d.months[i];
+        var bg = i%2===0 ? '#fff' : '#f8f8f8';
+        var chTxt = m.change === null ? '—' : m.change + ' pp';
+        var chStyle = m.change === null ? 'color:#555;' : (m.change.toString().indexOf('+')===0 ? 'font-weight:600;color:#111;' : 'color:#555;');
+        var flag = parseFloat(m.rate)>=10 ? ' *' : '';
+        content += '<tr style="background:' + bg + ';border-bottom:1px solid #eee;">';
+        content += '<td style="padding:8px 10px;border-right:1px solid #e0e0e0;font-weight:600;color:#111;">' + m.period + '</td>';
+        content += '<td style="padding:8px 10px;border-right:1px solid #e0e0e0;text-align:right;color:#333;">' + m.absences.toLocaleString() + '</td>';
+        content += '<td style="padding:8px 10px;border-right:1px solid #e0e0e0;text-align:right;font-weight:600;color:#111;">' + m.rate + '%' + flag + '</td>';
+        content += '<td style="padding:8px 10px;border-right:1px solid #e0e0e0;text-align:right;' + chStyle + '">' + chTxt + '</td>';
+        content += '</tr>';
+      }
+      content += '</tbody></table></div>';
+
+      // School summary
+      content += '<div style="font-weight:700;font-size:12px;color:#333;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px;">School Summary</div>';
+      content += '<div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;font-size:13px;">';
+      content += '<thead><tr style="background:#1a1a1a;color:#fff;">';
+      content += '<th style="padding:8px 10px;border-right:1px solid rgba(255,255,255,0.2);text-align:left;font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:0.05em;">School</th>';
+      content += '<th style="padding:8px 10px;border-right:1px solid rgba(255,255,255,0.2);text-align:right;font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:0.05em;">Enrolled</th>';
+      content += '<th style="padding:8px 10px;border-right:1px solid rgba(255,255,255,0.2);text-align:right;font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:0.05em;">Period Absences</th>';
+      content += '<th style="padding:8px 10px;border-right:1px solid rgba(255,255,255,0.2);text-align:right;font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:0.05em;">Avg Monthly Rate</th>';
+      content += '<th style="padding:8px 10px;border-right:1px solid rgba(255,255,255,0.2);text-align:left;font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:0.05em;">Peak Month</th>';
+      content += '<th style="padding:8px 10px;border-right:1px solid rgba(255,255,255,0.2);text-align:left;font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:0.05em;">Trend</th>';
+      content += '</tr></thead><tbody>';
+      for(var i=0; i<d.schools.length; i++){
+        var s = d.schools[i];
+        var bg = i%2===0 ? '#fff' : '#f8f8f8';
+        var flag = parseFloat(s.avgRate)>=10 ? ' *' : '';
+        content += '<tr style="background:' + bg + ';border-bottom:1px solid #eee;">';
+        content += '<td style="padding:8px 10px;border-right:1px solid #e0e0e0;font-weight:600;color:#111;">' + s.full + '</td>';
+        content += '<td style="padding:8px 10px;border-right:1px solid #e0e0e0;text-align:right;color:#333;">' + s.enrolled + '</td>';
+        content += '<td style="padding:8px 10px;border-right:1px solid #e0e0e0;text-align:right;color:#333;">' + s.absences.toLocaleString() + '</td>';
+        content += '<td style="padding:8px 10px;border-right:1px solid #e0e0e0;text-align:right;font-weight:600;color:#111;">' + s.avgRate + '%' + flag + '</td>';
+        content += '<td style="padding:8px 10px;border-right:1px solid #e0e0e0;color:#333;">' + s.peak + '</td>';
+        content += '<td style="padding:8px 10px;border-right:1px solid #e0e0e0;font-weight:600;color:#111;">' + s.trend + '</td>';
+        content += '</tr>';
+      }
+      content += '</tbody></table></div>';
+      content += '<div style="font-size:10px;color:#555;margin-top:6px;">* Absence rate ≥10% — requires review &nbsp;\xb7&nbsp; pp = percentage points</div>';
+
+    } else {
+      // Single school
+      var sd = absenceTrendsData[scopeKey];
+      if(!sd){ content = '<p style="color:#555;padding:20px;text-align:center;">No data available.</p>'; }
+      else {
+        var totalAbs2 = 0;
+        var rateSum = 0;
+        var peakM2 = sd.months[0];
+        for(var i=0; i<sd.months.length; i++){
+          totalAbs2 += sd.months[i].absences;
+          rateSum += parseFloat(sd.months[i].rate);
+          if(parseFloat(sd.months[i].rate) > parseFloat(peakM2.rate)) peakM2 = sd.months[i];
+        }
+        var avgRate2 = (rateSum / sd.months.length).toFixed(1);
+        var firstR2 = parseFloat(sd.months[0].rate);
+        var lastR2  = parseFloat(sd.months[sd.months.length-1].rate);
+        var trend2  = lastR2 < firstR2 ? 'Improving' : lastR2 > firstR2 ? 'Worsening' : 'Stable';
+        var boardLast = absenceTrendsData['all'].months[absenceTrendsData['all'].months.length-1].rate;
+
+        // KPIs
+        content += '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px;">';
+        content += '<div class="kpi-card" style="border:1px solid #ccc;background:#fff;"><div class="kpi-label" style="color:#555;">Period Absences</div><div class="kpi-value" style="color:#111;">' + totalAbs2.toLocaleString() + '</div><div class="kpi-sub" style="color:#555;">all months combined</div></div>';
+        content += '<div class="kpi-card" style="border:1px solid #ccc;background:#fff;"><div class="kpi-label" style="color:#555;">Avg Monthly Rate</div><div class="kpi-value" style="color:#111;">' + avgRate2 + '%</div><div class="kpi-sub" style="color:#555;">board avg: ' + boardLast + '%</div></div>';
+        content += '<div class="kpi-card" style="border:1px solid #ccc;background:#fff;"><div class="kpi-label" style="color:#555;">Peak Month</div><div class="kpi-value" style="font-size:18px;color:#111;">' + peakM2.period + '</div><div class="kpi-sub" style="color:#555;">' + peakM2.rate + '% absence rate</div></div>';
+        content += '<div class="kpi-card" style="border:1px solid #ccc;background:#fff;"><div class="kpi-label" style="color:#555;">Overall Trend</div><div class="kpi-value" style="font-size:18px;color:#111;">' + trend2 + '</div><div class="kpi-sub" style="color:#555;">' + firstR2 + '% → ' + lastR2 + '%</div></div>';
+        content += '</div>';
+
+        // Monthly breakdown
+        content += '<div style="font-weight:700;font-size:12px;color:#333;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px;">Monthly Breakdown</div>';
+        content += '<div style="overflow-x:auto;margin-bottom:20px;"><table style="width:100%;border-collapse:collapse;font-size:13px;">';
+        content += '<thead><tr style="background:#1a1a1a;color:#fff;">';
+        content += '<th style="padding:8px 10px;border-right:1px solid rgba(255,255,255,0.2);text-align:left;font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:0.05em;">Month</th>';
+        content += '<th style="padding:8px 10px;border-right:1px solid rgba(255,255,255,0.2);text-align:right;font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:0.05em;">Absences</th>';
+        content += '<th style="padding:8px 10px;border-right:1px solid rgba(255,255,255,0.2);text-align:right;font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:0.05em;">Rate</th>';
+        content += '<th style="padding:8px 10px;border-right:1px solid rgba(255,255,255,0.2);text-align:right;font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:0.05em;">Excused</th>';
+        content += '<th style="padding:8px 10px;border-right:1px solid rgba(255,255,255,0.2);text-align:right;font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:0.05em;">Unexcused</th>';
+        content += '<th style="padding:8px 10px;border-right:1px solid rgba(255,255,255,0.2);text-align:right;font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:0.05em;">Late</th>';
+        content += '<th style="padding:8px 10px;border-right:1px solid rgba(255,255,255,0.2);text-align:right;font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:0.05em;">vs Prev</th>';
+        content += '</tr></thead><tbody>';
+        for(var i=0; i<sd.months.length; i++){
+          var m2 = sd.months[i];
+          var bg = i%2===0 ? '#fff' : '#f8f8f8';
+          var chTxt2 = m2.change === null ? '—' : m2.change + ' pp';
+          var chStyle2 = m2.change === null ? 'color:#555;' : (m2.change.toString().indexOf('+')===0 ? 'font-weight:600;color:#111;' : 'color:#555;');
+          var flag2 = parseFloat(m2.rate)>=10 ? ' *' : '';
+          content += '<tr style="background:' + bg + ';border-bottom:1px solid #eee;">';
+          content += '<td style="padding:8px 10px;border-right:1px solid #e0e0e0;font-weight:600;color:#111;">' + m2.period + '</td>';
+          content += '<td style="padding:8px 10px;border-right:1px solid #e0e0e0;text-align:right;color:#333;">' + m2.absences.toLocaleString() + '</td>';
+          content += '<td style="padding:8px 10px;border-right:1px solid #e0e0e0;text-align:right;font-weight:600;color:#111;">' + m2.rate + '%' + flag2 + '</td>';
+          content += '<td style="padding:8px 10px;border-right:1px solid #e0e0e0;text-align:right;color:#555;">' + m2.excused + '</td>';
+          content += '<td style="padding:8px 10px;border-right:1px solid #e0e0e0;text-align:right;color:#555;">' + m2.unexcused + '</td>';
+          content += '<td style="padding:8px 10px;border-right:1px solid #e0e0e0;text-align:right;color:#555;">' + m2.late + '</td>';
+          content += '<td style="padding:8px 10px;border-right:1px solid #e0e0e0;text-align:right;' + chStyle2 + '">' + chTxt2 + '</td>';
+          content += '</tr>';
+        }
+        content += '</tbody></table></div>';
+
+        // Grade breakdown
+        content += '<div style="font-weight:700;font-size:12px;color:#333;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px;">Absence Rate by Grade</div>';
+        content += '<div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;font-size:13px;">';
+        content += '<thead><tr style="background:#1a1a1a;color:#fff;">';
+        content += '<th style="padding:8px 10px;border-right:1px solid rgba(255,255,255,0.2);text-align:left;font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:0.05em;">Grade</th>';
+        content += '<th style="padding:8px 10px;border-right:1px solid rgba(255,255,255,0.2);text-align:right;font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:0.05em;">Enrolled</th>';
+        content += '<th style="padding:8px 10px;border-right:1px solid rgba(255,255,255,0.2);text-align:right;font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:0.05em;">Period Absences</th>';
+        content += '<th style="padding:8px 10px;border-right:1px solid rgba(255,255,255,0.2);text-align:right;font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:0.05em;">Avg Rate</th>';
+        content += '</tr></thead><tbody>';
+        for(var i=0; i<sd.grades.length; i++){
+          var g = sd.grades[i];
+          var bg = i%2===0 ? '#fff' : '#f8f8f8';
+          var flag3 = parseFloat(g.rate)>=10 ? ' *' : '';
+          content += '<tr style="background:' + bg + ';border-bottom:1px solid #eee;">';
+          content += '<td style="padding:8px 10px;border-right:1px solid #e0e0e0;font-weight:600;color:#111;">' + g.grade + '</td>';
+          content += '<td style="padding:8px 10px;border-right:1px solid #e0e0e0;text-align:right;color:#333;">' + g.enrolled + '</td>';
+          content += '<td style="padding:8px 10px;border-right:1px solid #e0e0e0;text-align:right;color:#333;">' + g.absences.toLocaleString() + '</td>';
+          content += '<td style="padding:8px 10px;border-right:1px solid #e0e0e0;text-align:right;font-weight:600;color:#111;">' + g.rate + '%' + flag3 + '</td>';
+          content += '</tr>';
+        }
+        content += '</tbody></table></div>';
+        content += '<div style="font-size:10px;color:#555;margin-top:6px;">* Absence rate ≥10% — requires review &nbsp;\xb7&nbsp; pp = percentage points vs prior month</div>';
+      }
+    }
+
+    document.getElementById('atr-content').innerHTML = content;
+    document.getElementById('atr-modal').style.display = 'flex';
+  }
+
+  function hideAbsenceTrends(){
+    document.getElementById('atr-modal').style.display = 'none';
+  }
+
+  // ── Open Disputes data ─────────────────────────────────────────────────────────
+  var openDisputesData = {
+    'all':{
+      schools:[
+        {key:'Notre-Dame',  full:'École Notre-Dame',   open:8,  avgDays:7.3, oldest:18, resolved:12, escalated:0},
+        {key:'Sainte-Croix',full:'École Sainte-Croix', open:5,  avgDays:5.1, oldest:11, resolved:9,  escalated:1},
+        {key:'Saint-Michel',full:'École Saint-Michel', open:14, avgDays:9.8, oldest:24, resolved:8,  escalated:2},
+        {key:'Saint-Luc',   full:'École Saint-Luc',    open:3,  avgDays:4.2, oldest:8,  resolved:11, escalated:0}
+      ]
+    },
+    'Notre-Dame':{
+      full:'École Notre-Dame', resolved:12,
+      disputes:[
+        {student:'Lena Bergeron',    id:'STD-2294',grade:'Gr 11',absDate:'Jun 1, 2026', subject:'French Language Arts',daysOpen:18,disputedBy:'Parent', status:'Pending Admin',  reason:'Medical documentation pending'},
+        {student:'Marcus Okonkwo',   id:'STD-1882',grade:'Gr 10',absDate:'Jun 6, 2026', subject:'Geography',           daysOpen:13,disputedBy:'Parent', status:'Under Review',   reason:'Student was present'},
+        {student:'Sophie Lafortune', id:'STD-3112',grade:'Gr 10',absDate:'Jun 10, 2026',subject:'Mathematics',         daysOpen:9, disputedBy:'Parent', status:'Pending Parent', reason:'Medical documentation pending'},
+        {student:'Aisha Ndiaye',     id:'STD-3340',grade:'Gr 9', absDate:'Jun 11, 2026',subject:'History',             daysOpen:8, disputedBy:'Student',status:'Under Review',   reason:'Schedule change'},
+        {student:'Lena Bergeron',    id:'STD-2294',grade:'Gr 11',absDate:'Jun 13, 2026',subject:'Physical Education',  daysOpen:6, disputedBy:'Parent', status:'Under Review',   reason:'Technical error'},
+        {student:'Emile Beaumont',   id:'STD-1445',grade:'Gr 11',absDate:'Jun 14, 2026',subject:'Chemistry',           daysOpen:5, disputedBy:'Parent', status:'Pending Parent', reason:'Medical documentation pending'},
+        {student:'Marcus Okonkwo',   id:'STD-1882',grade:'Gr 10',absDate:'Jun 16, 2026',subject:'English',             daysOpen:3, disputedBy:'Parent', status:'Under Review',   reason:'Student was present'},
+        {student:'Sophie Lafortune', id:'STD-3112',grade:'Gr 10',absDate:'Jun 17, 2026',subject:'Biology',             daysOpen:2, disputedBy:'Parent', status:'Pending Parent', reason:'Medical documentation pending'}
+      ]
+    },
+    'Sainte-Croix':{
+      full:'École Sainte-Croix', resolved:9,
+      disputes:[
+        {student:'Olivier Tremblay', id:'STD-5521',grade:'Gr 12',absDate:'Jun 8, 2026', subject:'French Literature',  daysOpen:11,disputedBy:'Parent', status:'Escalated',      reason:'Student was present'},
+        {student:'Maya Cote',        id:'STD-5678',grade:'Gr 9', absDate:'Jun 11, 2026',subject:'Mathematics',        daysOpen:8, disputedBy:'Parent', status:'Under Review',   reason:'Medical documentation pending'},
+        {student:'Olivier Tremblay', id:'STD-5521',grade:'Gr 12',absDate:'Jun 12, 2026',subject:'History',            daysOpen:7, disputedBy:'Parent', status:'Pending Admin',  reason:'Technical error'},
+        {student:'Maya Cote',        id:'STD-5678',grade:'Gr 9', absDate:'Jun 15, 2026',subject:'Physical Education', daysOpen:4, disputedBy:'Student',status:'Under Review',   reason:'Schedule change'},
+        {student:'Noah Bergeron',    id:'STD-5902',grade:'Gr 10',absDate:'Jun 17, 2026',subject:'Chemistry',          daysOpen:2, disputedBy:'Parent', status:'Pending Parent', reason:'Medical documentation pending'}
+      ]
+    },
+    'Saint-Michel':{
+      full:'École Saint-Michel', resolved:8,
+      disputes:[
+        {student:'Claire Fontaine',  id:'STD-7312',grade:'Gr 11',absDate:'May 26, 2026',subject:'Mathematics',        daysOpen:24,disputedBy:'Parent', status:'Escalated',      reason:'Student was present'},
+        {student:'Leo Okonkwo',      id:'STD-7489',grade:'Gr 9', absDate:'May 28, 2026',subject:'English',            daysOpen:22,disputedBy:'Parent', status:'Escalated',      reason:'Medical documentation pending'},
+        {student:'Claire Fontaine',  id:'STD-7312',grade:'Gr 11',absDate:'Jun 3, 2026', subject:'French Language Arts',daysOpen:16,disputedBy:'Parent', status:'Pending Admin',  reason:'Technical error'},
+        {student:'Leo Okonkwo',      id:'STD-7489',grade:'Gr 9', absDate:'Jun 5, 2026', subject:'Geography',          daysOpen:14,disputedBy:'Student',status:'Under Review',   reason:'Student was present'},
+        {student:'Fatima Diallo',    id:'STD-7623',grade:'Gr 10',absDate:'Jun 8, 2026', subject:'History',            daysOpen:11,disputedBy:'Parent', status:'Pending Admin',  reason:'Medical documentation pending'},
+        {student:'Claire Fontaine',  id:'STD-7312',grade:'Gr 11',absDate:'Jun 10, 2026',subject:'Biology',            daysOpen:9, disputedBy:'Parent', status:'Under Review',   reason:'Student was present'},
+        {student:'Fatima Diallo',    id:'STD-7623',grade:'Gr 10',absDate:'Jun 12, 2026',subject:'Chemistry',          daysOpen:7, disputedBy:'Parent', status:'Pending Parent', reason:'Medical documentation pending'},
+        {student:'Yusuf Mensah',     id:'STD-7801',grade:'Gr 12',absDate:'Jun 14, 2026',subject:'Physics',            daysOpen:5, disputedBy:'Parent', status:'Under Review',   reason:'Schedule change'},
+        {student:'Leo Okonkwo',      id:'STD-7489',grade:'Gr 9', absDate:'Jun 15, 2026',subject:'Mathematics',        daysOpen:4, disputedBy:'Parent', status:'Pending Parent', reason:'Medical documentation pending'},
+        {student:'Yusuf Mensah',     id:'STD-7801',grade:'Gr 12',absDate:'Jun 16, 2026',subject:'Art',                daysOpen:3, disputedBy:'Parent', status:'Under Review',   reason:'Technical error'},
+        {student:'Fatima Diallo',    id:'STD-7623',grade:'Gr 10',absDate:'Jun 17, 2026',subject:'Physical Education', daysOpen:2, disputedBy:'Parent', status:'Pending Parent', reason:'Medical documentation pending'},
+        {student:'Yusuf Mensah',     id:'STD-7801',grade:'Gr 12',absDate:'Jun 18, 2026',subject:'History',            daysOpen:1, disputedBy:'Student',status:'Under Review',   reason:'Student was present'},
+        {student:'Claire Fontaine',  id:'STD-7312',grade:'Gr 11',absDate:'Jun 18, 2026',subject:'Mathematics',        daysOpen:1, disputedBy:'Parent', status:'Pending Parent', reason:'Medical documentation pending'},
+        {student:'Leo Okonkwo',      id:'STD-7489',grade:'Gr 9', absDate:'Jun 18, 2026',subject:'Geography',          daysOpen:1, disputedBy:'Parent', status:'Under Review',   reason:'Student was present'}
+      ]
+    },
+    'Saint-Luc':{
+      full:'École Saint-Luc', resolved:11,
+      disputes:[
+        {student:'Marie-Claire Potvin',id:'STD-9145',grade:'Gr 12',absDate:'Jun 11, 2026',subject:'Mathematics',      daysOpen:8, disputedBy:'Parent', status:'Under Review',   reason:'Medical documentation pending'},
+        {student:'Theo Lacroix',       id:'STD-9287',grade:'Gr 10',absDate:'Jun 14, 2026',subject:'History',          daysOpen:5, disputedBy:'Parent', status:'Pending Admin',  reason:'Technical error'},
+        {student:'Marie-Claire Potvin',id:'STD-9145',grade:'Gr 12',absDate:'Jun 17, 2026',subject:'Chemistry',        daysOpen:2, disputedBy:'Parent', status:'Pending Parent', reason:'Medical documentation pending'}
+      ]
+    }
+  };
+
+  var _odrRows = [];
+
+  function openOdrReportRow(idx){
+    var r = _odrRows[idx];
+    if(!r) return;
+    showOpenDisputes(r.schoolKey || 'all', r.term, r.date, r.dateFrom, r.dateTo);
+  }
+
+  function showOpenDisputes(scopeKey, term, dateGenerated, dateFrom, dateTo){
+    var isAll = (scopeKey === 'all');
+    var rangeLabel = (dateFrom && dateTo) ? dateFrom + ' – ' + dateTo : term;
+
+    document.getElementById('odr-school').textContent = isAll ? 'All Schools — Board-Wide' : openDisputesData[scopeKey].full;
+    document.getElementById('odr-range').textContent  = rangeLabel;
+    document.getElementById('odr-date').textContent   = dateGenerated;
+
+    var content = '';
+    var TD = 'padding:7px 10px;border-right:1px solid #e0e0e0;border-bottom:1px solid #eee;';
+    var TH = 'padding:7px 10px;text-align:left;font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:0.05em;border-right:1px solid rgba(255,255,255,0.2);';
+    var THR = 'padding:7px 10px;text-align:right;font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:0.05em;border-right:1px solid rgba(255,255,255,0.2);';
+
+    if(isAll){
+      var d = openDisputesData['all'];
+      var totalOpen=0, totalEsc=0, totalRes=0;
+      var worstSchool = d.schools[0];
+      for(var i=0; i<d.schools.length; i++){
+        var s = d.schools[i];
+        totalOpen += s.open;
+        totalEsc  += s.escalated;
+        totalRes  += s.resolved;
+        if(s.open > worstSchool.open) worstSchool = s;
+      }
+      var totalAvgDays = 0;
+      for(var i=0; i<d.schools.length; i++) totalAvgDays += d.schools[i].avgDays;
+      var boardAvg = (totalAvgDays / d.schools.length).toFixed(1);
+
+      // KPIs
+      content += '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px;">';
+      content += '<div class="kpi-card" style="border:1px solid #ccc;background:#fff;"><div class="kpi-label" style="color:#555;">Open Disputes</div><div class="kpi-value" style="color:#111;">' + totalOpen + '</div><div class="kpi-sub" style="color:#555;">board-wide · current</div></div>';
+      content += '<div class="kpi-card" style="border:1px solid #ccc;background:#fff;"><div class="kpi-label" style="color:#555;">Avg Days Open</div><div class="kpi-value" style="color:#111;">' + boardAvg + '</div><div class="kpi-sub" style="color:#555;">across all open disputes</div></div>';
+      content += '<div class="kpi-card" style="border:1px solid #ccc;background:#fff;"><div class="kpi-label" style="color:#555;">Escalated Cases</div><div class="kpi-value" style="color:#111;">' + totalEsc + (totalEsc>0?' *':'') + '</div><div class="kpi-sub" style="color:#555;">require senior review</div></div>';
+      content += '<div class="kpi-card" style="border:1px solid #ccc;background:#fff;"><div class="kpi-label" style="color:#555;">Resolved This Period</div><div class="kpi-value" style="color:#111;">' + totalRes + '</div><div class="kpi-sub" style="color:#555;">closed · period total</div></div>';
+      content += '</div>';
+
+      // School summary table
+      content += '<div style="font-weight:700;font-size:12px;color:#333;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px;">School Summary</div>';
+      content += '<div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;font-size:13px;">';
+      content += '<thead><tr style="background:#1a1a1a;color:#fff;">';
+      content += '<th style="' + TH  + '">School</th>';
+      content += '<th style="' + THR + '">Open Disputes</th>';
+      content += '<th style="' + THR + '">Avg Days Open</th>';
+      content += '<th style="' + THR + '">Oldest Case (days)</th>';
+      content += '<th style="' + THR + '">Escalated</th>';
+      content += '<th style="' + THR + '">Resolved This Period</th>';
+      content += '</tr></thead><tbody>';
+      for(var i=0; i<d.schools.length; i++){
+        var s = d.schools[i];
+        var bg = i%2===0 ? '#fff' : '#f8f8f8';
+        var openFlag = s.open >= 10 ? ' *' : '';
+        var escFlag  = s.escalated > 0 ? ' *' : '';
+        content += '<tr style="background:' + bg + ';">';
+        content += '<td style="' + TD + 'font-weight:600;color:#111;">' + s.full + '</td>';
+        content += '<td style="' + TD + 'text-align:right;font-weight:600;color:#111;">' + s.open + openFlag + '</td>';
+        content += '<td style="' + TD + 'text-align:right;color:#333;">' + s.avgDays + '</td>';
+        content += '<td style="' + TD + 'text-align:right;color:#333;">' + s.oldest + '</td>';
+        content += '<td style="' + TD + 'text-align:right;font-weight:' + (s.escalated>0?'700':'400') + ';color:#111;">' + s.escalated + escFlag + '</td>';
+        content += '<td style="' + TD + 'text-align:right;color:#555;">' + s.resolved + '</td>';
+        content += '</tr>';
+      }
+      content += '</tbody></table></div>';
+      content += '<div style="font-size:10px;color:#555;margin-top:6px;">* Open disputes ≥10 or escalated cases require immediate attention</div>';
+
+    } else {
+      var sd = openDisputesData[scopeKey];
+      if(!sd){ content = '<p style="color:#555;padding:20px;text-align:center;">No data available.</p>'; }
+      else {
+        var disputes = sd.disputes;
+        var totalOpen2=disputes.length, escCount=0, pendAdmin=0, pendParent=0, underReview=0;
+        var totalDays2=0;
+        for(var i=0; i<disputes.length; i++){
+          totalDays2 += disputes[i].daysOpen;
+          if(disputes[i].status==='Escalated')      escCount++;
+          else if(disputes[i].status==='Pending Admin')  pendAdmin++;
+          else if(disputes[i].status==='Pending Parent') pendParent++;
+          else if(disputes[i].status==='Under Review')   underReview++;
+        }
+        var avgD = disputes.length>0 ? (totalDays2/disputes.length).toFixed(1) : '0';
+        var oldest = disputes.length>0 ? disputes[0].daysOpen : 0;
+
+        // KPIs
+        content += '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px;">';
+        content += '<div class="kpi-card" style="border:1px solid #ccc;background:#fff;"><div class="kpi-label" style="color:#555;">Open Disputes</div><div class="kpi-value" style="color:#111;">' + totalOpen2 + '</div><div class="kpi-sub" style="color:#555;">active · unresolved</div></div>';
+        content += '<div class="kpi-card" style="border:1px solid #ccc;background:#fff;"><div class="kpi-label" style="color:#555;">Avg Days Open</div><div class="kpi-value" style="color:#111;">' + avgD + '</div><div class="kpi-sub" style="color:#555;">days since filed</div></div>';
+        content += '<div class="kpi-card" style="border:1px solid #ccc;background:#fff;"><div class="kpi-label" style="color:#555;">Resolved This Period</div><div class="kpi-value" style="color:#111;">' + sd.resolved + '</div><div class="kpi-sub" style="color:#555;">closed · period total</div></div>';
+        content += '<div class="kpi-card" style="border:1px solid #ccc;background:#fff;"><div class="kpi-label" style="color:#555;">Escalated</div><div class="kpi-value" style="color:#111;">' + escCount + (escCount>0?' *':'') + '</div><div class="kpi-sub" style="color:#555;">senior review required</div></div>';
+        content += '</div>';
+
+        // Status breakdown bar
+        content += '<div style="display:grid;grid-template-columns:repeat(4,1fr);border:1px solid #ccc;border-radius:6px;overflow:hidden;margin-bottom:16px;">';
+        var statusItems = [
+          {label:'Under Review',  val:underReview},
+          {label:'Pending Admin', val:pendAdmin},
+          {label:'Pending Parent',val:pendParent},
+          {label:'Escalated',     val:escCount}
+        ];
+        for(var i=0; i<statusItems.length; i++){
+          var st = statusItems[i];
+          var br = i<3 ? 'border-right:1px solid #ccc;' : '';
+          content += '<div style="' + br + 'padding:10px 14px;text-align:center;">';
+          content += '<div style="font-size:10px;font-weight:700;color:#555;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:4px;">' + st.label + '</div>';
+          content += '<div style="font-size:22px;font-weight:800;color:#111;">' + st.val + '</div>';
+          content += '</div>';
+        }
+        content += '</div>';
+
+        // Disputes table
+        content += '<div style="font-weight:700;font-size:12px;color:#333;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px;">Open Dispute Records</div>';
+        content += '<div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;font-size:13px;">';
+        content += '<thead><tr style="background:#1a1a1a;color:#fff;">';
+        content += '<th style="' + TH  + '">Student</th>';
+        content += '<th style="' + TH  + '">Grade</th>';
+        content += '<th style="' + TH  + '">Absence Date</th>';
+        content += '<th style="' + TH  + '">Subject</th>';
+        content += '<th style="' + THR + '">Days Open</th>';
+        content += '<th style="' + TH  + '">Disputed By</th>';
+        content += '<th style="' + TH  + '">Reason</th>';
+        content += '<th style="' + TH  + '">Status</th>';
+        content += '</tr></thead><tbody>';
+        for(var i=0; i<disputes.length; i++){
+          var dsp = disputes[i];
+          var bg = i%2===0 ? '#fff' : '#f8f8f8';
+          var daysFlag = dsp.daysOpen >= 14 ? ' *' : '';
+          var statusBold = dsp.status === 'Escalated' ? 'font-weight:700;' : '';
+          content += '<tr style="background:' + bg + ';">';
+          content += '<td style="' + TD + 'font-weight:600;color:#111;">' + dsp.student + '</td>';
+          content += '<td style="' + TD + 'color:#555;">' + dsp.grade + '</td>';
+          content += '<td style="' + TD + 'color:#333;">' + dsp.absDate + '</td>';
+          content += '<td style="' + TD + 'color:#333;">' + dsp.subject + '</td>';
+          content += '<td style="' + TD + 'text-align:right;font-weight:600;color:#111;">' + dsp.daysOpen + daysFlag + '</td>';
+          content += '<td style="' + TD + 'color:#555;">' + dsp.disputedBy + '</td>';
+          content += '<td style="' + TD + 'color:#555;">' + dsp.reason + '</td>';
+          content += '<td style="' + TD + statusBold + 'color:#111;">' + dsp.status + '</td>';
+          content += '</tr>';
+        }
+        content += '</tbody></table></div>';
+        content += '<div style="font-size:10px;color:#555;margin-top:6px;">* Days open ≥14 — escalation recommended · Sorted by days open descending</div>';
+      }
+    }
+
+    document.getElementById('odr-content').innerHTML = content;
+    document.getElementById('odr-modal').style.display = 'flex';
+  }
+
+  function hideOpenDisputes(){
+    document.getElementById('odr-modal').style.display = 'none';
+  }
+
+  // Scope label map — matches historyData scope values
+  var scopeLabels = {
+    'all':'All Schools',
+    'Notre-Dame':'École Notre-Dame',
+    'Sainte-Croix':'École Sainte-Croix',
+    'Saint-Michel':'École Saint-Michel',
+    'Saint-Luc':'École Saint-Luc'
+  };
+
+  function filterHistory(){
+    var termVal  = document.getElementById('hf-term').value;
+    var scopeVal = document.getElementById('hf-scope').value;
+    var days     = parseInt(document.getElementById('hf-date').value) || 0;
+
+    var rows = document.getElementById('history-tbody').querySelectorAll('tr');
+    var visible = 0;
+
+    var cutoff = null;
+    if(days > 0){
+      cutoff = new Date();
+      cutoff.setDate(cutoff.getDate() - days);
+    }
+
+    for(var i=0;i<rows.length;i++){
+      var cells = rows[i].querySelectorAll('td');
+      if(cells.length < 3) continue;
+
+      var rowTerm  = cells[1].textContent.trim();
+      var rowScope = cells[2].textContent.trim();
+      var rowDate  = cells[0].querySelector('.cell-primary') ? cells[0].querySelector('.cell-primary').textContent.trim() : '';
+
+      var matchTerm  = !termVal  || rowTerm === termVal;
+      var matchScope = !scopeVal || rowScope === scopeVal;
+      var matchDate  = true;
+      if(cutoff && rowDate){
+        var parsed = new Date(rowDate);
+        matchDate = !isNaN(parsed) && parsed >= cutoff;
+      }
+
+      var show = matchTerm && matchScope && matchDate;
+      rows[i].style.display = show ? '' : 'none';
+      if(show) visible++;
+    }
+
+    document.getElementById('history-count').textContent = visible;
+  }
+
+  function getParam(name){
+    var search = window.location.search;
+    var pairs = search.substring(1).split('&');
+    for(var i=0; i<pairs.length; i++){
+      var pair = pairs[i].split('=');
+      if(decodeURIComponent(pair[0]) === name) return decodeURIComponent(pair[1] || '');
+    }
+    return '';
+  }
+
+
+  // ═══ GRADE THRESHOLD DATA ═══════════════════════════════════════════════════
+  var gtrSchoolData = {
+    'Notre-Dame':{
+      full:'École Notre-Dame', total:89, exceeding:4, near:5,
+      rows:[
+        {name:'Lena Bergeron',     id:'STD-2294',grade:'Gr 11',subject:'Mathematics',           scheduled:149,abs:18,rate:12.1,threshold:12},
+        {name:'Julien Poirier',    id:'STD-2051',grade:'Gr 12',subject:'History',               scheduled:124,abs:15,rate:12.1,threshold:12},
+        {name:'Aisha Ndiaye',      id:'STD-3340',grade:'Gr 9', subject:'Mathematics',           scheduled:117,abs:12,rate:10.3,threshold:10},
+        {name:'Ryan Beaumont',     id:'STD-1144',grade:'Gr 10',subject:'Physical Education',    scheduled:132,abs:16,rate:12.1,threshold:12},
+        {name:'Lena Bergeron',     id:'STD-2294',grade:'Gr 11',subject:'French Language Arts',  scheduled:149,abs:14,rate:9.4, threshold:12},
+        {name:'Marcus Okonkwo',    id:'STD-1882',grade:'Gr 10',subject:'Mathematics',           scheduled:132,abs:12,rate:9.1, threshold:12},
+        {name:'Julien Poirier',    id:'STD-2051',grade:'Gr 12',subject:'English Language Arts', scheduled:124,abs:11,rate:8.9, threshold:12},
+        {name:'Aisha Ndiaye',      id:'STD-3340',grade:'Gr 9', subject:'Science',               scheduled:117,abs:10,rate:8.5, threshold:10},
+        {name:'Marcus Okonkwo',    id:'STD-1882',grade:'Gr 10',subject:'Geography',             scheduled:121,abs:10,rate:8.3, threshold:12},
+        {name:'Chloe Tremblay',    id:'STD-2778',grade:'Gr 11',subject:'English',               scheduled:149,abs:12,rate:8.1, threshold:12},
+        {name:'Sara El-Amin',      id:'STD-4021',grade:'Gr 9', subject:'English Language Arts', scheduled:117,abs:10,rate:8.5, threshold:10},
+        {name:'Victor Lebrun',     id:'STD-3655',grade:'Gr 12',subject:'Chemistry',             scheduled:124,abs:10,rate:8.1, threshold:12},
+        {name:'Mei-Lin Xu',        id:'STD-2900',grade:'Gr 11',subject:'Visual Arts',           scheduled:132,abs:11,rate:8.3, threshold:12}
+      ]
+    },
+    'Sainte-Croix':{
+      full:'École Sainte-Croix', total:76, exceeding:2, near:5,
+      rows:[
+        {name:'Omar Hassane',      id:'STD-1560',grade:'Gr 10',subject:'Mathematics',           scheduled:132,abs:16,rate:12.1,threshold:12},
+        {name:'Camille Dubois',    id:'STD-2413',grade:'Gr 11',subject:'English Language Arts', scheduled:149,abs:18,rate:12.1,threshold:12},
+        {name:'Omar Hassane',      id:'STD-1560',grade:'Gr 10',subject:'Science',               scheduled:132,abs:12,rate:9.1, threshold:12},
+        {name:'Camille Dubois',    id:'STD-2413',grade:'Gr 11',subject:'History',               scheduled:132,abs:12,rate:9.1, threshold:12},
+        {name:'Priya Natarajan',   id:'STD-3107',grade:'Gr 9', subject:'Mathematics',           scheduled:117,abs:10,rate:8.5, threshold:10},
+        {name:'Priya Natarajan',   id:'STD-3107',grade:'Gr 9', subject:'Science',               scheduled:117,abs:10,rate:8.5, threshold:10},
+        {name:'Elise Carrier',     id:'STD-3881',grade:'Gr 9', subject:'French Language Arts',  scheduled:117,abs:10,rate:8.5, threshold:10},
+        {name:'Leo Santos',        id:'STD-2204',grade:'Gr 12',subject:'Mathematics',           scheduled:124,abs:10,rate:8.1, threshold:12},
+        {name:'Noah Martin',       id:'STD-2890',grade:'Gr 10',subject:'History',               scheduled:121,abs:10,rate:8.3, threshold:12}
+      ]
+    },
+    'Saint-Michel':{
+      full:'École Saint-Michel', total:68, exceeding:1, near:4,
+      rows:[
+        {name:'Fatou Diallo',      id:'STD-1723',grade:'Gr 11',subject:'Science',               scheduled:149,abs:18,rate:12.1,threshold:12},
+        {name:'Thomas Villeneuve', id:'STD-0891',grade:'Gr 12',subject:'History',               scheduled:124,abs:12,rate:9.7, threshold:12},
+        {name:'Fatou Diallo',      id:'STD-1723',grade:'Gr 11',subject:'Mathematics',           scheduled:149,abs:14,rate:9.4, threshold:12},
+        {name:'Thomas Villeneuve', id:'STD-0891',grade:'Gr 12',subject:'Mathematics',           scheduled:124,abs:11,rate:8.9, threshold:12},
+        {name:'Isabelle Morin',    id:'STD-2566',grade:'Gr 10',subject:'French Language Arts',  scheduled:132,abs:11,rate:8.3, threshold:12}
+      ]
+    },
+    'Saint-Luc':{
+      full:'École Saint-Luc', total:82, exceeding:0, near:2,
+      rows:[
+        {name:'Anais Cote-Leblanc',id:'STD-4412',grade:'Gr 8', subject:'Mathematics',           scheduled:110,abs:9, rate:8.2, threshold:10},
+        {name:'Dmitri Kowalski',   id:'STD-3894',grade:'Gr 7', subject:'Mathematics',           scheduled:105,abs:9, rate:8.6, threshold:10},
+        {name:'Anais Cote-Leblanc',id:'STD-4412',grade:'Gr 8', subject:'French Language Arts',  scheduled:110,abs:9, rate:8.2, threshold:10}
+      ]
+    }
+  };
+
+  var gtrStudentData = {
+    'STD-2294':{
+      name:'Lena Bergeron', id:'STD-2294', grade:'Grade 11', school:'École Notre-Dame',
+      subjects:[
+        {subject:'Mathematics',           scheduled:149, abs:18, rate:12.1, threshold:12},
+        {subject:'French Language Arts',  scheduled:149, abs:14, rate:9.4,  threshold:12},
+        {subject:'English',               scheduled:149, abs:8,  rate:5.4,  threshold:12},
+        {subject:'Science',               scheduled:132, abs:7,  rate:5.3,  threshold:12},
+        {subject:'Physical Education',    scheduled:132, abs:6,  rate:4.5,  threshold:12}
+      ],
+      log:[
+        {date:'Jun 18, 2026', period:'P2', subject:'Mathematics',          type:'Unjustified',   status:'Open'},
+        {date:'Jun 17, 2026', period:'P3', subject:'Mathematics',          type:'Unjustified',   status:'Open'},
+        {date:'Jun 12, 2026', period:'P2', subject:'French Language Arts', type:'Unjustified',   status:'Open'},
+        {date:'Jun 10, 2026', period:'P2', subject:'Mathematics',          type:'Medical',       status:'Justified'},
+        {date:'Jun 5, 2026',  period:'P3', subject:'French Language Arts', type:'Unjustified',   status:'Open'},
+        {date:'Jun 3, 2026',  period:'P1', subject:'Mathematics',          type:'Late Arrival',  status:'Open'}
+      ]
+    },
+    'STD-1882':{
+      name:'Marcus Okonkwo', id:'STD-1882', grade:'Grade 10', school:'École Notre-Dame',
+      subjects:[
+        {subject:'Mathematics',   scheduled:132, abs:12, rate:9.1,  threshold:12},
+        {subject:'Geography',     scheduled:121, abs:10, rate:8.3,  threshold:12},
+        {subject:'Science',       scheduled:132, abs:6,  rate:4.5,  threshold:12},
+        {subject:'English',       scheduled:149, abs:5,  rate:3.4,  threshold:12},
+        {subject:'History',       scheduled:121, abs:4,  rate:3.3,  threshold:12}
+      ],
+      log:[
+        {date:'Jun 18, 2026', period:'P3', subject:'Mathematics',  type:'Unjustified',  status:'Open'},
+        {date:'Jun 16, 2026', period:'P1', subject:'Geography',    type:'Unjustified',  status:'Open'},
+        {date:'Jun 13, 2026', period:'P3', subject:'Mathematics',  type:'Unjustified',  status:'Open'},
+        {date:'Jun 11, 2026', period:'P2', subject:'Geography',    type:'Medical',      status:'Justified'},
+        {date:'Jun 9, 2026',  period:'P1', subject:'Mathematics',  type:'Late Arrival', status:'Open'}
+      ]
+    },
+    'STD-3107':{
+      name:'Priya Natarajan', id:'STD-3107', grade:'Grade 9', school:'École Sainte-Croix',
+      subjects:[
+        {subject:'Mathematics',   scheduled:117, abs:10, rate:8.5,  threshold:10},
+        {subject:'Science',       scheduled:117, abs:10, rate:8.5,  threshold:10},
+        {subject:'English',       scheduled:117, abs:6,  rate:5.1,  threshold:10},
+        {subject:'French',        scheduled:117, abs:5,  rate:4.3,  threshold:10},
+        {subject:'History',       scheduled:110, abs:4,  rate:3.6,  threshold:10}
+      ],
+      log:[
+        {date:'Jun 18, 2026', period:'P1', subject:'Mathematics',  type:'Unjustified',  status:'Open'},
+        {date:'Jun 15, 2026', period:'P2', subject:'Science',      type:'Unjustified',  status:'Open'},
+        {date:'Jun 12, 2026', period:'P1', subject:'Mathematics',  type:'Medical',      status:'Justified'},
+        {date:'Jun 9, 2026',  period:'P3', subject:'Science',      type:'Unjustified',  status:'Open'}
+      ]
+    },
+    'STD-1723':{
+      name:'Fatou Diallo', id:'STD-1723', grade:'Grade 11', school:'École Saint-Michel',
+      subjects:[
+        {subject:'Science',       scheduled:149, abs:18, rate:12.1, threshold:12},
+        {subject:'Mathematics',   scheduled:149, abs:14, rate:9.4,  threshold:12},
+        {subject:'English',       scheduled:149, abs:7,  rate:4.7,  threshold:12},
+        {subject:'History',       scheduled:132, abs:5,  rate:3.8,  threshold:12}
+      ],
+      log:[
+        {date:'Jun 18, 2026', period:'P1', subject:'Science',      type:'Unjustified',  status:'Open'},
+        {date:'Jun 17, 2026', period:'P2', subject:'Mathematics',  type:'Unjustified',  status:'Open'},
+        {date:'Jun 14, 2026', period:'P1', subject:'Science',      type:'Unjustified',  status:'Open'},
+        {date:'Jun 10, 2026', period:'P3', subject:'Mathematics',  type:'Medical',      status:'Justified'},
+        {date:'Jun 6, 2026',  period:'P1', subject:'Science',      type:'Late Arrival', status:'Open'}
+      ]
+    },
+    'STD-2051':{
+      name:'Julien Poirier', id:'STD-2051', grade:'Grade 12', school:'École Notre-Dame',
+      subjects:[
+        {subject:'History',               scheduled:124, abs:15, rate:12.1, threshold:12},
+        {subject:'English Language Arts', scheduled:124, abs:11, rate:8.9,  threshold:12},
+        {subject:'Mathematics',           scheduled:124, abs:7,  rate:5.6,  threshold:12},
+        {subject:'Science',               scheduled:110, abs:5,  rate:4.5,  threshold:12}
+      ],
+      log:[
+        {date:'Jun 18, 2026', period:'P4', subject:'History',               type:'Unjustified',  status:'Open'},
+        {date:'Jun 15, 2026', period:'P2', subject:'English Language Arts', type:'Unjustified',  status:'Open'},
+        {date:'Jun 11, 2026', period:'P4', subject:'History',               type:'Medical',      status:'Justified'},
+        {date:'Jun 8, 2026',  period:'P4', subject:'History',               type:'Unjustified',  status:'Open'}
+      ]
+    },
+    'STD-1560':{
+      name:'Omar Hassane', id:'STD-1560', grade:'Grade 10', school:'École Sainte-Croix',
+      subjects:[
+        {subject:'Mathematics', scheduled:132, abs:16, rate:12.1, threshold:12},
+        {subject:'Science',     scheduled:132, abs:12, rate:9.1,  threshold:12},
+        {subject:'English',     scheduled:132, abs:6,  rate:4.5,  threshold:12},
+        {subject:'History',     scheduled:121, abs:4,  rate:3.3,  threshold:12}
+      ],
+      log:[
+        {date:'Jun 18, 2026', period:'P3', subject:'Mathematics', type:'Unjustified',  status:'Open'},
+        {date:'Jun 16, 2026', period:'P1', subject:'Science',     type:'Unjustified',  status:'Open'},
+        {date:'Jun 13, 2026', period:'P3', subject:'Mathematics', type:'Unjustified',  status:'Open'},
+        {date:'Jun 10, 2026', period:'P1', subject:'Science',     type:'Medical',      status:'Justified'}
+      ]
+    },
+    'STD-2413':{
+      name:'Camille Dubois', id:'STD-2413', grade:'Grade 11', school:'École Sainte-Croix',
+      subjects:[
+        {subject:'English Language Arts', scheduled:149, abs:18, rate:12.1, threshold:12},
+        {subject:'History',               scheduled:132, abs:12, rate:9.1,  threshold:12},
+        {subject:'Mathematics',           scheduled:132, abs:7,  rate:5.3,  threshold:12},
+        {subject:'Science',               scheduled:132, abs:5,  rate:3.8,  threshold:12}
+      ],
+      log:[
+        {date:'Jun 18, 2026', period:'P2', subject:'English Language Arts', type:'Unjustified',  status:'Open'},
+        {date:'Jun 15, 2026', period:'P4', subject:'History',               type:'Unjustified',  status:'Open'},
+        {date:'Jun 12, 2026', period:'P2', subject:'English Language Arts', type:'Medical',      status:'Justified'},
+        {date:'Jun 9, 2026',  period:'P4', subject:'History',               type:'Unjustified',  status:'Open'}
+      ]
+    },
+    'STD-3340':{
+      name:'Aisha Ndiaye', id:'STD-3340', grade:'Grade 9', school:'École Notre-Dame',
+      subjects:[
+        {subject:'Mathematics', scheduled:117, abs:12, rate:10.3, threshold:10},
+        {subject:'Science',     scheduled:117, abs:10, rate:8.5,  threshold:10},
+        {subject:'English',     scheduled:117, abs:6,  rate:5.1,  threshold:10},
+        {subject:'French',      scheduled:117, abs:5,  rate:4.3,  threshold:10}
+      ],
+      log:[
+        {date:'Jun 17, 2026', period:'P1', subject:'Mathematics', type:'Unjustified',  status:'Open'},
+        {date:'Jun 16, 2026', period:'P2', subject:'Science',     type:'Unjustified',  status:'Open'},
+        {date:'Jun 12, 2026', period:'P1', subject:'Mathematics', type:'Unjustified',  status:'Open'},
+        {date:'Jun 9, 2026',  period:'P2', subject:'Science',     type:'Medical',      status:'Justified'}
+      ]
+    },
+    'STD-1144':{
+      name:'Ryan Beaumont', id:'STD-1144', grade:'Grade 10', school:'École Notre-Dame',
+      subjects:[
+        {subject:'Physical Education', scheduled:132, abs:16, rate:12.1, threshold:12},
+        {subject:'Mathematics',        scheduled:132, abs:9,  rate:6.8,  threshold:12},
+        {subject:'Science',            scheduled:132, abs:6,  rate:4.5,  threshold:12},
+        {subject:'History',            scheduled:121, abs:4,  rate:3.3,  threshold:12}
+      ],
+      log:[
+        {date:'Jun 18, 2026', period:'P5', subject:'Physical Education', type:'Unjustified',  status:'Open'},
+        {date:'Jun 15, 2026', period:'P5', subject:'Physical Education', type:'Unjustified',  status:'Open'},
+        {date:'Jun 11, 2026', period:'P5', subject:'Physical Education', type:'Medical',      status:'Justified'},
+        {date:'Jun 8, 2026',  period:'P5', subject:'Physical Education', type:'Unjustified',  status:'Open'}
+      ]
+    },
+    'STD-0891':{
+      name:'Thomas Villeneuve', id:'STD-0891', grade:'Grade 12', school:'École Saint-Michel',
+      subjects:[
+        {subject:'History',     scheduled:124, abs:12, rate:9.7,  threshold:12},
+        {subject:'Mathematics', scheduled:124, abs:11, rate:8.9,  threshold:12},
+        {subject:'Science',     scheduled:124, abs:5,  rate:4.0,  threshold:12},
+        {subject:'French',      scheduled:124, abs:4,  rate:3.2,  threshold:12}
+      ],
+      log:[
+        {date:'Jun 17, 2026', period:'P4', subject:'History',     type:'Unjustified',  status:'Open'},
+        {date:'Jun 14, 2026', period:'P3', subject:'Mathematics', type:'Unjustified',  status:'Open'},
+        {date:'Jun 11, 2026', period:'P4', subject:'History',     type:'Medical',      status:'Justified'},
+        {date:'Jun 8, 2026',  period:'P3', subject:'Mathematics', type:'Unjustified',  status:'Open'}
+      ]
+    },
+    'STD-4412':{
+      name:'Anais Cote-Leblanc', id:'STD-4412', grade:'Grade 8', school:'École Saint-Luc',
+      subjects:[
+        {subject:'Mathematics',          scheduled:110, abs:9, rate:8.2, threshold:10},
+        {subject:'French Language Arts', scheduled:110, abs:9, rate:8.2, threshold:10},
+        {subject:'Science',              scheduled:110, abs:5, rate:4.5, threshold:10},
+        {subject:'History',              scheduled:110, abs:4, rate:3.6, threshold:10}
+      ],
+      log:[
+        {date:'Jun 18, 2026', period:'P1', subject:'Mathematics',          type:'Unjustified',  status:'Open'},
+        {date:'Jun 15, 2026', period:'P2', subject:'French Language Arts', type:'Unjustified',  status:'Open'},
+        {date:'Jun 12, 2026', period:'P1', subject:'Mathematics',          type:'Medical',      status:'Justified'}
+      ]
+    },
+    'STD-2778':{
+      name:'Chloe Tremblay', id:'STD-2778', grade:'Grade 11', school:'École Notre-Dame',
+      subjects:[
+        {subject:'English',    scheduled:149, abs:12, rate:8.1, threshold:12},
+        {subject:'French',     scheduled:149, abs:9,  rate:6.0, threshold:12},
+        {subject:'Science',    scheduled:132, abs:7,  rate:5.3, threshold:12},
+        {subject:'History',    scheduled:132, abs:5,  rate:3.8, threshold:12}
+      ],
+      log:[
+        {date:'Jun 17, 2026', period:'P2', subject:'English', type:'Unjustified',  status:'Open'},
+        {date:'Jun 13, 2026', period:'P2', subject:'English', type:'Unjustified',  status:'Open'},
+        {date:'Jun 10, 2026', period:'P2', subject:'English', type:'Medical',      status:'Justified'},
+        {date:'Jun 6, 2026',  period:'P2', subject:'English', type:'Unjustified',  status:'Open'}
+      ]
+    },
+    'STD-4021':{
+      name:'Sara El-Amin', id:'STD-4021', grade:'Grade 9', school:'École Notre-Dame',
+      subjects:[
+        {subject:'English Language Arts', scheduled:117, abs:10, rate:8.5, threshold:10},
+        {subject:'Mathematics',           scheduled:117, abs:7,  rate:6.0, threshold:10},
+        {subject:'Science',               scheduled:117, abs:5,  rate:4.3, threshold:10},
+        {subject:'History',               scheduled:110, abs:4,  rate:3.6, threshold:10}
+      ],
+      log:[
+        {date:'Jun 18, 2026', period:'P3', subject:'English Language Arts', type:'Unjustified',  status:'Open'},
+        {date:'Jun 14, 2026', period:'P3', subject:'English Language Arts', type:'Unjustified',  status:'Open'},
+        {date:'Jun 10, 2026', period:'P3', subject:'English Language Arts', type:'Medical',      status:'Justified'}
+      ]
+    },
+    'STD-3655':{
+      name:'Victor Lebrun', id:'STD-3655', grade:'Grade 12', school:'École Notre-Dame',
+      subjects:[
+        {subject:'Chemistry',  scheduled:124, abs:10, rate:8.1, threshold:12},
+        {subject:'Physics',    scheduled:124, abs:7,  rate:5.6, threshold:12},
+        {subject:'Mathematics',scheduled:124, abs:6,  rate:4.8, threshold:12},
+        {subject:'History',    scheduled:124, abs:4,  rate:3.2, threshold:12}
+      ],
+      log:[
+        {date:'Jun 17, 2026', period:'P4', subject:'Chemistry', type:'Unjustified',  status:'Open'},
+        {date:'Jun 13, 2026', period:'P4', subject:'Chemistry', type:'Unjustified',  status:'Open'},
+        {date:'Jun 9, 2026',  period:'P4', subject:'Chemistry', type:'Medical',      status:'Justified'}
+      ]
+    },
+    'STD-2900':{
+      name:'Mei-Lin Xu', id:'STD-2900', grade:'Grade 11', school:'École Notre-Dame',
+      subjects:[
+        {subject:'Visual Arts',  scheduled:132, abs:11, rate:8.3, threshold:12},
+        {subject:'Art History',  scheduled:132, abs:7,  rate:5.3, threshold:12},
+        {subject:'English',      scheduled:149, abs:6,  rate:4.0, threshold:12},
+        {subject:'Mathematics',  scheduled:149, abs:5,  rate:3.4, threshold:12}
+      ],
+      log:[
+        {date:'Jun 18, 2026', period:'P5', subject:'Visual Arts', type:'Unjustified',  status:'Open'},
+        {date:'Jun 14, 2026', period:'P5', subject:'Visual Arts', type:'Unjustified',  status:'Open'},
+        {date:'Jun 10, 2026', period:'P5', subject:'Visual Arts', type:'Late Arrival', status:'Open'}
+      ]
+    },
+    'STD-3881':{
+      name:'Elise Carrier', id:'STD-3881', grade:'Grade 9', school:'École Sainte-Croix',
+      subjects:[
+        {subject:'French Language Arts', scheduled:117, abs:10, rate:8.5, threshold:10},
+        {subject:'Mathematics',          scheduled:117, abs:7,  rate:6.0, threshold:10},
+        {subject:'Science',              scheduled:117, abs:5,  rate:4.3, threshold:10},
+        {subject:'History',              scheduled:110, abs:3,  rate:2.7, threshold:10}
+      ],
+      log:[
+        {date:'Jun 17, 2026', period:'P2', subject:'French Language Arts', type:'Unjustified',  status:'Open'},
+        {date:'Jun 13, 2026', period:'P2', subject:'French Language Arts', type:'Unjustified',  status:'Open'},
+        {date:'Jun 9, 2026',  period:'P2', subject:'French Language Arts', type:'Medical',      status:'Justified'}
+      ]
+    },
+    'STD-2204':{
+      name:'Leo Santos', id:'STD-2204', grade:'Grade 12', school:'École Sainte-Croix',
+      subjects:[
+        {subject:'Mathematics',           scheduled:124, abs:10, rate:8.1, threshold:12},
+        {subject:'Physics',               scheduled:124, abs:7,  rate:5.6, threshold:12},
+        {subject:'English Language Arts', scheduled:124, abs:5,  rate:4.0, threshold:12},
+        {subject:'History',               scheduled:124, abs:4,  rate:3.2, threshold:12}
+      ],
+      log:[
+        {date:'Jun 18, 2026', period:'P3', subject:'Mathematics', type:'Unjustified',  status:'Open'},
+        {date:'Jun 14, 2026', period:'P3', subject:'Mathematics', type:'Unjustified',  status:'Open'},
+        {date:'Jun 10, 2026', period:'P3', subject:'Mathematics', type:'Late Arrival', status:'Open'}
+      ]
+    },
+    'STD-2890':{
+      name:'Noah Martin', id:'STD-2890', grade:'Grade 10', school:'École Sainte-Croix',
+      subjects:[
+        {subject:'History',     scheduled:121, abs:10, rate:8.3, threshold:12},
+        {subject:'Geography',   scheduled:121, abs:7,  rate:5.8, threshold:12},
+        {subject:'Science',     scheduled:132, abs:5,  rate:3.8, threshold:12},
+        {subject:'Mathematics', scheduled:132, abs:4,  rate:3.0, threshold:12}
+      ],
+      log:[
+        {date:'Jun 17, 2026', period:'P4', subject:'History', type:'Unjustified',  status:'Open'},
+        {date:'Jun 13, 2026', period:'P4', subject:'History', type:'Unjustified',  status:'Open'},
+        {date:'Jun 9, 2026',  period:'P4', subject:'History', type:'Medical',      status:'Justified'}
+      ]
+    },
+    'STD-2566':{
+      name:'Isabelle Morin', id:'STD-2566', grade:'Grade 10', school:'École Saint-Michel',
+      subjects:[
+        {subject:'French Language Arts', scheduled:132, abs:11, rate:8.3, threshold:12},
+        {subject:'English',              scheduled:132, abs:7,  rate:5.3, threshold:12},
+        {subject:'Mathematics',          scheduled:132, abs:5,  rate:3.8, threshold:12},
+        {subject:'Science',              scheduled:132, abs:4,  rate:3.0, threshold:12}
+      ],
+      log:[
+        {date:'Jun 18, 2026', period:'P2', subject:'French Language Arts', type:'Unjustified',  status:'Open'},
+        {date:'Jun 14, 2026', period:'P2', subject:'French Language Arts', type:'Unjustified',  status:'Open'},
+        {date:'Jun 10, 2026', period:'P2', subject:'French Language Arts', type:'Medical',      status:'Justified'}
+      ]
+    },
+    'STD-3894':{
+      name:'Dmitri Kowalski', id:'STD-3894', grade:'Grade 7', school:'École Saint-Luc',
+      subjects:[
+        {subject:'Mathematics', scheduled:105, abs:9, rate:8.6, threshold:10},
+        {subject:'Science',     scheduled:105, abs:6, rate:5.7, threshold:10},
+        {subject:'French',      scheduled:105, abs:5, rate:4.8, threshold:10},
+        {subject:'History',     scheduled:105, abs:3, rate:2.9, threshold:10}
+      ],
+      log:[
+        {date:'Jun 17, 2026', period:'P1', subject:'Mathematics', type:'Unjustified',  status:'Open'},
+        {date:'Jun 14, 2026', period:'P3', subject:'Mathematics', type:'Unjustified',  status:'Open'},
+        {date:'Jun 11, 2026', period:'P1', subject:'Mathematics', type:'Medical',      status:'Justified'}
+      ]
+    }
+  };
+
+  function _gtrRenderSchoolSection(schoolKey){
+    var d = gtrSchoolData[schoolKey];
+    if(!d) return '';
+
+    // Aggregate rows into one per student
+    var students = {};
+    var studentOrder = [];
+    for(var i=0; i<d.rows.length; i++){
+      var row = d.rows[i];
+      if(!students[row.id]){
+        students[row.id] = {name:row.name, id:row.id, grade:row.grade, highestRate:0, threshold:row.threshold};
+        studentOrder.push(row.id);
+      }
+      if(row.rate > students[row.id].highestRate) students[row.id].highestRate = row.rate;
+    }
+    studentOrder.sort(function(a,b){ return students[b].highestRate - students[a].highestRate; });
+
+    var within = d.total - d.exceeding - d.near;
+    var h = '<div style="margin-bottom:32px;">';
+
+    // School heading bar
+    h += '<div style="background:#1B5DAF;color:#fff;padding:11px 16px;border-radius:8px 8px 0 0;">';
+    h += '<div style="font-weight:700;font-size:14px;">' + d.full + '</div>';
+    h += '</div>';
+
+    // School KPI row
+    h += '<div style="display:grid;grid-template-columns:repeat(4,1fr);border:1px solid #D6DBE2;border-top:none;margin-bottom:16px;">';
+    h += '<div style="padding:10px 14px;border-right:1px solid #D6DBE2;">';
+    h += '<div style="font-size:10px;font-weight:700;text-transform:uppercase;color:#475467;margin-bottom:3px;">Students Enrolled</div>';
+    h += '<div style="font-size:22px;font-weight:800;color:#0F2546;">' + d.total + '</div>';
+    h += '</div>';
+    var excBg = d.exceeding > 0 ? 'background:#FEF7F7;' : '';
+    h += '<div style="padding:10px 14px;border-right:1px solid #D6DBE2;border-left:3px solid #B42318;' + excBg + '">';
+    h += '<div style="font-size:10px;font-weight:700;text-transform:uppercase;color:#B42318;margin-bottom:3px;">Exceeding Threshold</div>';
+    h += '<div style="font-size:22px;font-weight:800;color:#B42318;">' + d.exceeding + '</div>';
+    h += '</div>';
+    var nearBg = d.near > 0 ? 'background:#FFFAF2;' : '';
+    h += '<div style="padding:10px 14px;border-right:1px solid #D6DBE2;border-left:3px solid #9A4708;' + nearBg + '">';
+    h += '<div style="font-size:10px;font-weight:700;text-transform:uppercase;color:#9A4708;margin-bottom:3px;">At-Risk Warning</div>';
+    h += '<div style="font-size:22px;font-weight:800;color:#9A4708;">' + d.near + '</div>';
+    h += '</div>';
+    h += '<div style="padding:10px 14px;">';
+    h += '<div style="font-size:10px;font-weight:700;text-transform:uppercase;color:#1F7A3F;margin-bottom:3px;">Within Limit</div>';
+    h += '<div style="font-size:22px;font-weight:800;color:#1F7A3F;">' + within + '</div>';
+    h += '</div>';
+    h += '</div>';
+
+    if(studentOrder.length === 0){
+      h += '<div style="border:1px solid #D6DBE2;border-radius:6px;padding:14px 16px;text-align:center;color:#5C6470;font-size:13px;">';
+      h += '<i class="fa-solid fa-circle-check" style="color:#1F7A3F;margin-right:6px;"></i>No students flagged this term.';
+      h += '</div>';
+    } else {
+      // Render each student fully expanded — no click, PDF-ready
+      for(var j=0; j<studentOrder.length; j++){
+        var stu = students[studentOrder[j]];
+        var sd = gtrStudentData[stu.id];
+        var exceeded = stu.highestRate >= stu.threshold;
+        var headerBg = exceeded ? 'background:#FEF0EF;border-left:4px solid #B42318;' : 'background:#FFFAF2;border-left:4px solid #9A4708;';
+        var statusLabel = exceeded ? 'Exceeds Threshold' : 'At-Risk Warning';
+        var statusCls   = exceeded ? 'status--alert' : 'status--warn';
+
+        h += '<div style="border:1px solid #D6DBE2;border-radius:8px;overflow:hidden;margin-bottom:12px;">';
+
+        // Student header
+        h += '<div style="padding:10px 14px;display:flex;align-items:center;justify-content:space-between;' + headerBg + '">';
+        h += '<div>';
+        h += '<div style="font-size:13px;font-weight:700;color:#0F2546;">' + stu.name + '</div>';
+        h += '<div style="font-size:11px;color:#5C6470;margin-top:2px;">' + stu.id + ' &nbsp;·&nbsp; ' + stu.grade + '</div>';
+        h += '</div>';
+        h += '<span class="status ' + statusCls + '">' + statusLabel + '</span>';
+        h += '</div>';
+
+        // Subject breakdown table
+        if(sd && sd.subjects){
+          h += '<div style="overflow-x:auto;">';
+          h += '<table style="width:100%;border-collapse:collapse;font-size:12px;">';
+          h += '<thead><tr style="background:#F8FAFC;">';
+          h += '<th style="padding:7px 12px;text-align:left;font-size:11px;font-weight:700;color:#475467;border-bottom:1px solid #E5E8EE;">Subject</th>';
+          h += '<th style="padding:7px 12px;text-align:center;font-size:11px;font-weight:700;color:#475467;border-bottom:1px solid #E5E8EE;">Classes Scheduled</th>';
+          h += '<th style="padding:7px 12px;text-align:center;font-size:11px;font-weight:700;color:#475467;border-bottom:1px solid #E5E8EE;">Absences</th>';
+          h += '<th style="padding:7px 12px;text-align:center;font-size:11px;font-weight:700;color:#475467;border-bottom:1px solid #E5E8EE;">Absence Rate</th>';
+          h += '<th style="padding:7px 12px;text-align:center;font-size:11px;font-weight:700;color:#475467;border-bottom:1px solid #E5E8EE;">Threshold</th>';
+          h += '<th style="padding:7px 12px;text-align:left;font-size:11px;font-weight:700;color:#475467;border-bottom:1px solid #E5E8EE;">Status</th>';
+          h += '</tr></thead><tbody>';
+          for(var k=0; k<sd.subjects.length; k++){
+            var sub = sd.subjects[k];
+            var subExc = sub.rate >= sub.threshold;
+            var rowBg = subExc ? 'background:#FEF7F7;' : '';
+            var rateColor = subExc ? 'color:#B42318;font-weight:700;' : (sub.rate >= 8 ? 'color:#9A4708;font-weight:700;' : 'color:#475467;');
+            var subStatus = subExc
+              ? '<span class="status status--alert">Exceeds</span>'
+              : (sub.rate >= 8 ? '<span class="status status--warn">At-Risk</span>' : '<span class="status status--neutral">Within limit</span>');
+            h += '<tr style="border-bottom:1px solid #F0F2F5;' + rowBg + '">';
+            h += '<td style="padding:8px 12px;color:#0F2546;font-weight:500;">' + sub.subject + '</td>';
+            h += '<td style="padding:8px 12px;text-align:center;color:#475467;">' + sub.scheduled + '</td>';
+            h += '<td style="padding:8px 12px;text-align:center;">' + sub.abs + '</td>';
+            h += '<td style="padding:8px 12px;text-align:center;' + rateColor + '">' + sub.rate.toFixed(1) + '%</td>';
+            h += '<td style="padding:8px 12px;text-align:center;color:#475467;">' + sub.threshold + '%</td>';
+            h += '<td style="padding:8px 12px;">' + subStatus + '</td>';
+            h += '</tr>';
+          }
+          h += '</tbody></table></div>';
+        }
+        h += '</div>'; // end student card
+      }
+    }
+
+    h += '</div>'; // end school section
+    return h;
+  }
+
+    var _gtrRows = [];
+
+  function openGtrReportRow(idx){
+    var r = _gtrRows[idx];
+    if(!r) return;
+    showGradeThreshold(r.schoolKey || 'all', r.term, r.date);
+  }
+
+  function showGradeThreshold(scopeKey, term, dateGenerated){
+    var allSchoolKeys = ['Notre-Dame','Sainte-Croix','Saint-Michel','Saint-Luc'];
+    var isAll = (!scopeKey || scopeKey === 'all');
+    var keysToUse = isAll ? allSchoolKeys : [scopeKey];
+
+    var grandTotal=0, grandExceeding=0, grandNear=0;
+    for(var k=0; k<keysToUse.length; k++){
+      var sd = gtrSchoolData[keysToUse[k]];
+      if(!sd) continue;
+      grandTotal += sd.total;
+      grandExceeding += sd.exceeding;
+      grandNear += sd.near;
+    }
+
+    document.getElementById('gtr-school').textContent = isAll ? 'All Schools — Board-Wide' : gtrSchoolData[scopeKey].full;
+    document.getElementById('gtr-term').textContent = term || 'Term 1 · 2025–26';
+    document.getElementById('gtr-date').textContent = dateGenerated || 'Jun 19, 2026';
+    document.getElementById('gtr-total').textContent = grandTotal;
+    document.getElementById('gtr-exceeding').textContent = grandExceeding;
+    document.getElementById('gtr-near').textContent = grandNear;
+    document.getElementById('gtr-within').textContent = grandTotal - grandExceeding - grandNear;
+
+    var sectionsHtml = '';
+    for(var k=0; k<keysToUse.length; k++){
+      sectionsHtml += _gtrRenderSchoolSection(keysToUse[k]);
+    }
+    document.getElementById('gtr-content').innerHTML = sectionsHtml;
+    document.getElementById('gtr-modal').style.display = 'flex';
+  }
+
+  function hideGradeThreshold(){
+    document.getElementById('gtr-modal').style.display = 'none';
+  }
+
+  function showGtrStudentDetail(studentId){
+    var d = gtrStudentData[studentId];
+    if(!d) return;
+
+    document.getElementById('gsd-name').textContent = d.name;
+    document.getElementById('gsd-id').textContent = d.id;
+    document.getElementById('gsd-grade').textContent = d.grade;
+    document.getElementById('gsd-school').textContent = d.school;
+
+    var exceeding=0, highestRate=0;
+    for(var i=0; i<d.subjects.length; i++){
+      if(d.subjects[i].rate >= d.subjects[i].threshold) exceeding++;
+      if(d.subjects[i].rate > highestRate) highestRate = d.subjects[i].rate;
+    }
+    document.getElementById('gsd-subj-total').textContent = d.subjects.length;
+    document.getElementById('gsd-subj-exceeding').textContent = exceeding;
+    document.getElementById('gsd-highest-rate').textContent = highestRate.toFixed(1) + '%';
+
+    var badge = document.getElementById('gsd-status');
+    if(exceeding > 0){ badge.className='status status--alert'; badge.textContent='Exceeds Threshold'; }
+    else { badge.className='status status--warn'; badge.textContent='At-Risk Warning'; }
+
+    var sRows='';
+    for(var i=0; i<d.subjects.length; i++){
+      var s=d.subjects[i];
+      var exc=s.rate>=s.threshold;
+      var rc=exc?'color:#B42318;font-weight:700;':(s.rate>=8?'color:#9A4708;font-weight:700;':'color:var(--c-ink-muted);');
+      var sh=exc?'<span class="status status--alert">Exceeds</span>':(s.rate>=8?'<span class="status status--warn">At-Risk</span>':'<span class="status status--neutral">Within limit</span>');
+      sRows+='<tr'+(exc?' style="background:#FEF7F7;"':'')+'>'+
+        '<td style="font-size:13px;">'+s.subject+'</td>'+
+        '<td style="text-align:center;color:var(--c-ink-muted);">'+s.scheduled+'</td>'+
+        '<td style="text-align:center;">'+s.abs+'</td>'+
+        '<td style="text-align:center;'+rc+'">'+s.rate.toFixed(1)+'%</td>'+
+        '<td style="text-align:center;color:var(--c-ink-muted);">'+s.threshold+'%</td>'+
+        '<td>'+sh+'</td>'+
+        '</tr>';
+    }
+    document.getElementById('gsd-subj-tbody').innerHTML = sRows;
+
+    var lRows='';
+    for(var j=0; j<d.log.length; j++){
+      var l=d.log[j];
+      var tc=l.type==='Unjustified'?'status--alert':(l.type==='Medical'?'status--ok':'status--warn');
+      var sc2=l.status==='Justified'?'status--ok':(l.status==='Disputed'?'status--info':'status--neutral');
+      lRows+='<tr>'+
+        '<td style="white-space:nowrap;font-size:12px;">'+l.date+'</td>'+
+        '<td style="text-align:center;font-size:12px;">'+l.period+'</td>'+
+        '<td style="font-size:12px;">'+l.subject+'</td>'+
+        '<td><span class="status '+tc+'">'+l.type+'</span></td>'+
+        '<td><span class="status '+sc2+'">'+l.status+'</span></td>'+
+        '</tr>';
+    }
+    document.getElementById('gsd-log-tbody').innerHTML = lRows;
+    document.getElementById('gsd-modal').style.display = 'flex';
+  }
+
+  function hideGtrStudentDetail(){
+    document.getElementById('gsd-modal').style.display = 'none';
+  }
+
+  function renderPage(){
+    _ujrRows = [];
+    _attRows = [];
+    _tcrRows = [];
+    _chrRows = [];
+    _atrRows = [];
+    _odrRows = [];
+    _gtrRows = [];
+    var key = getParam('r') || 'unjustified-absences';
+    var def = reportDefs[key] || reportDefs['unjustified-absences'];
+    var rows = historyData[key] || [];
+
+    // Set page title and breadcrumb
+    document.title = 'ClassTrack — ' + def.title;
+    document.getElementById('page-title').textContent = def.title;
+    document.getElementById('page-sub').textContent = def.sub;
+    document.getElementById('crumb-report').textContent = def.title;
+
+    // Set report icon
+    var iconEl = document.getElementById('report-icon');
+    iconEl.style.background = def.iconBg;
+    iconEl.style.color = def.iconColor;
+    iconEl.innerHTML = '<i class="fa-solid ' + def.iconClass + '"></i>';
+
+    // Render history rows
+    var tbody = document.getElementById('history-tbody');
+    if(rows.length === 0){
+      tbody.innerHTML = '<tr><td colspan="5"><div class="empty-state"><i class="fa-solid fa-clock-rotate-left"></i><p style="font-weight:600;color:var(--c-ink);">No reports generated yet</p><p>Click Generate New Report to create the first run.</p></div></td></tr>';
+      return;
+    }
+    var html = '';
+    for(var i=0; i<rows.length; i++){
+      var r = rows[i];
+      var isLatest = i === 0;
+      html += '<tr>';
+      html += '<td>';
+      html += '<div class="cell-primary">' + r.date + '</div>';
+      html += '<div class="cell-sub">' + r.time + (isLatest ? ' &nbsp;<span class="status status--ok" style="font-size:10px;padding:1px 6px;">Latest</span>' : '') + '</div>';
+      html += '</td>';
+      html += '<td style="font-size:13px;">' + r.term + '</td>';
+      html += '<td style="font-size:13px;">' + r.scope + '</td>';
+      html += '<td><span class="status status--ok"><i class="fa-solid fa-circle-check" style="font-size:10px;"></i> Ready</span></td>';
+      html += '<td>';
+      html += '<div style="display:flex;gap:6px;">';
+      if(key === 'unjustified-absences'){
+        _ujrRows.push(r);
+        html += '<button class="btn btn--secondary btn--sm" onclick="openUnjReportRow(' + (_ujrRows.length - 1) + ')"><i class="fa-solid fa-eye"></i> Open</button>';
+      } else if(key === 'attendance-summary'){
+        _attRows.push(r);
+        html += '<button class="btn btn--secondary btn--sm" onclick="openAttReportRow(' + (_attRows.length - 1) + ')"><i class="fa-solid fa-eye"></i> Open</button>';
+      } else if(key === 'teacher-submission'){
+        _tcrRows.push(r);
+        html += '<button class="btn btn--secondary btn--sm" onclick="openTcrReportRow(' + (_tcrRows.length - 1) + ')"><i class="fa-solid fa-eye"></i> Open</button>';
+      } else if(key === 'chronic-absenteeism'){
+        _chrRows.push(r);
+        html += '<button class="btn btn--secondary btn--sm" onclick="openChrReportRow(' + (_chrRows.length - 1) + ')"><i class="fa-solid fa-eye"></i> Open</button>';
+      } else if(key === 'absence-trends'){
+        _atrRows.push(r);
+        html += '<button class="btn btn--secondary btn--sm" onclick="openAtrReportRow(' + (_atrRows.length - 1) + ')"><i class="fa-solid fa-eye"></i> Open</button>';
+      } else if(key === 'open-disputes'){
+        _odrRows.push(r);
+        html += '<button class="btn btn--secondary btn--sm" onclick="openOdrReportRow(' + (_odrRows.length - 1) + ')"><i class="fa-solid fa-eye"></i> Open</button>';
+      } else if(key === 'grade-threshold'){
+        _gtrRows.push(r);
+        html += '<button class="btn btn--secondary btn--sm" onclick="openGtrReportRow(' + (_gtrRows.length - 1) + ')"><i class="fa-solid fa-eye"></i> Open</button>';
+      } else {
+        html += '<button class="btn btn--secondary btn--sm"><i class="fa-solid fa-eye"></i> Open</button>';
+      }
+      html += '<button class="btn btn--ghost btn--sm"><i class="fa-solid fa-file-pdf"></i> PDF</button>';
+      html += '<button class="btn btn--ghost btn--sm"><i class="fa-solid fa-file-csv"></i> CSV</button>';
+      html += '</div>';
+      html += '</td>';
+      html += '</tr>';
+    }
+    tbody.innerHTML = html;
+    document.getElementById('history-count').textContent = rows.length;
+  }
+
+  window.addEventListener('DOMContentLoaded', renderPage);
+</script>
+</head>
+<body>
+<div class="wf-banner" role="region">
+  <div class="wf-banner__left"><i class="fa-solid fa-pencil-ruler"></i><strong>Wireframe — Admin Portal V1 · Report History</strong><span>· EC Catholic · Board Admin</span></div>
+  <div style="display:flex;gap:12px;font-size:12px;"><a href="dashboard.html">Dashboard</a><a href="reports.html">Reports</a></div>
+</div>
+<div class="app">
+  <aside class="sidebar">
+    <div class="sidebar__logo"><div class="sidebar__logo-mark">CT</div><div><div class="sidebar__logo-text">ClassTrack</div><div class="sidebar__logo-sub">EC Catholic · Board</div></div></div>
+    <div class="sidebar__role-badge">Board Administrator</div><nav class="sidebar__section"><div class="sidebar__section-label">Overview</div><a href="dashboard.html" class="nav-item"><span class="nav-icon"><i class="fa-solid fa-gauge-high"></i></span>Dashboard</a></nav><nav class="sidebar__section"><div class="sidebar__section-label">Management</div><a href="schools.html" class="nav-item"><span class="nav-icon"><i class="fa-solid fa-school"></i></span>Schools<span class="nav-badge nav-badge--neutral">8</span></a><a href="users.html" class="nav-item"><span class="nav-icon"><i class="fa-solid fa-users-gear"></i></span>Users<span class="nav-badge nav-badge--neutral">247</span></a><a href="registered-contacts.html" class="nav-item"><span class="nav-icon"><i class="fa-solid fa-id-badge"></i></span>Registered Contacts<span class="nav-badge nav-badge--neutral">14</span></a></nav><nav class="sidebar__section"><div class="sidebar__section-label">Reports</div><a href="attendance-summary-v3.html" class="nav-item"><span class="nav-icon"><i class="fa-solid fa-chart-bar"></i></span>Attendance Summary</a><a href="absence-trends-v2.html" class="nav-item"><span class="nav-icon"><i class="fa-solid fa-chart-line"></i></span>Absence Trends</a><a href="chronic-absenteeism-v2.html" class="nav-item"><span class="nav-icon"><i class="fa-solid fa-user-clock"></i></span>Chronic Absenteeism</a><a href="unjustified-absences-v2.html" class="nav-item"><span class="nav-icon"><i class="fa-solid fa-circle-exclamation"></i></span>Unjustified Absences</a><a href="submission-compliance-v2.html" class="nav-item"><span class="nav-icon"><i class="fa-solid fa-clipboard-check"></i></span>Submission Compliance</a><a href="open-disputes-v2.html" class="nav-item"><span class="nav-icon"><i class="fa-solid fa-scale-balanced"></i></span>Open Disputes</a><a href="grade-threshold-v2.html" class="nav-item"><span class="nav-icon"><i class="fa-solid fa-graduation-cap"></i></span>Grade Threshold</a></nav><nav class="sidebar__section"><div class="sidebar__section-label">System</div><a href="aspen.html" class="nav-item"><span class="nav-icon"><i class="fa-solid fa-arrows-rotate"></i></span>Aspen Sync<span class="nav-badge nav-badge--warn">1</span></a><a href="configuration.html" class="nav-item"><span class="nav-icon"><i class="fa-solid fa-calendar-days"></i></span>Calendar &amp; Periods</a><a href="notifications.html" class="nav-item"><span class="nav-icon"><i class="fa-solid fa-bell-slash"></i></span>Notifications</a></nav><div class="sidebar__user"><div class="avatar">AR</div><div><div class="sidebar__user-name">André Rousseau</div><div class="sidebar__user-role">Board Administrator</div></div></div>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <div class="topbar__crumbs">
+        <a href="dashboard.html">Board</a><span>›</span>
+        <a href="reports.html">Reports</a><span>›</span>
+        <strong id="crumb-report">Report</strong>
+      </div>
+      <div class="topbar__scope"><i class="fa-solid fa-school"></i> EC Catholic · All Schools</div>
+      <div class="topbar__actions">
+        <div class="lang-toggle"><button aria-pressed="true">EN</button><button aria-pressed="false">FR</button></div>
+        <button class="icon-btn"><i class="fa-solid fa-bell"></i><span class="icon-btn__count">3</span></button>
+        <span class="user-chip"><span class="avatar" style="width:28px;height:28px;font-size:12px;">AR</span>André R.</span>
+      </div>
+    </header>
+
+    <main id="main" class="content" tabindex="-1">
+
+      <!-- Page header -->
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:12px;">
+        <div style="display:flex;align-items:center;gap:14px;">
+          <div id="report-icon" class="report-icon" style="width:48px;height:48px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;background:#FCE9E7;color:#B42318;"></div>
+          <div>
+            <div style="font-size:20px;font-weight:800;color:var(--c-ink);letter-spacing:-0.02em;" id="page-title">Report</div>
+            <div style="font-size:13px;color:var(--c-ink-subtle);margin-top:2px;" id="page-sub">—</div>
+          </div>
+        </div>
+        <button class="btn btn--primary btn--sm" onclick="showGenerateModal()"><i class="fa-solid fa-plus"></i> Generate New Report</button>
+      </div>
+
+      <!-- History table -->
+      <div class="card">
+        <div class="card__h">
+          <div>
+            <div class="card__title"><i class="fa-solid fa-clock-rotate-left" style="color:var(--c-brand);margin-right:8px;"></i>Report History</div>
+            <div class="card__sub">All previously generated runs · most recent first</div>
+          </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="filter-bar">
+          <span class="filter-bar__label">Filter:</span>
+          <select id="hf-term" class="filter-select" onchange="filterHistory()">
+            <option value="">All Terms</option>
+            <option value="Term 1 · 2025–26">Term 1 · 2025–26</option>
+            <option value="Term 2 · 2024–25">Term 2 · 2024–25</option>
+          </select>
+          <select id="hf-scope" class="filter-select" onchange="filterHistory()">
+            <option value="">All Scopes</option>
+            <option value="All Schools">All Schools</option>
+            <option value="École Notre-Dame">École Notre-Dame</option>
+            <option value="École Sainte-Croix">École Sainte-Croix</option>
+            <option value="École Saint-Michel">École Saint-Michel</option>
+            <option value="École Saint-Luc">École Saint-Luc</option>
+          </select>
+          <select id="hf-date" class="filter-select" onchange="filterHistory()">
+            <option value="">All Time</option>
+            <option value="30">Last 30 days</option>
+            <option value="90">Last 90 days</option>
+            <option value="180">Last 180 days</option>
+          </select>
+        </div>
+
+        <!-- Table -->
+        <div style="overflow-x:auto;">
+          <table class="table" id="history-table">
+            <thead>
+              <tr>
+                <th>Date Generated</th>
+                <th>Term</th>
+                <th>Scope</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="history-tbody"></tbody>
+          </table>
+        </div>
+
+        <div class="card__footer">
+          <span style="font-size:12px;color:var(--c-ink-subtle);"><span id="history-count">0</span> reports in history</span>
+        </div>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     GENERATE NEW REPORT MODAL
+════════════════════════════════════════════════════════════ -->
+<div id="gen-modal" class="modal-backdrop" style="display:none;" onclick="if(event.target===this)hideGenerateModal()">
+  <div class="modal" style="width:100%;max-width:480px;">
+    <div style="background:#1a1a1a;color:#fff;padding:16px 24px;border-radius:14px 14px 0 0;flex-shrink:0;">
+      <div style="display:flex;align-items:center;justify-content:space-between;">
+        <div>
+          <div style="font-size:11px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:rgba(255,255,255,0.5);margin-bottom:4px;">EC Catholic District School Board</div>
+          <div style="font-size:16px;font-weight:800;">Generate New Report</div>
+        </div>
+        <button onclick="hideGenerateModal()" style="background:rgba(255,255,255,0.1);border:none;color:#fff;width:32px;height:32px;border-radius:6px;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;">×</button>
+      </div>
+    </div>
+    <div class="modal__b" style="gap:20px;">
+      <div>
+        <label style="display:block;font-size:12px;font-weight:700;color:var(--c-ink-muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.05em;">Term</label>
+        <select id="gen-term" class="filter-select" style="width:100%;padding:9px 12px;border:1px solid var(--c-border);border-radius:8px;font-size:14px;background:#fff;color:var(--c-ink);">
+          <option value="Term 1 · 2025–26">Term 1 · 2025–26</option>
+          <option value="Term 2 · 2024–25">Term 2 · 2024–25</option>
+        </select>
+      </div>
+      <div>
+        <label style="display:block;font-size:12px;font-weight:700;color:var(--c-ink-muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.05em;">Scope</label>
+        <select id="gen-scope" class="filter-select" style="width:100%;padding:9px 12px;border:1px solid var(--c-border);border-radius:8px;font-size:14px;background:#fff;color:var(--c-ink);">
+          <option value="all">All Schools — Board-Wide</option>
+          <option value="Notre-Dame">École Notre-Dame</option>
+          <option value="Sainte-Croix">École Sainte-Croix</option>
+          <option value="Saint-Michel">École Saint-Michel</option>
+          <option value="Saint-Luc">École Saint-Luc</option>
+        </select>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <div>
+          <label style="display:block;font-size:12px;font-weight:700;color:var(--c-ink-muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.05em;">Date From</label>
+          <input type="date" id="gen-date-from" style="width:100%;padding:9px 12px;border:1px solid var(--c-border);border-radius:8px;font-size:14px;color:var(--c-ink);" />
+        </div>
+        <div>
+          <label style="display:block;font-size:12px;font-weight:700;color:var(--c-ink-muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.05em;">Date To</label>
+          <input type="date" id="gen-date-to" style="width:100%;padding:9px 12px;border:1px solid var(--c-border);border-radius:8px;font-size:14px;color:var(--c-ink);" />
+        </div>
+      </div>
+    </div>
+    <div class="modal__f">
+      <button class="btn btn--ghost btn--sm" onclick="hideGenerateModal()">Cancel</button>
+      <button class="btn btn--primary btn--sm" onclick="generateReport()"><i class="fa-solid fa-play"></i> Generate Report</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     ABSENCE TRENDS REPORT MODAL
+════════════════════════════════════════════════════════════ -->
+<div id="atr-modal" class="modal-backdrop" style="display:none;" onclick="if(event.target===this)hideAbsenceTrends()">
+  <div class="modal" style="width:100%;max-width:960px;">
+    <div style="background:#1a1a1a;color:#fff;padding:16px 24px;border-radius:14px 14px 0 0;flex-shrink:0;">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px;">
+        <div>
+          <div style="font-size:11px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:rgba(255,255,255,0.5);margin-bottom:4px;">EC Catholic District School Board · Standard Report</div>
+          <div style="font-size:18px;font-weight:800;letter-spacing:-0.01em;">Absence Trends</div>
+          <div id="atr-school" style="font-size:13px;color:rgba(255,255,255,0.7);margin-top:3px;">—</div>
+        </div>
+        <button onclick="hideAbsenceTrends()" style="background:rgba(255,255,255,0.1);border:none;color:#fff;width:32px;height:32px;border-radius:6px;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">×</button>
+      </div>
+      <div style="display:flex;align-items:center;gap:20px;margin-top:10px;padding-top:10px;border-top:1px solid rgba(255,255,255,0.12);font-size:11px;color:rgba(255,255,255,0.55);">
+        <span><i class="fa-solid fa-calendar-days" style="margin-right:5px;"></i>Date Range: <strong id="atr-range" style="color:rgba(255,255,255,0.85);">—</strong></span>
+        <span><i class="fa-solid fa-clock" style="margin-right:5px;"></i>Generated: <strong id="atr-date" style="color:rgba(255,255,255,0.85);">—</strong></span>
+        <span style="margin-left:auto;background:rgba(255,255,255,0.12);padding:2px 10px;border-radius:999px;font-size:10px;font-weight:700;letter-spacing:0.06em;">CONFIDENTIAL</span>
+      </div>
+    </div>
+    <div class="modal__b">
+      <div id="atr-content"></div>
+    </div>
+    <div class="modal__f">
+      <span style="font-size:12px;color:var(--c-ink-subtle);">ClassTrack · EC Catholic District School Board · Prototype V1</span>
+      <div style="display:flex;gap:8px;">
+        <button class="btn btn--secondary btn--sm"><i class="fa-solid fa-file-pdf"></i> Export PDF</button>
+        <button class="btn btn--secondary btn--sm"><i class="fa-solid fa-file-csv"></i> Export CSV</button>
+        <button class="btn btn--ghost btn--sm" onclick="hideAbsenceTrends()">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     CHRONIC ABSENTEEISM REPORT MODAL
+════════════════════════════════════════════════════════════ -->
+<div id="chr-modal" class="modal-backdrop" style="display:none;" onclick="if(event.target===this)hideChronicAbsenteeism()">
+  <div class="modal" style="width:100%;max-width:860px;">
+    <div style="background:#1a1a1a;color:#fff;padding:16px 24px;border-radius:14px 14px 0 0;flex-shrink:0;">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px;">
+        <div>
+          <div style="font-size:11px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:rgba(255,255,255,0.5);margin-bottom:4px;">EC Catholic District School Board · Standard Report</div>
+          <div style="font-size:18px;font-weight:800;letter-spacing:-0.01em;">Chronic Absenteeism</div>
+          <div id="chr-school" style="font-size:13px;color:rgba(255,255,255,0.7);margin-top:3px;">—</div>
+        </div>
+        <button onclick="hideChronicAbsenteeism()" style="background:rgba(255,255,255,0.1);border:none;color:#fff;width:32px;height:32px;border-radius:6px;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">×</button>
+      </div>
+      <div style="display:flex;align-items:center;gap:20px;margin-top:10px;padding-top:10px;border-top:1px solid rgba(255,255,255,0.12);font-size:11px;color:rgba(255,255,255,0.55);">
+        <span><i class="fa-solid fa-calendar-days" style="margin-right:5px;"></i>Date Range: <strong id="chr-range" style="color:rgba(255,255,255,0.85);">—</strong></span>
+        <span><i class="fa-solid fa-clock" style="margin-right:5px;"></i>Generated: <strong id="chr-date" style="color:rgba(255,255,255,0.85);">—</strong></span>
+        <span style="margin-left:auto;background:rgba(255,255,255,0.12);padding:2px 10px;border-radius:999px;font-size:10px;font-weight:700;letter-spacing:0.06em;">CONFIDENTIAL</span>
+      </div>
+    </div>
+    <div class="modal__b">
+      <div id="chr-content"></div>
+    </div>
+    <div class="modal__f">
+      <span style="font-size:12px;color:var(--c-ink-subtle);">ClassTrack · EC Catholic District School Board · Prototype V1</span>
+      <div style="display:flex;gap:8px;">
+        <button class="btn btn--secondary btn--sm"><i class="fa-solid fa-file-pdf"></i> Export PDF</button>
+        <button class="btn btn--secondary btn--sm"><i class="fa-solid fa-file-csv"></i> Export CSV</button>
+        <button class="btn btn--ghost btn--sm" onclick="hideChronicAbsenteeism()">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     TEACHER SUBMISSION COMPLIANCE REPORT MODAL
+════════════════════════════════════════════════════════════ -->
+<div id="tcr-modal" class="modal-backdrop" style="display:none;" onclick="if(event.target===this)hideTeacherCompliance()">
+  <div class="modal" style="width:100%;max-width:980px;">
+    <div style="background:#1a1a1a;color:#fff;padding:16px 24px;border-radius:14px 14px 0 0;flex-shrink:0;">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px;">
+        <div>
+          <div style="font-size:11px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:rgba(255,255,255,0.5);margin-bottom:4px;">EC Catholic District School Board · Standard Report</div>
+          <div style="font-size:18px;font-weight:800;letter-spacing:-0.01em;">Teacher Submission Compliance</div>
+          <div id="tcr-school" style="font-size:13px;color:rgba(255,255,255,0.7);margin-top:3px;">—</div>
+        </div>
+        <button onclick="hideTeacherCompliance()" style="background:rgba(255,255,255,0.1);border:none;color:#fff;width:32px;height:32px;border-radius:6px;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">×</button>
+      </div>
+      <div style="display:flex;align-items:center;gap:20px;margin-top:10px;padding-top:10px;border-top:1px solid rgba(255,255,255,0.12);font-size:11px;color:rgba(255,255,255,0.55);">
+        <span><i class="fa-solid fa-calendar-days" style="margin-right:5px;"></i>Date Range: <strong id="tcr-range" style="color:rgba(255,255,255,0.85);">—</strong></span>
+        <span><i class="fa-solid fa-clock" style="margin-right:5px;"></i>Generated: <strong id="tcr-date" style="color:rgba(255,255,255,0.85);">—</strong></span>
+        <span style="margin-left:auto;background:rgba(255,255,255,0.12);padding:2px 10px;border-radius:999px;font-size:10px;font-weight:700;letter-spacing:0.06em;">CONFIDENTIAL</span>
+      </div>
+    </div>
+    <div class="modal__b">
+      <div id="tcr-content"></div>
+    </div>
+    <div class="modal__f">
+      <span style="font-size:12px;color:var(--c-ink-subtle);">ClassTrack · EC Catholic District School Board · Prototype V1</span>
+      <div style="display:flex;gap:8px;">
+        <button class="btn btn--secondary btn--sm"><i class="fa-solid fa-file-pdf"></i> Export PDF</button>
+        <button class="btn btn--secondary btn--sm"><i class="fa-solid fa-file-csv"></i> Export CSV</button>
+        <button class="btn btn--ghost btn--sm" onclick="hideTeacherCompliance()">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     ATTENDANCE SUMMARY REPORT MODAL
+════════════════════════════════════════════════════════════ -->
+<div id="att-modal" class="modal-backdrop" style="display:none;" onclick="if(event.target===this)hideAttendanceSummary()">
+  <div class="modal" style="width:100%;max-width:960px;">
+    <div style="background:#1a1a1a;color:#fff;padding:16px 24px;border-radius:14px 14px 0 0;flex-shrink:0;">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px;">
+        <div>
+          <div style="font-size:11px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:rgba(255,255,255,0.5);margin-bottom:4px;">EC Catholic District School Board · Standard Report</div>
+          <div style="font-size:18px;font-weight:800;letter-spacing:-0.01em;">Attendance Summary</div>
+          <div id="att-school" style="font-size:13px;color:rgba(255,255,255,0.7);margin-top:3px;">—</div>
+        </div>
+        <button onclick="hideAttendanceSummary()" style="background:rgba(255,255,255,0.1);border:none;color:#fff;width:32px;height:32px;border-radius:6px;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">×</button>
+      </div>
+      <div style="display:flex;align-items:center;gap:20px;margin-top:10px;padding-top:10px;border-top:1px solid rgba(255,255,255,0.12);font-size:11px;color:rgba(255,255,255,0.55);">
+        <span><i class="fa-solid fa-calendar-days" style="margin-right:5px;"></i>Date Range: <strong id="att-range" style="color:rgba(255,255,255,0.85);">—</strong></span>
+        <span><i class="fa-solid fa-clock" style="margin-right:5px;"></i>Generated: <strong id="att-date" style="color:rgba(255,255,255,0.85);">—</strong></span>
+        <span style="margin-left:auto;background:rgba(255,255,255,0.12);padding:2px 10px;border-radius:999px;font-size:10px;font-weight:700;letter-spacing:0.06em;">CONFIDENTIAL</span>
+      </div>
+    </div>
+    <div class="modal__b">
+      <div id="att-content"></div>
+    </div>
+    <div class="modal__f">
+      <span style="font-size:12px;color:var(--c-ink-subtle);">ClassTrack · EC Catholic District School Board · Prototype V1</span>
+      <div style="display:flex;gap:8px;">
+        <button class="btn btn--secondary btn--sm"><i class="fa-solid fa-file-pdf"></i> Export PDF</button>
+        <button class="btn btn--secondary btn--sm"><i class="fa-solid fa-file-csv"></i> Export CSV</button>
+        <button class="btn btn--ghost btn--sm" onclick="hideAttendanceSummary()">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     OPEN DISPUTES REPORT MODAL
+═══════════════════════════════════════════════════════════ -->
+<div id="odr-modal" class="modal-backdrop" style="display:none;" onclick="if(event.target===this)hideOpenDisputes()">
+  <div class="modal" style="width:100%;max-width:1020px;">
+    <div style="background:#1a1a1a;color:#fff;padding:16px 24px;border-radius:14px 14px 0 0;flex-shrink:0;">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px;">
+        <div>
+          <div style="font-size:11px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:rgba(255,255,255,0.5);margin-bottom:4px;">EC Catholic District School Board · Standard Report</div>
+          <div style="font-size:18px;font-weight:800;letter-spacing:-0.01em;">Open Disputes</div>
+          <div id="odr-school" style="font-size:13px;color:rgba(255,255,255,0.7);margin-top:3px;">—</div>
+        </div>
+        <button onclick="hideOpenDisputes()" style="background:rgba(255,255,255,0.1);border:none;color:#fff;width:32px;height:32px;border-radius:6px;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">×</button>
+      </div>
+      <div style="display:flex;align-items:center;gap:20px;margin-top:10px;padding-top:10px;border-top:1px solid rgba(255,255,255,0.12);font-size:11px;color:rgba(255,255,255,0.55);">
+        <span><i class="fa-solid fa-calendar-days" style="margin-right:5px;"></i>Date Range: <strong id="odr-range" style="color:rgba(255,255,255,0.85);">—</strong></span>
+        <span><i class="fa-solid fa-clock" style="margin-right:5px;"></i>Generated: <strong id="odr-date" style="color:rgba(255,255,255,0.85);">—</strong></span>
+        <span style="margin-left:auto;background:rgba(255,255,255,0.12);padding:2px 10px;border-radius:999px;font-size:10px;font-weight:700;letter-spacing:0.06em;">CONFIDENTIAL</span>
+      </div>
+    </div>
+    <div class="modal__b">
+      <div id="odr-content"></div>
+    </div>
+    <div class="modal__f">
+      <span style="font-size:12px;color:var(--c-ink-subtle);">ClassTrack · EC Catholic District School Board · Prototype V1</span>
+      <div style="display:flex;gap:8px;">
+        <button class="btn btn--secondary btn--sm"><i class="fa-solid fa-file-pdf"></i> Export PDF</button>
+        <button class="btn btn--secondary btn--sm"><i class="fa-solid fa-file-csv"></i> Export CSV</button>
+        <button class="btn btn--ghost btn--sm" onclick="hideOpenDisputes()">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     UNJUSTIFIED ABSENCES REPORT MODAL
+════════════════════════════════════════════════════════════ -->
+<div id="unjustified-modal" class="modal-backdrop" style="display:none;" onclick="if(event.target===this)hideUnjustifiedReport()">
+  <div class="modal" style="width:100%;max-width:960px;">
+    <div style="background:#1a1a1a;color:#fff;padding:16px 24px;border-radius:14px 14px 0 0;flex-shrink:0;">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px;">
+        <div>
+          <div style="font-size:11px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:rgba(255,255,255,0.5);margin-bottom:4px;">EC Catholic District School Board · Standard Report</div>
+          <div style="font-size:18px;font-weight:800;letter-spacing:-0.01em;">Unjustified Absences</div>
+          <div id="ujr-school" style="font-size:13px;color:rgba(255,255,255,0.7);margin-top:3px;">—</div>
+        </div>
+        <button onclick="hideUnjustifiedReport()" style="background:rgba(255,255,255,0.1);border:none;color:#fff;width:32px;height:32px;border-radius:6px;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">×</button>
+      </div>
+      <div style="display:flex;align-items:center;gap:20px;margin-top:10px;padding-top:10px;border-top:1px solid rgba(255,255,255,0.12);font-size:11px;color:rgba(255,255,255,0.55);">
+        <span><i class="fa-solid fa-clock" style="margin-right:5px;"></i>Generated: <strong id="ujr-date" style="color:rgba(255,255,255,0.85);">—</strong></span>
+        <span><i class="fa-solid fa-tag" style="margin-right:5px;"></i>Term: <strong id="ujr-term" style="color:rgba(255,255,255,0.85);">—</strong></span>
+        <span style="margin-left:auto;background:rgba(255,255,255,0.12);padding:2px 10px;border-radius:999px;font-size:10px;font-weight:700;letter-spacing:0.06em;">CONFIDENTIAL</span>
+      </div>
+    </div>
+    <div class="modal__b">
+      <div id="ujr-content"></div>
+    </div>
+    <div class="modal__f">
+      <span style="font-size:12px;color:var(--c-ink-subtle);">ClassTrack · EC Catholic District School Board · Prototype V1</span>
+      <div style="display:flex;gap:8px;">
+        <button class="btn btn--secondary btn--sm"><i class="fa-solid fa-file-pdf"></i> Export PDF</button>
+        <button class="btn btn--secondary btn--sm"><i class="fa-solid fa-file-csv"></i> Export CSV</button>
+        <button class="btn btn--ghost btn--sm" onclick="hideUnjustifiedReport()">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════════════
+     GRADE THRESHOLD REPORT MODAL
+════════════════════════════════════════════════════════════ -->
+<div id="gtr-modal" class="modal-backdrop" style="display:none;" onclick="if(event.target===this)hideGradeThreshold()">
+  <div class="modal" style="width:100%;max-width:1020px;">
+    <div style="background:#1a1a1a;color:#fff;padding:16px 24px;border-radius:14px 14px 0 0;flex-shrink:0;">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px;">
+        <div>
+          <div style="font-size:11px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:rgba(255,255,255,0.5);margin-bottom:4px;">EC Catholic District School Board · Grade Threshold Report</div>
+          <div style="font-size:18px;font-weight:800;letter-spacing:-0.01em;" id="gtr-school">—</div>
+          <div style="font-size:13px;color:rgba(255,255,255,0.7);margin-top:3px;" id="gtr-term">—</div>
+        </div>
+        <button onclick="hideGradeThreshold()" style="background:rgba(255,255,255,0.1);border:none;color:#fff;width:32px;height:32px;border-radius:6px;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">×</button>
+      </div>
+      <div style="display:flex;align-items:center;gap:20px;margin-top:10px;padding-top:10px;border-top:1px solid rgba(255,255,255,0.12);font-size:11px;color:rgba(255,255,255,0.55);">
+        <span><i class="fa-solid fa-clock" style="margin-right:5px;"></i>Generated: <strong id="gtr-date" style="color:rgba(255,255,255,0.85);">—</strong></span>
+        <span style="margin-left:auto;background:rgba(255,255,255,0.12);padding:2px 10px;border-radius:999px;font-size:10px;font-weight:700;letter-spacing:0.06em;">CONFIDENTIAL</span>
+      </div>
+    </div>
+    <!-- Board KPI row -->
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);border-bottom:1px solid #e0e0e0;flex-shrink:0;">
+      <div style="padding:14px 20px;border-right:1px solid #e0e0e0;">
+        <div style="font-size:10px;font-weight:700;text-transform:uppercase;color:#475467;margin-bottom:4px;">Students Enrolled</div>
+        <div style="font-size:26px;font-weight:800;color:#0F2546;" id="gtr-total">—</div>
+        <div style="font-size:11px;color:#5C6470;">across selected schools</div>
+      </div>
+      <div style="padding:14px 20px;border-right:1px solid #e0e0e0;background:#FEF7F7;border-left:3px solid #B42318;">
+        <div style="font-size:10px;font-weight:700;text-transform:uppercase;color:#B42318;margin-bottom:4px;">Exceeding Threshold</div>
+        <div style="font-size:26px;font-weight:800;color:#B42318;" id="gtr-exceeding">—</div>
+        <div style="font-size:11px;color:#5C6470;">at or above Ontario §2.1 limit</div>
+      </div>
+      <div style="padding:14px 20px;border-right:1px solid #e0e0e0;background:#FFFAF2;border-left:3px solid #9A4708;">
+        <div style="font-size:10px;font-weight:700;text-transform:uppercase;color:#9A4708;margin-bottom:4px;">At-Risk Warning</div>
+        <div style="font-size:26px;font-weight:800;color:#9A4708;" id="gtr-near">—</div>
+        <div style="font-size:11px;color:#5C6470;">within 2% of threshold</div>
+      </div>
+      <div style="padding:14px 20px;">
+        <div style="font-size:10px;font-weight:700;text-transform:uppercase;color:#1F7A3F;margin-bottom:4px;">Within Limit</div>
+        <div style="font-size:26px;font-weight:800;color:#1F7A3F;" id="gtr-within">—</div>
+        <div style="font-size:11px;color:#5C6470;">no compliance concern</div>
+      </div>
+    </div>
+    <div class="modal__b" id="gtr-content"></div>
+    <div class="modal__f">
+      <span style="font-size:12px;color:var(--c-ink-subtle);">ClassTrack · EC Catholic District School Board · Prototype V1</span>
+      <div style="display:flex;gap:8px;">
+        <button class="btn btn--secondary btn--sm"><i class="fa-solid fa-file-pdf"></i> Export PDF</button>
+        <button class="btn btn--secondary btn--sm"><i class="fa-solid fa-file-csv"></i> Export CSV</button>
+        <button class="btn btn--ghost btn--sm" onclick="hideGradeThreshold()">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════════════
+     GRADE THRESHOLD — STUDENT DETAIL MODAL
+════════════════════════════════════════════════════════════ -->
+<div id="gsd-modal" class="modal-backdrop" style="display:none;z-index:200;" onclick="if(event.target===this)hideGtrStudentDetail()">
+  <div class="modal" style="width:100%;max-width:800px;">
+    <div style="background:#1a1a1a;color:#fff;padding:16px 24px;border-radius:14px 14px 0 0;flex-shrink:0;">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px;">
+        <div>
+          <div style="font-size:11px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:rgba(255,255,255,0.5);margin-bottom:4px;">Student Grade Threshold Detail</div>
+          <div style="font-size:18px;font-weight:800;" id="gsd-name">—</div>
+          <div style="font-size:13px;color:rgba(255,255,255,0.7);margin-top:3px;display:flex;gap:12px;">
+            <span id="gsd-id">—</span><span>·</span><span id="gsd-grade">—</span><span>·</span><span id="gsd-school">—</span>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;flex-shrink:0;">
+          <span class="status" id="gsd-status">—</span>
+          <button onclick="hideGtrStudentDetail()" style="background:rgba(255,255,255,0.1);border:none;color:#fff;width:32px;height:32px;border-radius:6px;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;">×</button>
+        </div>
+      </div>
+    </div>
+    <!-- KPI row -->
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);border-bottom:1px solid #e0e0e0;flex-shrink:0;">
+      <div style="padding:12px 16px;border-right:1px solid #e0e0e0;">
+        <div style="font-size:10px;font-weight:700;text-transform:uppercase;color:#475467;margin-bottom:3px;">Subjects Enrolled</div>
+        <div style="font-size:22px;font-weight:800;color:#0F2546;" id="gsd-subj-total">—</div>
+      </div>
+      <div style="padding:12px 16px;border-right:1px solid #e0e0e0;">
+        <div style="font-size:10px;font-weight:700;text-transform:uppercase;color:#B42318;margin-bottom:3px;">Subjects Exceeding</div>
+        <div style="font-size:22px;font-weight:800;color:#B42318;" id="gsd-subj-exceeding">—</div>
+      </div>
+      <div style="padding:12px 16px;">
+        <div style="font-size:10px;font-weight:700;text-transform:uppercase;color:#9A4708;margin-bottom:3px;">Highest Absence Rate</div>
+        <div style="font-size:22px;font-weight:800;color:#9A4708;" id="gsd-highest-rate">—</div>
+      </div>
+    </div>
+    <div class="modal__b" style="gap:16px;">
+      <!-- Subject breakdown -->
+      <div>
+        <div style="font-size:12px;font-weight:700;color:#475467;margin-bottom:8px;text-transform:uppercase;letter-spacing:0.06em;">Subject Breakdown</div>
+        <div style="overflow-x:auto;">
+          <table class="data-table" style="font-size:12px;width:100%;">
+            <thead><tr>
+              <th>Subject</th>
+              <th style="text-align:center;">Classes Scheduled</th>
+              <th style="text-align:center;">Absences</th>
+              <th style="text-align:center;">Rate</th>
+              <th style="text-align:center;">Threshold</th>
+              <th>Status</th>
+            </tr></thead>
+            <tbody id="gsd-subj-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+      <!-- Absence log -->
+      <div>
+        <div style="font-size:12px;font-weight:700;color:#475467;margin-bottom:8px;text-transform:uppercase;letter-spacing:0.06em;">Recent Absence Log</div>
+        <div style="overflow-x:auto;">
+          <table class="data-table" style="font-size:12px;width:100%;">
+            <thead><tr>
+              <th>Date</th>
+              <th style="text-align:center;">Period</th>
+              <th>Subject</th>
+              <th>Type</th>
+              <th>Status</th>
+            </tr></thead>
+            <tbody id="gsd-log-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    <div class="modal__f">
+      <span style="font-size:12px;color:var(--c-ink-subtle);">ClassTrack · EC Catholic · Prototype V1</span>
+      <button class="btn btn--ghost btn--sm" onclick="hideGtrStudentDetail()">Close</button>
+    </div>
+  </div>
+</div>
+
+
+</body>
+</h

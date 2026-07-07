@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en-CA" data-lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ClassTrack — Board Admin · Aspen Integration</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+  :root {
+    --c-bg:#F4F6FA; --c-surface:#FFFFFF; --c-surface-2:#F8FAFC; --c-surface-alt:#EEF2F7;
+    --c-sidebar:#0F2546; --c-sidebar-2:#0A1B36; --c-sidebar-hover:rgba(255,255,255,0.08); --c-sidebar-active:#1B5DAF;
+    --c-border:#D6DBE2; --c-border-2:#E5E8EE; --c-border-strong:#A6ADBB;
+    --c-ink:#0F2546; --c-ink-muted:#475467; --c-ink-subtle:#5C6470;
+    --c-brand:#1B5DAF; --c-brand-ink:#0E2E55; --c-brand-tint:#E8F0FA;
+    --c-success:#1F7A3F; --c-success-tint:#E6F4EC;
+    --c-warning:#9A4708; --c-warning-tint:#FCF1DD; --c-warning-bord:#B97F38;
+    --c-danger:#B42318; --c-danger-tint:#FCE9E7;
+    --c-info:#0E5C8A; --c-info-tint:#E0EFF7;
+    --c-neutral-tint:#EEF1F5;
+    --c-purple-tint:#EEEAFE; --c-purple:#3F22A6;
+    --c-focus:#FFB400;
+    --s-1:4px;--s-2:8px;--s-3:12px;--s-4:16px;--s-5:24px;--s-6:32px;
+    --r-sm:4px;--r-md:6px;--r-lg:10px;--r-xl:14px;--r-pill:999px;
+    --ff:"Segoe UI",system-ui,-apple-system,sans-serif;
+    --fs-xs:12px;--fs-sm:13px;--fs-md:14px;--fs-lg:16px;--fs-xl:20px;--fs-2xl:24px;
+    --shadow-md:0 4px 12px rgba(15,37,70,0.08);--shadow-lg:0 8px 28px rgba(15,37,70,0.12);
+  }
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+  html,body{height:100%;}
+  body{font-family:var(--ff);background:var(--c-bg);color:var(--c-ink);font-size:var(--fs-md);line-height:1.55;-webkit-font-smoothing:antialiased;}
+  a{color:var(--c-brand);text-decoration:none;}a:hover{text-decoration:underline;}
+  button{font-family:inherit;cursor:pointer;}
+  .skip-link{position:absolute;top:-40px;left:12px;background:var(--c-focus);color:#5C3F00;padding:8px 12px;border-radius:6px;font-weight:600;z-index:200;text-decoration:none;}
+  .skip-link:focus{top:8px;}
+  .wf-banner{background:#F0EFFE;border-bottom:1px solid #C8C0F0;color:#3F22A6;font-size:12px;padding:6px 16px;display:flex;align-items:center;justify-content:space-between;gap:16px;}
+  .wf-banner__left{display:flex;align-items:center;gap:8px;}
+  .wf-banner__right{display:flex;align-items:center;gap:12px;}
+  .wf-banner a{color:#3F22A6;}
+  .app{display:grid;grid-template-columns:240px 1fr;min-height:calc(100vh - 32px);}
+  /* Sidebar */
+  .sidebar{background:linear-gradient(180deg,var(--c-sidebar) 0%,var(--c-sidebar-2) 100%);color:rgba(255,255,255,0.85);display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow-y:auto;}
+  .sidebar__logo{padding:24px 16px 16px;border-bottom:1px solid rgba(255,255,255,0.08);display:flex;align-items:center;gap:12px;}
+  .sidebar__logo-mark{width:36px;height:36px;background:var(--c-sidebar-active);border-radius:10px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:16px;}
+  .sidebar__logo-text{color:#fff;font-size:16px;font-weight:700;}
+  .sidebar__logo-sub{color:rgba(255,255,255,0.6);font-size:11px;margin-top:2px;}
+  .sidebar__role-badge{margin:8px 16px 0;background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.2);border-radius:999px;padding:3px 10px;font-size:10px;font-weight:700;color:rgba(255,255,255,0.9);letter-spacing:0.06em;text-transform:uppercase;text-align:center;}
+  .sidebar__section{padding:16px 12px 4px;}
+  .sidebar__section-label{text-transform:uppercase;font-size:10px;font-weight:700;letter-spacing:0.12em;color:rgba(255,255,255,0.45);padding:0 12px;margin-bottom:4px;}
+  .nav-item{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:6px;color:rgba(255,255,255,0.78);font-size:13px;font-weight:500;min-height:36px;text-decoration:none;}
+  .nav-item:hover{background:var(--c-sidebar-hover);color:#fff;text-decoration:none;}
+  .nav-item.is-active{background:var(--c-sidebar-active);color:#fff;font-weight:600;}
+  .nav-item .nav-icon{width:20px;text-align:center;font-size:14px;}
+  .nav-item .nav-badge{margin-left:auto;background:var(--c-danger);color:#fff;font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px;}
+  .nav-item .nav-badge--neutral{background:rgba(255,255,255,0.18);color:#fff;}
+  .nav-item .nav-badge--warn{background:var(--c-warning);color:#fff;}
+  .sidebar__user{margin-top:auto;padding:12px 16px;border-top:1px solid rgba(255,255,255,0.08);display:flex;align-items:center;gap:12px;}
+  .avatar{width:36px;height:36px;border-radius:999px;background:var(--c-brand-tint);color:var(--c-brand-ink);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;flex-shrink:0;}
+  .sidebar__user-name{color:#fff;font-size:13px;font-weight:600;}
+  .sidebar__user-role{color:rgba(255,255,255,0.6);font-size:11px;}
+  /* Topbar */
+  .main{display:flex;flex-direction:column;min-width:0;}
+  .topbar{background:var(--c-surface);border-bottom:1px solid var(--c-border);display:flex;align-items:center;gap:16px;padding:12px 24px;position:sticky;top:0;z-index:50;min-height:64px;}
+  .topbar__crumbs{display:flex;align-items:center;gap:8px;color:var(--c-ink-subtle);font-size:12px;}
+  .topbar__crumbs strong{color:var(--c-ink);font-weight:600;}
+  .topbar__scope{margin-left:auto;background:var(--c-purple-tint);color:var(--c-purple);border:1px solid #C8C0F0;padding:6px 12px;border-radius:6px;font-size:12px;font-weight:600;display:inline-flex;align-items:center;gap:8px;}
+  .topbar__actions{display:flex;align-items:center;gap:8px;}
+  .icon-btn{width:36px;height:36px;border-radius:6px;background:transparent;border:1px solid transparent;color:var(--c-ink-muted);display:inline-flex;align-items:center;justify-content:center;position:relative;font-size:14px;}
+  .icon-btn:hover{background:var(--c-surface-alt);}
+  .icon-btn__count{position:absolute;top:2px;right:2px;background:var(--c-danger);color:#fff;font-size:10px;font-weight:700;min-width:18px;height:18px;border-radius:999px;display:flex;align-items:center;justify-content:center;padding:0 4px;border:2px solid var(--c-surface);}
+  .lang-toggle{display:inline-flex;border:1px solid var(--c-border-strong);border-radius:6px;overflow:hidden;}
+  .lang-toggle button{background:var(--c-surface);border:0;padding:6px 12px;font-size:12px;font-weight:700;color:var(--c-ink-muted);min-height:32px;}
+  .lang-toggle button[aria-pressed="true"]{background:var(--c-brand);color:#fff;}
+  .user-chip{display:inline-flex;align-items:center;gap:8px;padding:4px 10px 4px 4px;border:1px solid var(--c-border);border-radius:999px;font-size:12px;color:var(--c-ink-muted);min-height:36px;}
+  /* Content */
+  .content{padding:24px;flex:1;display:flex;flex-direction:column;gap:16px;}
+  .page-header{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap;}
+  .page-header h1{font-size:24px;font-weight:700;letter-spacing:-0.01em;}
+  .page-header p{color:var(--c-ink-muted);font-size:14px;margin-top:4px;}
+  .page-header__actions{display:flex;gap:8px;flex-wrap:wrap;}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:8px 14px;border-radius:6px;font-size:13px;font-weight:600;border:1px solid transparent;min-height:36px;transition:background 0.12s;text-decoration:none;}
+  .btn--primary{background:var(--c-brand);color:#fff;border-color:var(--c-brand);}
+  .btn--primary:hover{background:var(--c-brand-ink);}
+  .btn--secondary{background:var(--c-surface);color:var(--c-ink);border-color:var(--c-border-strong);}
+  .btn--secondary:hover{background:var(--c-surface-alt);}
+  .btn--ghost{background:transparent;color:var(--c-brand);}
+  .btn--ghost:hover{background:var(--c-brand-tint);}
+  .btn--sm{padding:4px 10px;min-height:28px;font-size:12px;}
+  /* Sync status cards */
+  .sync-cards{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;}
+  @media(max-width:1100px){.sync-cards{grid-template-columns:repeat(2,1fr);}}
+  @media(max-width:700px){.sync-cards{grid-template-columns:1fr;}}
+  .sync-card{background:var(--c-surface);border:1px solid var(--c-border);border-radius:10px;padding:16px;display:flex;flex-direction:column;gap:10px;}
+  .sync-card--ok{border-left:3px solid var(--c-success);}
+  .sync-card--warn{border-left:3px solid var(--c-warning);}
+  .sync-card--err{border-left:3px solid var(--c-danger);}
+  .sync-card__header{display:flex;align-items:center;justify-content:space-between;}
+  .sync-card__icon{width:32px;height:32px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:14px;}
+  .sync-card__icon--ok{background:var(--c-success-tint);color:var(--c-success);}
+  .sync-card__icon--warn{background:var(--c-warning-tint);color:var(--c-warning);}
+  .sync-card__icon--err{background:var(--c-danger-tint);color:var(--c-danger);}
+  .sync-card__label{font-size:12px;font-weight:700;color:var(--c-ink-muted);margin-top:4px;}
+  .sync-card__title{font-size:16px;font-weight:700;color:var(--c-ink);}
+  .sync-card__meta{font-size:11px;color:var(--c-ink-subtle);}
+  /* Status */
+  .status{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:999px;font-size:11px;font-weight:700;border:1px solid transparent;}
+  .status--ok{background:var(--c-success-tint);color:var(--c-success);border-color:#4F9A6C;}
+  .status--warn{background:var(--c-warning-tint);color:var(--c-warning);border-color:var(--c-warning-bord);}
+  .status--err{background:var(--c-danger-tint);color:var(--c-danger);border-color:#B0625A;}
+  .status--info{background:var(--c-info-tint);color:var(--c-info);border-color:#5B96BC;}
+  .status--neutral{background:var(--c-neutral-tint);color:var(--c-ink-muted);border-color:var(--c-border-strong);}
+  /* Cards */
+  .card{background:var(--c-surface);border:1px solid var(--c-border);border-radius:10px;overflow:hidden;display:flex;flex-direction:column;}
+  .card__h{padding:12px 16px;border-bottom:1px solid var(--c-border-2);display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;}
+  .card__title{font-size:14px;font-weight:700;color:var(--c-ink);display:flex;align-items:center;gap:8px;}
+  .card__title-count{background:var(--c-neutral-tint);color:var(--c-ink-muted);padding:2px 8px;border-radius:999px;font-size:12px;font-weight:700;}
+  .card__sub{font-size:12px;color:var(--c-ink-subtle);margin-top:2px;}
+  .card__footer{padding:8px 16px;background:var(--c-surface-2);border-top:1px solid var(--c-border-2);display:flex;align-items:center;justify-content:space-between;font-size:12px;color:var(--c-ink-subtle);}
+  /* Data flow diagram */
+  .flow-diagram{padding:24px;display:flex;align-items:center;gap:0;justify-content:center;flex-wrap:wrap;}
+  .flow-box{background:var(--c-surface-2);border:1px solid var(--c-border);border-radius:10px;padding:16px 20px;text-align:center;min-width:140px;}
+  .flow-box--aspen{background:var(--c-brand-tint);border-color:#6E94BF;}
+  .flow-box--classtrack{background:var(--c-purple-tint);border-color:#7E68DC;}
+  .flow-box__icon{font-size:24px;margin-bottom:6px;}
+  .flow-box__name{font-weight:700;font-size:14px;color:var(--c-ink);}
+  .flow-box__sub{font-size:11px;color:var(--c-ink-subtle);margin-top:2px;}
+  .flow-arrow{display:flex;flex-direction:column;align-items:center;gap:4px;padding:0 16px;}
+  .flow-arrow__line{width:60px;height:2px;background:var(--c-border-strong);position:relative;}
+  .flow-arrow__line::after{content:'▶';position:absolute;right:-6px;top:-8px;font-size:12px;color:var(--c-ink-muted);}
+  .flow-arrow__label{font-size:10px;color:var(--c-ink-subtle);font-weight:600;white-space:nowrap;}
+  .flow-arrow-left .flow-arrow__line::after{content:'◀';right:auto;left:-6px;}
+  /* Log table */
+  .log-table{width:100%;border-collapse:collapse;font-size:13px;}
+  .log-table thead tr{border-bottom:2px solid var(--c-border);}
+  .log-table thead th{padding:8px 12px;text-align:left;font-size:12px;font-weight:700;color:var(--c-ink-muted);background:var(--c-surface-2);white-space:nowrap;}
+  .log-table tbody tr{border-bottom:1px solid var(--c-border-2);}
+  .log-table tbody tr:last-child{border-bottom:0;}
+  .log-table tbody tr:hover{background:var(--c-surface-2);}
+  .log-table td{padding:10px 12px;vertical-align:middle;}
+  .log-type-ok{color:var(--c-success);}
+  .log-type-warn{color:var(--c-warning);}
+  .log-type-err{color:var(--c-danger);}
+  /* Row 2 */
+  .row-2{display:grid;grid-template-columns:2fr 1fr;gap:16px;align-items:start;}
+  @media(max-width:1100px){.row-2{grid-template-columns:1fr;}}
+  .col-stack{display:flex;flex-direction:column;gap:16px;}
+  /* Schedule card */
+  .schedule-list{list-style:none;}
+  .schedule-list li+li{border-top:1px solid var(--c-border-2);}
+  .schedule-item{padding:10px 16px;display:grid;grid-template-columns:1fr auto;align-items:center;gap:12px;}
+  .schedule-item__name{font-weight:600;color:var(--c-ink);font-size:13px;}
+  .schedule-item__meta{font-size:11px;color:var(--c-ink-subtle);margin-top:2px;}
+  /* Filter bar */
+  .filter-bar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:12px 16px;border-bottom:1px solid var(--c-border-2);}
+  .filter-bar select{padding:7px 12px;border:1px solid var(--c-border-strong);border-radius:6px;font-size:13px;background:var(--c-surface);color:var(--c-ink);cursor:pointer;}
+  .filter-bar input[type="search"]{flex:1;min-width:200px;padding:7px 12px;border:1px solid var(--c-border-strong);border-radius:6px;font-size:13px;background:var(--c-surface);color:var(--c-ink);}
+  @media(max-width:880px){.app{grid-template-columns:1fr;}.sidebar{position:relative;height:auto;flex-direction:row;overflow-x:auto;overflow-y:hidden;}.sidebar__section{padding:8px;display:flex;flex-direction:row;gap:4px;}.sidebar__section-label,.sidebar__user,.sidebar__logo-text,.sidebar__logo-sub,.sidebar__role-badge{display:none;}.nav-item{white-space:nowrap;}}
+</style>
+</head>
+<body>
+<a href="#main" class="skip-link">Skip to main content</a>
+<div class="wf-banner" role="region">
+  <div class="wf-banner__left"><i class="fa-solid fa-pencil-ruler"></i><strong>Wireframe — Admin Portal V1 · Aspen Integration Console</strong><span>· EC Catholic · Board Admin</span></div>
+  <div class="wf-banner__right"><a href="dashboard.html">Dashboard</a><a href="schools.html">Schools</a><a href="configuration.html">Configuration</a><a href="reports.html">Reports</a></div>
+</div>
+<div class="app">
+  <aside class="sidebar">
+    <div class="sidebar__logo"><div class="sidebar__logo-mark">CT</div><div><div class="sidebar__logo-text">ClassTrack</div><div class="sidebar__logo-sub">EC Catholic · Board</div></div></div>
+    <div class="sidebar__role-badge">Board Administrator</div><nav class="sidebar__section"><div class="sidebar__section-label">Overview</div><a href="dashboard.html" class="nav-item"><span class="nav-icon"><i class="fa-solid fa-gauge-high"></i></span>Dashboard</a></nav><nav class="sidebar__section"><div class="sidebar__section-label">Management</div><a href="schools.html" class="nav-item"><span class="nav-icon"><i class="fa-solid fa-school"></i></span>Schools<span class="nav-badge nav-badge--neutral">8</span></a><a href="users.html" class="nav-item"><span class="nav-icon"><i class="fa-solid fa-users-gear"></i></span>Users<span class="nav-badge nav-badge--neutral">247</span></a><a href="registered-contacts.html" class="nav-item"><span class="nav-icon"><i class="fa-solid fa-id-badge"></i></span>Registered Contacts<span class="nav-badge nav-badge--neutral">14</span></a></nav><nav class="sidebar__section"><div class="sidebar__section-label">Reports</div><a href="attendance-summary-v3.html" class="nav-item"><span class="nav-icon"><i class="fa-solid fa-chart-bar"></i></span>Attendance Summary</a><a href="absence-trends-v2.html" class="nav-item"><span class="nav-icon"><i class="fa-solid fa-chart-line"></i></span>Absence Trends</a><a href="chronic-absenteeism-v2.html" class="nav-item"><span class="nav-icon"><i class="fa-solid fa-user-clock"></i></span>Chronic Absenteeism</a><a href="unjustified-absences-v2.html" class="nav-item"><span class="nav-icon"><i class="fa-solid fa-circle-exclamation"></i></span>Unjustified Absences</a><a href="submission-compliance-v2.html" class="nav-item"><span class="nav-icon"><i class="fa-solid fa-clipboard-check"></i></span>Submission Compliance</a><a href="open-disputes-v2.html" class="nav-item"><span class="nav-icon"><i class="fa-solid fa-scale-balanced"></i></span>Open Disputes</a><a href="grade-threshold-v2.html" class="nav-item"><span class="nav-icon"><i class="fa-solid fa-graduation-cap"></i></span>Grade Threshold</a></nav><nav class="sidebar__section"><div class="sidebar__section-label">System</div><a href="aspen.html" class="nav-item is-active" aria-current="page"><span class="nav-icon"><i class="fa-solid fa-arrows-rotate"></i></span>Aspen Sync<span class="nav-badge nav-badge--warn">1</span></a><a href="configuration.html" class="nav-item"><span class="nav-icon"><i class="fa-solid fa-calendar-days"></i></span>Calendar &amp; Periods</a><a href="notifications.html" class="nav-item"><span class="nav-icon"><i class="fa-solid fa-bell-slash"></i></span>Notifications</a></nav><div class="sidebar__user"><div class="avatar">AR</div><div><div class="sidebar__user-name">André Rousseau</div><div class="sidebar__user-role">Board Administrator</div></div></div>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <div class="topbar__crumbs"><a href="dashboard.html">Board</a><span>›</span><strong>Aspen Integration</strong></div>
+      <div class="topbar__scope"><i class="fa-solid fa-school"></i> EC Catholic · All Schools</div>
+      <div class="topbar__actions">
+        <div class="lang-toggle"><button aria-pressed="true">EN</button><button aria-pressed="false">FR</button></div>
+        <button class="icon-btn"><i class="fa-solid fa-bell"></i><span class="icon-btn__count">3</span></button>
+        <span class="user-chip"><span class="avatar" style="width:28px;height:28px;font-size:12px;">AR</span>André R. · Board Admin</span>
+      </div>
+    </header>
+
+    <main id="main" class="content" tabindex="-1">
+      <div class="page-header">
+        <div>
+          <h1>Aspen Integration Console</h1>
+          <p>Monitor data sync between Aspen (system of record) and ClassTrack · Owner: Mourad Dimassi's team</p>
+        </div>
+        <div class="page-header__actions">
+          <button class="btn btn--secondary"><i class="fa-solid fa-rotate"></i> Force Re-sync</button>
+          <button class="btn btn--secondary"><i class="fa-solid fa-file-export"></i> Export Log</button>
+        </div>
+      </div>
+
+      <!-- Warning banner -->
+      <div style="background:var(--c-warning-tint);border:1px solid var(--c-warning-bord);border-radius:10px;padding:12px 16px;display:flex;align-items:flex-start;gap:12px;">
+        <i class="fa-solid fa-triangle-exclamation" style="color:var(--c-warning);margin-top:2px;flex-shrink:0;"></i>
+        <div style="flex:1;">
+          <strong style="color:var(--c-warning);font-size:13px;">1 sync warning requires attention</strong>
+          <div style="font-size:12px;color:var(--c-ink-muted);margin-top:2px;">Staff roster sync for École Saint-Michel failed for 1 record: teacher <strong>D. Park</strong> (ID: EMP-2219) not found in Aspen. Record skipped. Verify in Aspen or deactivate in ClassTrack.</div>
+        </div>
+        <div style="display:flex;gap:8px;flex-shrink:0;">
+          <button class="btn btn--secondary btn--sm"><i class="fa-solid fa-arrow-up-right-from-square"></i> Open in Aspen</button>
+          <button class="btn btn--ghost btn--sm">Dismiss</button>
+        </div>
+      </div>
+
+      <!-- Sync status cards -->
+      <section class="sync-cards" aria-label="Data feed status">
+        <div class="sync-card sync-card--ok">
+          <div class="sync-card__header">
+            <div class="sync-card__icon sync-card__icon--ok"><i class="fa-solid fa-user-graduate"></i></div>
+            <span class="status status--ok"><i class="fa-solid fa-circle-check"></i> Current</span>
+          </div>
+          <div class="sync-card__label">Data In — Students</div>
+          <div class="sync-card__title">3,847 records</div>
+          <div class="sync-card__meta">Last sync: Today 2:15 AM · 0 errors · Nightly at 2:00 AM</div>
+          <button class="btn btn--ghost btn--sm" style="align-self:flex-start;"><i class="fa-solid fa-rotate"></i> Sync now</button>
+        </div>
+        <div class="sync-card sync-card--ok">
+          <div class="sync-card__header">
+            <div class="sync-card__icon sync-card__icon--ok"><i class="fa-solid fa-chalkboard-user"></i></div>
+            <span class="status status--warn"><i class="fa-solid fa-triangle-exclamation"></i> 1 Warning</span>
+          </div>
+          <div class="sync-card__label">Data In — Staff Roster</div>
+          <div class="sync-card__title">247 records</div>
+          <div class="sync-card__meta">Last sync: Yesterday 2:18 AM · 1 warning (D. Park, Saint-Michel)</div>
+          <button class="btn btn--ghost btn--sm" style="align-self:flex-start;"><i class="fa-solid fa-rotate"></i> Sync now</button>
+        </div>
+        <div class="sync-card sync-card--ok">
+          <div class="sync-card__header">
+            <div class="sync-card__icon sync-card__icon--ok"><i class="fa-solid fa-calendar"></i></div>
+            <span class="status status--ok"><i class="fa-solid fa-circle-check"></i> Current</span>
+          </div>
+          <div class="sync-card__label">Data In — Schedules &amp; Calendar</div>
+          <div class="sync-card__title">8 schools · 312 classes</div>
+          <div class="sync-card__meta">Last sync: Today 2:15 AM · 0 errors · Nightly at 2:00 AM</div>
+          <button class="btn btn--ghost btn--sm" style="align-self:flex-start;"><i class="fa-solid fa-rotate"></i> Sync now</button>
+        </div>
+        <div class="sync-card sync-card--ok">
+          <div class="sync-card__header">
+            <div class="sync-card__icon sync-card__icon--ok"><i class="fa-solid fa-file-export"></i></div>
+            <span class="status status--ok"><i class="fa-solid fa-circle-check"></i> Pushed</span>
+          </div>
+          <div class="sync-card__label">Data Out — Absence Records</div>
+          <div class="sync-card__title">412 records exported</div>
+          <div class="sync-card__meta">Last push: Today 6:00 AM · 0 errors · Scheduled 6:00 AM daily</div>
+          <button class="btn btn--ghost btn--sm" style="align-self:flex-start;"><i class="fa-solid fa-rotate"></i> Push now</button>
+        </div>
+      </section>
+
+      <!-- Data flow diagram + schedule -->
+      <section class="row-2">
+        <div class="card">
+          <div class="card__h">
+            <div><h2 class="card__title"><i class="fa-solid fa-diagram-project" style="color:var(--c-brand);font-size:13px;"></i> Data Flow</h2><div class="card__sub">What ClassTrack reads from Aspen and pushes back</div></div>
+          </div>
+          <div class="flow-diagram">
+            <div class="flow-box flow-box--aspen">
+              <div class="flow-box__icon" style="color:var(--c-brand);">🏛️</div>
+              <div class="flow-box__name">Aspen</div>
+              <div class="flow-box__sub">System of Record<br>Mourad's team</div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:20px;padding:0 24px;align-items:center;">
+              <div class="flow-arrow">
+                <div class="flow-arrow__line"></div>
+                <div class="flow-arrow__label" style="color:var(--c-brand);">Data IN (nightly)</div>
+              </div>
+              <div class="flow-arrow flow-arrow-left">
+                <div class="flow-arrow__line" style="background:var(--c-success);"></div>
+                <div class="flow-arrow__label" style="color:var(--c-success);">Data OUT (6 AM daily)</div>
+              </div>
+            </div>
+            <div class="flow-box flow-box--classtrack">
+              <div class="flow-box__icon" style="color:var(--c-purple);">📋</div>
+              <div class="flow-box__name">ClassTrack</div>
+              <div class="flow-box__sub">Attendance Platform<br>ZINation</div>
+            </div>
+          </div>
+          <div style="padding:16px;border-top:1px solid var(--c-border-2);display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+            <div>
+              <div style="font-size:12px;font-weight:700;color:var(--c-brand);margin-bottom:8px;display:flex;align-items:center;gap:6px;"><i class="fa-solid fa-arrow-right"></i> Aspen → ClassTrack (nightly)</div>
+              <ul style="list-style:none;display:flex;flex-direction:column;gap:6px;">
+                <li style="font-size:12px;display:flex;align-items:center;gap:8px;"><span class="status status--ok" style="font-size:10px;">✓</span> Student roster (name, grade, school, parent contact)</li>
+                <li style="font-size:12px;display:flex;align-items:center;gap:8px;"><span class="status status--warn" style="font-size:10px;">!</span> Teacher roster &amp; credentials (1 warning)</li>
+                <li style="font-size:12px;display:flex;align-items:center;gap:8px;"><span class="status status--ok" style="font-size:10px;">✓</span> Class schedules &amp; period assignments</li>
+                <li style="font-size:12px;display:flex;align-items:center;gap:8px;"><span class="status status--ok" style="font-size:10px;">✓</span> School calendar (holidays, PD days)</li>
+              </ul>
+            </div>
+            <div>
+              <div style="font-size:12px;font-weight:700;color:var(--c-success);margin-bottom:8px;display:flex;align-items:center;gap:6px;"><i class="fa-solid fa-arrow-left"></i> ClassTrack → Aspen (daily 6 AM)</div>
+              <ul style="list-style:none;display:flex;flex-direction:column;gap:6px;">
+                <li style="font-size:12px;display:flex;align-items:center;gap:8px;"><span class="status status--ok" style="font-size:10px;">✓</span> Absence records per student per period + status + justification</li>
+                <li style="font-size:12px;display:flex;align-items:center;gap:8px;"><span class="status status--ok" style="font-size:10px;">✓</span> Late arrivals &amp; reconciliation status</li>
+                <li style="font-size:12px;display:flex;align-items:center;gap:8px;"><span class="status status--ok" style="font-size:10px;">✓</span> Audit trail (marked by / approved by / justified by + timestamps)</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-stack">
+          <!-- Sync schedule -->
+          <div class="card">
+            <div class="card__h"><h2 class="card__title"><i class="fa-solid fa-clock" style="color:var(--c-brand);font-size:13px;"></i> Sync Schedule</h2></div>
+            <ul class="schedule-list">
+              <li><div class="schedule-item"><div><div class="schedule-item__name">Nightly roster pull</div><div class="schedule-item__meta">Students, staff, schedules, calendar</div></div><span class="status status--ok">2:00 AM daily</span></div></li>
+              <li><div class="schedule-item"><div><div class="schedule-item__name">Absence export push</div><div class="schedule-item__meta">All absence records + audit</div></div><span class="status status--ok">6:00 AM daily</span></div></li>
+              <li><div class="schedule-item"><div><div class="schedule-item__name">Manual re-sync</div><div class="schedule-item__meta">Trigger on demand</div></div><button class="btn btn--ghost btn--sm"><i class="fa-solid fa-rotate"></i> Run now</button></div></li>
+            </ul>
+          </div>
+
+          <!-- Field mapping -->
+          <div class="card">
+            <div class="card__h"><h2 class="card__title"><i class="fa-solid fa-map" style="color:var(--c-brand);font-size:13px;"></i> Aspen Field Mapping</h2></div>
+            <div style="padding:16px;display:flex;flex-direction:column;gap:10px;">
+              <div style="font-size:12px;color:var(--c-ink-subtle);">Key Aspen fields mapped to ClassTrack. Full mapping managed by Mourad Dimassi's team.</div>
+              <table style="width:100%;font-size:12px;border-collapse:collapse;">
+                <thead><tr style="border-bottom:1px solid var(--c-border-2);"><th style="padding:4px 8px;text-align:left;color:var(--c-ink-muted);">Aspen field</th><th style="padding:4px 8px;text-align:left;color:var(--c-ink-muted);">ClassTrack field</th></tr></thead>
+                <tbody>
+                  <tr style="border-bottom:1px solid var(--c-border-2);"><td style="padding:6px 8px;font-family:monospace;color:var(--c-ink);">STD_ID</td><td style="padding:6px 8px;">student.aspenId</td></tr>
+                  <tr style="border-bottom:1px solid var(--c-border-2);"><td style="padding:6px 8px;font-family:monospace;color:var(--c-ink);">CTJ_PARENT_EMAIL</td><td style="padding:6px 8px;">parent.emailOnFile</td></tr>
+                  <tr style="border-bottom:1px solid var(--c-border-2);"><td style="padding:6px 8px;font-family:monospace;color:var(--c-ink);">MST_COURSE_NO</td><td style="padding:6px 8px;">class.aspenCourseId</td></tr>
+                  <tr><td style="padding:6px 8px;font-family:monospace;color:var(--c-ink);">ABS_CODE</td><td style="padding:6px 8px;">absence.justificationCode</td></tr>
+                </tbody>
+              </table>
+              <button class="btn btn--ghost btn--sm" style="align-self:flex-start;"><i class="fa-solid fa-arrow-up-right-from-square"></i> View full mapping</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Sync log -->
+      <div class="card">
+        <div class="card__h">
+          <div><h2 class="card__title"><i class="fa-solid fa-list-ul" style="color:var(--c-brand);font-size:13px;"></i> Sync Log <span class="card__title-count">Last 48h</span></h2><div class="card__sub">All import/export events with status and record counts</div></div>
+          <div style="display:flex;gap:8px;">
+            <select style="padding:6px 10px;border:1px solid var(--c-border-strong);border-radius:6px;font-size:12px;background:var(--c-surface);" aria-label="Filter by type"><option>All types</option><option>Data In</option><option>Data Out</option></select>
+            <select style="padding:6px 10px;border:1px solid var(--c-border-strong);border-radius:6px;font-size:12px;background:var(--c-surface);" aria-label="Filter by status"><option>All statuses</option><option>Success</option><option>Warning</option><option>Error</option></select>
+          </div>
+        </div>
+        <div style="overflow-x:auto;">
+          <table class="log-table">
+            <thead><tr><th>Timestamp</th><th>Type</th><th>Direction</th><th>Records</th><th>Status</th><th>Notes</th><th></th></tr></thead>
+            <tbody>
+              <tr><td style="font-size:12px;color:var(--c-ink-subtle);">Today 6:00 AM</td><td>Absence export</td><td><span style="font-size:11px;background:var(--c-success-tint);color:var(--c-success);padding:1px 7px;border-radius:999px;">← Out</span></td><td style="font-variant-numeric:tabular-nums;">412</td><td><span class="status status--ok"><i class="fa-solid fa-circle-check"></i> Success</span></td><td style="font-size:12px;color:var(--c-ink-subtle);">All schools · 0 errors · audit trail included</td><td><button class="btn btn--ghost btn--sm">Details</button></td></tr>
+              <tr><td style="font-size:12px;color:var(--c-ink-subtle);">Today 2:15 AM</td><td>Student roster</td><td><span style="font-size:11px;background:var(--c-info-tint);color:var(--c-info);padding:1px 7px;border-radius:999px;">→ In</span></td><td style="font-variant-numeric:tabular-nums;">3,847</td><td><span class="status status--ok"><i class="fa-solid fa-circle-check"></i> Success</span></td><td style="font-size:12px;color:var(--c-ink-subtle);">3 new students enrolled · 1 transfer</td><td><button class="btn btn--ghost btn--sm">Details</button></td></tr>
+              <tr><td style="font-size:12px;color:var(--c-ink-subtle);">Today 2:15 AM</td><td>Schedule &amp; calendar</td><td><span style="font-size:11px;background:var(--c-info-tint);color:var(--c-info);padding:1px 7px;border-radius:999px;">→ In</span></td><td style="font-variant-numeric:tabular-nums;">312</td><td><span class="status status--ok"><i class="fa-solid fa-circle-check"></i> Success</span></td><td style="font-size:12px;color:var(--c-ink-subtle);">No changes detected</td><td><button class="btn btn--ghost btn--sm">Details</button></td></tr>
+              <tr style="background:var(--c-warning-tint);">
+                <td style="font-size:12px;color:var(--c-ink-subtle);">Yesterday 2:18 AM</td><td>Staff roster</td><td><span style="font-size:11px;background:var(--c-info-tint);color:var(--c-info);padding:1px 7px;border-radius:999px;">→ In</span></td><td style="font-variant-numeric:tabular-nums;">247</td><td><span class="status status--warn"><i class="fa-solid fa-triangle-exclamation"></i> Warning</span></td><td style="font-size:12px;color:var(--c-warning);">D. Park (EMP-2219) not found in Aspen · record skipped</td><td><button class="btn btn--ghost btn--sm">Details</button></td>
+              </tr>
+              <tr><td style="font-size:12px;color:var(--c-ink-subtle);">Yesterday 6:00 AM</td><td>Absence export</td><td><span style="font-size:11px;background:var(--c-success-tint);color:var(--c-success);padding:1px 7px;border-radius:999px;">← Out</span></td><td style="font-variant-numeric:tabular-nums;">388</td><td><span class="status status--ok"><i class="fa-solid fa-circle-check"></i> Success</span></td><td style="font-size:12px;color:var(--c-ink-subtle);">0 errors</td><td><button class="btn btn--ghost btn--sm">Details</button></td></tr>
+              <tr><td style="font-size:12px;color:var(--c-ink-subtle);">Yesterday 2:15 AM</td><td>Student roster</td><td><span style="font-size:11px;background:var(--c-info-tint);color:var(--c-info);padding:1px 7px;border-radius:999px;">→ In</span></td><td style="font-variant-numeric:tabular-nums;">3,844</td><td><span class="status status--ok"><i class="fa-solid fa-circle-check"></i> Success</span></td><td style="font-size:12px;color:var(--c-ink-subtle);">No changes detected</td><td><button class="btn btn--ghost btn--sm">Details</button></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="card__footer"><span>Showing 6 of 28 log entries (last 48h)</span><button class="btn btn--ghost btn--sm">Load more</button></div>
+      </div>
+
+    </main>
+  </div>
+</div>
+</body>
+</html>

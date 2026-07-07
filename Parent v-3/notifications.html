@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ClassTrack — Notifications</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="stylesheet" href="assets/styles.css">
+</head>
+<body>
+<a href="#main" class="skip-link" data-en="Skip to content" data-fr="Aller au contenu">Skip to content</a>
+<div class="app">
+<aside id="sidebar"></aside>
+<main id="main" class="shell">
+  <section class="hero-row">
+    <div>
+      <h1 class="hero-row__title" data-en="Notifications" data-fr="Notifications">Notifications</h1>
+      <p class="hero-row__sub" data-en="Messages the school has sent you about your children." data-fr="Messages envoyés par l'école au sujet de vos enfants.">Messages the school has sent you about your children.</p>
+    </div>
+    <div class="hero-row__actions">
+      <button class="btn btn--secondary" onclick="showToast(window.__ct_i18n.getLang()==='fr'?'Tout marqué comme lu':'All notifications marked as read','success')">
+        <i class="fa-solid fa-envelope-open"></i>
+        <span data-en="Mark all read" data-fr="Tout marquer lu">Mark all read</span>
+      </button>
+    </div>
+  </section>
+
+  <div class="grid-1-2">
+    <aside class="rail">
+      <div class="card">
+        <div class="rail-card__h"><div class="rail-card__title" data-en="Filter by type" data-fr="Filtrer par type">Filter by type</div></div>
+        <div class="card__b--flush">
+          <div class="filter-list">
+            <button class="filter-list__item is-active"><i class="fa-solid fa-inbox"></i><span data-en="All notifications" data-fr="Toutes">All notifications</span><span class="filter-count">10</span></button>
+            <button class="filter-list__item"><i class="fa-solid fa-circle-check text-success"></i><span data-en="Decisions" data-fr="Décisions">Decisions</span><span class="filter-count">3</span></button>
+            <button class="filter-list__item"><i class="fa-solid fa-clock text-warning"></i><span data-en="Late &amp; absences" data-fr="Retards et absences">Late &amp; absences</span><span class="filter-count">5</span></button>
+            <button class="filter-list__item"><i class="fa-solid fa-school text-info"></i><span data-en="School events" data-fr="Événements">School events</span><span class="filter-count">2</span></button>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="rail-card__h"><div class="rail-card__title" data-en="Filter by child" data-fr="Filtrer par enfant">Filter by child</div></div>
+        <div class="card__b--flush">
+          <div class="filter-list">
+            <button class="filter-list__item is-active"><i class="fa-solid fa-users"></i><span data-en="Both children" data-fr="Les deux enfants">Both children</span><span class="filter-count">10</span></button>
+            <button class="filter-list__item"><div class="avatar avatar--blue avatar--sm" style="width:20px;height:20px;font-size:9px;">AC</div><span>Aaliyah</span><span class="filter-count">6</span></button>
+            <button class="filter-list__item"><div class="avatar avatar--orange avatar--sm" style="width:20px;height:20px;font-size:9px;">JC</div><span>Jaylen</span><span class="filter-count">4</span></button>
+          </div>
+        </div>
+      </div>
+      <div class="card" style="background:var(--c-brand-tint);border-color:var(--c-brand-tint-2);">
+        <div class="card__b" style="padding:var(--s-4);">
+          <div style="font-size:var(--fs-sm);font-weight:700;color:var(--c-brand-ink);margin-bottom:var(--s-2);"><i class="fa-solid fa-circle-dot" style="margin-right:6px;"></i><span data-en="Need to take action?" data-fr="Besoin d'agir ?">Need to take action?</span></div>
+          <div class="fs-sm text-muted" style="margin-bottom:var(--s-3);" data-en="Justifications and open records live in Active Records." data-fr="Les justifications et dossiers ouverts se trouvent dans Dossiers actifs.">Justifications and open records live in Active Records.</div>
+          <a href="active-records.html" class="btn btn--primary btn--sm btn--block"><span data-en="Go to Active Records" data-fr="Dossiers actifs">Go to Active Records</span> <i class="fa-solid fa-arrow-right"></i></a>
+        </div>
+      </div>
+    </aside>
+
+    <div class="stack">
+      <section class="card">
+        <div class="card__h"><div class="card__title" data-en="Today" data-fr="Aujourd'hui">Today</div></div>
+        <div class="card__b--flush">
+          <div class="simple-list">
+            <div class="simple-list__item">
+              <div class="simple-list__icon simple-list__icon--approve"><i class="fa-solid fa-circle-check"></i></div>
+              <div class="simple-list__body">
+                <div class="simple-list__title" data-en="Aaliyah's May 4 absence is now justified" data-fr="L'absence d'Aaliyah du 4 mai est maintenant justifiée">Aaliyah's May 4 absence is now justified</div>
+                <div class="simple-list__sub" data-en="Medical appointment · Doctor's note accepted by the clerk. Record closed — no grade impact." data-fr="Rendez-vous médical · Billet médical accepté. Dossier fermé — aucune incidence sur la note.">Medical appointment · Doctor's note accepted by the clerk. Record closed — no grade impact.</div>
+                <div class="simple-list__meta">8:14 AM · <span data-en="Today" data-fr="Aujourd'hui">Today</span></div>
+              </div>
+              <span class="status status--excused" data-en="Justified" data-fr="Justifiée">Justified</span>
+            </div>
+            <div class="simple-list__item">
+              <div class="simple-list__icon simple-list__icon--late"><i class="fa-solid fa-clock"></i></div>
+              <div class="simple-list__body">
+                <div class="simple-list__title" data-en="Jaylen arrived 22 min late — P1 (Math)" data-fr="Jaylen est arrivé 22 min en retard — P1 (Maths)">Jaylen arrived 22 min late — P1 (Math)</div>
+                <div class="simple-list__sub" data-en="Signed in at the office at 9:02 AM and confirmed in class by his teacher. A reason is helpful but has no strict deadline." data-fr="Signé au bureau à 9 h 02 et confirmé en classe. Un motif est utile mais sans échéance stricte.">Signed in at the office at 9:02 AM and confirmed in class by his teacher. A reason is helpful but has no strict deadline.</div>
+                <div class="simple-list__meta">9:02 AM · <span data-en="Today" data-fr="Aujourd'hui">Today</span></div>
+              </div>
+              <span class="status status--late" data-en="Late" data-fr="Retard">Late</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="card__h"><div class="card__title" data-en="This week" data-fr="Cette semaine">This week</div></div>
+        <div class="card__b--flush">
+          <div class="simple-list">
+            <div class="simple-list__item">
+              <div class="simple-list__icon simple-list__icon--absent"><i class="fa-solid fa-triangle-exclamation"></i></div>
+              <div class="simple-list__body">
+                <div class="simple-list__title" data-en="Jaylen was absent — May 11 · P2 (Reading)" data-fr="Jaylen était absent — 11 mai · P2 (Lecture)">Jaylen was absent — May 11 · P2 (Reading)</div>
+                <div class="simple-list__sub" data-en="Marked absent by his teacher at 1:45 PM. The school needs a reason within 24 hours." data-fr="Marqué absent par son enseignant à 13 h 45. L'école a besoin d'un motif dans les 24 heures.">Marked absent by his teacher at 1:45 PM. The school needs a reason within 24 hours.</div>
+                <div class="simple-list__meta" data-en="May 11 · 1:45 PM" data-fr="11 mai · 13 h 45">May 11 · 1:45 PM</div>
+              </div>
+              <span class="status status--absent" data-en="Absent" data-fr="Absent">Absent</span>
+            </div>
+            <div class="simple-list__item">
+              <div class="simple-list__icon simple-list__icon--event"><i class="fa-solid fa-trophy"></i></div>
+              <div class="simple-list__body">
+                <div class="simple-list__title" data-en="Aaliyah's soccer tournament — P3 (French) &amp; P4 (History) pre-justified" data-fr="Tournoi de soccer d'Aaliyah — P3 (Français) et P4 (Histoire) pré-justifiées">Aaliyah's soccer tournament — P3 (French) &amp; P4 (History) pre-justified</div>
+                <div class="simple-list__sub" data-en="Thu May 14 · Coach Lévesque pre-justified both periods as a school-sanctioned event. No action needed." data-fr="Jeu. 14 mai · L'entraîneur Lévesque a pré-justifié les deux périodes. Aucune action requise.">Thu May 14 · Coach Lévesque pre-justified both periods as a school-sanctioned event. No action needed.</div>
+                <div class="simple-list__meta" data-en="May 11 · 4:18 PM" data-fr="11 mai · 16 h 18">May 11 · 4:18 PM</div>
+              </div>
+              <span class="status status--info" data-en="No action" data-fr="Aucune action">No action</span>
+            </div>
+            <div class="simple-list__item">
+              <div class="simple-list__icon simple-list__icon--info"><i class="fa-solid fa-paper-plane"></i></div>
+              <div class="simple-list__body">
+                <div class="simple-list__title" data-en="You submitted a reason for Aaliyah's May 4 absence" data-fr="Vous avez soumis un motif pour l'absence d'Aaliyah du 4 mai">You submitted a reason for Aaliyah's May 4 absence</div>
+                <div class="simple-list__sub" data-en="Medical appointment · Doctor's note attached. Sent to the Attendance Clerk for review." data-fr="Rendez-vous médical · Billet médical joint. Envoyé au Surveillant pour révision.">Medical appointment · Doctor's note attached. Sent to the Attendance Clerk for review.</div>
+                <div class="simple-list__meta" data-en="May 5 · 8:14 AM" data-fr="5 mai · 8 h 14">May 5 · 8:14 AM</div>
+              </div>
+            </div>
+            <div class="simple-list__item">
+              <div class="simple-list__icon simple-list__icon--absent"><i class="fa-solid fa-triangle-exclamation"></i></div>
+              <div class="simple-list__body">
+                <div class="simple-list__title" data-en="Aaliyah was marked absent — May 4 · Full day" data-fr="Aaliyah a été marquée absente — 4 mai · Journée complète">Aaliyah was marked absent — May 4 · Full day</div>
+                <div class="simple-list__sub" data-en="Absent across all periods. School notification sent at 9:07 AM." data-fr="Absente pour toutes les périodes. Notification envoyée à 9 h 07.">Absent across all periods. School notification sent at 9:07 AM.</div>
+                <div class="simple-list__meta" data-en="May 4 · 9:07 AM" data-fr="4 mai · 9 h 07">May 4 · 9:07 AM</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="card__h"><div class="card__title" data-en="Earlier" data-fr="Précédemment">Earlier</div></div>
+        <div class="card__b--flush">
+          <div class="simple-list">
+            <div class="simple-list__item">
+              <div class="simple-list__icon simple-list__icon--late"><i class="fa-solid fa-clock"></i></div>
+              <div class="simple-list__body">
+                <div class="simple-list__title" data-en="Aaliyah arrived 12 min late — Apr 22 · P1 (Math)" data-fr="Aaliyah est arrivée 12 min en retard — 22 avr · P1 (Maths)">Aaliyah arrived 12 min late — Apr 22 · P1 (Math)</div>
+                <div class="simple-list__sub" data-en="Bus delay · Record closed as justified (transportation)." data-fr="Retard d'autobus · Dossier fermé comme justifié (transport).">Bus delay · Record closed as justified (transportation).</div>
+                <div class="simple-list__meta" data-en="Apr 22 · 8:52 AM" data-fr="22 avr · 8 h 52">Apr 22 · 8:52 AM</div>
+              </div>
+              <span class="status status--excused" data-en="Justified" data-fr="Justifié">Justified</span>
+            </div>
+            <div class="simple-list__item">
+              <div class="simple-list__icon simple-list__icon--approve"><i class="fa-solid fa-circle-check"></i></div>
+              <div class="simple-list__body">
+                <div class="simple-list__title" data-en="Aaliyah's Apr 8 absence — P3 (French) &amp; P4 (History) justified" data-fr="Absence d'Aaliyah du 8 avr — P3 (Français) et P4 (Histoire) justifiées">Aaliyah's Apr 8 absence — P3 (French) &amp; P4 (History) justified</div>
+                <div class="simple-list__sub" data-en="Pre-declared family medical appointment. Recorded as excused — no grade impact." data-fr="Rendez-vous médical familial pré-déclaré. Consignée comme motivée — aucune incidence.">Pre-declared family medical appointment. Recorded as excused — no grade impact.</div>
+                <div class="simple-list__meta" data-en="Apr 1 · 2:42 PM" data-fr="1 avr · 14 h 42">Apr 1 · 2:42 PM</div>
+              </div>
+              <span class="status status--excused" data-en="Justified" data-fr="Justifiée">Justified</span>
+            </div>
+          </div>
+        </div>
+        <div class="card__footer" style="text-align:center;"><a href="#" data-en="Load older →" data-fr="Charger plus →">Load older →</a></div>
+      </section>
+    </div>
+  </div>
+</main>
+</div>
+
+<style>
+  .hero-row { display:flex; align-items:center; justify-content:space-between; gap:var(--s-4); flex-wrap:wrap; }
+  .hero-row__title { font-size:var(--fs-3xl); font-weight:700; letter-spacing:-0.015em; }
+  .hero-row__sub { color:var(--c-ink-muted); font-size:var(--fs-lg); margin-top:6px; }
+  .filter-list { display:flex; flex-direction:column; }
+  .filter-list__item { display:flex; align-items:center; gap:var(--s-3); padding:10px var(--s-4); border:0; background:transparent; width:100%; color:var(--c-ink); font-size:var(--fs-sm); font-weight:500; text-align:left; border-left:3px solid transparent; }
+  .filter-list__item:hover { background:var(--c-surface-2); }
+  .filter-list__item.is-active { background:var(--c-brand-tint); border-left-color:var(--c-brand); color:var(--c-brand-ink); font-weight:600; }
+  .filter-list__item i { width:18px; text-align:center; color:var(--c-ink-muted); }
+  .filter-list__item.is-active i { color:var(--c-brand); }
+  .filter-count { margin-left:auto; font-size:11px; font-weight:700; padding:1px 8px; border-radius:var(--r-pill); background:var(--c-neutral-tint); color:var(--c-ink-muted); }
+  .filter-list__item.is-active .filter-count { background:var(--c-brand); color:#fff; }
+</style>
+
+<script src="assets/app.js"></script>
+<script>
+  document.querySelectorAll('.filter-list').forEach(function(group){
+    group.querySelectorAll('.filter-list__item').forEach(function(b){
+      b.addEventListener('click',function(){ group.querySelectorAll('.filter-list__item').forEach(function(x){x.classList.remove('is-active');}); b.classList.add('is-active'); });
+    });
+  });
+  __ct_mountSidebar('notifications');
+  __ct_mountProtoSwitcher('parent');
+</script>
+</body>
+</html>

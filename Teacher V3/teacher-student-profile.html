@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ClassTrack — Student Profile</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family:'Segoe UI',system-ui,-apple-system,sans-serif; background:#F0F4F9; color:#1A2B45; display:flex; min-height:100vh; font-size:14px; }
+
+    /* Sidebar */
+    .sidebar { width:240px; min-height:100vh; background:#0F2546; display:flex; flex-direction:column; flex-shrink:0; position:fixed; top:0; left:0; bottom:0; z-index:100; }
+    .sidebar-logo { padding:28px 24px 20px; border-bottom:1px solid rgba(255,255,255,0.08); }
+    .logo-mark { display:flex; align-items:center; gap:10px; }
+    .logo-icon { width:36px; height:36px; background:#2E7DD1; border-radius:10px; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:16px; color:#fff; }
+    .logo-text { color:#fff; font-size:17px; font-weight:700; letter-spacing:-0.3px; }
+    .logo-sub { color:rgba(255,255,255,0.45); font-size:11px; margin-top:2px; }
+    .sidebar-nav { flex:1; overflow-y:auto; padding:12px 0; }
+    .sidebar-section { padding:18px 12px 6px; }
+    .sidebar-section-label { text-transform:uppercase; font-size:10px; font-weight:600; letter-spacing:1.2px; color:rgba(255,255,255,0.35); padding:0 12px; margin-bottom:6px; }
+    .nav-item { display:flex; align-items:center; gap:12px; padding:10px 12px; border-radius:8px; cursor:pointer; color:rgba(255,255,255,0.6); font-size:13.5px; font-weight:500; text-decoration:none; margin-bottom:2px; }
+    .nav-item:hover { background:rgba(255,255,255,0.07); color:#fff; }
+    .nav-item.active { background:#2E7DD1; color:#fff; }
+    .nav-item .nav-icon { font-size:15px; width:20px; text-align:center; }
+    .nav-badge { margin-left:auto; background:#E53E3E; color:#fff; font-size:10px; font-weight:700; padding:2px 6px; border-radius:10px; }
+    .sidebar-footer { margin-top:auto; padding:16px 12px; border-top:1px solid rgba(255,255,255,0.08); }
+    .user-info { display:flex; align-items:center; gap:10px; padding:8px 12px; border-radius:8px; }
+    .user-avatar { width:32px; height:32px; border-radius:50%; background:linear-gradient(135deg,#2E7DD1,#1A5FA8); color:#fff; font-weight:700; font-size:13px; display:flex; align-items:center; justify-content:center; }
+    .user-name { color:#fff; font-size:13px; font-weight:600; }
+    .user-role { color:rgba(255,255,255,0.45); font-size:11px; }
+
+    /* Main */
+    .main { margin-left:240px; flex:1; display:flex; flex-direction:column; min-height:100vh; }
+    .topbar { background:#fff; border-bottom:1px solid #E2E8F0; padding:0 32px; height:64px; display:flex; align-items:center; gap:16px; position:sticky; top:0; z-index:90; }
+    .topbar-back { display:flex; align-items:center; gap:7px; color:#718096; font-size:13px; font-weight:500; cursor:pointer; text-decoration:none; padding:6px 10px; border-radius:7px; transition:all .15s; }
+    .topbar-back:hover { background:#F0F4F9; color:#1A2B45; }
+    .topbar-divider { width:1px; height:20px; background:#E2E8F0; }
+    .topbar-title { font-size:18px; font-weight:700; color:#0F2546; }
+    .topbar-right { margin-left:auto; display:flex; align-items:center; gap:12px; }
+    .icon-btn { width:36px; height:36px; border-radius:8px; border:1px solid #E2E8F0; background:#fff; display:flex; align-items:center; justify-content:center; color:#4A5568; cursor:pointer; font-size:15px; position:relative; }
+    .icon-btn:hover { background:#F7FAFC; }
+    .notif-dot { position:absolute; top:7px; right:7px; width:7px; height:7px; border-radius:50%; background:#E53E3E; border:1.5px solid #fff; }
+
+    .page-body { padding:24px 32px; flex:1; max-width:1100px; }
+
+    /* Student header */
+    .stu-header { background:#fff; border-radius:12px; border:1px solid #E2E8F0; padding:24px 28px; display:flex; align-items:center; gap:22px; margin-bottom:20px; }
+    .stu-avatar-lg { width:68px; height:68px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:24px; font-weight:700; color:#fff; flex-shrink:0; }
+    .stu-name-lg { font-size:20px; font-weight:700; color:#0F2546; }
+    .stu-sub { font-size:13px; color:#718096; margin-top:4px; display:flex; gap:16px; flex-wrap:wrap; }
+    .stu-sub span { display:inline-flex; align-items:center; gap:5px; }
+    .stu-sub i { color:#A0AEC0; font-size:11px; }
+    .stu-quick { display:flex; gap:24px; padding-left:24px; border-left:1px solid #F1F5F9; }
+    .quick-stat { text-align:center; }
+    .quick-val { font-size:22px; font-weight:700; color:#0F2546; line-height:1; }
+    .quick-lbl { font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:.05em; color:#A0AEC0; margin-top:4px; }
+    .scope-banner { background:#FEF3C7; border:1px solid #FDE68A; color:#92400E; border-radius:8px; padding:8px 14px; font-size:12.5px; display:inline-flex; align-items:center; gap:7px; margin-top:14px; }
+    .scope-banner i { font-size:12px; }
+
+    /* Tab strip */
+    .tabs { display:flex; gap:4px; border-bottom:1px solid #E2E8F0; margin-bottom:20px; }
+    .tab { padding:10px 18px; font-size:13.5px; font-weight:600; color:#718096; cursor:pointer; border-bottom:2px solid transparent; transition:all .15s; }
+    .tab:hover { color:#1A2B45; }
+    .tab.active { color:#2E7DD1; border-bottom-color:#2E7DD1; }
+
+    /* Cards */
+    .card { background:#fff; border-radius:12px; border:1px solid #E2E8F0; overflow:hidden; }
+    .card-header { padding:14px 20px; border-bottom:1px solid #F1F5F9; display:flex; align-items:center; justify-content:space-between; }
+    .card-title { font-size:14px; font-weight:700; color:#0F2546; }
+    .card-meta { font-size:12px; color:#A0AEC0; }
+    .card-body { padding:20px; }
+
+    /* Tab panels */
+    .panel { display:none; }
+    .panel.active { display:block; }
+
+    /* Active records */
+    .record-row { padding:14px 20px; border-bottom:1px solid #F1F5F9; display:grid; grid-template-columns:auto 1fr auto auto; gap:14px; align-items:center; cursor:pointer; transition:background .12s; }
+    .record-row:last-child { border-bottom:none; }
+    .record-row:hover { background:#F7FAFC; }
+    .record-icon { width:36px; height:36px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:14px; flex-shrink:0; }
+    .ri-red { background:#FEF2F2; color:#DC2626; }
+    .ri-amber { background:#FFFBEB; color:#D97706; }
+    .ri-blue { background:#EBF4FF; color:#2E7DD1; }
+    .ri-indigo { background:#F3F4FF; color:#4F46E5; }
+    .record-title { font-size:13.5px; font-weight:600; color:#1A2B45; }
+    .record-desc { font-size:12px; color:#718096; margin-top:2px; }
+    .record-status { font-size:11.5px; font-weight:600; padding:4px 10px; border-radius:99px; white-space:nowrap; }
+    .rs-pending { background:#FEF3C7; color:#92400E; }
+    .rs-resolved { background:#ECFDF5; color:#059669; }
+    .rs-disputed { background:#F3F4FF; color:#4338CA; }
+
+    /* Status badges (shared) */
+    .status-badge { display:inline-flex; align-items:center; gap:5px; padding:3px 9px; border-radius:99px; font-size:11.5px; font-weight:600; white-space:nowrap; }
+    .status-dot { width:6px; height:6px; border-radius:50%; }
+    .badge-present { background:#ECFDF5; color:#059669; } .badge-present .status-dot { background:#059669; }
+    .badge-absent { background:#FEF2F2; color:#DC2626; } .badge-absent .status-dot { background:#DC2626; }
+    .badge-late { background:#FFFBEB; color:#D97706; } .badge-late .status-dot { background:#D97706; }
+    .badge-future { background:#EBF4FF; color:#1D4ED8; } .badge-future .status-dot { background:#1D4ED8; }
+    .badge-event { background:#F3F4FF; color:#4338CA; } .badge-event .status-dot { background:#4338CA; }
+    .badge-late-just { background:#ECFDF5; color:#059669; } .badge-late-just .status-dot { background:#059669; }
+
+    /* Attendance table */
+    .att-table { width:100%; border-collapse:collapse; }
+    .att-table thead th { padding:10px 18px; text-align:left; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.05em; color:#718096; background:#F8FAFC; border-bottom:1px solid #E2E8F0; }
+    .att-table tbody tr { border-bottom:1px solid #F1F5F9; }
+    .att-table tbody tr:last-child { border-bottom:none; }
+    .att-table td { padding:11px 18px; font-size:13px; color:#2D3748; }
+    .att-month-stripe { padding:10px 20px; font-size:11.5px; font-weight:700; color:#718096; background:#F8FAFC; text-transform:uppercase; letter-spacing:.05em; border-bottom:1px solid #E2E8F0; }
+
+    /* Teacher notes */
+    .note-item { padding:14px 20px; border-bottom:1px solid #F1F5F9; }
+    .note-item:last-child { border-bottom:none; }
+    .note-meta { font-size:11.5px; color:#A0AEC0; margin-bottom:5px; display:flex; gap:10px; align-items:center; }
+    .note-body { font-size:13px; color:#2D3748; line-height:1.55; }
+    .note-textarea { width:100%; border:1px solid #E2E8F0; border-radius:9px; padding:12px; font-size:13px; font-family:inherit; min-height:80px; resize:vertical; outline:none; }
+    .note-textarea:focus { border-color:#2E7DD1; box-shadow:0 0 0 3px rgba(46,125,209,.08); }
+    .note-form { padding:16px 20px; border-top:1px solid #F1F5F9; background:#F8FAFC; }
+    .btn-primary { padding:9px 18px; background:#2E7DD1; color:#fff; border:none; border-radius:8px; font-size:13px; font-weight:600; cursor:pointer; }
+    .btn-primary:hover { background:#2563EB; }
+
+    /* ── Period / Subject chips ── */
+    .period-chip  { display:inline-flex; align-items:center; padding:3px 9px; border-radius:99px; font-size:11.5px; font-weight:600; background:#F8FAFC; color:#475467; border:1px solid #E2E8F0; white-space:nowrap; }
+    .subject-chip { display:inline-flex; align-items:center; padding:3px 9px; border-radius:99px; font-size:11.5px; font-weight:600; background:#F0FDFA; color:#0F766E; border:1px solid #99F6E4; white-space:nowrap; }
+
+    /* ── Per-subject summary table ── */
+    .subj-summary-table { width:100%; border-collapse:collapse; }
+    .subj-summary-table th { padding:9px 18px; text-align:left; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.05em; color:#718096; background:#F8FAFC; border-bottom:1px solid #E2E8F0; }
+    .subj-summary-table td { padding:11px 18px; font-size:13px; color:#2D3748; border-bottom:1px solid #F1F5F9; }
+    .subj-summary-table tr:last-child td { border-bottom:none; }
+    .threshold-within      { display:inline-flex; align-items:center; gap:5px; padding:3px 9px; border-radius:99px; font-size:11.5px; font-weight:600; background:#ECFDF5; color:#059669; }
+    .threshold-approaching { display:inline-flex; align-items:center; gap:5px; padding:3px 9px; border-radius:99px; font-size:11.5px; font-weight:600; background:#FFFBEB; color:#D97706; }
+    .threshold-exceeded    { display:inline-flex; align-items:center; gap:5px; padding:3px 9px; border-radius:99px; font-size:11.5px; font-weight:600; background:#FEF2F2; color:#DC2626; }
+
+    /* ── Threshold banner ── */
+    .thr-banner { background:#FFFBEB; border:1px solid #FDE68A; border-radius:10px; padding:10px 16px; display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:16px; }
+    .thr-banner__text { font-size:13px; font-weight:600; color:#92400E; display:flex; align-items:center; gap:8px; }
+    .thr-banner__btn { font-size:12.5px; font-weight:700; color:#92400E; background:none; border:1px solid #FDE68A; border-radius:7px; padding:4px 12px; cursor:pointer; white-space:nowrap; }
+    .thr-banner__btn:hover { background:rgba(146,64,14,.08); }
+
+    /* ── Grade-impact modal ── */
+    .grade-modal-overlay { display:none; position:fixed; inset:0; background:rgba(15,37,70,.48); align-items:flex-start; justify-content:center; padding:80px 24px 24px; z-index:500; }
+    .grade-modal-overlay.is-on { display:flex; }
+    .grade-modal { background:#fff; border:1px solid #E2E8F0; border-radius:14px; width:100%; max-width:480px; overflow:hidden; box-shadow:0 16px 48px rgba(15,37,70,.18); }
+    .grade-modal__hdr { display:flex; align-items:center; justify-content:space-between; padding:14px 20px; border-bottom:1px solid #F1F5F9; background:#F8FAFC; }
+    .grade-modal__title { font-size:14px; font-weight:700; color:#0F2546; }
+    .grade-modal__close { background:none; border:none; color:#718096; cursor:pointer; font-size:18px; padding:2px 6px; border-radius:6px; }
+    .grade-modal__close:hover { background:#F0F4F9; }
+    .grade-modal__body { padding:16px 20px; display:flex; flex-direction:column; gap:12px; }
+    .gm-subj { display:flex; flex-direction:column; gap:7px; padding:12px; border-radius:9px; border:1px solid #E2E8F0; background:#F8FAFC; }
+    .gm-subj--warn { border-color:#FDE68A; background:#FFFBEB; }
+    .gm-subj--exceeded { border-color:#FECACA; background:#FEF2F2; }
+    .gm-subj__hdr { display:flex; align-items:center; justify-content:space-between; gap:8px; }
+    .gm-subj__name { font-size:13px; font-weight:700; color:#1A2B45; }
+    .gm-subj__counts { font-size:12px; color:#718096; }
+    .gm-bar-row { display:flex; align-items:center; gap:8px; }
+    .gm-bar { flex:1; height:6px; background:#E2E8F0; border-radius:99px; overflow:hidden; }
+    .gm-bar-fill { height:100%; border-radius:99px; }
+    .gm-bar-fill--warn { background:#D97706; }
+    .gm-bar-fill--ok { background:#059669; }
+    .gm-bar-fill--exceeded { background:#DC2626; }
+    .gm-bar-pct { font-size:11px; font-weight:700; color:#718096; min-width:30px; text-align:right; }
+    .gm-note { font-size:11.5px; color:#718096; padding:8px 12px; background:#F0F4F9; border-radius:7px; }
+
+    /* Toast */
+    .toast { position:fixed; bottom:28px; left:50%; transform:translateX(-50%) translateY(20px); background:#1A2B45; color:#fff; padding:10px 20px; border-radius:8px; font-size:13px; opacity:0; transition:all .25s; pointer-events:none; z-index:999; }
+    .toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+  </style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-mark">
+      <div class="logo-icon">CT</div>
+      <div><div class="logo-text">ClassTrack</div><div class="logo-sub" data-en="Teacher Portal" data-fr="Portail enseignant">Teacher Portal</div></div>
+    </div>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="sidebar-section">
+      <div class="sidebar-section-label" data-en="Overview" data-fr="Vue d'ensemble">Overview</div>
+      <a class="nav-item" href="teacher-dashboard.html"><span class="nav-icon"><i class="fa-solid fa-gauge-high"></i></span> <span data-en="Dashboard" data-fr="Tableau de bord">Dashboard</span></a>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-section-label" data-en="Teaching" data-fr="Enseignement">Teaching</div>
+      <a class="nav-item" href="teacher-attendance.html"><span class="nav-icon"><i class="fa-solid fa-clipboard-check"></i></span> <span data-en="Mark Attendance" data-fr="Saisir les présences">Mark Attendance</span><span class="nav-badge">1</span></a>
+      <a class="nav-item active" href="teacher-schedule-axon file.html"><span class="nav-icon"><i class="fa-solid fa-calendar-week"></i></span> <span data-en="My Classes" data-fr="Mes classes">My Classes</span></a>
+      <a class="nav-item" href="teacher-history.html"><span class="nav-icon"><i class="fa-solid fa-calendar-days"></i></span> <span data-en="Attendance History" data-fr="Historique des présences">Attendance History</span></a>
+      <a class="nav-item" href="teacher-disputes.html"><span class="nav-icon"><i class="fa-solid fa-scale-balanced"></i></span> <span data-en="Disputes" data-fr="Contestations">Disputes</span><span class="nav-badge" style="background:#4F46E5">2</span></a>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-section-label" data-en="System" data-fr="Système">System</div>
+      <a class="nav-item" onclick="showToast(T('settings_soon'))"><span class="nav-icon"><i class="fa-solid fa-gear"></i></span> <span data-en="Settings" data-fr="Paramètres">Settings</span></a>
+    </div>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="user-info">
+      <div class="user-avatar">ST</div>
+      <div><div class="user-name" data-en="Ms. S. Tremblay" data-fr="Mme S. Tremblay">Ms. S. Tremblay</div><div class="user-role" data-en="Science Dept · Grade 7A" data-fr="Dépt. Sciences · 7e A">Science Dept · Grade 7A</div></div>
+    </div>
+  </div>
+</aside>
+
+<div class="main">
+  <div class="topbar">
+    <a class="topbar-back" href="teacher-schedule-axon file.html"><i class="fa-solid fa-arrow-left"></i> <span data-en="Back to Schedule" data-fr="Retour à l'horaire">Back to Schedule</span></a>
+    <div class="topbar-divider"></div>
+    <div class="topbar-title" data-en="Student Profile" data-fr="Profil de l'élève">Student Profile</div>
+    <div class="topbar-right">
+      <div class="icon-btn" title="Notifications"><i class="fa-solid fa-bell"></i><span class="notif-dot"></span></div>
+    </div>
+  </div>
+
+  <div class="page-body">
+
+    <!-- Student header -->
+    <div class="stu-header">
+      <div class="stu-avatar-lg" style="background:#2E7DD1">AC</div>
+      <div style="flex:1">
+        <div class="stu-name-lg">Aaliyah Carter</div>
+        <div class="stu-sub">
+          <span><i class="fa-solid fa-id-card"></i> ST-1041 · STU-2024-0042</span>
+          <span><i class="fa-solid fa-door-open"></i> <span data-en="Grade 7A · Homeroom" data-fr="7e A · Classe titulaire">Grade 7A · Homeroom</span></span>
+          <span><i class="fa-solid fa-user-shield"></i> <span data-en="Parent: M. Carter · +1 (416) 555-0182" data-fr="Parent : M. Carter · +1 (416) 555-0182">Parent: M. Carter · +1 (416) 555-0182</span></span>
+        </div>
+        <div class="scope-banner">
+          <i class="fa-solid fa-eye-slash"></i>
+          <span data-en="Showing records for your classes only (Grade 7A · Science · Math)" data-fr="Affichage limité à vos classes (7e A · Sciences · Mathématiques)">Showing records for your classes only (Grade 7A · Science · Math)</span>
+        </div>
+      </div>
+      <div class="stu-quick">
+        <div class="quick-stat"><div class="quick-val" style="color:#059669">94%</div><div class="quick-lbl" data-en="Rate" data-fr="Taux">Rate</div></div>
+        <div class="quick-stat"><div class="quick-val" style="color:#DC2626">2</div><div class="quick-lbl" data-en="Absences" data-fr="Absences">Absences</div></div>
+        <div class="quick-stat"><div class="quick-val" style="color:#D97706">1</div><div class="quick-lbl" data-en="Late" data-fr="En retard">Late</div></div>
+      </div>
+    </div>
+
+    <!-- Threshold banner (rendered by JS from SUBJECT_SUMMARY) -->
+    <div id="threshold-banner-area"></div>
+
+    <!-- Tabs -->
+    <div class="tabs">
+      <div class="tab active" data-tab="active" onclick="setTab('active', this)"><i class="fa-solid fa-clipboard-list" style="margin-right:5px"></i> <span data-en="Active Records" data-fr="Dossiers actifs">Active Records</span></div>
+      <div class="tab" data-tab="attendance" onclick="setTab('attendance', this)"><i class="fa-solid fa-calendar-days" style="margin-right:5px"></i> <span data-en="Attendance" data-fr="Présences">Attendance</span></div>
+      <div class="tab" data-tab="notes" onclick="setTab('notes', this)"><i class="fa-solid fa-pen-to-square" style="margin-right:5px"></i> <span data-en="Teacher Notes" data-fr="Notes de l'enseignant">Teacher Notes</span></div>
+    </div>
+
+    <!-- Active records -->
+    <div class="panel active" id="panel-active">
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title" data-en="Records that need your attention" data-fr="Dossiers nécessitant votre attention">Records that need your attention</span>
+          <span class="card-meta" data-en="Filtered to Grade 7A · Science" data-fr="Filtré à 7e A · Sciences">Filtered to Grade 7A · Science</span>
+        </div>
+        <div id="recordsList"></div>
+      </div>
+    </div>
+
+    <!-- Attendance (history filtered to this class) -->
+    <div class="panel" id="panel-attendance">
+      <!-- Per-subject summary (above row-by-row history, per v5 §2.4) -->
+      <div class="card" style="margin-bottom:16px">
+        <div class="card-header">
+          <span class="card-title" data-en="Subject Summary" data-fr="Résumé par matière">Subject Summary</span>
+          <span class="card-meta" data-en="Absence counts per subject · Term 2" data-fr="Absences par matière · Étape 2">Absence counts per subject · Term 2</span>
+        </div>
+        <div id="subjectSummary"></div>
+      </div>
+      <!-- Row-by-row attendance history -->
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title" data-en="Attendance History — Grade 7A (this teacher's classes)" data-fr="Historique — 7e A (vos classes)">Attendance History — Grade 7A (this teacher's classes)</span>
+          <span class="card-meta" data-en="Term 2 — 2025/26" data-fr="Étape 2 — 2025/26">Term 2 — 2025/26</span>
+        </div>
+        <div id="attendanceList"></div>
+      </div>
+    </div>
+
+    <!-- Teacher notes -->
+    <div class="panel" id="panel-notes">
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title" data-en="Notes (visible only to teachers)" data-fr="Notes (visibles seulement aux enseignants)">Notes (visible only to teachers)</span>
+        </div>
+        <div id="notesList"></div>
+        <div class="note-form">
+          <label style="font-size:11.5px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#718096;display:block;margin-bottom:6px" data-en="Add a note" data-fr="Ajouter une note">Add a note</label>
+          <textarea class="note-textarea" id="newNote" placeholder="Add an internal note about this student…" data-placeholder-en="Add an internal note about this student…" data-placeholder-fr="Ajouter une note interne sur cet élève…"></textarea>
+          <div style="display:flex;justify-content:flex-end;margin-top:10px">
+            <button class="btn-primary" onclick="addNote()" data-en="Save Note" data-fr="Enregistrer la note">Save Note</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Grade-impact modal overlay -->
+<div class="grade-modal-overlay" id="grade-modal" role="dialog" aria-modal="true" aria-labelledby="gm-title">
+  <div class="grade-modal">
+    <div class="grade-modal__hdr">
+      <span class="grade-modal__title" id="gm-title"><i class="fa-solid fa-chart-pie" style="margin-right:6px"></i><span id="gm-title-text">Grade-impact summary</span></span>
+      <button class="grade-modal__close" id="gm-close" aria-label="Close"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="grade-modal__body" id="gm-body"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  const STRINGS = {
+    en: {
+      // active records
+      rec_lab_title:'Missed Chapter 5 lab introduction', rec_lab_desc:'Period 2 — Mar 19. Makeup activity scheduled for Mar 26 (you assigned).',
+      rec_lab_status:'In progress',
+      rec_late_title:'Late arrival pending parent reply', rec_late_desc:'Period 3 — Mar 21. Parent notified at 9:14 AM, awaiting reason.',
+      rec_late_status:'Awaiting parent',
+      rec_event_title:'Group event — Mar 26', rec_event_desc:'Science class will miss Period 2 for tournament. Pre-justified.',
+      rec_event_status:'Pre-justified',
+      // attendance entries
+      mar:'March 2026',
+      a_p2_19:'Period 2 — Science', a_p2_19_d:'Thu, Mar 19',
+      a_p1_21:'Period 1 — Science', a_p1_21_d:'Sat, Mar 21',
+      a_p2_18:'Period 2 — Science', a_p2_18_d:'Wed, Mar 18',
+      a_p2_17:'Period 2 — Science', a_p2_17_d:'Tue, Mar 17',
+      a_p2_14:'Period 2 — Science', a_p2_14_d:'Sat, Mar 14',
+      st_present:'Present', st_absent_just:'Absent — justified', st_late_just:'Late — justified', st_future:'Future', st_event:'Group event',
+      // Periods (standalone labels for separate period chip)
+      p_1:'Period 1', p_2:'Period 2', p_3:'Period 3',
+      // Subjects
+      subj_science:'Science', subj_math:'Math', subj_geography:'Geography', subj_spanish:'Spanish',
+      // Per-subject summary
+      subjects_summary_title:'Subject Summary',
+      subjects_summary_meta:'Absence counts per subject · Term 2',
+      col_subject:'Subject', col_absences:'Absences', col_tardies:'Tardies', col_threshold:'Threshold',
+      threshold_within:'Within limit',
+      threshold_approaching:'Approaching threshold',
+      threshold_exceeded:'Threshold exceeded',
+      note_excerpt:'Aaliyah missed the Chapter 5 lab introduction. I have emailed her the lab handout. She will complete the makeup activity during lunch recess on March 26 before the quiz.',
+      note_meta:'Ms. S. Tremblay · Fri, Mar 20 · 11:30 AM',
+      note_excerpt_2:'Strong in lab work but quiet during whole-class discussion. Will try smaller-group format next week.',
+      note_meta_2:'Ms. S. Tremblay · Mon, Mar 16 · 2:45 PM',
+      note_saved:'Note saved',
+      settings_soon:'Settings coming soon',
+      att_col_date:'Date', att_col_period:'Period', att_col_subject:'Subject', att_col_status:'Status', att_col_note:'Note',
+    },
+    fr: {
+      rec_lab_title:'A manqué l\'intro du laboratoire (ch. 5)', rec_lab_desc:'Période 2 — 19 mars. Activité de rattrapage prévue le 26 mars (assignée par vous).',
+      rec_lab_status:'En cours',
+      rec_late_title:'Arrivée tardive — réponse parent attendue', rec_late_desc:'Période 3 — 21 mars. Parent averti à 9 h 14, motif attendu.',
+      rec_late_status:'Attente du parent',
+      rec_event_title:'Événement scolaire — 26 mars', rec_event_desc:'La classe de sciences manquera la période 2 pour le tournoi. Pré-motivée.',
+      rec_event_status:'Pré-motivée',
+      mar:'Mars 2026',
+      a_p2_19:'Période 2 — Sciences', a_p2_19_d:'Jeu. 19 mars',
+      a_p1_21:'Période 1 — Sciences', a_p1_21_d:'Sam. 21 mars',
+      a_p2_18:'Période 2 — Sciences', a_p2_18_d:'Mer. 18 mars',
+      a_p2_17:'Période 2 — Sciences', a_p2_17_d:'Mar. 17 mars',
+      a_p2_14:'Période 2 — Sciences', a_p2_14_d:'Sam. 14 mars',
+      st_present:'Présent', st_absent_just:'Absence motivée', st_late_just:'Retard motivé', st_future:'Future', st_event:'Événement scolaire',
+      // Périodes
+      p_1:'Période 1', p_2:'Période 2', p_3:'Période 3',
+      // Matières
+      subj_science:'Sciences', subj_math:'Mathématiques', subj_geography:'Géographie', subj_spanish:'Espagnol',
+      // Résumé par matière
+      subjects_summary_title:'Résumé par matière',
+      subjects_summary_meta:'Absences par matière · Étape 2',
+      col_subject:'Matière', col_absences:'Absences', col_tardies:'Retards', col_threshold:'Seuil',
+      threshold_within:'Dans les limites',
+      threshold_approaching:'Seuil approché',
+      threshold_exceeded:'Seuil dépassé',
+      note_excerpt:'Aaliyah a manqué l\'introduction au laboratoire du chapitre 5. Je lui ai envoyé le document du laboratoire par courriel. Elle fera l\'activité de rattrapage pendant la récréation du dîner le 26 mars, avant le contrôle.',
+      note_meta:'Mme S. Tremblay · ven. 20 mars · 11 h 30',
+      note_excerpt_2:'Forte en laboratoire mais discrète en discussion plénière. J\'essaierai un format de petits groupes la semaine prochaine.',
+      note_meta_2:'Mme S. Tremblay · lun. 16 mars · 14 h 45',
+      note_saved:'Note enregistrée',
+      settings_soon:'Paramètres — bientôt disponibles',
+      att_col_date:'Date', att_col_period:'Période', att_col_subject:'Matière', att_col_status:'Statut', att_col_note:'Note',
+    }
+  };
+  function T(k){ var lang=(window.__ct_i18n&&window.__ct_i18n.getLang())||'en'; return (STRINGS[lang]&&STRINGS[lang][k])||STRINGS.en[k]||k; }
+
+  const RECORDS = [
+    { id:'r1', icon:'fa-flask',     iconCls:'ri-amber', titleKey:'rec_lab_title',  descKey:'rec_lab_desc',  status:'rs-pending', labelKey:'rec_lab_status' },
+    { id:'r2', icon:'fa-clock',     iconCls:'ri-blue',  titleKey:'rec_late_title', descKey:'rec_late_desc', status:'rs-pending', labelKey:'rec_late_status' },
+    { id:'r3', icon:'fa-people-group',iconCls:'ri-indigo',titleKey:'rec_event_title',descKey:'rec_event_desc',status:'rs-resolved',labelKey:'rec_event_status' },
+  ];
+
+  const ATTENDANCE = [
+    { id:'a1', dateKey:'a_p1_21_d', periodKey:'p_1', subject:'science', status:'late-just',   note:'Arrived 8:50 AM — bus delay', note_fr:'Arrivée à 8 h 50 — retard de bus' },
+    { id:'a2', dateKey:'a_p2_19_d', periodKey:'p_2', subject:'science', status:'absent-just', note:'Doctor\'s note received', note_fr:'Billet médical reçu' },
+    { id:'a3', dateKey:'a_p2_18_d', periodKey:'p_2', subject:'math',    status:'present',     note:'' },
+    { id:'a4', dateKey:'a_p2_17_d', periodKey:'p_1', subject:'math',    status:'present',     note:'' },
+    { id:'a5', dateKey:'a_p2_14_d', periodKey:'p_2', subject:'science', status:'present',     note:'' },
+  ];
+
+  // Per-subject absence summary for the student (this teacher's classes · current term)
+  const SUBJECT_SUMMARY = [
+    { subjectKey:'subj_science', absences:2, tardies:1, threshold:'approaching' },
+    { subjectKey:'subj_math',    absences:0, tardies:1, threshold:'within' },
+  ];
+
+  const NOTES = [
+    { id:'n1', metaKey:'note_meta',   bodyKey:'note_excerpt' },
+    { id:'n2', metaKey:'note_meta_2', bodyKey:'note_excerpt_2' },
+  ];
+
+  function setTab(name, el) {
+    document.querySelectorAll('.tab').forEach(function(t){ t.classList.remove('active'); });
+    document.querySelectorAll('.panel').forEach(function(p){ p.classList.remove('active'); });
+    el.classList.add('active');
+    document.getElementById('panel-' + name).classList.add('active');
+  }
+
+  function renderRecords() {
+    document.getElementById('recordsList').innerHTML = RECORDS.map(function(r){
+      var rdMsg = (window.__ct_i18n && window.__ct_i18n.getLang())==='fr' ? 'Détail du dossier (démo)' : 'Record detail (demo)';
+      return '<div class="record-row" onclick="showToast(\'' + rdMsg + '\')">' +
+        '<div class="record-icon ' + r.iconCls + '"><i class="fa-solid ' + r.icon + '"></i></div>' +
+        '<div><div class="record-title">' + T(r.titleKey) + '</div><div class="record-desc">' + T(r.descKey) + '</div></div>' +
+        '<span class="record-status ' + r.status + '">' + T(r.labelKey) + '</span>' +
+        '<i class="fa-solid fa-chevron-right" style="color:#CBD5E0;font-size:12px"></i>' +
+      '</div>';
+    }).join('');
+  }
+
+  function renderAttendance() {
+    var badgeMap = {
+      'present':     '<span class="status-badge badge-present"><span class="status-dot"></span>' + T('st_present') + '</span>',
+      'absent-just': '<span class="status-badge badge-late-just"><span class="status-dot"></span>' + T('st_absent_just') + '</span>',
+      'late-just':   '<span class="status-badge badge-late-just"><span class="status-dot"></span>' + T('st_late_just') + '</span>',
+      'future':      '<span class="status-badge badge-future"><span class="status-dot"></span>' + T('st_future') + '</span>',
+      'event':       '<span class="status-badge badge-event"><span class="status-dot"></span>' + T('st_event') + '</span>',
+    };
+    var html = '<div class="att-month-stripe">' + T('mar') + '</div>';
+    html += '<table class="att-table"><thead><tr><th>' + T('att_col_date') + '</th><th>' + T('att_col_period') + '</th><th>' + T('att_col_subject') + '</th><th>' + T('att_col_status') + '</th><th>' + T('att_col_note') + '</th></tr></thead><tbody>';
+    ATTENDANCE.forEach(function(a){
+      var lang = (window.__ct_i18n && window.__ct_i18n.getLang()) || 'en';
+      var noteText = lang==='fr' && a.note_fr ? a.note_fr : a.note;
+      html += '<tr>' +
+        '<td>' + T(a.dateKey) + '</td>' +
+        '<td><span class="period-chip">' + T(a.periodKey) + '</span></td>' +
+        '<td><span class="subject-chip">' + T('subj_' + a.subject) + '</span></td>' +
+        '<td>' + (badgeMap[a.status] || a.status) + '</td>' +
+        '<td style="color:#718096;font-size:12.5px;font-style:' + (noteText?'normal':'italic') + '">' + (noteText || '—') + '</td>' +
+      '</tr>';
+    });
+    html += '</tbody></table>';
+    document.getElementById('attendanceList').innerHTML = html;
+  }
+
+  function renderNotes() {
+    document.getElementById('notesList').innerHTML = NOTES.map(function(n){
+      return '<div class="note-item">' +
+        '<div class="note-meta"><i class="fa-solid fa-user-pen" style="color:#A0AEC0"></i> ' + T(n.metaKey) + '</div>' +
+        '<div class="note-body">' + T(n.bodyKey) + '</div>' +
+      '</div>';
+    }).join('');
+  }
+
+  function renderSubjectSummary() {
+    var el = document.getElementById('subjectSummary');
+    if (!el) return;
+    var html = '<table class="subj-summary-table"><thead><tr>' +
+      '<th>' + T('col_subject') + '</th>' +
+      '<th>' + T('col_absences') + '</th>' +
+      '<th>' + T('col_tardies') + '</th>' +
+      '<th>' + T('col_threshold') + '</th>' +
+      '</tr></thead><tbody>';
+    SUBJECT_SUMMARY.forEach(function(s) {
+      var indicator;
+      if (s.threshold === 'within') {
+        indicator = '<span class="threshold-within"><i class="fa-solid fa-circle-check" style="font-size:10px"></i> ' + T('threshold_within') + '</span>';
+      } else if (s.threshold === 'approaching') {
+        indicator = '<span class="threshold-approaching"><i class="fa-solid fa-triangle-exclamation" style="font-size:10px"></i> ' + T('threshold_approaching') + '</span>';
+      } else {
+        indicator = '<span class="threshold-exceeded"><i class="fa-solid fa-circle-xmark" style="font-size:10px"></i> ' + T('threshold_exceeded') + '</span>';
+      }
+      html += '<tr>' +
+        '<td><span class="subject-chip">' + T(s.subjectKey) + '</span></td>' +
+        '<td style="font-weight:700;color:' + (s.absences > 0 ? '#DC2626' : '#1A2B45') + '">' + s.absences + '</td>' +
+        '<td style="font-weight:700;color:' + (s.tardies > 0 ? '#D97706' : '#1A2B45') + '">' + s.tardies + '</td>' +
+        '<td>' + indicator + '</td>' +
+      '</tr>';
+    });
+    html += '</tbody></table>';
+    el.innerHTML = html;
+  }
+
+  function addNote() {
+    var ta = document.getElementById('newNote');
+    if (!ta.value.trim()) return;
+    showToast(T('note_saved'));
+    ta.value = '';
+  }
+
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg; t.classList.add('show');
+    setTimeout(function(){ t.classList.remove('show'); }, 2500);
+  }
+
+  // ── Threshold banner + grade-impact modal ──────────────────────────────────
+  function renderThresholdBanner() {
+    var lang = (window.__ct_i18n && window.__ct_i18n.getLang()) || 'en';
+    var area = document.getElementById('threshold-banner-area');
+    if (!area) return;
+    // Find subjects at 'approaching' or 'exceeded' threshold
+    var at_risk = SUBJECT_SUMMARY.filter(function(s){ return s.threshold === 'approaching' || s.threshold === 'exceeded'; });
+    if (!at_risk.length) { area.innerHTML = ''; return; }
+    var s = at_risk[0]; // show the most critical one
+    var subjectLabel = T(s.subjectKey);
+    var statusLabel = s.threshold === 'exceeded'
+      ? (lang === 'fr' ? 'Seuil dépassé' : 'threshold exceeded')
+      : (lang === 'fr' ? 'Seuil approché' : 'approaching grade threshold');
+    var counts = s.absences + ' abs / ' + s.tardies + (lang === 'fr' ? ' retard(s) ce trimestre' : ' late this term');
+    area.innerHTML =
+      '<div class="thr-banner" role="alert">' +
+        '<span class="thr-banner__text">' +
+          '<i class="fa-solid fa-triangle-exclamation"></i>' +
+          subjectLabel + ' ' + statusLabel + ' · ' + counts +
+        '</span>' +
+        '<button class="thr-banner__btn" id="thr-open">' +
+          (lang === 'fr' ? 'Voir les détails ↗' : 'View details ↗') +
+        '</button>' +
+      '</div>';
+    document.getElementById('thr-open').addEventListener('click', openGradeModal);
+  }
+
+  function openGradeModal() {
+    var lang = (window.__ct_i18n && window.__ct_i18n.getLang()) || 'en';
+    var modal = document.getElementById('grade-modal');
+    var body  = document.getElementById('gm-body');
+    var titleText = document.getElementById('gm-title-text');
+    titleText.textContent = lang === 'fr' ? 'Impact sur la note · Aaliyah Carter · Étape 2' : 'Grade-impact summary · Aaliyah Carter · Term 2';
+    var html = '';
+    SUBJECT_SUMMARY.forEach(function(s) {
+      var label = T(s.subjectKey);
+      var pct   = Math.round((s.absences / 6) * 100); // threshold = 6
+      var cls   = s.threshold === 'exceeded' ? 'exceeded' : (s.threshold === 'approaching' ? 'warn' : 'ok');
+      var chip;
+      if (s.threshold === 'exceeded')   chip = '<span class="threshold-exceeded"><i class="fa-solid fa-circle-xmark" style="font-size:10px"></i> ' + T('threshold_exceeded') + '</span>';
+      else if (s.threshold === 'approaching') chip = '<span class="threshold-approaching"><i class="fa-solid fa-triangle-exclamation" style="font-size:10px"></i> ' + T('threshold_approaching') + '</span>';
+      else                               chip = '<span class="threshold-within"><i class="fa-solid fa-circle-check" style="font-size:10px"></i> ' + T('threshold_within') + '</span>';
+      html +=
+        '<div class="gm-subj gm-subj--' + cls + '">' +
+          '<div class="gm-subj__hdr">' +
+            '<span class="gm-subj__name"><span class="subject-chip">' + label + '</span></span>' +
+            chip +
+          '</div>' +
+          '<div class="gm-subj__counts">' + s.absences + (lang==='fr'?' abs · ':' absences · ') + s.tardies + (lang==='fr'?' retard(s) ce trimestre (seuil : 6 abs)':' late this term (threshold: 6 abs)') + '</div>' +
+          '<div class="gm-bar-row">' +
+            '<div class="gm-bar"><div class="gm-bar-fill gm-bar-fill--' + cls + '" style="width:' + pct + '%"></div></div>' +
+            '<span class="gm-bar-pct">' + pct + '%</span>' +
+          '</div>' +
+        '</div>';
+    });
+    html += '<p class="gm-note">§2.1 — ' + (lang==='fr'?'Les absences médicales motivées sont exclues du décompte.':'Justified medical absences are excluded from grade-impact counts.') + '</p>';
+    body.innerHTML = html;
+    modal.classList.add('is-on');
+    document.getElementById('gm-close').focus();
+  }
+
+  // Modal close handlers
+  (function() {
+    function closeModal() {
+      document.getElementById('grade-modal').classList.remove('is-on');
+      var btn = document.getElementById('thr-open');
+      if (btn) btn.focus();
+    }
+    document.getElementById('gm-close').addEventListener('click', closeModal);
+    document.getElementById('grade-modal').addEventListener('click', function(e){ if (e.target === this) closeModal(); });
+    document.addEventListener('keydown', function(e){ if (e.key === 'Escape') closeModal(); });
+  })();
+
+  function ctRerender() { renderRecords(); renderAttendance(); renderSubjectSummary(); renderNotes(); renderThresholdBanner(); }
+  window.__ct_page_rerender = ctRerender;
+
+  renderRecords();
+  renderAttendance();
+  renderSubjectSummary();
+  renderNotes();
+  renderThresholdBanner();
+</script>
+
+<!-- Prototype cross-portal switcher -->
+<div id="proto-switcher" style="position:fixed;bottom:16px;right:16px;z-index:9999;background:rgba(15,37,70,.95);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.1);padding:5px;border-radius:999px;box-shadow:0 8px 24px rgba(0,0,0,.25);font-family:'Segoe UI',system-ui,sans-serif;display:flex;gap:2px;align-items:center;"><span style="color:rgba(255,255,255,.4);font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:0 6px 0 10px;">Prototype</span><a href="index.html" style="display:inline-flex;align-items:center;gap:4px;padding:6px 12px;border-radius:999px;font-size:12px;font-weight:600;text-decoration:none;letter-spacing:.02em;transition:all .15s;background:transparent;color:#CBD5E0;">Index</a><a href="admin-dashboard.html" style="display:inline-flex;align-items:center;gap:4px;padding:6px 12px;border-radius:999px;font-size:12px;font-weight:600;text-decoration:none;letter-spacing:.02em;transition:all .15s;background:transparent;color:#CBD5E0;">Admin</a><a href="teacher-dashboard.html" style="display:inline-flex;align-items:center;gap:4px;padding:6px 12px;border-radius:999px;font-size:12px;font-weight:600;text-decoration:none;letter-spacing:.02em;transition:all .15s;background:#2E7DD1;color:#fff;">Teacher</a><a href="parent-app.html" style="display:inline-flex;align-items:center;gap:4px;padding:6px 12px;border-radius:999px;font-size:12px;font-weight:600;text-decoration:none;letter-spacing:.02em;transition:all .15s;background:transparent;color:#CBD5E0;">Parent</a><span style="color:rgba(255,255,255,.2);padding:0 4px;">|</span><a href="#" class="lang-btn" data-lang="en" onclick="event.preventDefault();window.__ct_i18n.setLang('en');" style="display:inline-flex;align-items:center;gap:4px;padding:6px 10px;border-radius:999px;font-size:11px;font-weight:700;text-decoration:none;letter-spacing:.04em;background:#2E7DD1;color:#fff;">EN</a><a href="#" class="lang-btn" data-lang="fr" onclick="event.preventDefault();window.__ct_i18n.setLang('fr');" style="display:inline-flex;align-items:center;gap:4px;padding:6px 10px;border-radius:999px;font-size:11px;font-weight:700;text-decoration:none;letter-spacing:.04em;background:transparent;color:#CBD5E0;">FR</a></div>
+
+<script id="i18n-core">
+(function(){
+  function getLang(){ var p=new URLSearchParams(window.location.search); return p.get('lang')==='fr'?'fr':'en'; }
+  function setLangUrl(href, lang){ if(!href||href.startsWith('http')||href.startsWith('#')||href.startsWith('javascript:'))return href; var base=href.split('?')[0].split('#')[0]; var hash=href.indexOf('#')>=0?href.substring(href.indexOf('#')):''; if(!base.endsWith('.html'))return href; return base+(lang==='fr'?'?lang=fr':'')+hash; }
+  function applyLang(){
+    var lang = getLang();
+    document.documentElement.lang = lang;
+    document.body && (document.body.dataset.lang = lang);
+    document.querySelectorAll('[data-en]').forEach(function(el){ var val=el.getAttribute('data-'+lang); if(val!==null){ if(el.hasAttribute('data-html')) el.innerHTML=val; else el.textContent=val; } });
+    document.querySelectorAll('[data-placeholder-en]').forEach(function(el){ var val=el.getAttribute('data-placeholder-'+lang); if(val!==null) el.setAttribute('placeholder',val); });
+    document.querySelectorAll('[data-title-en]').forEach(function(el){ var val=el.getAttribute('data-title-'+lang); if(val!==null) el.setAttribute('title',val); });
+    document.querySelectorAll('a[href]').forEach(function(a){ a.setAttribute('href',setLangUrl(a.getAttribute('href'),lang)); });
+    document.querySelectorAll('.lang-btn').forEach(function(btn){ var on=btn.getAttribute('data-lang')===lang; btn.style.background=on?'#2E7DD1':'transparent'; btn.style.color=on?'#fff':'#CBD5E0'; });
+    if(typeof window.__ct_page_rerender==='function') window.__ct_page_rerender();
+  }
+  function setLang(lang){ var p=new URLSearchParams(window.location.search); if(lang==='fr')p.set('lang','fr'); else p.delete('lang'); var qs=p.toString(); var newUrl=window.location.pathname+(qs?'?'+qs:'')+window.location.hash; window.history.replaceState({}, '', newUrl); applyLang(); }
+  window.__ct_i18n = { getLang:getLang, applyLang:applyLang, setLang:setLang };
+  if(document.readyState==='loading'){ document.addEventListener('DOMContentLoaded', applyLang); } else { applyLang(); }
+})();
+</script>
+
+</body>
+</html>

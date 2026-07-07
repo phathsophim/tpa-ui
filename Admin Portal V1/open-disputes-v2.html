@@ -1,0 +1,933 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ClassTrack — Board Admin · Reports · Open Disputes</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+:root{
+  --c-bg:#F0F2F7;--c-surface:#FFFFFF;--c-surface-2:#F8FAFC;--c-surface-alt:#EEF2F7;
+  --c-sidebar:#0F2546;--c-sidebar-2:#0A1B36;--c-sidebar-hover:rgba(255,255,255,0.08);--c-sidebar-active:#1B5DAF;
+  --c-border:#D6DBE2;--c-border-2:#E5E8EE;--c-border-strong:#A6ADBB;
+  --c-ink:#0F2546;--c-ink-muted:#475467;--c-ink-subtle:#5C6470;
+  --c-brand:#1B5DAF;--c-brand-ink:#0E2E55;--c-brand-tint:#E8F0FA;
+  --c-success:#1F7A3F;--c-success-tint:#E6F4EC;
+  --c-warning:#9A4708;--c-warning-tint:#FCF1DD;--c-warning-bord:#B97F38;
+  --c-danger:#B42318;--c-danger-tint:#FCE9E7;
+  --c-info:#0E5C8A;--c-info-tint:#E0EFF7;
+  --c-purple:#3F22A6;--c-purple-tint:#EEEAFE;
+  --c-neutral-tint:#EEF1F5;
+  --c-focus:#FFB400;
+  --ff:"Segoe UI",system-ui,-apple-system,sans-serif;
+  --shadow-sm:0 1px 3px rgba(15,37,70,0.06);--shadow-md:0 4px 12px rgba(15,37,70,0.08);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;}
+body{font-family:var(--ff);background:var(--c-bg);color:var(--c-ink);font-size:14px;line-height:1.55;-webkit-font-smoothing:antialiased;}
+a{color:var(--c-brand);text-decoration:none;}a:hover{text-decoration:underline;}
+button{font-family:inherit;cursor:pointer;}
+
+/* Banner */
+.wf-banner{background:#F0EFFE;border-bottom:1px solid #C8C0F0;color:#3F22A6;font-size:12px;padding:6px 16px;display:flex;align-items:center;justify-content:space-between;gap:16px;}
+.wf-banner__left{display:flex;align-items:center;gap:8px;}
+.wf-banner__right{display:flex;align-items:center;gap:12px;}
+.wf-banner a{color:#3F22A6;}
+
+/* Layout */
+.app{display:grid;grid-template-columns:240px 1fr;min-height:calc(100vh - 32px);}
+
+/* Sidebar */
+.sidebar{background:linear-gradient(180deg,var(--c-sidebar) 0%,var(--c-sidebar-2) 100%);color:rgba(255,255,255,0.85);display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow-y:auto;}
+.sidebar__logo{padding:24px 16px 16px;border-bottom:1px solid rgba(255,255,255,0.08);display:flex;align-items:center;gap:12px;}
+.sidebar__logo-mark{width:36px;height:36px;background:var(--c-sidebar-active);border-radius:10px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:16px;}
+.sidebar__logo-text{color:#fff;font-size:16px;font-weight:700;}
+.sidebar__logo-sub{color:rgba(255,255,255,0.6);font-size:11px;margin-top:2px;}
+.sidebar__role-badge{margin:8px 16px 0;background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.2);border-radius:999px;padding:3px 10px;font-size:10px;font-weight:700;color:rgba(255,255,255,0.9);letter-spacing:0.06em;text-transform:uppercase;text-align:center;}
+.sidebar__section{padding:16px 12px 4px;}
+.sidebar__section-label{text-transform:uppercase;font-size:10px;font-weight:700;letter-spacing:0.12em;color:rgba(255,255,255,0.45);padding:0 12px;margin-bottom:4px;}
+.nav-item{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:6px;color:rgba(255,255,255,0.78);font-size:13px;font-weight:500;min-height:36px;text-decoration:none;}
+.nav-item:hover{background:var(--c-sidebar-hover);color:#fff;text-decoration:none;}
+.nav-item.is-active{background:var(--c-sidebar-active);color:#fff;font-weight:600;}
+.nav-item .nav-icon{width:20px;text-align:center;font-size:14px;}
+.nav-item .nav-badge{margin-left:auto;background:var(--c-danger);color:#fff;font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px;}
+.nav-item .nav-badge--neutral{background:rgba(255,255,255,0.18);color:#fff;}
+.nav-item .nav-badge--warn{background:#7A3500;color:#fff;}
+.sidebar__user{margin-top:auto;padding:12px 16px;border-top:1px solid rgba(255,255,255,0.08);display:flex;align-items:center;gap:12px;}
+.avatar{width:36px;height:36px;border-radius:999px;background:var(--c-brand-tint);color:var(--c-brand-ink);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;flex-shrink:0;}
+.sidebar__user-name{color:#fff;font-size:13px;font-weight:600;}
+.sidebar__user-role{color:rgba(255,255,255,0.6);font-size:11px;}
+
+/* Main */
+.main{display:flex;flex-direction:column;min-width:0;}
+
+/* Topbar */
+.topbar{background:var(--c-surface);border-bottom:1px solid var(--c-border);display:flex;align-items:center;gap:16px;padding:0 24px;position:sticky;top:0;z-index:50;min-height:64px;}
+.topbar__left{display:flex;flex-direction:column;gap:2px;}
+.topbar__title{font-size:15px;font-weight:700;color:var(--c-ink);}
+.topbar__breadcrumb{font-size:12px;color:var(--c-ink-subtle);}
+.topbar__breadcrumb span{color:var(--c-ink-muted);}
+.topbar__scope{background:var(--c-purple-tint);color:var(--c-purple);border:1px solid #C8C0F0;padding:6px 12px;border-radius:6px;font-size:12px;font-weight:600;display:inline-flex;align-items:center;gap:8px;margin-left:auto;}
+.topbar__actions{display:flex;align-items:center;gap:8px;}
+.icon-btn{width:36px;height:36px;border-radius:6px;background:transparent;border:none;color:var(--c-ink-muted);display:inline-flex;align-items:center;justify-content:center;position:relative;font-size:14px;cursor:pointer;}
+.icon-btn:hover{background:var(--c-surface-alt);}
+.icon-btn__count{position:absolute;top:2px;right:2px;background:var(--c-danger);color:#fff;font-size:10px;font-weight:700;min-width:18px;height:18px;border-radius:999px;display:flex;align-items:center;justify-content:center;padding:0 4px;border:2px solid var(--c-surface);}
+.lang-toggle{display:inline-flex;border:1px solid var(--c-border-strong);border-radius:6px;overflow:hidden;}
+.lang-toggle button{background:var(--c-surface);border:0;padding:6px 12px;font-size:12px;font-weight:700;color:var(--c-ink-muted);min-height:32px;}
+.lang-toggle button[aria-pressed="true"]{background:var(--c-brand);color:#fff;}
+.user-chip{display:inline-flex;align-items:center;gap:8px;padding:4px 10px 4px 4px;border:1px solid var(--c-border);border-radius:999px;font-size:12px;color:var(--c-ink-muted);min-height:36px;}
+
+/* Page Header (replaces report-header + filters-bar) */
+.page-header{background:var(--c-surface);border-bottom:1px solid var(--c-border);padding:14px 24px;display:flex;align-items:center;justify-content:space-between;gap:16px;}
+.page-header__left{display:flex;align-items:center;gap:12px;}
+.live-dot{width:10px;height:10px;border-radius:50%;background:#22C55E;box-shadow:0 0 0 0 rgba(34,197,94,0.4);animation:pulse-dot 2s infinite;}
+@keyframes pulse-dot{0%{box-shadow:0 0 0 0 rgba(34,197,94,0.4);}70%{box-shadow:0 0 0 7px rgba(34,197,94,0);}100%{box-shadow:0 0 0 0 rgba(34,197,94,0);}}
+.page-header__title{font-size:16px;font-weight:700;color:var(--c-ink);}
+.page-header__meta{font-size:12px;color:var(--c-ink-subtle);display:flex;align-items:center;gap:10px;}
+.page-header__meta-sep{color:var(--c-border-strong);}
+.page-header__actions{display:flex;align-items:center;gap:8px;}
+
+/* Attention Bar */
+.attention-bar{padding:10px 24px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+.attention-bar--danger{background:var(--c-danger-tint);border-bottom:1px solid #F0B0AA;}
+.attn-icon{width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;}
+.attn-icon--danger{background:var(--c-danger);color:#fff;}
+.attn-text{font-size:13px;font-weight:600;color:var(--c-danger);flex:1;}
+.attn-chips{display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
+.attn-chip{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:999px;font-size:11px;font-weight:700;cursor:pointer;border:1.5px solid transparent;transition:opacity .15s;}
+.attn-chip:hover{opacity:.82;}
+.attn-chip.is-selected{outline:2px solid var(--c-focus);outline-offset:1px;}
+
+/* KPI Row */
+.kpi-row{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;padding:16px 24px 0;}
+.kpi-card{background:var(--c-surface);border:1px solid var(--c-border-2);border-radius:10px;padding:14px 16px;position:relative;overflow:hidden;}
+.kpi-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;}
+.kpi-card--danger::before{background:var(--c-danger);}
+.kpi-card--warning::before{background:#D97706;}
+.kpi-card--info::before{background:var(--c-info);}
+.kpi-card--purple::before{background:var(--c-purple);}
+.kpi-card--neutral::before{background:var(--c-border-strong);}
+.kpi-card__label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--c-ink-muted);margin-bottom:6px;}
+.kpi-card__value{font-size:26px;font-weight:800;line-height:1.1;}
+.kpi-card__sub{font-size:11px;color:var(--c-ink-subtle);margin-top:3px;}
+.kpi-card__trend{display:inline-flex;align-items:center;gap:3px;font-size:10px;font-weight:700;padding:2px 7px;border-radius:999px;margin-top:6px;}
+.kpi-card__trend--up-bad{background:var(--c-danger-tint);color:var(--c-danger);}
+.kpi-card__trend--down-good{background:var(--c-success-tint);color:var(--c-success);}
+.kpi-card__trend--neutral{background:var(--c-neutral-tint);color:var(--c-ink-muted);}
+
+/* Tabs */
+.report-tabs{background:var(--c-surface);border-bottom:1px solid var(--c-border);padding:0 24px;display:flex;gap:0;margin-top:16px;}
+.report-tab{font-size:13px;font-weight:500;padding:10px 16px;color:var(--c-ink-muted);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;user-select:none;}
+.report-tab:hover{color:var(--c-ink);}
+.report-tab.is-active{color:var(--c-brand);border-bottom-color:var(--c-brand);}
+.tab-panel{display:none;}
+.tab-panel.is-active{display:block;}
+
+/* Controls */
+.controls-row{padding:16px 24px 0;display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.search-wrap{position:relative;flex:0 0 220px;}
+.search-wrap i{position:absolute;left:9px;top:50%;transform:translateY(-50%);color:var(--c-ink-subtle);font-size:12px;pointer-events:none;}
+.search-input{width:100%;padding:7px 10px 7px 30px;border:1px solid var(--c-border-strong);border-radius:6px;font-size:12px;background:var(--c-surface);color:var(--c-ink);height:32px;}
+.search-input:focus{outline:2px solid var(--c-brand);outline-offset:-1px;}
+.filter-select{font-size:12px;padding:5px 10px;border:1px solid var(--c-border-strong);border-radius:6px;background:var(--c-surface);color:var(--c-ink);height:32px;cursor:pointer;}
+.controls-sep{flex:1;}
+
+/* Toggle Group */
+.toggle-group{display:inline-flex;border:1px solid var(--c-border-strong);border-radius:6px;overflow:hidden;}
+.toggle-btn{background:var(--c-surface);border:0;border-right:1px solid var(--c-border-strong);padding:5px 12px;font-size:12px;font-weight:600;color:var(--c-ink-muted);cursor:pointer;white-space:nowrap;}
+.toggle-btn:last-child{border-right:0;}
+.toggle-btn:hover{background:var(--c-surface-alt);}
+.toggle-btn.is-active{background:var(--c-brand);color:#fff;}
+.toggle-btn .tgl-count{font-size:11px;font-weight:700;margin-left:4px;opacity:.8;}
+
+/* Table */
+.table-wrap{padding:12px 24px 24px;overflow-x:auto;}
+.portal-table{width:100%;border-collapse:collapse;font-size:12px;}
+.portal-table thead th{padding:9px 10px;text-align:left;font-size:11px;font-weight:700;color:var(--c-ink-muted);text-transform:uppercase;letter-spacing:0.05em;border-bottom:2px solid var(--c-border);background:var(--c-surface-2);white-space:nowrap;cursor:pointer;user-select:none;}
+.portal-table thead th:hover{color:var(--c-ink);}
+.portal-table thead th.sort-asc::after{content:' ↑';opacity:.7;}
+.portal-table thead th.sort-desc::after{content:' ↓';opacity:.7;}
+.portal-table thead th.no-sort{cursor:default;}
+.portal-table tbody tr{border-bottom:1px solid var(--c-border-2);}
+.portal-table tbody tr:hover{background:var(--c-surface-2);}
+.portal-table td{padding:10px 10px;vertical-align:middle;}
+.portal-table .cell-student{min-width:140px;}
+.portal-table .cell-student__name{font-weight:600;color:var(--c-ink);}
+.portal-table .cell-student__id{font-size:10px;color:var(--c-ink-subtle);}
+.school-dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:5px;flex-shrink:0;}
+
+/* Days-open urgency badge */
+.days-badge{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:999px;font-size:11px;font-weight:700;white-space:nowrap;}
+.days-badge--ok{background:var(--c-neutral-tint);color:var(--c-ink-muted);}
+.days-badge--warn{background:var(--c-warning-tint);color:var(--c-warning);}
+.days-badge--hot{background:#FEF3C7;color:#92400E;}
+.days-badge--crit{background:var(--c-danger-tint);color:var(--c-danger);}
+
+/* Dispute reason chip */
+.reason-chip{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600;background:var(--c-neutral-tint);color:var(--c-ink-muted);}
+
+/* Blocking reason badge */
+.block-badge{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:700;white-space:nowrap;}
+.block-badge--clerk{background:var(--c-warning-tint);color:var(--c-warning);}
+.block-badge--parent{background:var(--c-info-tint);color:var(--c-info);}
+.block-badge--review{background:var(--c-success-tint);color:var(--c-success);}
+
+/* Status pills */
+.status{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:999px;font-size:11px;font-weight:700;border:1px solid transparent;}
+.status--ok{background:var(--c-success-tint);color:var(--c-success);border-color:#4F9A6C;}
+.status--warn{background:var(--c-warning-tint);color:var(--c-warning);border-color:var(--c-warning-bord);}
+.status--alert{background:var(--c-danger-tint);color:var(--c-danger);border-color:#B0625A;}
+.status--neutral{background:var(--c-neutral-tint);color:var(--c-ink-muted);border-color:var(--c-border-strong);}
+.status--info{background:var(--c-info-tint);color:var(--c-info);border-color:#5B9EC7;}
+
+/* Empty state */
+.empty-state{padding:40px;text-align:center;color:var(--c-ink-subtle);}
+.empty-state i{font-size:28px;margin-bottom:10px;opacity:.4;}
+
+/* History */
+.history-body{padding:24px;display:flex;flex-direction:column;gap:8px;}
+.history-row{display:flex;align-items:center;gap:16px;padding:12px 16px;background:var(--c-surface);border:1px solid var(--c-border);border-radius:8px;font-size:13px;}
+.history-row:hover{background:var(--c-surface-2);}
+.history-row__name{font-weight:600;color:var(--c-ink);flex:1;}
+.history-row__meta{color:var(--c-ink-subtle);font-size:12px;min-width:180px;}
+.history-row__user{color:var(--c-ink-subtle);font-size:12px;min-width:140px;}
+
+/* Buttons */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:6px;font-size:13px;font-weight:600;border:1px solid transparent;min-height:34px;cursor:pointer;text-decoration:none;}
+.btn--primary{background:var(--c-brand);color:#fff;border-color:var(--c-brand);}
+.btn--primary:hover{background:var(--c-brand-ink);}
+.btn--secondary{background:var(--c-surface);color:var(--c-ink);border-color:var(--c-border-strong);}
+.btn--secondary:hover{background:var(--c-surface-alt);}
+.btn--ghost{background:transparent;color:var(--c-brand);border:0;}
+.btn--ghost:hover{background:var(--c-brand-tint);}
+.btn--sm{padding:4px 10px;min-height:28px;font-size:12px;}
+
+/* Modals */
+.modal-backdrop{position:fixed;inset:0;background:rgba(15,37,70,0.48);z-index:100;display:flex;align-items:center;justify-content:center;padding:16px;}
+.modal-backdrop.is-hidden{display:none;}
+.modal{background:var(--c-surface);border-radius:14px;box-shadow:0 8px 28px rgba(15,37,70,0.18);width:100%;max-width:480px;display:flex;flex-direction:column;}
+.modal__h{padding:16px 24px;border-bottom:1px solid var(--c-border-2);display:flex;align-items:center;justify-content:space-between;}
+.modal__title{font-size:15px;font-weight:700;color:var(--c-ink);}
+.modal__close{width:32px;height:32px;border:none;background:transparent;border-radius:6px;display:flex;align-items:center;justify-content:center;color:var(--c-ink-muted);cursor:pointer;font-size:14px;}
+.modal__close:hover{background:var(--c-surface-alt);}
+.modal__b{padding:20px 24px;display:flex;flex-direction:column;gap:16px;}
+.modal__f{padding:12px 24px;border-top:1px solid var(--c-border-2);display:flex;justify-content:flex-end;gap:8px;}
+.modal-field{display:flex;flex-direction:column;gap:6px;}
+.modal-label{font-size:12px;font-weight:600;color:var(--c-ink-muted);}
+.modal-select{padding:8px 12px;border:1px solid var(--c-border-strong);border-radius:6px;font-size:13px;background:var(--c-surface);color:var(--c-ink);width:100%;}
+.modal-summary{background:var(--c-surface-2);border:1px solid var(--c-border-2);border-radius:8px;padding:12px 14px;font-size:12px;color:var(--c-ink-muted);display:flex;flex-direction:column;gap:4px;}
+.modal-summary__row{display:flex;justify-content:space-between;}
+.modal-summary__val{font-weight:600;color:var(--c-ink);}
+.modal-date-row{display:flex;align-items:center;gap:8px;}
+
+/* Format toggle in export modal */
+.format-options{display:flex;gap:8px;}
+.format-option{flex:1;border:2px solid var(--c-border);border-radius:8px;padding:10px 12px;cursor:pointer;text-align:center;background:var(--c-surface);transition:border-color .15s,background .15s;}
+.format-option:hover{border-color:var(--c-brand);}
+.format-option.is-selected{border-color:var(--c-brand);background:var(--c-brand-tint);}
+.format-option__icon{font-size:18px;margin-bottom:4px;}
+.format-option__label{font-size:12px;font-weight:700;color:var(--c-ink);}
+.format-option__sub{font-size:10px;color:var(--c-ink-subtle);}
+
+/* Preview Modal */
+.modal--preview{max-width:960px;max-height:92vh;}
+.modal--preview .modal__b{overflow-y:auto;flex:1;}
+.preview-meta{display:flex;gap:24px;font-size:12px;color:var(--c-ink-muted);padding:12px 0 0;flex-wrap:wrap;}
+.preview-meta span{display:flex;align-items:center;gap:5px;}
+.preview-meta strong{color:var(--c-ink);}
+
+/* Preview doc-style table */
+.data-table{width:100%;border-collapse:collapse;font-size:12px;}
+.data-table thead th{padding:8px 10px;text-align:left;font-size:11px;font-weight:700;color:#fff;background:#1a1a1a;text-transform:uppercase;letter-spacing:0.05em;border-right:1px solid rgba(255,255,255,0.2);}
+.data-table tbody tr{border-bottom:1px solid #eee;}
+.data-table tbody tr:nth-child(even){background:#f8f8f8;}
+.data-table td{padding:8px 10px;border-right:1px solid #e0e0e0;}
+.preview-kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px;}
+.preview-kpi{background:var(--c-surface-2);border:1px solid var(--c-border-2);border-radius:8px;padding:12px 14px;}
+.preview-kpi__label{font-size:10px;font-weight:700;color:var(--c-ink-muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px;}
+.preview-kpi__value{font-size:22px;font-weight:800;color:var(--c-ink);line-height:1.1;}
+.preview-kpi__sub{font-size:11px;color:var(--c-ink-subtle);margin-top:2px;}
+</style>
+</head>
+<body>
+
+<div class="wf-banner">
+  <div class="wf-banner__left"><i class="fa-solid fa-triangle-exclamation"></i><strong>Wireframe / Prototype</strong> — Not for distribution. Data is fictitious.</div>
+  <div class="wf-banner__right"><a href="#">Feedback</a><a href="#">Docs</a></div>
+</div>
+
+<div class="app">
+  <!-- ===== SIDEBAR ===== -->
+  <nav class="sidebar">
+    <div class="sidebar__logo">
+      <div class="sidebar__logo-mark">CT</div>
+      <div><div class="sidebar__logo-text">ClassTrack</div><div class="sidebar__logo-sub">Board Admin Console</div></div>
+    </div>
+    <div class="sidebar__role-badge">Board Administrator</div><nav class="sidebar__section"><div class="sidebar__section-label">Overview</div><a href="dashboard.html" class="nav-item"><span class="nav-icon"><i class="fa-solid fa-gauge-high"></i></span>Dashboard</a></nav><nav class="sidebar__section"><div class="sidebar__section-label">Management</div><a href="schools.html" class="nav-item"><span class="nav-icon"><i class="fa-solid fa-school"></i></span>Schools<span class="nav-badge nav-badge--neutral">8</span></a><a href="users.html" class="nav-item"><span class="nav-icon"><i class="fa-solid fa-users-gear"></i></span>Users<span class="nav-badge nav-badge--neutral">247</span></a><a href="registered-contacts.html" class="nav-item"><span class="nav-icon"><i class="fa-solid fa-id-badge"></i></span>Registered Contacts<span class="nav-badge nav-badge--neutral">14</span></a></nav><nav class="sidebar__section"><div class="sidebar__section-label">Reports</div><a href="attendance-summary-v3.html" class="nav-item"><span class="nav-icon"><i class="fa-solid fa-chart-bar"></i></span>Attendance Summary</a><a href="absence-trends-v2.html" class="nav-item"><span class="nav-icon"><i class="fa-solid fa-chart-line"></i></span>Absence Trends</a><a href="chronic-absenteeism-v2.html" class="nav-item"><span class="nav-icon"><i class="fa-solid fa-user-clock"></i></span>Chronic Absenteeism</a><a href="unjustified-absences-v2.html" class="nav-item"><span class="nav-icon"><i class="fa-solid fa-circle-exclamation"></i></span>Unjustified Absences</a><a href="submission-compliance-v2.html" class="nav-item"><span class="nav-icon"><i class="fa-solid fa-clipboard-check"></i></span>Submission Compliance</a><a href="open-disputes-v2.html" class="nav-item is-active" aria-current="page"><span class="nav-icon"><i class="fa-solid fa-scale-balanced"></i></span>Open Disputes</a><a href="grade-threshold-v2.html" class="nav-item"><span class="nav-icon"><i class="fa-solid fa-graduation-cap"></i></span>Grade Threshold</a></nav><nav class="sidebar__section"><div class="sidebar__section-label">System</div><a href="aspen.html" class="nav-item"><span class="nav-icon"><i class="fa-solid fa-arrows-rotate"></i></span>Aspen Sync<span class="nav-badge nav-badge--warn">1</span></a><a href="configuration.html" class="nav-item"><span class="nav-icon"><i class="fa-solid fa-calendar-days"></i></span>Calendar &amp; Periods</a><a href="notifications.html" class="nav-item"><span class="nav-icon"><i class="fa-solid fa-bell-slash"></i></span>Notifications</a></nav><div class="sidebar__user">
+      <div class="avatar">MA</div>
+      <div><div class="sidebar__user-name">M. Archambault</div><div class="sidebar__user-role">Board Administrator</div></div>
+    </div>
+  </nav>
+
+  <!-- ===== MAIN ===== -->
+  <main class="main">
+    <!-- Topbar -->
+    <div class="topbar">
+      <div class="topbar__left">
+        <div class="topbar__title">Open Disputes</div>
+        <div class="topbar__breadcrumb">Reports &rsaquo; <span>Open Disputes</span></div>
+      </div>
+      <div class="topbar__scope"><i class="fa-solid fa-building-columns"></i> Board-wide &mdash; All Schools</div>
+      <div class="topbar__actions">
+        <div class="lang-toggle"><button aria-pressed="true">EN</button><button aria-pressed="false">FR</button></div>
+        <button class="icon-btn"><i class="fa-solid fa-bell"></i><span class="icon-btn__count">3</span></button>
+        <div class="user-chip"><div class="avatar" style="width:28px;height:28px;font-size:11px;">MA</div>M. Archambault</div>
+      </div>
+    </div>
+
+    <!-- Page Header -->
+    <div class="page-header">
+      <div class="page-header__left">
+        <div class="live-dot"></div>
+        <div class="page-header__title">Open Disputes</div>
+        <div class="page-header__meta">
+          <span>Term 1 &middot; 2025&ndash;26</span>
+          <span class="page-header__meta-sep">|</span>
+          <span><i class="fa-solid fa-rotate" style="font-size:10px;"></i> Synced Jun 26, 2026 &middot; 9:00 AM</span>
+        </div>
+      </div>
+      <div class="page-header__actions">
+        <button class="btn btn--secondary btn--sm" onclick="switchTab('history')"><i class="fa-solid fa-clock-rotate-left"></i> History (5)</button>
+        <button class="btn btn--primary btn--sm" onclick="openExportModal()"><i class="fa-solid fa-file-export"></i> Export Report</button>
+      </div>
+    </div>
+
+    <!-- Attention Bar -->
+    <div class="attention-bar attention-bar--danger">
+      <div class="attn-icon attn-icon--danger"><i class="fa-solid fa-triangle-exclamation"></i></div>
+      <div class="attn-text">8 disputes awaiting clerk action &mdash; &Eacute;cole Saint-Michel has 14 open disputes including a case open 24 days.</div>
+      <div class="attn-chips">
+        <span class="attn-chip" style="background:#E6F4EC;color:#1F7A3F;border-color:#4F9A6C;" onclick="filterBySchool('Notre-Dame')">
+          <span class="school-dot" style="background:#1F7A3F;"></span>Notre-Dame <strong>8</strong>
+        </span>
+        <span class="attn-chip" style="background:#E0EFF7;color:#0E5C8A;border-color:#5B9EC7;" onclick="filterBySchool('Sainte-Croix')">
+          <span class="school-dot" style="background:#0E5C8A;"></span>Sainte-Croix <strong>5</strong>
+        </span>
+        <span class="attn-chip is-selected" style="background:#FCE9E7;color:#B42318;border-color:#B0625A;" onclick="filterBySchool('Saint-Michel')">
+          <span class="school-dot" style="background:#9A4708;"></span>Saint-Michel <strong>14</strong>
+        </span>
+        <span class="attn-chip" style="background:#EEEAFE;color:#3F22A6;border-color:#8B72D4;" onclick="filterBySchool('Saint-Luc')">
+          <span class="school-dot" style="background:#3F22A6;"></span>Saint-Luc <strong>3</strong>
+        </span>
+      </div>
+    </div>
+
+    <!-- KPI Row -->
+    <div class="kpi-row">
+      <div class="kpi-card kpi-card--danger">
+        <div class="kpi-card__label">Total Open Disputes</div>
+        <div class="kpi-card__value" style="color:var(--c-danger);">30</div>
+        <div class="kpi-card__sub">across all 4 schools</div>
+        <div class="kpi-card__trend kpi-card__trend--up-bad"><i class="fa-solid fa-arrow-up"></i> +2 vs last week</div>
+      </div>
+      <div class="kpi-card kpi-card--warning">
+        <div class="kpi-card__label">Awaiting Clerk Review</div>
+        <div class="kpi-card__value" style="color:#D97706;">8</div>
+        <div class="kpi-card__sub">clerk has not yet acted</div>
+        <div class="kpi-card__trend kpi-card__trend--up-bad"><i class="fa-solid fa-arrow-up"></i> +3 vs last week</div>
+      </div>
+      <div class="kpi-card kpi-card--info">
+        <div class="kpi-card__label">No Parent Response</div>
+        <div class="kpi-card__value" style="color:var(--c-info);">9</div>
+        <div class="kpi-card__sub">parent not replying</div>
+        <div class="kpi-card__trend kpi-card__trend--down-good"><i class="fa-solid fa-arrow-down"></i> &minus;1 vs last week</div>
+      </div>
+      <div class="kpi-card kpi-card--neutral">
+        <div class="kpi-card__label">Under Review</div>
+        <div class="kpi-card__value" style="color:var(--c-ink);">13</div>
+        <div class="kpi-card__sub">clerk actively processing</div>
+        <div class="kpi-card__trend kpi-card__trend--down-good"><i class="fa-solid fa-arrow-down"></i> &minus;2 vs last week</div>
+      </div>
+      <div class="kpi-card kpi-card--danger">
+        <div class="kpi-card__label">Oldest Open</div>
+        <div class="kpi-card__value" style="color:var(--c-danger);">24<span style="font-size:14px;font-weight:600;"> days</span></div>
+        <div class="kpi-card__sub">Claire Fontaine, Saint-Michel</div>
+        <div class="kpi-card__trend kpi-card__trend--up-bad"><i class="fa-solid fa-arrow-up"></i> +3d vs last week</div>
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="report-tabs">
+      <div class="report-tab is-active" id="tab-live" onclick="switchTab('live')">Live Data</div>
+      <div class="report-tab" id="tab-history" onclick="switchTab('history')">History (5)</div>
+    </div>
+
+    <!-- ===== LIVE DATA PANEL ===== -->
+    <div class="tab-panel is-active" id="panel-live">
+      <div class="controls-row">
+        <div class="search-wrap">
+          <i class="fa-solid fa-magnifying-glass"></i>
+          <input class="search-input" type="text" id="search-input" placeholder="Search student or subject…" oninput="applyFilters()">
+        </div>
+        <select class="filter-select" id="filter-school" onchange="applyFilters()">
+          <option value="all">All Schools</option>
+          <option value="Notre-Dame">&#201;cole Notre-Dame</option>
+          <option value="Sainte-Croix">&#201;cole Sainte-Croix</option>
+          <option value="Saint-Michel">&#201;cole Saint-Michel</option>
+          <option value="Saint-Luc">&#201;cole Saint-Luc</option>
+        </select>
+        <div class="controls-sep"></div>
+        <div class="toggle-group">
+          <button class="toggle-btn is-active" data-filter="all" onclick="setStatusFilter('all',this)">All <span class="tgl-count">30</span></button>
+          <button class="toggle-btn" data-filter="clerk" onclick="setStatusFilter('clerk',this)"><i class="fa-solid fa-hourglass-half" style="font-size:10px;"></i> Awaiting Clerk <span class="tgl-count">8</span></button>
+          <button class="toggle-btn" data-filter="parent" onclick="setStatusFilter('parent',this)"><i class="fa-solid fa-clock" style="font-size:10px;"></i> No Parent Response <span class="tgl-count">9</span></button>
+          <button class="toggle-btn" data-filter="review" onclick="setStatusFilter('review',this)">Under Review <span class="tgl-count">13</span></button>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table class="portal-table" id="disputes-table">
+          <thead>
+            <tr>
+              <th onclick="sortBy('student')">Student</th>
+              <th class="no-sort">School</th>
+              <th onclick="sortBy('grade')">Grade</th>
+              <th onclick="sortBy('dateSort')">Absence Date</th>
+              <th class="no-sort">Subject</th>
+              <th onclick="sortBy('daysOpen')" id="th-daysOpen" class="sort-desc">Days Open</th>
+              <th class="no-sort">Dispute Reason</th>
+              <th class="no-sort">Blocking Reason</th>
+              <th class="no-sort">Disputed By</th>
+            </tr>
+          </thead>
+          <tbody id="disputes-tbody"></tbody>
+        </table>
+        <div class="empty-state" id="empty-state" style="display:none;">
+          <div><i class="fa-solid fa-filter-circle-xmark"></i></div>
+          <div style="font-weight:600;margin-top:4px;">No disputes match your filters</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== HISTORY PANEL ===== -->
+    <div class="tab-panel" id="panel-history">
+      <div class="history-body" id="history-tbody">
+        <!-- populated by JS -->
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- ===== EXPORT MODAL ===== -->
+<div class="modal-backdrop is-hidden" id="export-modal" onclick="handleBackdropClick(event,'export-modal')">
+  <div class="modal">
+    <div class="modal__h">
+      <div class="modal__title">Export Report &mdash; Open Disputes</div>
+      <button class="modal__close" onclick="closeExportModal()"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="modal__b">
+      <div class="modal-field">
+        <div class="modal-label">SCHOOL SCOPE</div>
+        <select class="modal-select" id="exp-school">
+          <option value="all">All Schools (Board-wide)</option>
+          <option value="Notre-Dame">&#201;cole Notre-Dame</option>
+          <option value="Sainte-Croix">&#201;cole Sainte-Croix</option>
+          <option value="Saint-Michel">&#201;cole Saint-Michel</option>
+          <option value="Saint-Luc">&#201;cole Saint-Luc</option>
+        </select>
+      </div>
+      <div class="modal-field">
+        <div class="modal-label">TERM</div>
+        <select class="modal-select" id="exp-term">
+          <option>Term 1 &middot; 2025&ndash;26</option>
+          <option>Term 2 &middot; 2024&ndash;25</option>
+        </select>
+      </div>
+      <div class="modal-field">
+        <div class="modal-label">DATE RANGE</div>
+        <div class="modal-date-row">
+          <input type="date" class="modal-select" id="exp-from" value="2026-06-01" style="flex:1;">
+          <span style="color:var(--c-ink-muted);font-size:12px;">to</span>
+          <input type="date" class="modal-select" id="exp-to" value="2026-06-26" style="flex:1;">
+        </div>
+      </div>
+      <div class="modal-field">
+        <div class="modal-label">FORMAT</div>
+        <div class="format-options">
+          <div class="format-option is-selected" onclick="selectFormat(this)">
+            <div class="format-option__icon"><i class="fa-solid fa-file-pdf" style="color:#E53E3E;"></i></div>
+            <div class="format-option__label">PDF</div>
+            <div class="format-option__sub">Printable report</div>
+          </div>
+          <div class="format-option" onclick="selectFormat(this)">
+            <div class="format-option__icon"><i class="fa-solid fa-file-csv" style="color:#38A169;"></i></div>
+            <div class="format-option__label">CSV</div>
+            <div class="format-option__sub">For spreadsheet analysis</div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-summary">
+        <div class="modal-summary__row"><span>Report</span><span class="modal-summary__val">Open Disputes</span></div>
+        <div class="modal-summary__row"><span>Scope</span><span class="modal-summary__val">Board-wide</span></div>
+        <div class="modal-summary__row"><span>Term</span><span class="modal-summary__val">Term 1 &middot; 2025&ndash;26</span></div>
+        <div class="modal-summary__row"><span>Open disputes included</span><span class="modal-summary__val">30</span></div>
+      </div>
+    </div>
+    <div class="modal__f">
+      <button class="btn btn--secondary" onclick="closeExportModal()">Cancel</button>
+      <button class="btn btn--primary" onclick="generateReport()"><i class="fa-solid fa-file-export"></i> Export</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== PREVIEW MODAL ===== -->
+<div class="modal-backdrop is-hidden" id="preview-modal" onclick="handleBackdropClick(event,'preview-modal')">
+  <div class="modal modal--preview">
+    <div class="modal__h">
+      <div class="modal__title">Open Disputes Report</div>
+      <button class="modal__close" onclick="hidePreview()"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="modal__b">
+      <div id="preview-meta-bar" class="preview-meta"></div>
+      <div id="preview-content" style="margin-top:16px;"></div>
+    </div>
+    <div class="modal__f">
+      <button class="btn btn--secondary" onclick="hidePreview()">Close</button>
+      <button class="btn btn--primary"><i class="fa-solid fa-download"></i> Download PDF</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* =====================================================================
+   DATA
+   ===================================================================== */
+var SCHOOL_META = {
+  'Notre-Dame': {full:'École Notre-Dame', color:'#1F7A3F', bg:'#E6F4EC', resolved:12},
+  'Sainte-Croix': {full:'École Sainte-Croix', color:'#0E5C8A', bg:'#E0EFF7', resolved:9},
+  'Saint-Michel': {full:'École Saint-Michel', color:'#9A4708', bg:'#FEF3C7', resolved:8},
+  'Saint-Luc': {full:'École Saint-Luc', color:'#3F22A6', bg:'#EEEAFE', resolved:11}
+};
+
+/* blockReason values: 'Awaiting clerk review' | 'Under review by clerk' | 'No parent response' | 'Escalated to admin' */
+/* disputeReason values: 'Claims student attended' | 'Has medical documentation' | 'Suspected clerical error' | 'Schedule conflict' */
+var _allDisputes = [
+  /* ---- Notre-Dame (8) ---- */
+  {school:'Notre-Dame',student:'Lena Bergeron',id:'STD-2294',grade:'Gr 11',absDate:'Jun 1, 2026',dateSort:'2026-06-01',subject:'French Language Arts',daysOpen:18,disputedBy:'Parent',status:'Pending Admin',disputeReason:'Has medical documentation',blockReason:'Awaiting clerk review'},
+  {school:'Notre-Dame',student:'Marcus Okonkwo',id:'STD-1882',grade:'Gr 10',absDate:'Jun 6, 2026',dateSort:'2026-06-06',subject:'Geography',daysOpen:13,disputedBy:'Parent',status:'Under Review',disputeReason:'Claims student attended',blockReason:'Under review by clerk'},
+  {school:'Notre-Dame',student:'Sophie Lafortune',id:'STD-3112',grade:'Gr 10',absDate:'Jun 10, 2026',dateSort:'2026-06-10',subject:'Mathematics',daysOpen:9,disputedBy:'Parent',status:'Pending Parent',disputeReason:'Has medical documentation',blockReason:'No parent response'},
+  {school:'Notre-Dame',student:'Aisha Ndiaye',id:'STD-3340',grade:'Gr 9',absDate:'Jun 11, 2026',dateSort:'2026-06-11',subject:'History',daysOpen:8,disputedBy:'Student',status:'Under Review',disputeReason:'Schedule conflict',blockReason:'Under review by clerk'},
+  {school:'Notre-Dame',student:'Lena Bergeron',id:'STD-2294',grade:'Gr 11',absDate:'Jun 13, 2026',dateSort:'2026-06-13',subject:'Physical Education',daysOpen:6,disputedBy:'Parent',status:'Under Review',disputeReason:'Suspected clerical error',blockReason:'Under review by clerk'},
+  {school:'Notre-Dame',student:'Emile Beaumont',id:'STD-1445',grade:'Gr 11',absDate:'Jun 14, 2026',dateSort:'2026-06-14',subject:'Chemistry',daysOpen:5,disputedBy:'Parent',status:'Pending Parent',disputeReason:'Has medical documentation',blockReason:'No parent response'},
+  {school:'Notre-Dame',student:'Marcus Okonkwo',id:'STD-1882',grade:'Gr 10',absDate:'Jun 16, 2026',dateSort:'2026-06-16',subject:'English',daysOpen:3,disputedBy:'Parent',status:'Under Review',disputeReason:'Claims student attended',blockReason:'Under review by clerk'},
+  {school:'Notre-Dame',student:'Sophie Lafortune',id:'STD-3112',grade:'Gr 10',absDate:'Jun 17, 2026',dateSort:'2026-06-17',subject:'Biology',daysOpen:2,disputedBy:'Parent',status:'Pending Parent',disputeReason:'Has medical documentation',blockReason:'No parent response'},
+  /* ---- Sainte-Croix (5) ---- */
+  {school:'Sainte-Croix',student:'Olivier Tremblay',id:'STD-5521',grade:'Gr 12',absDate:'Jun 8, 2026',dateSort:'2026-06-08',subject:'French Literature',daysOpen:11,disputedBy:'Parent',status:'Pending Admin',disputeReason:'Claims student attended',blockReason:'Awaiting clerk review'},
+  {school:'Sainte-Croix',student:'Maya Cote',id:'STD-5678',grade:'Gr 9',absDate:'Jun 11, 2026',dateSort:'2026-06-11',subject:'Mathematics',daysOpen:8,disputedBy:'Parent',status:'Under Review',disputeReason:'Has medical documentation',blockReason:'Under review by clerk'},
+  {school:'Sainte-Croix',student:'Olivier Tremblay',id:'STD-5521',grade:'Gr 12',absDate:'Jun 12, 2026',dateSort:'2026-06-12',subject:'History',daysOpen:7,disputedBy:'Parent',status:'Pending Admin',disputeReason:'Suspected clerical error',blockReason:'Awaiting clerk review'},
+  {school:'Sainte-Croix',student:'Maya Cote',id:'STD-5678',grade:'Gr 9',absDate:'Jun 15, 2026',dateSort:'2026-06-15',subject:'Physical Education',daysOpen:4,disputedBy:'Student',status:'Under Review',disputeReason:'Schedule conflict',blockReason:'Under review by clerk'},
+  {school:'Sainte-Croix',student:'Noah Bergeron',id:'STD-5902',grade:'Gr 10',absDate:'Jun 17, 2026',dateSort:'2026-06-17',subject:'Chemistry',daysOpen:2,disputedBy:'Parent',status:'Pending Parent',disputeReason:'Has medical documentation',blockReason:'No parent response'},
+  /* ---- Saint-Michel (14) ---- */
+  {school:'Saint-Michel',student:'Claire Fontaine',id:'STD-7312',grade:'Gr 11',absDate:'May 26, 2026',dateSort:'2026-05-26',subject:'Mathematics',daysOpen:24,disputedBy:'Parent',status:'Pending Admin',disputeReason:'Claims student attended',blockReason:'Awaiting clerk review'},
+  {school:'Saint-Michel',student:'Leo Okonkwo',id:'STD-7489',grade:'Gr 9',absDate:'May 28, 2026',dateSort:'2026-05-28',subject:'English',daysOpen:22,disputedBy:'Parent',status:'Pending Admin',disputeReason:'Has medical documentation',blockReason:'Awaiting clerk review'},
+  {school:'Saint-Michel',student:'Claire Fontaine',id:'STD-7312',grade:'Gr 11',absDate:'Jun 3, 2026',dateSort:'2026-06-03',subject:'French Language Arts',daysOpen:16,disputedBy:'Parent',status:'Pending Admin',disputeReason:'Suspected clerical error',blockReason:'Awaiting clerk review'},
+  {school:'Saint-Michel',student:'Leo Okonkwo',id:'STD-7489',grade:'Gr 9',absDate:'Jun 5, 2026',dateSort:'2026-06-05',subject:'Geography',daysOpen:14,disputedBy:'Student',status:'Under Review',disputeReason:'Claims student attended',blockReason:'Under review by clerk'},
+  {school:'Saint-Michel',student:'Fatima Diallo',id:'STD-7623',grade:'Gr 10',absDate:'Jun 8, 2026',dateSort:'2026-06-08',subject:'History',daysOpen:11,disputedBy:'Parent',status:'Pending Admin',disputeReason:'Has medical documentation',blockReason:'Awaiting clerk review'},
+  {school:'Saint-Michel',student:'Claire Fontaine',id:'STD-7312',grade:'Gr 11',absDate:'Jun 10, 2026',dateSort:'2026-06-10',subject:'Biology',daysOpen:9,disputedBy:'Parent',status:'Under Review',disputeReason:'Claims student attended',blockReason:'Under review by clerk'},
+  {school:'Saint-Michel',student:'Fatima Diallo',id:'STD-7623',grade:'Gr 10',absDate:'Jun 12, 2026',dateSort:'2026-06-12',subject:'Chemistry',daysOpen:7,disputedBy:'Parent',status:'Pending Parent',disputeReason:'Has medical documentation',blockReason:'No parent response'},
+  {school:'Saint-Michel',student:'Yusuf Mensah',id:'STD-7801',grade:'Gr 12',absDate:'Jun 14, 2026',dateSort:'2026-06-14',subject:'Physics',daysOpen:5,disputedBy:'Parent',status:'Under Review',disputeReason:'Schedule conflict',blockReason:'Under review by clerk'},
+  {school:'Saint-Michel',student:'Leo Okonkwo',id:'STD-7489',grade:'Gr 9',absDate:'Jun 15, 2026',dateSort:'2026-06-15',subject:'Mathematics',daysOpen:4,disputedBy:'Parent',status:'Pending Parent',disputeReason:'Has medical documentation',blockReason:'No parent response'},
+  {school:'Saint-Michel',student:'Yusuf Mensah',id:'STD-7801',grade:'Gr 12',absDate:'Jun 16, 2026',dateSort:'2026-06-16',subject:'Art',daysOpen:3,disputedBy:'Parent',status:'Under Review',disputeReason:'Suspected clerical error',blockReason:'Under review by clerk'},
+  {school:'Saint-Michel',student:'Fatima Diallo',id:'STD-7623',grade:'Gr 10',absDate:'Jun 17, 2026',dateSort:'2026-06-17',subject:'Physical Education',daysOpen:2,disputedBy:'Parent',status:'Pending Parent',disputeReason:'Has medical documentation',blockReason:'No parent response'},
+  {school:'Saint-Michel',student:'Yusuf Mensah',id:'STD-7801',grade:'Gr 12',absDate:'Jun 18, 2026',dateSort:'2026-06-18',subject:'History',daysOpen:1,disputedBy:'Student',status:'Under Review',disputeReason:'Claims student attended',blockReason:'Under review by clerk'},
+  {school:'Saint-Michel',student:'Claire Fontaine',id:'STD-7312',grade:'Gr 11',absDate:'Jun 18, 2026',dateSort:'2026-06-18',subject:'Mathematics',daysOpen:1,disputedBy:'Parent',status:'Pending Parent',disputeReason:'Has medical documentation',blockReason:'No parent response'},
+  {school:'Saint-Michel',student:'Leo Okonkwo',id:'STD-7489',grade:'Gr 9',absDate:'Jun 18, 2026',dateSort:'2026-06-18',subject:'Geography',daysOpen:1,disputedBy:'Parent',status:'Under Review',disputeReason:'Claims student attended',blockReason:'Under review by clerk'},
+  /* ---- Saint-Luc (3) ---- */
+  {school:'Saint-Luc',student:'Marie-Claire Potvin',id:'STD-9145',grade:'Gr 12',absDate:'Jun 11, 2026',dateSort:'2026-06-11',subject:'Mathematics',daysOpen:8,disputedBy:'Parent',status:'Under Review',disputeReason:'Has medical documentation',blockReason:'Under review by clerk'},
+  {school:'Saint-Luc',student:'Theo Lacroix',id:'STD-9287',grade:'Gr 10',absDate:'Jun 14, 2026',dateSort:'2026-06-14',subject:'History',daysOpen:5,disputedBy:'Parent',status:'Pending Admin',disputeReason:'Suspected clerical error',blockReason:'Awaiting clerk review'},
+  {school:'Saint-Luc',student:'Marie-Claire Potvin',id:'STD-9145',grade:'Gr 12',absDate:'Jun 17, 2026',dateSort:'2026-06-17',subject:'Chemistry',daysOpen:2,disputedBy:'Parent',status:'Pending Parent',disputeReason:'Has medical documentation',blockReason:'No parent response'}
+];
+
+/* =====================================================================
+   STATE
+   ===================================================================== */
+var _statusFilter = 'all';
+var _sortCol = 'daysOpen';
+var _sortDir = -1; /* -1 = desc, 1 = asc */
+
+/* =====================================================================
+   FILTER + RENDER
+   ===================================================================== */
+function applyFilters(){
+  var q = document.getElementById('search-input').value.trim().toLowerCase();
+  var school = document.getElementById('filter-school').value;
+
+  var rows = _allDisputes.filter(function(d){
+    if(school !== 'all' && d.school !== school) return false;
+    if(_statusFilter === 'clerk' && d.blockReason !== 'Awaiting clerk review') return false;
+    if(_statusFilter === 'parent' && d.blockReason !== 'No parent response') return false;
+    if(_statusFilter === 'review' && d.blockReason !== 'Under review by clerk') return false;
+    if(q){
+      var hay = (d.student+' '+d.id+' '+d.subject+' '+d.disputeReason+' '+d.blockReason).toLowerCase();
+      if(hay.indexOf(q) === -1) return false;
+    }
+    return true;
+  });
+
+  /* sort */
+  rows.sort(function(a,b){
+    var av = a[_sortCol], bv = b[_sortCol];
+    if(typeof av === 'string') return av.localeCompare(bv) * _sortDir;
+    return (av - bv) * _sortDir;
+  });
+
+  renderRows(rows);
+}
+
+function renderRows(rows){
+  var tbody = document.getElementById('disputes-tbody');
+  var empty = document.getElementById('empty-state');
+  if(!rows.length){
+    tbody.innerHTML = '';
+    empty.style.display = '';
+    return;
+  }
+  empty.style.display = 'none';
+
+  var html = '';
+  for(var i=0; i<rows.length; i++){
+    var d = rows[i];
+    var sm = SCHOOL_META[d.school];
+    html += '<tr>';
+    /* Student */
+    html += '<td class="cell-student"><div class="cell-student__name">'+d.student+'</div><div class="cell-student__id">'+d.id+' &middot; '+d.grade+'</div></td>';
+    /* School */
+    html += '<td style="white-space:nowrap;"><span class="school-dot" style="background:'+sm.color+';"></span><span style="font-weight:600;font-size:12px;">'+d.school+'</span></td>';
+    /* Grade */
+    html += '<td>'+d.grade+'</td>';
+    /* Abs Date */
+    html += '<td style="white-space:nowrap;">'+d.absDate+'</td>';
+    /* Subject */
+    html += '<td>'+d.subject+'</td>';
+    /* Days Open */
+    html += '<td>'+daysBadge(d.daysOpen)+'</td>';
+    /* Dispute Reason */
+    html += '<td>'+disputeReasonChip(d.disputeReason)+'</td>';
+    /* Blocking Reason */
+    html += '<td>'+blockBadge(d.blockReason)+'</td>';
+    /* Disputed By */
+    html += '<td><span style="font-size:12px;color:var(--c-ink-muted);">'+d.disputedBy+'</span></td>';
+    html += '</tr>';
+  }
+  tbody.innerHTML = html;
+}
+
+function daysBadge(n){
+  var cls, icon;
+  if(n >= 14){ cls='days-badge--crit'; icon='<i class="fa-solid fa-circle-exclamation" style="font-size:9px;"></i> '; }
+  else if(n >= 8){ cls='days-badge--hot'; icon='<i class="fa-solid fa-fire" style="font-size:9px;"></i> '; }
+  else if(n >= 4){ cls='days-badge--warn'; icon=''; }
+  else { cls='days-badge--ok'; icon=''; }
+  return '<span class="days-badge '+cls+'">'+icon+n+'d</span>';
+}
+
+function disputeReasonChip(r){
+  var icons = {
+    'Claims student attended':'<i class="fa-solid fa-user-check" style="font-size:9px;"></i> ',
+    'Has medical documentation':'<i class="fa-solid fa-file-medical" style="font-size:9px;"></i> ',
+    'Suspected clerical error':'<i class="fa-solid fa-keyboard" style="font-size:9px;"></i> ',
+    'Schedule conflict':'<i class="fa-solid fa-calendar-xmark" style="font-size:9px;"></i> '
+  };
+  return '<span class="reason-chip">'+(icons[r]||'')+r+'</span>';
+}
+
+function blockBadge(r){
+  var map = {
+    'Awaiting clerk review':   {cls:'block-badge--clerk',    icon:'fa-hourglass-half'},
+    'Under review by clerk':   {cls:'block-badge--review',   icon:'fa-magnifying-glass'},
+    'No parent response':      {cls:'block-badge--parent',   icon:'fa-comment-slash'}
+  };
+  var m = map[r] || {cls:'block-badge--review', icon:'fa-circle-info'};
+  return '<span class="block-badge '+m.cls+'"><i class="fa-solid '+m.icon+'" style="font-size:9px;"></i> '+r+'</span>';
+}
+
+/* =====================================================================
+   SORTING
+   ===================================================================== */
+function sortBy(col){
+  if(_sortCol === col){
+    _sortDir *= -1;
+  } else {
+    _sortCol = col;
+    _sortDir = col === 'daysOpen' ? -1 : 1;
+  }
+  /* update header classes */
+  var ths = document.querySelectorAll('.portal-table thead th');
+  var colMap = ['student','','grade','dateSort','','daysOpen','','',''];
+  ths.forEach(function(th,i){
+    th.classList.remove('sort-asc','sort-desc');
+    if(colMap[i] === _sortCol){
+      th.classList.add(_sortDir === 1 ? 'sort-asc' : 'sort-desc');
+    }
+  });
+  applyFilters();
+}
+
+/* =====================================================================
+   STATUS FILTER
+   ===================================================================== */
+function setStatusFilter(val, btn){
+  _statusFilter = val;
+  document.querySelectorAll('.toggle-btn').forEach(function(b){ b.classList.remove('is-active'); });
+  btn.classList.add('is-active');
+  applyFilters();
+}
+
+/* =====================================================================
+   SCHOOL FILTER (from attention chips)
+   ===================================================================== */
+function filterBySchool(school){
+  document.getElementById('filter-school').value = school;
+  _statusFilter = 'all';
+  document.querySelectorAll('.toggle-btn').forEach(function(b){ b.classList.remove('is-active'); });
+  document.querySelector('.toggle-btn[data-filter="all"]').classList.add('is-active');
+  applyFilters();
+  switchTab('live');
+}
+
+/* =====================================================================
+   TABS
+   ===================================================================== */
+function switchTab(tab){
+  document.getElementById('tab-live').classList.toggle('is-active', tab==='live');
+  document.getElementById('tab-history').classList.toggle('is-active', tab==='history');
+  document.getElementById('panel-live').classList.toggle('is-active', tab==='live');
+  document.getElementById('panel-history').classList.toggle('is-active', tab==='history');
+}
+
+/* =====================================================================
+   EXPORT MODAL
+   ===================================================================== */
+function openExportModal(){
+  document.getElementById('export-modal').classList.remove('is-hidden');
+}
+function closeExportModal(){
+  document.getElementById('export-modal').classList.add('is-hidden');
+}
+function selectFormat(el){
+  document.querySelectorAll('.format-option').forEach(function(f){ f.classList.remove('is-selected'); });
+  el.classList.add('is-selected');
+}
+function handleBackdropClick(e, id){
+  if(e.target === document.getElementById(id)) document.getElementById(id).classList.add('is-hidden');
+}
+document.addEventListener('keydown', function(e){ if(e.key==='Escape'){ closeExportModal(); hidePreview(); } });
+
+/* =====================================================================
+   HISTORY ROWS
+   ===================================================================== */
+var _historyRows = [
+  {label:'Open Disputes &middot; All Schools &middot; Jun 1 &ndash; Jun 19, 2026', date:'Jun 19, 2026', user:'M. Archambault', schoolKey:'all', term:'Term 1 \xb7 2025–26', dateFrom:'Jun 1, 2026', dateTo:'Jun 19, 2026'},
+  {label:'Open Disputes &middot; All Schools &middot; Jun 1 &ndash; Jun 12, 2026', date:'Jun 12, 2026', user:'M. Archambault', schoolKey:'all', term:'Term 1 \xb7 2025–26', dateFrom:'Jun 1, 2026', dateTo:'Jun 12, 2026'},
+  {label:'Open Disputes &middot; École Notre-Dame &middot; May 1 &ndash; Jun 5, 2026', date:'Jun 5, 2026', user:'M. Archambault', schoolKey:'Notre-Dame', term:'Term 1 \xb7 2025–26', dateFrom:'May 1, 2026', dateTo:'Jun 5, 2026'},
+  {label:'Open Disputes &middot; All Schools &middot; May 1 &ndash; May 29, 2026', date:'May 29, 2026', user:'M. Archambault', schoolKey:'all', term:'Term 1 \xb7 2025–26', dateFrom:'May 1, 2026', dateTo:'May 29, 2026'},
+  {label:'Open Disputes &middot; All Schools &middot; May 1 &ndash; May 22, 2026', date:'May 22, 2026', user:'M. Archambault', schoolKey:'all', term:'Term 1 \xb7 2025–26', dateFrom:'May 1, 2026', dateTo:'May 22, 2026'}
+];
+
+function renderHistory(){
+  var tbody = document.getElementById('history-tbody');
+  var html = '';
+  for(var i=0; i<_historyRows.length; i++){
+    var r = _historyRows[i];
+    html += '<div class="history-row">';
+    html += '<div class="history-row__name">'+r.label+'</div>';
+    html += '<div class="history-row__meta"><i class="fa-regular fa-calendar"></i> '+r.date+' &middot; 10:00 AM</div>';
+    html += '<div class="history-row__user"><i class="fa-solid fa-user"></i> '+r.user+'</div>';
+    html += '<button class="btn btn--secondary btn--sm" onclick="openHistoryRow('+i+')"><i class="fa-solid fa-eye"></i> View</button>';
+    html += '</div>';
+  }
+  tbody.innerHTML = html;
+}
+
+function openHistoryRow(idx){
+  var r = _historyRows[idx];
+  showPreview(r.schoolKey, r.term, r.date, r.dateFrom, r.dateTo);
+}
+
+/* =====================================================================
+   EXPORT → ADD TO HISTORY → OPEN PREVIEW
+   ===================================================================== */
+function generateReport(){
+  var school = document.getElementById('exp-school').value;
+  var term = document.getElementById('exp-term').value;
+  var from = document.getElementById('exp-from').value;
+  var to = document.getElementById('exp-to').value;
+
+  var schoolLabel = school === 'all' ? 'All Schools' : (SCHOOL_META[school] ? SCHOOL_META[school].full : school);
+  var fromLabel = formatDateLabel(from);
+  var toLabel = formatDateLabel(to);
+  var now = new Date();
+  var dateGenerated = now.toLocaleDateString('en-CA', {month:'short',day:'numeric',year:'numeric'});
+
+  /* prepend to history */
+  _historyRows.unshift({
+    label: 'Open Disputes &middot; '+schoolLabel+' &middot; '+fromLabel+' &ndash; '+toLabel,
+    date: dateGenerated,
+    user: 'M. Archambault',
+    schoolKey: school,
+    term: term,
+    dateFrom: fromLabel,
+    dateTo: toLabel
+  });
+  renderHistory();
+
+  /* update tab label */
+  document.getElementById('tab-history').textContent = 'History ('+_historyRows.length+')';
+
+  closeExportModal();
+  showPreview(school, term, dateGenerated, fromLabel, toLabel);
+}
+
+function formatDateLabel(iso){
+  if(!iso) return '';
+  var d = new Date(iso+'T00:00:00');
+  return d.toLocaleDateString('en-CA', {month:'short',day:'numeric',year:'numeric'});
+}
+
+/* =====================================================================
+   PREVIEW MODAL — doc-style report
+   ===================================================================== */
+function showPreview(schoolKey, term, dateGenerated, dateFrom, dateTo){
+  var label = schoolKey === 'all' ? 'All Schools (Board-wide)' : (SCHOOL_META[schoolKey] ? SCHOOL_META[schoolKey].full : schoolKey);
+  var rangeStr = (dateFrom && dateTo) ? dateFrom + ' &ndash; ' + dateTo : term;
+
+  document.getElementById('preview-meta-bar').innerHTML =
+    '<span><i class="fa-solid fa-building-columns"></i> <strong>'+label+'</strong></span>'+
+    '<span><i class="fa-regular fa-calendar"></i> <strong>'+rangeStr+'</strong></span>'+
+    '<span><i class="fa-solid fa-clock"></i> Generated <strong>'+dateGenerated+'</strong></span>';
+
+  document.getElementById('preview-content').innerHTML = renderReportContent(schoolKey);
+  document.getElementById('preview-modal').classList.remove('is-hidden');
+}
+
+function hidePreview(){
+  document.getElementById('preview-modal').classList.add('is-hidden');
+}
+
+function renderReportContent(scopeKey){
+  var isAll = (!scopeKey || scopeKey === 'all');
+  var content = '';
+
+  if(isAll){
+    /* Board-level KPIs */
+    var grandOpen=0, grandResolved=0, grandOldest=0, grandClerkPending=0;
+    var schools = ['Notre-Dame','Sainte-Croix','Saint-Michel','Saint-Luc'];
+    var schoolSummary = [];
+
+    schools.forEach(function(sk){
+      var sm = SCHOOL_META[sk];
+      var disputes = _allDisputes.filter(function(d){ return d.school===sk; });
+      var clerkPending=0, oldest=0, totalDays=0;
+      disputes.forEach(function(d){
+        if(d.blockReason==='Awaiting clerk review') clerkPending++;
+        if(d.daysOpen>oldest) oldest=d.daysOpen;
+        totalDays+=d.daysOpen;
+      });
+      var avgDays = disputes.length > 0 ? (totalDays/disputes.length).toFixed(1) : '0.0';
+      grandOpen += disputes.length;
+      grandResolved += sm.resolved;
+      grandClerkPending += clerkPending;
+      if(oldest > grandOldest) grandOldest = oldest;
+      schoolSummary.push({sk:sk, full:sm.full, color:sm.color, open:disputes.length, resolved:sm.resolved, clerkPending:clerkPending, oldest:oldest, avgDays:avgDays});
+    });
+
+    content += '<div class="preview-kpi-grid">';
+    content += '<div class="preview-kpi"><div class="preview-kpi__label">Total Open Disputes</div><div class="preview-kpi__value" style="color:var(--c-danger);">'+grandOpen+'</div><div class="preview-kpi__sub">board-wide</div></div>';
+    content += '<div class="preview-kpi"><div class="preview-kpi__label">Resolved This Period</div><div class="preview-kpi__value" style="color:var(--c-success);">'+grandResolved+'</div><div class="preview-kpi__sub">successfully closed</div></div>';
+    content += '<div class="preview-kpi"><div class="preview-kpi__label">Awaiting Clerk Review</div><div class="preview-kpi__value" style="color:var(--c-warning);">'+grandClerkPending+'</div><div class="preview-kpi__sub">clerk has not yet acted</div></div>';
+    content += '<div class="preview-kpi"><div class="preview-kpi__label">Oldest Open (days)</div><div class="preview-kpi__value" style="color:var(--c-danger);">'+grandOldest+'</div><div class="preview-kpi__sub">board-wide maximum</div></div>';
+    content += '</div>';
+
+    content += '<div style="background:var(--c-surface);border:1px solid var(--c-border);border-radius:10px;overflow:hidden;margin-bottom:20px;">';
+    content += '<div style="background:#1B5DAF;color:#fff;padding:11px 16px;font-weight:700;font-size:14px;">School Summary</div>';
+    content += '<div style="overflow-x:auto;"><table class="data-table"><thead><tr>';
+    content += '<th>School</th><th style="text-align:center;">Open</th><th style="text-align:center;">Avg. Days</th><th style="text-align:center;">Oldest</th><th style="text-align:center;">Resolved</th><th style="text-align:center;">Awaiting Clerk</th>';
+    content += '</tr></thead><tbody>';
+    schoolSummary.forEach(function(sc){
+      content += '<tr><td style="font-weight:600;"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:'+sc.color+';margin-right:6px;"></span>'+sc.full+'</td>';
+      content += '<td style="text-align:center;font-weight:700;color:var(--c-danger);">'+sc.open+'</td>';
+      content += '<td style="text-align:center;">'+sc.avgDays+'</td>';
+      content += '<td style="text-align:center;font-weight:'+(sc.oldest>=14?'700':'400')+';color:'+(sc.oldest>=14?'var(--c-danger)':'inherit')+';">'+sc.oldest+'</td>';
+      content += '<td style="text-align:center;color:var(--c-success);font-weight:600;">'+sc.resolved+'</td>';
+      content += '<td style="text-align:center;color:'+(sc.clerkPending>0?'var(--c-warning)':'inherit')+';font-weight:'+(sc.clerkPending>0?'700':'400')+';">'+sc.clerkPending+'</td></tr>';
+    });
+    content += '</tbody></table></div></div>';
+
+    /* Detail tables per school */
+    schools.forEach(function(sk){
+      content += renderSchoolDetailTable(sk);
+    });
+
+  } else {
+    /* Single school */
+    var sm = SCHOOL_META[scopeKey];
+    if(!sm){ return '<p style="color:#555;padding:20px;text-align:center;">No data available.</p>'; }
+    var disputes = _allDisputes.filter(function(d){ return d.school===scopeKey; });
+    var clerkPending=0, oldest=0, totalDays=0;
+    disputes.forEach(function(d){
+      if(d.blockReason==='Awaiting clerk review') clerkPending++;
+      if(d.daysOpen>oldest) oldest=d.daysOpen;
+      totalDays+=d.daysOpen;
+    });
+    var avgDays = disputes.length > 0 ? (totalDays/disputes.length).toFixed(1) : '0.0';
+
+    content += '<div class="preview-kpi-grid">';
+    content += '<div class="preview-kpi"><div class="preview-kpi__label">Open Disputes</div><div class="preview-kpi__value" style="color:var(--c-danger);">'+disputes.length+'</div><div class="preview-kpi__sub">at '+sm.full+'</div></div>';
+    content += '<div class="preview-kpi"><div class="preview-kpi__label">Resolved This Period</div><div class="preview-kpi__value" style="color:var(--c-success);">'+sm.resolved+'</div><div class="preview-kpi__sub">successfully closed</div></div>';
+    content += '<div class="preview-kpi"><div class="preview-kpi__label">Avg. Days Open</div><div class="preview-kpi__value">'+avgDays+'</div><div class="preview-kpi__sub">per dispute</div></div>';
+    content += '<div class="preview-kpi"><div class="preview-kpi__label">Awaiting Clerk Review</div><div class="preview-kpi__value" style="color:'+(clerkPending>0?'var(--c-warning)':'var(--c-success)')+';">'+clerkPending+'</div><div class="preview-kpi__sub">clerk has not yet acted</div></div>';
+    content += '</div>';
+    content += renderSchoolDetailTable(scopeKey);
+  }
+
+  return content;
+}
+
+function renderSchoolDetailTable(sk){
+  var sm = SCHOOL_META[sk];
+  var disputes = _allDisputes.filter(function(d){ return d.school===sk; });
+  if(!disputes.length) return '';
+
+  var html = '<div style="background:var(--c-surface);border:1px solid var(--c-border);border-radius:10px;overflow:hidden;margin-bottom:20px;">';
+  html += '<div style="background:#1B5DAF;color:#fff;padding:11px 16px;font-weight:700;font-size:14px;">'+sm.full+' &mdash; Dispute Details</div>';
+  html += '<div style="overflow-x:auto;"><table class="data-table"><thead><tr>';
+  html += '<th>Student</th><th>Grade</th><th>Absence Date</th><th>Subject</th><th style="text-align:center;">Days Open</th><th>Dispute Reason</th><th>Blocking Reason</th><th>Disputed By</th><th>Status</th>';
+  html += '</tr></thead><tbody>';
+  disputes.forEach(function(d){
+    var statusCls = d.status==='Pending Admin' ? 'color:var(--c-warning);font-weight:700;' : 'color:var(--c-ink-muted);';
+    html += '<tr>';
+    html += '<td><div style="font-weight:600;">'+d.student+'</div><div style="font-size:11px;color:var(--c-ink-subtle);">'+d.id+'</div></td>';
+    html += '<td>'+d.grade+'</td>';
+    html += '<td style="white-space:nowrap;">'+d.absDate+'</td>';
+    html += '<td>'+d.subject+'</td>';
+    html += '<td style="text-align:center;font-weight:'+(d.daysOpen>=10?'700':'400')+';color:'+(d.daysOpen>=14?'var(--c-danger)':d.daysOpen>=8?'var(--c-warning)':'inherit')+';">'+d.daysOpen+'</td>';
+    html += '<td style="font-size:11px;">'+d.disputeReason+'</td>';
+    html += '<td style="font-size:11px;">'+d.blockReason+'</td>';
+    html += '<td style="font-size:11px;">'+d.disputedBy+'</td>';
+    html += '<td style="'+statusCls+'font-size:11px;">'+d.status+'</td>';
+    html += '</tr>';
+  });
+  html += '</tbody></table></div></div>';
+  return html;
+}
+
+/* =====================================================================
+   INIT
+   ===================================================================== */
+document.addEventListener('DOMContentLoaded', function(){
+  applyFilters();
+  renderHistory();
+});
+</script>
+</body>
+</html>

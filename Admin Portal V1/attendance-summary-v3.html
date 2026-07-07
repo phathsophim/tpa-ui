@@ -1,0 +1,1231 @@
+<!DOCTYPE html>
+<html lang="en-CA" data-lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ClassTrack — Board Admin · Attendance Summary</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+  :root{
+    --c-bg:#F0F2F7;--c-surface:#FFFFFF;--c-surface-2:#F8FAFC;--c-surface-alt:#EEF2F7;
+    --c-sidebar:#0F2546;--c-sidebar-2:#0A1B36;--c-sidebar-hover:rgba(255,255,255,0.08);--c-sidebar-active:#1B5DAF;
+    --c-border:#D6DBE2;--c-border-2:#E5E8EE;--c-border-strong:#A6ADBB;
+    --c-ink:#0F2546;--c-ink-muted:#475467;--c-ink-subtle:#5C6470;
+    --c-brand:#1B5DAF;--c-brand-ink:#0E2E55;--c-brand-tint:#E8F0FA;
+    --c-success:#1F7A3F;--c-success-tint:#E6F4EC;--c-success-bord:#4F9A6C;
+    --c-warning:#9A4708;--c-warning-tint:#FCF1DD;--c-warning-bord:#B97F38;
+    --c-danger:#B42318;--c-danger-tint:#FCE9E7;--c-danger-bord:#B0625A;
+    --c-info:#0E5C8A;--c-info-tint:#E0EFF7;
+    --c-neutral-tint:#EEF1F5;--c-purple-tint:#EEEAFE;--c-purple:#3F22A6;
+    --c-focus:#FFB400;
+    --ff:"Segoe UI",system-ui,-apple-system,sans-serif;
+    --shadow-sm:0 1px 3px rgba(15,37,70,0.06);--shadow-md:0 4px 12px rgba(15,37,70,0.08);
+  }
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+  html,body{height:100%;}
+  body{font-family:var(--ff);background:var(--c-bg);color:var(--c-ink);font-size:14px;line-height:1.55;-webkit-font-smoothing:antialiased;}
+  a{color:var(--c-brand);text-decoration:none;}a:hover{text-decoration:underline;}
+  button{font-family:inherit;cursor:pointer;}
+
+  /* ── WF Banner ── */
+  .wf-banner{background:#F0EFFE;border-bottom:1px solid #C8C0F0;color:#3F22A6;font-size:12px;padding:6px 16px;display:flex;align-items:center;justify-content:space-between;gap:16px;}
+  .wf-banner__left{display:flex;align-items:center;gap:8px;}
+  .wf-banner__right{display:flex;align-items:center;gap:12px;}
+  .wf-banner a{color:#3F22A6;}
+
+  /* ── App layout ── */
+  .app{display:grid;grid-template-columns:240px 1fr;min-height:calc(100vh - 32px);}
+
+  /* ── Sidebar ── */
+  .sidebar{background:linear-gradient(180deg,var(--c-sidebar) 0%,var(--c-sidebar-2) 100%);color:rgba(255,255,255,0.85);display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow-y:auto;}
+  .sidebar__logo{padding:24px 16px 16px;border-bottom:1px solid rgba(255,255,255,0.08);display:flex;align-items:center;gap:12px;}
+  .sidebar__logo-mark{width:36px;height:36px;background:var(--c-sidebar-active);border-radius:10px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:16px;}
+  .sidebar__logo-text{color:#fff;font-size:16px;font-weight:700;}
+  .sidebar__logo-sub{color:rgba(255,255,255,0.6);font-size:11px;margin-top:2px;}
+  .sidebar__role-badge{margin:8px 16px 0;background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.2);border-radius:999px;padding:3px 10px;font-size:10px;font-weight:700;color:rgba(255,255,255,0.9);letter-spacing:0.06em;text-transform:uppercase;text-align:center;}
+  .sidebar__section{padding:16px 12px 4px;}
+  .sidebar__section-label{text-transform:uppercase;font-size:10px;font-weight:700;letter-spacing:0.12em;color:rgba(255,255,255,0.45);padding:0 12px;margin-bottom:4px;}
+  .nav-item{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:6px;color:rgba(255,255,255,0.78);font-size:13px;font-weight:500;min-height:36px;text-decoration:none;}
+  .nav-item:hover{background:var(--c-sidebar-hover);color:#fff;text-decoration:none;}
+  .nav-item.is-active{background:var(--c-sidebar-active);color:#fff;font-weight:600;}
+  .nav-item .nav-icon{width:20px;text-align:center;font-size:14px;}
+  .nav-item .nav-badge{margin-left:auto;background:var(--c-danger);color:#fff;font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px;}
+  .nav-item .nav-badge--neutral{background:rgba(255,255,255,0.18);color:#fff;}
+  .nav-item .nav-badge--warn{background:#7A3500;color:#fff;}
+  .sidebar__user{margin-top:auto;padding:12px 16px;border-top:1px solid rgba(255,255,255,0.08);display:flex;align-items:center;gap:12px;}
+  .avatar{width:36px;height:36px;border-radius:999px;background:var(--c-brand-tint);color:var(--c-brand-ink);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;flex-shrink:0;}
+  .sidebar__user-name{color:#fff;font-size:13px;font-weight:600;}
+  .sidebar__user-role{color:rgba(255,255,255,0.6);font-size:11px;}
+
+  /* ── Topbar ── */
+  .main{display:flex;flex-direction:column;min-width:0;}
+  .topbar{background:var(--c-surface);border-bottom:1px solid var(--c-border);display:flex;align-items:center;gap:16px;padding:0 24px;position:sticky;top:0;z-index:50;min-height:64px;}
+  .topbar__left{display:flex;flex-direction:column;gap:2px;}
+  .topbar__title{font-size:15px;font-weight:700;color:var(--c-ink);}
+  .topbar__breadcrumb{font-size:12px;color:var(--c-ink-subtle);}
+  .topbar__breadcrumb span{color:var(--c-ink-muted);}
+  .topbar__scope{background:var(--c-purple-tint);color:var(--c-purple);border:1px solid #C8C0F0;padding:6px 12px;border-radius:6px;font-size:12px;font-weight:600;display:inline-flex;align-items:center;gap:8px;margin-left:auto;}
+  .topbar__actions{display:flex;align-items:center;gap:8px;}
+  .icon-btn{width:36px;height:36px;border-radius:6px;background:transparent;border:none;color:var(--c-ink-muted);display:inline-flex;align-items:center;justify-content:center;position:relative;font-size:14px;cursor:pointer;}
+  .icon-btn:hover{background:var(--c-surface-alt);}
+  .icon-btn__count{position:absolute;top:2px;right:2px;background:var(--c-danger);color:#fff;font-size:10px;font-weight:700;min-width:18px;height:18px;border-radius:999px;display:flex;align-items:center;justify-content:center;padding:0 4px;border:2px solid var(--c-surface);}
+  .lang-toggle{display:inline-flex;border:1px solid var(--c-border-strong);border-radius:6px;overflow:hidden;}
+  .lang-toggle button{background:var(--c-surface);border:0;padding:6px 12px;font-size:12px;font-weight:700;color:var(--c-ink-muted);min-height:32px;}
+  .lang-toggle button[aria-pressed="true"]{background:var(--c-brand);color:#fff;}
+  .user-chip{display:inline-flex;align-items:center;gap:8px;padding:4px 10px 4px 4px;border:1px solid var(--c-border);border-radius:999px;font-size:12px;color:var(--c-ink-muted);min-height:36px;}
+
+  /* ── Page Header (replaces document-style report-header) ── */
+  .page-header{background:var(--c-surface);border-bottom:1px solid var(--c-border);padding:18px 24px;display:flex;align-items:center;justify-content:space-between;gap:24px;flex-wrap:wrap;}
+  .page-header__info{}
+  .page-header__title{font-size:20px;font-weight:800;color:var(--c-ink);line-height:1.2;}
+  .page-header__meta{font-size:12px;color:var(--c-ink-subtle);margin-top:4px;display:flex;align-items:center;gap:8px;}
+  .live-dot{width:7px;height:7px;background:#1F7A3F;border-radius:50%;display:inline-block;flex-shrink:0;animation:pulse-dot 2.4s ease-in-out infinite;}
+  @keyframes pulse-dot{0%,100%{opacity:1;transform:scale(1);}50%{opacity:0.45;transform:scale(0.85);}}
+  .page-header__divider{color:var(--c-border-strong);}
+  .page-header__controls{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+  .term-selector{display:flex;align-items:center;gap:7px;background:var(--c-surface-2);border:1px solid var(--c-border);border-radius:8px;padding:5px 10px 5px 12px;}
+  .term-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--c-ink-muted);white-space:nowrap;}
+  .term-select{font-size:13px;font-weight:700;padding:0 4px;border:0;background:transparent;color:var(--c-ink);cursor:pointer;outline:none;min-width:140px;}
+  .last-updated{font-size:12px;color:var(--c-ink-subtle);display:flex;align-items:center;gap:5px;white-space:nowrap;padding:6px 10px;background:var(--c-surface-2);border:1px solid var(--c-border);border-radius:8px;}
+  .last-updated i{color:var(--c-ink-muted);}
+
+  /* ── Attention bar ── */
+  .attention-bar{background:#FFF8EE;border-bottom:2px solid #D49A40;padding:10px 24px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+  .attention-bar__icon{color:#92450A;font-size:14px;flex-shrink:0;}
+  .attention-bar__label{font-size:13px;font-weight:700;color:#92450A;white-space:nowrap;}
+  .attention-bar__sep{color:#D49A40;font-size:12px;}
+  .attention-bar__chips{display:flex;gap:6px;flex-wrap:wrap;}
+  .attn-chip{display:inline-flex;align-items:center;gap:5px;padding:3px 10px 3px 8px;border-radius:6px;font-size:12px;font-weight:700;background:#FEF0D0;color:#92450A;border:1px solid #D49A40;cursor:pointer;transition:background 0.1s;}
+  .attn-chip:hover{background:#FAE5B8;text-decoration:none;}
+  .attn-chip--red{background:var(--c-danger-tint);color:var(--c-danger);border-color:var(--c-danger-bord);}
+  .attn-chip--red:hover{background:#F8D9D7;text-decoration:none;}
+  .attn-chip i{font-size:10px;}
+  .attention-bar__dismiss{margin-left:auto;font-size:11px;color:var(--c-ink-subtle);cursor:pointer;border:0;background:transparent;padding:4px 8px;border-radius:4px;}
+  .attention-bar__dismiss:hover{background:var(--c-surface-alt);}
+
+  /* ── Tabs ── */
+  .report-tabs{background:var(--c-surface);border-bottom:1px solid var(--c-border);padding:0 24px;display:flex;gap:0;position:sticky;top:64px;z-index:40;}
+  .report-tab{font-size:13px;font-weight:500;padding:11px 16px;color:var(--c-ink-muted);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;user-select:none;display:flex;align-items:center;gap:7px;}
+  .report-tab:hover{color:var(--c-ink);}
+  .report-tab.is-active{color:var(--c-brand);border-bottom-color:var(--c-brand);font-weight:600;}
+  .tab-count{background:var(--c-neutral-tint);color:var(--c-ink-muted);padding:1px 7px;border-radius:999px;font-size:11px;font-weight:700;}
+  .report-tab.is-active .tab-count{background:var(--c-brand-tint);color:var(--c-brand);}
+
+  /* ── Content body ── */
+  .report-body{padding:24px;flex:1;display:flex;flex-direction:column;gap:16px;}
+
+  /* ── KPI Cards ── */
+  .kpi-row{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;}
+  .kpi-card{background:var(--c-surface);border:1px solid var(--c-border);border-radius:10px;padding:16px;position:relative;overflow:hidden;}
+  .kpi-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;}
+  .kpi-card--ok::before{background:var(--c-success);}
+  .kpi-card--warn::before{background:var(--c-warning);}
+  .kpi-card--alert::before{background:var(--c-danger);}
+  .kpi-card--neutral::before{background:var(--c-brand);}
+  .kpi-card__label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--c-ink-muted);margin-bottom:6px;}
+  .kpi-card__value{font-size:28px;font-weight:800;font-variant-numeric:tabular-nums;line-height:1.1;}
+  .kpi-card__value--ok{color:var(--c-success);}
+  .kpi-card__value--warn{color:var(--c-warning);}
+  .kpi-card__value--alert{color:var(--c-danger);}
+  .kpi-card__value--neutral{color:var(--c-ink);}
+  .kpi-card__sub{font-size:11px;color:var(--c-ink-subtle);margin-top:4px;}
+  .kpi-card__trend{margin-top:10px;display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:700;padding:3px 8px;border-radius:999px;}
+  .kpi-card__trend--up{background:var(--c-success-tint);color:var(--c-success);}
+  .kpi-card__trend--down{background:var(--c-danger-tint);color:var(--c-danger);}
+  .kpi-card__trend--flat{background:var(--c-neutral-tint);color:var(--c-ink-muted);}
+
+  /* ── Section header ── */
+  .section-header{display:flex;align-items:center;justify-content:space-between;gap:12px;}
+  .section-title{font-size:14px;font-weight:700;color:var(--c-ink);}
+  .section-meta{font-size:12px;color:var(--c-ink-subtle);}
+
+  /* ── Table toolbar ── */
+  .table-toolbar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+  .search-wrap{position:relative;flex:0 0 220px;}
+  .search-wrap i{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--c-ink-muted);font-size:13px;pointer-events:none;}
+  .search-input{width:100%;height:34px;border:1px solid var(--c-border-strong);border-radius:6px;background:var(--c-surface);font-size:13px;color:var(--c-ink);padding:0 10px 0 32px;outline:none;}
+  .search-input:focus{border-color:var(--c-brand);box-shadow:0 0 0 2px rgba(27,93,175,0.12);}
+  .search-input::placeholder{color:var(--c-ink-muted);}
+  .toggle-group{display:flex;border:1px solid var(--c-border-strong);border-radius:6px;overflow:hidden;}
+  .toggle-btn{background:var(--c-surface);border:0;border-right:1px solid var(--c-border);padding:0 12px;font-size:12px;font-weight:600;color:var(--c-ink-muted);height:34px;cursor:pointer;white-space:nowrap;transition:background 0.1s;}
+  .toggle-btn:last-child{border-right:0;}
+  .toggle-btn:hover{background:var(--c-surface-alt);}
+  .toggle-btn.is-active{background:var(--c-brand-tint);color:var(--c-brand);}
+  .filter-sel{font-size:12px;font-weight:600;padding:0 10px;border:1px solid var(--c-border-strong);border-radius:6px;background:var(--c-surface);color:var(--c-ink);height:34px;cursor:pointer;outline:none;}
+  .filter-sel:focus{border-color:var(--c-brand);}
+  .toolbar-right{margin-left:auto;display:flex;align-items:center;gap:8px;}
+  .result-count{font-size:12px;color:var(--c-ink-subtle);white-space:nowrap;}
+
+  /* ── Table card ── */
+  .table-card{background:var(--c-surface);border:1px solid var(--c-border);border-radius:12px;overflow:hidden;}
+  .data-table{width:100%;border-collapse:collapse;}
+  .data-table th{background:var(--c-surface-2);padding:9px 16px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--c-ink-muted);border-bottom:2px solid var(--c-border);text-align:left;white-space:nowrap;}
+  .data-table th.sortable{cursor:pointer;user-select:none;transition:background 0.1s,color 0.1s;}
+  .data-table th.sortable:hover{color:var(--c-brand);background:#EBF2FB;}
+  .sort-ico{margin-left:4px;opacity:0.35;font-size:10px;transition:opacity 0.1s;}
+  .data-table th.sorted .sort-ico{opacity:1;color:var(--c-brand);}
+  .data-table td{padding:12px 16px;font-size:13px;border-bottom:1px solid var(--c-border-2);color:var(--c-ink);}
+  .data-table tr:last-child td{border-bottom:0;}
+  .data-table tbody tr:hover td{background:var(--c-surface-2);}
+  .data-table tr.row--warn td{background:#FFFAF5;}
+  .data-table tr.row--alert td{background:#FFF5F4;}
+  .school-cell{display:flex;flex-direction:column;gap:1px;}
+  .school-name{font-weight:600;color:var(--c-ink);}
+  .school-link{font-size:11px;color:var(--c-brand);display:none;}
+  .data-table tbody tr:hover .school-link{display:inline;}
+  .table-footer{padding:10px 18px;background:var(--c-surface-2);border-top:1px solid var(--c-border-2);display:flex;align-items:center;justify-content:space-between;font-size:12px;color:var(--c-ink-subtle);}
+
+  /* ── Rate bar ── */
+  .rate-bar{display:flex;align-items:center;gap:8px;min-width:150px;}
+  .rate-track{flex:1;height:5px;background:var(--c-surface-alt);border-radius:999px;overflow:hidden;}
+  .rate-fill{height:100%;border-radius:999px;transition:width 0.3s ease;}
+  .rate-fill--ok{background:var(--c-success);}
+  .rate-fill--warn{background:var(--c-warning);}
+  .rate-fill--alert{background:var(--c-danger);}
+  .rate-pct{font-size:13px;font-weight:700;font-variant-numeric:tabular-nums;min-width:44px;text-align:right;}
+  .rate-pct--ok{color:var(--c-success);}
+  .rate-pct--warn{color:var(--c-warning);}
+  .rate-pct--alert{color:var(--c-danger);}
+
+  /* ── Trend ── */
+  .trend{font-size:12px;font-weight:600;display:inline-flex;align-items:center;gap:4px;white-space:nowrap;}
+  .trend--up{color:var(--c-success);}
+  .trend--down{color:var(--c-danger);}
+  .trend--stable{color:var(--c-ink-subtle);}
+
+  /* ── Chips ── */
+  .chip{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:999px;font-size:11px;font-weight:700;border:1px solid transparent;}
+  .chip--ok{background:var(--c-success-tint);color:var(--c-success);border-color:var(--c-success-bord);}
+  .chip--warn{background:var(--c-warning-tint);color:var(--c-warning);border-color:var(--c-warning-bord);}
+  .chip--alert{background:var(--c-danger-tint);color:var(--c-danger);border-color:var(--c-danger-bord);}
+  .chip--neutral{background:var(--c-neutral-tint);color:var(--c-ink-muted);border-color:var(--c-border-strong);}
+  .chip--secondary{background:var(--c-purple-tint);color:var(--c-purple);border-color:#7E68DC;}
+
+  /* ── History tab ── */
+  .history-body{padding:24px;display:flex;flex-direction:column;gap:8px;}
+  .history-intro{font-size:12px;color:var(--c-ink-subtle);margin-bottom:4px;padding:10px 14px;background:var(--c-surface-2);border:1px solid var(--c-border-2);border-radius:8px;display:flex;align-items:center;gap:8px;}
+  .history-row{display:flex;align-items:center;gap:16px;padding:12px 16px;background:var(--c-surface);border:1px solid var(--c-border);border-radius:8px;font-size:13px;transition:background 0.1s;}
+  .history-row:hover{background:var(--c-surface-2);}
+  .history-row__name{font-weight:600;color:var(--c-ink);flex:1;}
+  .history-row__meta{color:var(--c-ink-subtle);font-size:12px;min-width:180px;}
+  .history-row__user{color:var(--c-ink-subtle);font-size:12px;min-width:140px;}
+
+  /* ── Buttons ── */
+  .btn{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:6px;font-size:13px;font-weight:600;border:1px solid transparent;min-height:34px;cursor:pointer;text-decoration:none;transition:background 0.1s;}
+  .btn--primary{background:var(--c-brand);color:#fff;border-color:var(--c-brand);}
+  .btn--primary:hover{background:var(--c-brand-ink);}
+  .btn--secondary{background:var(--c-surface);color:var(--c-ink);border-color:var(--c-border-strong);}
+  .btn--secondary:hover{background:var(--c-surface-alt);}
+  .btn--ghost{background:transparent;color:var(--c-brand);border:0;}
+  .btn--ghost:hover{background:var(--c-brand-tint);}
+  .btn--sm{padding:4px 10px;min-height:28px;font-size:12px;}
+
+  /* ── Empty state ── */
+  .empty-row{text-align:center;padding:40px 20px;color:var(--c-ink-subtle);}
+  .empty-row td{border-bottom:0!important;}
+
+  /* ── Tab panel visibility ── */
+  .tab-panel{display:none;}
+  .tab-panel.is-active{display:block;}
+
+  /* ── Modals ── */
+  .modal-backdrop{position:fixed;inset:0;background:rgba(15,37,70,0.48);z-index:100;display:flex;align-items:center;justify-content:center;padding:16px;}
+  .modal-backdrop.is-hidden{display:none;}
+  .modal{background:var(--c-surface);border-radius:14px;box-shadow:0 8px 28px rgba(15,37,70,0.18);width:100%;max-width:480px;display:flex;flex-direction:column;}
+  .modal__h{padding:16px 24px;border-bottom:1px solid var(--c-border-2);display:flex;align-items:flex-start;justify-content:space-between;gap:12px;}
+  .modal__title{font-size:15px;font-weight:700;color:var(--c-ink);}
+  .modal__sub{font-size:12px;color:var(--c-ink-subtle);margin-top:2px;}
+  .modal__close{width:32px;height:32px;border:none;background:transparent;border-radius:6px;display:flex;align-items:center;justify-content:center;color:var(--c-ink-muted);cursor:pointer;font-size:14px;flex-shrink:0;}
+  .modal__close:hover{background:var(--c-surface-alt);}
+  .modal__b{padding:20px 24px;display:flex;flex-direction:column;gap:16px;}
+  .modal__f{padding:12px 24px;border-top:1px solid var(--c-border-2);display:flex;justify-content:flex-end;gap:8px;}
+  .modal-field{display:flex;flex-direction:column;gap:6px;}
+  .modal-label{font-size:12px;font-weight:600;color:var(--c-ink-muted);}
+  .modal-select{padding:8px 12px;border:1px solid var(--c-border-strong);border-radius:6px;font-size:13px;background:var(--c-surface);color:var(--c-ink);width:100%;outline:none;}
+  .modal-select:focus{border-color:var(--c-brand);}
+  .format-toggle{display:flex;gap:8px;}
+  .format-btn{flex:1;padding:10px 12px;border:1.5px solid var(--c-border);border-radius:8px;background:var(--c-surface);cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px;font-size:12px;color:var(--c-ink-muted);font-weight:600;transition:border-color 0.1s;}
+  .format-btn:hover{border-color:var(--c-brand);color:var(--c-brand);}
+  .format-btn.is-selected{border-color:var(--c-brand);background:var(--c-brand-tint);color:var(--c-brand);}
+  .format-btn i{font-size:20px;}
+  .modal-summary{background:var(--c-surface-2);border:1px solid var(--c-border-2);border-radius:8px;padding:12px 14px;font-size:12px;color:var(--c-ink-muted);display:flex;flex-direction:column;gap:4px;}
+  .modal-summary__row{display:flex;justify-content:space-between;}
+  .modal-summary__val{font-weight:600;color:var(--c-ink);}
+  .modal-date-row{display:flex;align-items:center;gap:8px;}
+  /* Preview modal */
+  .modal--preview{max-width:940px;max-height:92vh;}
+  .modal--preview .modal__b{overflow-y:auto;flex:1;}
+  .preview-meta{display:flex;gap:24px;font-size:12px;color:var(--c-ink-muted);padding:8px 0 0;flex-wrap:wrap;}
+  .preview-meta span{display:flex;align-items:center;gap:5px;}
+  .preview-meta strong{color:var(--c-ink);}
+  /* Preview table (document-style, distinct from live data table) */
+  .preview-table{width:100%;border-collapse:collapse;font-size:12px;}
+  .preview-table thead th{padding:8px 10px;text-align:left;font-size:11px;font-weight:700;color:#fff;background:#1a1a1a;text-transform:uppercase;letter-spacing:0.05em;border-right:1px solid rgba(255,255,255,0.2);}
+  .preview-table tbody tr{border-bottom:1px solid #eee;}
+  .preview-table tbody tr:nth-child(even){background:#f8f8f8;}
+  .preview-table td{padding:8px 10px;border-right:1px solid #e0e0e0;}
+  /* KPI for preview */
+  .pkpi-grid{display:grid;gap:10px;margin-bottom:16px;}
+  .pkpi-grid--4{grid-template-columns:repeat(4,1fr);}
+  .pkpi-card{background:var(--c-surface);border:1px solid var(--c-border);border-radius:8px;padding:12px 14px;}
+  .pkpi-label{font-size:10px;font-weight:700;color:var(--c-ink-muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px;}
+  .pkpi-value{font-size:22px;font-weight:800;color:var(--c-ink);line-height:1.1;}
+  .pkpi-sub{font-size:11px;color:var(--c-ink-subtle);margin-top:2px;}
+</style>
+</head>
+<body>
+
+<!-- Wireframe banner -->
+<div class="wf-banner" role="region" aria-label="Wireframe notice">
+  <div class="wf-banner__left">
+    <i class="fa-solid fa-pencil-ruler"></i>
+    <strong>Wireframe — Admin Portal V2 · Attendance Summary (Redesigned v3)</strong>
+    <span>· EC Catholic · Board Admin</span>
+  </div>
+  <div class="wf-banner__right">
+    <a href="dashboard.html">Dashboard</a>
+    <a href="schools.html">Schools</a>
+    <a href="aspen.html">Aspen</a>
+    <a href="configuration.html">Config</a>
+  </div>
+</div>
+
+<div class="app">
+
+  <!-- ── Sidebar ── -->
+  <aside class="sidebar">
+    <div class="sidebar__logo">
+      <div class="sidebar__logo-mark">CT</div>
+      <div>
+        <div class="sidebar__logo-text">ClassTrack</div>
+        <div class="sidebar__logo-sub">EC Catholic · Board</div>
+      </div>
+    </div>
+    <div class="sidebar__role-badge">Board Administrator</div><nav class="sidebar__section"><div class="sidebar__section-label">Overview</div><a href="dashboard.html" class="nav-item"><span class="nav-icon"><i class="fa-solid fa-gauge-high"></i></span>Dashboard</a></nav><nav class="sidebar__section"><div class="sidebar__section-label">Management</div><a href="schools.html" class="nav-item"><span class="nav-icon"><i class="fa-solid fa-school"></i></span>Schools<span class="nav-badge nav-badge--neutral">8</span></a><a href="users.html" class="nav-item"><span class="nav-icon"><i class="fa-solid fa-users-gear"></i></span>Users<span class="nav-badge nav-badge--neutral">247</span></a><a href="registered-contacts.html" class="nav-item"><span class="nav-icon"><i class="fa-solid fa-id-badge"></i></span>Registered Contacts<span class="nav-badge nav-badge--neutral">14</span></a></nav><nav class="sidebar__section"><div class="sidebar__section-label">Reports</div><a href="attendance-summary-v3.html" class="nav-item is-active" aria-current="page"><span class="nav-icon"><i class="fa-solid fa-chart-bar"></i></span>Attendance Summary</a><a href="absence-trends-v2.html" class="nav-item"><span class="nav-icon"><i class="fa-solid fa-chart-line"></i></span>Absence Trends</a><a href="chronic-absenteeism-v2.html" class="nav-item"><span class="nav-icon"><i class="fa-solid fa-user-clock"></i></span>Chronic Absenteeism</a><a href="unjustified-absences-v2.html" class="nav-item"><span class="nav-icon"><i class="fa-solid fa-circle-exclamation"></i></span>Unjustified Absences</a><a href="submission-compliance-v2.html" class="nav-item"><span class="nav-icon"><i class="fa-solid fa-clipboard-check"></i></span>Submission Compliance</a><a href="open-disputes-v2.html" class="nav-item"><span class="nav-icon"><i class="fa-solid fa-scale-balanced"></i></span>Open Disputes</a><a href="grade-threshold-v2.html" class="nav-item"><span class="nav-icon"><i class="fa-solid fa-graduation-cap"></i></span>Grade Threshold</a></nav><nav class="sidebar__section"><div class="sidebar__section-label">System</div><a href="aspen.html" class="nav-item"><span class="nav-icon"><i class="fa-solid fa-arrows-rotate"></i></span>Aspen Sync<span class="nav-badge nav-badge--warn">1</span></a><a href="configuration.html" class="nav-item"><span class="nav-icon"><i class="fa-solid fa-calendar-days"></i></span>Calendar &amp; Periods</a><a href="notifications.html" class="nav-item"><span class="nav-icon"><i class="fa-solid fa-bell-slash"></i></span>Notifications</a></nav><div class="sidebar__user">
+      <div class="avatar">AR</div>
+      <div>
+        <div class="sidebar__user-name">André Rousseau</div>
+        <div class="sidebar__user-role">Board Administrator</div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ── Main ── -->
+  <div class="main">
+
+    <!-- Topbar -->
+    <header class="topbar">
+      <div class="topbar__left">
+        <div class="topbar__title">Attendance Summary</div>
+        <div class="topbar__breadcrumb">Reports <span>· Attendance Summary</span></div>
+      </div>
+      <div class="topbar__scope"><i class="fa-solid fa-school"></i> EC Catholic · All 8 Schools</div>
+      <div class="topbar__actions">
+        <div class="lang-toggle">
+          <button aria-pressed="true">EN</button>
+          <button aria-pressed="false">FR</button>
+        </div>
+        <button class="icon-btn" aria-label="Notifications (2 active)">
+          <i class="fa-solid fa-bell"></i>
+          <span class="icon-btn__count">2</span>
+        </button>
+        <span class="user-chip">
+          <span class="avatar" style="width:28px;height:28px;font-size:12px;">AR</span>
+          André R. · Board Admin
+        </span>
+      </div>
+    </header>
+
+    <!-- ── Page Header (live monitoring, not a document header) ── -->
+    <div class="page-header">
+      <div class="page-header__info">
+        <div class="page-header__title">Attendance Summary</div>
+        <div class="page-header__meta">
+          <span class="live-dot"></span>
+          Live data &nbsp;·&nbsp; EC Catholic &nbsp;·&nbsp; All 8 schools
+          <span class="page-header__divider">·</span>
+          <span>Last synced Jun 24, 2026 · 8:45 AM</span>
+        </div>
+      </div>
+      <div class="page-header__controls">
+        <div class="term-selector">
+          <span class="term-label">Term</span>
+          <select class="term-select" id="term-select" onchange="onTermChange()">
+            <option value="t4" selected>Term 4 · 2025–26</option>
+            <option value="t3">Term 3 · 2025–26</option>
+            <option value="t2">Term 2 · 2025–26</option>
+            <option value="t1">Term 1 · 2025–26</option>
+            <option value="fy">Full Year · 2025–26</option>
+          </select>
+        </div>
+        <button class="btn btn--secondary btn--sm" onclick="openExportModal()" title="Export the current view as PDF or CSV">
+          <i class="fa-solid fa-file-export"></i> Export Report
+        </button>
+      </div>
+    </div>
+
+    <!-- ── Attention bar (schools below target) ── -->
+    <div class="attention-bar" id="attention-bar">
+      <i class="fa-solid fa-triangle-exclamation attention-bar__icon"></i>
+      <span class="attention-bar__label">2 schools below 90% target</span>
+      <span class="attention-bar__sep">—</span>
+      <div class="attention-bar__chips">
+        <a href="#" class="attn-chip" onclick="highlightSchool('École sec. du Carrefour');return false;">
+          <i class="fa-solid fa-arrow-trend-down"></i> École sec. du Carrefour &nbsp;87.3%
+        </a>
+        <a href="#" class="attn-chip attn-chip--red" onclick="highlightSchool('École sec. de l\'Avenir');return false;">
+          <i class="fa-solid fa-arrow-trend-down"></i> École sec. de l'Avenir &nbsp;84.1%
+        </a>
+      </div>
+      <button class="attention-bar__dismiss" onclick="dismissAttention()" title="Dismiss">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+    </div>
+
+    <!-- ── Tabs ── -->
+    <div class="report-tabs" role="tablist">
+      <div class="report-tab is-active" role="tab" aria-selected="true" id="tab-report" onclick="switchTab('report')">
+        <i class="fa-solid fa-table-cells-large" style="font-size:12px;opacity:0.7;"></i>
+        Live Data
+      </div>
+      <div class="report-tab" role="tab" aria-selected="false" id="tab-history" onclick="switchTab('history')">
+        <i class="fa-solid fa-clock-rotate-left" style="font-size:12px;opacity:0.7;"></i>
+        Reports History
+        <span class="tab-count" id="history-count">6</span>
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════════════
+         LIVE DATA TAB
+    ════════════════════════════════════════ -->
+    <div class="tab-panel is-active" id="panel-report">
+      <div class="report-body">
+
+        <!-- KPI cards -->
+        <div class="kpi-row">
+          <div class="kpi-card kpi-card--ok">
+            <div class="kpi-card__label">Board Average</div>
+            <div class="kpi-card__value kpi-card__value--ok">91.4%</div>
+            <div class="kpi-card__sub">All 8 schools · Term 4</div>
+            <div class="kpi-card__trend kpi-card__trend--up"><i class="fa-solid fa-arrow-up"></i> +0.3 pp vs last week</div>
+          </div>
+          <div class="kpi-card kpi-card--ok">
+            <div class="kpi-card__label">Elementary Average</div>
+            <div class="kpi-card__value kpi-card__value--ok">94.4%</div>
+            <div class="kpi-card__sub">4 schools · all on target</div>
+            <div class="kpi-card__trend kpi-card__trend--up"><i class="fa-solid fa-arrow-up"></i> +0.5 pp vs last week</div>
+          </div>
+          <div class="kpi-card kpi-card--warn">
+            <div class="kpi-card__label">Secondary Average</div>
+            <div class="kpi-card__value kpi-card__value--warn">88.9%</div>
+            <div class="kpi-card__sub">4 schools · 2 below target</div>
+            <div class="kpi-card__trend kpi-card__trend--down"><i class="fa-solid fa-arrow-down"></i> −0.8 pp vs last week</div>
+          </div>
+          <div class="kpi-card kpi-card--alert">
+            <div class="kpi-card__label">Below Target</div>
+            <div class="kpi-card__value kpi-card__value--alert">2</div>
+            <div class="kpi-card__sub">schools &nbsp;·&nbsp; both secondary</div>
+            <div class="kpi-card__trend kpi-card__trend--flat"><i class="fa-solid fa-minus"></i> Same as last week</div>
+          </div>
+          <div class="kpi-card kpi-card--neutral">
+            <div class="kpi-card__label">Students Enrolled</div>
+            <div class="kpi-card__value kpi-card__value--neutral">3,137</div>
+            <div class="kpi-card__sub">board-wide · all schools</div>
+            <div class="kpi-card__trend kpi-card__trend--flat"><i class="fa-solid fa-minus"></i> No change this term</div>
+          </div>
+        </div>
+
+        <!-- Section header + toolbar -->
+        <div class="section-header">
+          <div>
+            <div class="section-title">All schools</div>
+            <div class="section-meta">Target: ≥ 90% · Sorted by attendance rate</div>
+          </div>
+        </div>
+
+        <div class="table-toolbar">
+          <div class="search-wrap">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input class="search-input" type="search" id="school-search" placeholder="Search schools…" oninput="applyFilters()" autocomplete="off">
+          </div>
+          <div class="toggle-group" id="type-toggles">
+            <button class="toggle-btn is-active" data-type="all"       onclick="setTypeFilter('all')">All types</button>
+            <button class="toggle-btn"           data-type="elementary" onclick="setTypeFilter('elementary')">Elementary</button>
+            <button class="toggle-btn"           data-type="secondary"  onclick="setTypeFilter('secondary')">Secondary</button>
+          </div>
+          <select class="filter-sel" id="status-filter" onchange="applyFilters()">
+            <option value="all">All statuses</option>
+            <option value="below">Below target only</option>
+            <option value="ontarget">On target only</option>
+          </select>
+          <div class="toolbar-right">
+            <span class="result-count" id="result-count">8 of 8 schools</span>
+            <button class="btn btn--secondary btn--sm" onclick="openExportModal()"><i class="fa-solid fa-file-export"></i> Export</button>
+          </div>
+        </div>
+
+        <!-- Schools table -->
+        <div class="table-card">
+          <table class="data-table" id="schools-table">
+            <thead>
+              <tr>
+                <th class="sortable" data-col="name" onclick="sortTable('name')">
+                  School <i class="fa-solid fa-sort sort-ico"></i>
+                </th>
+                <th>Type</th>
+                <th class="sortable" data-col="enrolled" onclick="sortTable('enrolled')">
+                  Enrolled <i class="fa-solid fa-sort sort-ico"></i>
+                </th>
+                <th class="sortable sorted" data-col="rate" onclick="sortTable('rate')">
+                  Rate — Term 4 <i class="fa-solid fa-sort-down sort-ico"></i>
+                </th>
+                <th class="sortable" data-col="vs3" onclick="sortTable('vs3')">
+                  vs Term 3 <i class="fa-solid fa-sort sort-ico"></i>
+                </th>
+                <th class="sortable" data-col="vsw" onclick="sortTable('vsw')">
+                  vs Last Week <i class="fa-solid fa-sort sort-ico"></i>
+                </th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="schools-tbody">
+              <!-- Populated by JS -->
+            </tbody>
+          </table>
+          <div class="table-footer">
+            <span id="table-summary">8 schools &nbsp;·&nbsp; 3,137 students enrolled &nbsp;·&nbsp; Board avg <strong>91.4%</strong> &nbsp;·&nbsp; Target ≥ 90%</span>
+            <a href="#" class="btn btn--ghost btn--sm">View chronic absenteeism →</a>
+          </div>
+        </div>
+
+      </div>
+    </div><!-- /panel-report -->
+
+
+    <!-- ════════════════════════════════════════
+         REPORTS HISTORY TAB
+    ════════════════════════════════════════ -->
+    <div class="tab-panel" id="panel-history">
+      <div class="history-body" id="history-list">
+
+        <div class="history-intro">
+          <i class="fa-solid fa-circle-info" style="color:var(--c-brand);"></i>
+          Previously generated reports — click <strong>View</strong> to open the report preview, or <i class="fa-solid fa-download" style="font-size:11px;"></i> to download.
+        </div>
+
+        <div class="history-row">
+          <i class="fa-solid fa-file-pdf" style="color:var(--c-danger);font-size:16px;flex-shrink:0;"></i>
+          <div class="history-row__name">Attendance Summary · All Schools · Jun 1 – Jun 19, 2026</div>
+          <div class="history-row__meta"><i class="fa-regular fa-calendar"></i> Jun 19, 2026 · 9:00 AM</div>
+          <div class="history-row__user"><i class="fa-regular fa-user"></i> André Rousseau</div>
+          <div style="display:flex;gap:6px;flex-shrink:0;">
+            <button class="btn btn--secondary btn--sm" onclick="openAttReportRow(0)"><i class="fa-solid fa-eye"></i> View</button>
+            <button class="btn btn--ghost btn--sm"><i class="fa-solid fa-download"></i></button>
+          </div>
+        </div>
+
+        <div class="history-row">
+          <i class="fa-solid fa-file-pdf" style="color:var(--c-danger);font-size:16px;flex-shrink:0;"></i>
+          <div class="history-row__name">Attendance Summary · All Schools · May 1 – Jun 6, 2026</div>
+          <div class="history-row__meta"><i class="fa-regular fa-calendar"></i> Jun 6, 2026 · 9:00 AM</div>
+          <div class="history-row__user"><i class="fa-regular fa-user"></i> André Rousseau</div>
+          <div style="display:flex;gap:6px;flex-shrink:0;">
+            <button class="btn btn--secondary btn--sm" onclick="openAttReportRow(1)"><i class="fa-solid fa-eye"></i> View</button>
+            <button class="btn btn--ghost btn--sm"><i class="fa-solid fa-download"></i></button>
+          </div>
+        </div>
+
+        <div class="history-row">
+          <i class="fa-solid fa-file-csv" style="color:var(--c-success);font-size:16px;flex-shrink:0;"></i>
+          <div class="history-row__name">Attendance Summary · École Notre-Dame · May 1 – May 9, 2026</div>
+          <div class="history-row__meta"><i class="fa-regular fa-calendar"></i> May 9, 2026 · 9:00 AM</div>
+          <div class="history-row__user"><i class="fa-regular fa-user"></i> André Rousseau</div>
+          <div style="display:flex;gap:6px;flex-shrink:0;">
+            <button class="btn btn--secondary btn--sm" onclick="openAttReportRow(2)"><i class="fa-solid fa-eye"></i> View</button>
+            <button class="btn btn--ghost btn--sm"><i class="fa-solid fa-download"></i></button>
+          </div>
+        </div>
+
+        <div class="history-row">
+          <i class="fa-solid fa-file-pdf" style="color:var(--c-danger);font-size:16px;flex-shrink:0;"></i>
+          <div class="history-row__name">Attendance Summary · All Schools · Apr 1 – May 2, 2026</div>
+          <div class="history-row__meta"><i class="fa-regular fa-calendar"></i> May 2, 2026 · 9:00 AM</div>
+          <div class="history-row__user"><i class="fa-regular fa-user"></i> André Rousseau</div>
+          <div style="display:flex;gap:6px;flex-shrink:0;">
+            <button class="btn btn--secondary btn--sm" onclick="openAttReportRow(3)"><i class="fa-solid fa-eye"></i> View</button>
+            <button class="btn btn--ghost btn--sm"><i class="fa-solid fa-download"></i></button>
+          </div>
+        </div>
+
+        <div class="history-row">
+          <i class="fa-solid fa-file-csv" style="color:var(--c-success);font-size:16px;flex-shrink:0;"></i>
+          <div class="history-row__name">Attendance Summary · École Sainte-Croix · Mar 1 – Apr 4, 2026</div>
+          <div class="history-row__meta"><i class="fa-regular fa-calendar"></i> Apr 4, 2026 · 9:00 AM</div>
+          <div class="history-row__user"><i class="fa-regular fa-user"></i> André Rousseau</div>
+          <div style="display:flex;gap:6px;flex-shrink:0;">
+            <button class="btn btn--secondary btn--sm" onclick="openAttReportRow(4)"><i class="fa-solid fa-eye"></i> View</button>
+            <button class="btn btn--ghost btn--sm"><i class="fa-solid fa-download"></i></button>
+          </div>
+        </div>
+
+        <div class="history-row">
+          <i class="fa-solid fa-file-pdf" style="color:var(--c-danger);font-size:16px;flex-shrink:0;"></i>
+          <div class="history-row__name">Attendance Summary · All Schools · Sep 2, 2025 – Jan 9, 2026</div>
+          <div class="history-row__meta"><i class="fa-regular fa-calendar"></i> Jan 9, 2026 · 9:00 AM</div>
+          <div class="history-row__user"><i class="fa-regular fa-user"></i> André Rousseau</div>
+          <div style="display:flex;gap:6px;flex-shrink:0;">
+            <button class="btn btn--secondary btn--sm" onclick="openAttReportRow(5)"><i class="fa-solid fa-eye"></i> View</button>
+            <button class="btn btn--ghost btn--sm"><i class="fa-solid fa-download"></i></button>
+          </div>
+        </div>
+
+      </div>
+    </div><!-- /panel-history -->
+
+  </div><!-- /main -->
+</div><!-- /app -->
+
+
+<!-- ══════════════════════════════════════════════════
+     EXPORT REPORT MODAL
+══════════════════════════════════════════════════ -->
+<div class="modal-backdrop is-hidden" id="export-modal" onclick="handleBackdropClick(event)">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="export-modal-title">
+    <div class="modal__h">
+      <div>
+        <div class="modal__title" id="export-modal-title"><i class="fa-solid fa-file-export" style="color:var(--c-brand);margin-right:6px;"></i>Export Report</div>
+        <div class="modal__sub">Exports the currently filtered view as a downloadable file.</div>
+      </div>
+      <button class="modal__close" onclick="closeExportModal()" aria-label="Close"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="modal__b">
+
+      <div class="modal-field">
+        <label class="modal-label" for="gen-format">Format</label>
+        <div class="format-toggle">
+          <button class="format-btn is-selected" id="fmt-pdf" onclick="selectFormat('pdf')"><i class="fa-solid fa-file-pdf"></i>PDF</button>
+          <button class="format-btn" id="fmt-csv" onclick="selectFormat('csv')"><i class="fa-solid fa-file-csv"></i>CSV</button>
+        </div>
+      </div>
+
+      <div class="modal-field">
+        <label class="modal-label" for="gen-scope">Scope</label>
+        <select class="modal-select" id="gen-scope">
+          <option value="all">All Schools (Board-Wide)</option>
+          <option value="Notre-Dame">École Notre-Dame</option>
+          <option value="Sainte-Croix">École Sainte-Croix</option>
+          <option value="Saint-Joseph">École Saint-Joseph</option>
+          <option value="Saint-Luc">École Saint-Luc</option>
+          <option value="Saint-Michel">École sec. Saint-Michel</option>
+          <option value="Sainte-Marie">École sec. Sainte-Marie</option>
+          <option value="Carrefour">École sec. du Carrefour</option>
+          <option value="Avenir">École sec. de l'Avenir</option>
+        </select>
+      </div>
+
+      <div class="modal-field">
+        <label class="modal-label" for="gen-term">Term</label>
+        <select class="modal-select" id="gen-term">
+          <option selected>Term 4 · 2025–26</option>
+          <option>Term 3 · 2025–26</option>
+          <option>Term 2 · 2025–26</option>
+          <option>Term 1 · 2025–26</option>
+          <option>Full Year · 2025–26</option>
+        </select>
+      </div>
+
+      <div class="modal-field">
+        <label class="modal-label">Date Range</label>
+        <div class="modal-date-row">
+          <input type="date" class="modal-select" id="gen-date-from" value="2026-06-01" style="flex:1;">
+          <span style="font-size:12px;color:var(--c-ink-muted);flex-shrink:0;">to</span>
+          <input type="date" class="modal-select" id="gen-date-to" value="2026-06-24" style="flex:1;">
+        </div>
+      </div>
+
+      <div class="modal-summary">
+        <div class="modal-summary__row"><span>Report type</span><span class="modal-summary__val">Attendance Summary</span></div>
+        <div class="modal-summary__row"><span>Exported by</span><span class="modal-summary__val">André Rousseau</span></div>
+        <div class="modal-summary__row"><span>Date</span><span class="modal-summary__val">June 24, 2026</span></div>
+      </div>
+
+    </div>
+    <div class="modal__f">
+      <button class="btn btn--secondary" onclick="closeExportModal()">Cancel</button>
+      <button class="btn btn--primary" onclick="generateReport()"><i class="fa-solid fa-file-arrow-down"></i> Generate &amp; Download</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════
+     REPORT PREVIEW MODAL (shown when clicking View in history)
+══════════════════════════════════════════════════ -->
+<div class="modal-backdrop is-hidden" id="att-modal" onclick="if(event.target===this)hideAttendanceSummary()">
+  <div class="modal modal--preview" role="dialog" aria-modal="true" aria-label="Report preview">
+    <div class="modal__h">
+      <div>
+        <div class="modal__title"><i class="fa-solid fa-chart-column" style="color:var(--c-brand);margin-right:6px;"></i>Attendance Summary Report</div>
+        <div class="preview-meta">
+          <span><i class="fa-solid fa-school"></i> <strong id="att-school">All Schools</strong></span>
+          <span><i class="fa-regular fa-calendar"></i> <strong id="att-range">Term 4 · 2025–26</strong></span>
+          <span><i class="fa-solid fa-clock"></i> Generated <strong id="att-date">Jun 19, 2026</strong></span>
+        </div>
+      </div>
+      <button class="modal__close" onclick="hideAttendanceSummary()" aria-label="Close"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="modal__b" id="att-content" style="padding:20px 24px;display:flex;flex-direction:column;gap:16px;"></div>
+    <div class="modal__f" style="justify-content:space-between;">
+      <div style="display:flex;gap:8px;">
+        <button class="btn btn--ghost btn--sm"><i class="fa-solid fa-file-pdf"></i> PDF</button>
+        <button class="btn btn--ghost btn--sm"><i class="fa-solid fa-file-csv"></i> CSV</button>
+      </div>
+      <button class="btn btn--secondary" onclick="hideAttendanceSummary()">Close</button>
+    </div>
+  </div>
+</div>
+
+
+<script>
+/* ═══════════════════════════════════════════════
+   SCHOOL DATA (source of truth for live table)
+═══════════════════════════════════════════════ */
+var schoolData = [
+  {
+    name: 'École Notre-Dame',
+    type: 'elementary',
+    typeLabel: 'Elementary',
+    enrolled: 312,
+    rate: 96.8,
+    vs3: +1.1,
+    vsw: +0.3,
+    status: 'ok'
+  },
+  {
+    name: 'École Sainte-Croix',
+    type: 'elementary',
+    typeLabel: 'Elementary',
+    enrolled: 287,
+    rate: 95.2,
+    vs3: 0,
+    vsw: 0,
+    status: 'ok'
+  },
+  {
+    name: 'École Saint-Joseph',
+    type: 'elementary',
+    typeLabel: 'Elementary',
+    enrolled: 341,
+    rate: 93.5,
+    vs3: +0.8,
+    vsw: +0.5,
+    status: 'ok'
+  },
+  {
+    name: 'École Saint-Luc',
+    type: 'elementary',
+    typeLabel: 'Elementary',
+    enrolled: 268,
+    rate: 92.1,
+    vs3: 0,
+    vsw: 0,
+    status: 'ok'
+  },
+  {
+    name: 'École sec. Saint-Michel',
+    type: 'secondary',
+    typeLabel: 'Secondary',
+    enrolled: 518,
+    rate: 91.4,
+    vs3: +1.4,
+    vsw: +0.4,
+    status: 'ok'
+  },
+  {
+    name: 'École sec. Sainte-Marie',
+    type: 'secondary',
+    typeLabel: 'Secondary',
+    enrolled: 492,
+    rate: 90.8,
+    vs3: 0,
+    vsw: 0,
+    status: 'ok'
+  },
+  {
+    name: 'École sec. du Carrefour',
+    type: 'secondary',
+    typeLabel: 'Secondary',
+    enrolled: 476,
+    rate: 87.3,
+    vs3: -1.2,
+    vsw: -0.8,
+    status: 'warn'
+  },
+  {
+    name: 'École sec. de l\'Avenir',
+    type: 'secondary',
+    typeLabel: 'Secondary',
+    enrolled: 443,
+    rate: 84.1,
+    vs3: -2.1,
+    vsw: -1.2,
+    status: 'alert'
+  }
+];
+
+/* Sort state */
+var sortCol = 'rate';
+var sortDir = 'desc'; /* desc = highest first */
+
+/* Filter state */
+var typeFilter = 'all';
+
+/* ───── Tab switching ───── */
+function switchTab(name) {
+  document.querySelectorAll('.report-tab').forEach(function(t){ t.classList.remove('is-active'); t.setAttribute('aria-selected','false'); });
+  document.querySelectorAll('.tab-panel').forEach(function(p){ p.classList.remove('is-active'); });
+  document.getElementById('tab-' + name).classList.add('is-active');
+  document.getElementById('tab-' + name).setAttribute('aria-selected','true');
+  document.getElementById('panel-' + name).classList.add('is-active');
+}
+
+/* ───── Attention bar dismiss ───── */
+function dismissAttention() {
+  var bar = document.getElementById('attention-bar');
+  if (bar) bar.style.display = 'none';
+}
+
+/* ───── Highlight a school row ───── */
+function highlightSchool(name) {
+  /* Clear existing highlights */
+  document.querySelectorAll('#schools-tbody tr').forEach(function(r){ r.style.outline = ''; });
+  /* Make sure live data tab is active */
+  switchTab('report');
+  /* Find and highlight row */
+  document.querySelectorAll('#schools-tbody tr').forEach(function(r){
+    if (r.dataset.school === name) {
+      r.style.outline = '2px solid var(--c-warning-bord)';
+      r.scrollIntoView({behavior:'smooth', block:'center'});
+      setTimeout(function(){ r.style.outline = ''; }, 3000);
+    }
+  });
+}
+
+/* ───── Render rate bar ───── */
+function rateBar(rate) {
+  var cls = rate >= 90 ? 'ok' : rate >= 85 ? 'warn' : 'alert';
+  return '<div class="rate-bar"><div class="rate-track"><div class="rate-fill rate-fill--' + cls + '" style="width:' + rate + '%;"></div></div>' +
+         '<span class="rate-pct rate-pct--' + cls + '">' + rate.toFixed(1) + '%</span></div>';
+}
+
+/* ───── Render trend ───── */
+function trendHtml(val) {
+  if (val > 0)  return '<span class="trend trend--up"><i class="fa-solid fa-arrow-trend-up"></i> +' + val.toFixed(1) + ' pp</span>';
+  if (val < 0)  return '<span class="trend trend--down"><i class="fa-solid fa-arrow-trend-down"></i> ' + val.toFixed(1) + ' pp</span>';
+  return '<span class="trend trend--stable"><i class="fa-solid fa-minus"></i> Stable</span>';
+}
+
+/* ───── Render type chip ───── */
+function typeChip(type, label) {
+  var cls = type === 'elementary' ? 'chip--neutral' : 'chip--secondary';
+  return '<span class="chip ' + cls + '">' + label + '</span>';
+}
+
+/* ───── Render status chip ───── */
+function statusChip(status) {
+  if (status === 'ok')    return '<span class="chip chip--ok"><i class="fa-solid fa-circle-check"></i> On target</span>';
+  if (status === 'warn')  return '<span class="chip chip--warn"><i class="fa-solid fa-triangle-exclamation"></i> Below target</span>';
+  if (status === 'alert') return '<span class="chip chip--alert"><i class="fa-solid fa-circle-exclamation"></i> Below target</span>';
+  return '';
+}
+
+/* ───── Apply filters and render table ───── */
+function applyFilters() {
+  var search = (document.getElementById('school-search').value || '').toLowerCase();
+  var status = document.getElementById('status-filter').value;
+
+  var filtered = schoolData.filter(function(s){
+    if (typeFilter !== 'all' && s.type !== typeFilter) return false;
+    if (status === 'below' && s.status === 'ok') return false;
+    if (status === 'ontarget' && s.status !== 'ok') return false;
+    if (search && s.name.toLowerCase().indexOf(search) === -1) return false;
+    return true;
+  });
+
+  renderRows(filtered);
+}
+
+/* ───── Set type filter ───── */
+function setTypeFilter(type) {
+  typeFilter = type;
+  document.querySelectorAll('#type-toggles .toggle-btn').forEach(function(b){
+    b.classList.toggle('is-active', b.dataset.type === type);
+  });
+  applyFilters();
+}
+
+/* ───── Sort table ───── */
+function sortTable(col) {
+  if (sortCol === col) {
+    sortDir = sortDir === 'asc' ? 'desc' : 'asc';
+  } else {
+    sortCol = col;
+    sortDir = col === 'name' ? 'asc' : 'desc';
+  }
+
+  /* Update header visuals */
+  document.querySelectorAll('#schools-table th').forEach(function(th){
+    th.classList.remove('sorted');
+    var ico = th.querySelector('.sort-ico');
+    if (ico) ico.className = 'fa-solid fa-sort sort-ico';
+  });
+  document.querySelectorAll('#schools-table th[data-col="' + col + '"]').forEach(function(th){
+    th.classList.add('sorted');
+    var ico = th.querySelector('.sort-ico');
+    if (ico) ico.className = (sortDir === 'asc' ? 'fa-solid fa-sort-up' : 'fa-solid fa-sort-down') + ' sort-ico';
+  });
+
+  /* Sort */
+  schoolData.sort(function(a, b){
+    var av = col === 'name' ? a.name : col === 'enrolled' ? a.enrolled : col === 'vs3' ? a.vs3 : col === 'vsw' ? a.vsw : a.rate;
+    var bv = col === 'name' ? b.name : col === 'enrolled' ? b.enrolled : col === 'vs3' ? b.vs3 : col === 'vsw' ? b.vsw : b.rate;
+    if (typeof av === 'string') return sortDir === 'asc' ? av.localeCompare(bv) : bv.localeCompare(av);
+    return sortDir === 'asc' ? av - bv : bv - av;
+  });
+
+  applyFilters();
+}
+
+/* ───── Render rows ───── */
+function renderRows(data) {
+  var tbody = document.getElementById('schools-tbody');
+  var count = document.getElementById('result-count');
+
+  if (data.length === 0) {
+    tbody.innerHTML = '<tr class="empty-row"><td colspan="7" style="text-align:center;padding:40px;color:var(--c-ink-subtle);"><i class="fa-solid fa-magnifying-glass" style="display:block;font-size:22px;margin-bottom:8px;opacity:0.4;"></i>No schools match your filters.</td></tr>';
+    count.textContent = '0 of ' + schoolData.length + ' schools';
+    return;
+  }
+
+  count.textContent = data.length + ' of ' + schoolData.length + ' school' + (schoolData.length !== 1 ? 's' : '');
+
+  var html = '';
+  data.forEach(function(s){
+    var rowCls = s.status === 'alert' ? 'row--alert' : s.status === 'warn' ? 'row--warn' : '';
+    html += '<tr class="' + rowCls + '" data-school="' + s.name + '">';
+    html += '<td><div class="school-cell"><span class="school-name">' + s.name + '</span><a href="#" class="school-link">View school →</a></div></td>';
+    html += '<td>' + typeChip(s.type, s.typeLabel) + '</td>';
+    html += '<td>' + s.enrolled.toLocaleString() + '</td>';
+    html += '<td>' + rateBar(s.rate) + '</td>';
+    html += '<td>' + trendHtml(s.vs3) + '</td>';
+    html += '<td>' + trendHtml(s.vsw) + '</td>';
+    html += '<td>' + statusChip(s.status) + '</td>';
+    html += '</tr>';
+  });
+  tbody.innerHTML = html;
+}
+
+/* ───── Term change (placeholder) ───── */
+function onTermChange() {
+  var term = document.getElementById('term-select').value;
+  console.log('Term changed to: ' + term);
+  /* In production this would refetch data for the selected term */
+}
+
+/* ═══════════════════════════════════════════════
+   EXPORT MODAL
+═══════════════════════════════════════════════ */
+var _selectedFormat = 'pdf';
+
+function selectFormat(fmt) {
+  _selectedFormat = fmt;
+  document.getElementById('fmt-pdf').classList.toggle('is-selected', fmt === 'pdf');
+  document.getElementById('fmt-csv').classList.toggle('is-selected', fmt === 'csv');
+}
+
+function openExportModal() {
+  document.getElementById('export-modal').classList.remove('is-hidden');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeExportModal() {
+  document.getElementById('export-modal').classList.add('is-hidden');
+  document.body.style.overflow = '';
+}
+
+function handleBackdropClick(e) {
+  if (e.target === document.getElementById('export-modal')) closeExportModal();
+}
+
+document.addEventListener('keydown', function(e){
+  if (e.key === 'Escape') { closeExportModal(); hideAttendanceSummary(); }
+});
+
+/* ═══════════════════════════════════════════════
+   GENERATE REPORT (history list)
+═══════════════════════════════════════════════ */
+var _attRows = [
+  {date:'Jun 19, 2026', term:'Term 4 · 2025–26', scope:'All Schools',         schoolKey:'all',         dateFrom:'Jun 1, 2026',  dateTo:'Jun 19, 2026'},
+  {date:'Jun 6, 2026',  term:'Term 4 · 2025–26', scope:'All Schools',         schoolKey:'all',         dateFrom:'May 1, 2026',  dateTo:'Jun 6, 2026'},
+  {date:'May 9, 2026',  term:'Term 4 · 2025–26', scope:'École Notre-Dame',    schoolKey:'Notre-Dame',  dateFrom:'May 1, 2026',  dateTo:'May 9, 2026'},
+  {date:'May 2, 2026',  term:'Term 4 · 2025–26', scope:'All Schools',         schoolKey:'all',         dateFrom:'Apr 1, 2026',  dateTo:'May 2, 2026'},
+  {date:'Apr 4, 2026',  term:'Term 4 · 2025–26', scope:'École Sainte-Croix',  schoolKey:'Sainte-Croix',dateFrom:'Mar 1, 2026',  dateTo:'Apr 4, 2026'},
+  {date:'Jan 9, 2026',  term:'Term 2 · 2024–25', scope:'All Schools',         schoolKey:'all',         dateFrom:'Sep 2, 2025',  dateTo:'Jan 9, 2026'}
+];
+
+function generateReport() {
+  var scopeVal  = document.getElementById('gen-scope').value;
+  var term      = document.getElementById('gen-term').value;
+  var dateFrom  = document.getElementById('gen-date-from').value;
+  var dateTo    = document.getElementById('gen-date-to').value;
+  var fmt       = _selectedFormat;
+
+  var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  var today  = new Date();
+  var displayDate = months[today.getMonth()] + ' ' + today.getDate() + ', ' + today.getFullYear();
+
+  var scopeLabels = {
+    'all':'All Schools','Notre-Dame':'École Notre-Dame','Sainte-Croix':'École Sainte-Croix',
+    'Saint-Joseph':'École Saint-Joseph','Saint-Luc':'École Saint-Luc',
+    'Saint-Michel':'École sec. Saint-Michel','Sainte-Marie':'École sec. Sainte-Marie',
+    'Carrefour':'École sec. du Carrefour','Avenir':'École sec. de l\'Avenir'
+  };
+  var scopeLabel = scopeLabels[scopeVal] || 'All Schools';
+
+  function fmtDate(iso) {
+    if (!iso) return '';
+    var p = iso.split('-');
+    return months[parseInt(p[1],10)-1] + ' ' + parseInt(p[2],10) + ', ' + p[0];
+  }
+
+  var dfDisplay = fmtDate(dateFrom);
+  var dtDisplay = fmtDate(dateTo);
+  var newIdx = _attRows.length;
+  _attRows.push({date:displayDate, term:term, scope:scopeLabel, schoolKey:scopeVal, dateFrom:dfDisplay, dateTo:dtDisplay});
+
+  /* Add to history list */
+  var list = document.getElementById('history-list');
+  var descLabel = 'Attendance Summary · ' + scopeLabel + (dfDisplay ? ' · ' + dfDisplay + ' – ' + dtDisplay : '');
+  var fmtIcon = fmt === 'csv'
+    ? '<i class="fa-solid fa-file-csv" style="color:var(--c-success);font-size:16px;flex-shrink:0;"></i>'
+    : '<i class="fa-solid fa-file-pdf" style="color:var(--c-danger);font-size:16px;flex-shrink:0;"></i>';
+
+  var newRow = '<div class="history-row" style="background:#EEF5FF;">' + fmtIcon +
+    '<div class="history-row__name">' + descLabel +
+    ' <span style="background:var(--c-brand);color:#fff;font-size:10px;padding:1px 6px;border-radius:999px;font-weight:700;margin-left:4px;">New</span></div>' +
+    '<div class="history-row__meta"><i class="fa-regular fa-calendar"></i> ' + displayDate + '</div>' +
+    '<div class="history-row__user"><i class="fa-regular fa-user"></i> André Rousseau</div>' +
+    '<div style="display:flex;gap:6px;flex-shrink:0;">' +
+      '<button class="btn btn--secondary btn--sm" onclick="openAttReportRow(' + newIdx + ')"><i class="fa-solid fa-eye"></i> View</button>' +
+      '<button class="btn btn--ghost btn--sm"><i class="fa-solid fa-download"></i></button>' +
+    '</div></div>';
+
+  var intro = list.querySelector('.history-intro');
+  if (intro) intro.insertAdjacentHTML('afterend', newRow);
+  else list.insertAdjacentHTML('afterbegin', newRow);
+
+  var cntEl = document.getElementById('history-count');
+  cntEl.textContent = parseInt(cntEl.textContent) + 1;
+
+  closeExportModal();
+  switchTab('history');
+}
+
+function openAttReportRow(idx) {
+  var r = _attRows[idx];
+  if (!r) return;
+  showAttendanceSummary(r.schoolKey || 'all', r.term, r.date, r.dateFrom, r.dateTo);
+}
+
+/* ═══════════════════════════════════════════════
+   ATTENDANCE DATA (for report preview modal)
+═══════════════════════════════════════════════ */
+var attendanceData = {
+  'Notre-Dame':{
+    full:'École Notre-Dame', enrolled:245,
+    days:[
+      {date:'Jun 2, 2026',day:'Mon',present:231,absent:11,late:3},
+      {date:'Jun 3, 2026',day:'Tue',present:234,absent:9, late:2},
+      {date:'Jun 4, 2026',day:'Wed',present:229,absent:13,late:3},
+      {date:'Jun 5, 2026',day:'Thu',present:236,absent:7, late:2},
+      {date:'Jun 6, 2026',day:'Fri',present:228,absent:14,late:3}
+    ],
+    students:[
+      {student:'Lena Bergeron',    id:'STD-2294',grade:'Gr 11',totalDays:5,present:3,absent:2,late:0,rate:'60.0'},
+      {student:'Marcus Okonkwo',   id:'STD-1882',grade:'Gr 10',totalDays:5,present:5,absent:0,late:0,rate:'100.0'},
+      {student:'Aisha Ndiaye',     id:'STD-3340',grade:'Gr 9', totalDays:5,present:4,absent:1,late:0,rate:'80.0'},
+      {student:'Julien Tremblay',  id:'STD-2901',grade:'Gr 12',totalDays:5,present:5,absent:0,late:0,rate:'100.0'},
+      {student:'Sophie Lafortune', id:'STD-3112',grade:'Gr 10',totalDays:5,present:4,absent:0,late:1,rate:'80.0'},
+      {student:'Émile Beaumont',   id:'STD-1445',grade:'Gr 11',totalDays:5,present:3,absent:1,late:1,rate:'60.0'}
+    ]
+  },
+  'Sainte-Croix':{
+    full:'École Sainte-Croix', enrolled:198,
+    days:[
+      {date:'Jun 2, 2026',day:'Mon',present:186,absent:10,late:2},
+      {date:'Jun 3, 2026',day:'Tue',present:189,absent:8, late:1},
+      {date:'Jun 4, 2026',day:'Wed',present:184,absent:12,late:2},
+      {date:'Jun 5, 2026',day:'Thu',present:191,absent:6, late:1},
+      {date:'Jun 6, 2026',day:'Fri',present:183,absent:13,late:2}
+    ],
+    students:[
+      {student:'Omar Hassane',    id:'STD-1560',grade:'Gr 10',totalDays:5,present:5,absent:0,late:0,rate:'100.0'},
+      {student:'Camille Dubois',  id:'STD-2413',grade:'Gr 11',totalDays:5,present:4,absent:1,late:0,rate:'80.0'},
+      {student:'Priya Natarajan', id:'STD-3107',grade:'Gr 9', totalDays:5,present:3,absent:2,late:0,rate:'60.0'},
+      {student:'Elise Carrier',   id:'STD-3881',grade:'Gr 9', totalDays:5,present:5,absent:0,late:0,rate:'100.0'},
+      {student:'Noah Gagnon',     id:'STD-2244',grade:'Gr 12',totalDays:5,present:4,absent:0,late:1,rate:'80.0'}
+    ]
+  },
+  'Saint-Michel':{
+    full:'École Saint-Michel', enrolled:176,
+    days:[
+      {date:'Jun 2, 2026',day:'Mon',present:166,absent:8, late:2},
+      {date:'Jun 3, 2026',day:'Tue',present:168,absent:7, late:1},
+      {date:'Jun 4, 2026',day:'Wed',present:163,absent:11,late:2},
+      {date:'Jun 5, 2026',day:'Thu',present:170,absent:5, late:1},
+      {date:'Jun 6, 2026',day:'Fri',present:162,absent:12,late:2}
+    ],
+    students:[
+      {student:'Fatou Diallo',       id:'STD-1723',grade:'Gr 11',totalDays:5,present:4,absent:1,late:0,rate:'80.0'},
+      {student:'Thomas Villeneuve',  id:'STD-0891',grade:'Gr 12',totalDays:5,present:5,absent:0,late:0,rate:'100.0'},
+      {student:'Isabelle Marchand',  id:'STD-2659',grade:'Gr 10',totalDays:5,present:3,absent:2,late:0,rate:'60.0'},
+      {student:'Samuel Osei',        id:'STD-3384',grade:'Gr 9', totalDays:5,present:5,absent:0,late:0,rate:'100.0'}
+    ]
+  },
+  'Saint-Luc':{
+    full:'École Saint-Luc', enrolled:134,
+    days:[
+      {date:'Jun 2, 2026',day:'Mon',present:127,absent:6,late:1},
+      {date:'Jun 3, 2026',day:'Tue',present:128,absent:5,late:1},
+      {date:'Jun 4, 2026',day:'Wed',present:125,absent:8,late:1},
+      {date:'Jun 5, 2026',day:'Thu',present:129,absent:4,late:1},
+      {date:'Jun 6, 2026',day:'Fri',present:124,absent:9,late:1}
+    ],
+    students:[
+      {student:'Anais Cote-Leblanc', id:'STD-4412',grade:'Gr 8',totalDays:5,present:5,absent:0,late:0,rate:'100.0'},
+      {student:'Mikael Fortin',      id:'STD-4101',grade:'Gr 9',totalDays:5,present:4,absent:1,late:0,rate:'80.0'},
+      {student:'Chloe Arsenault',    id:'STD-4788',grade:'Gr 8',totalDays:5,present:3,absent:1,late:1,rate:'60.0'}
+    ]
+  }
+};
+
+/* ═══════════════════════════════════════════════
+   PREVIEW MODAL RENDERER
+═══════════════════════════════════════════════ */
+function showAttendanceSummary(scopeKey, term, dateGenerated, dateFrom, dateTo) {
+  var allKeys = ['Notre-Dame','Sainte-Croix','Saint-Michel','Saint-Luc'];
+  var isAll   = (scopeKey === 'all');
+  var rangeLabel = (dateFrom && dateTo) ? dateFrom + ' – ' + dateTo : term;
+
+  document.getElementById('att-school').textContent = isAll ? 'All Schools — Board-Wide' : (attendanceData[scopeKey] ? attendanceData[scopeKey].full : scopeKey);
+  document.getElementById('att-range').textContent  = rangeLabel;
+  document.getElementById('att-date').textContent   = dateGenerated || 'Jun 24, 2026';
+
+  var c = '';
+
+  if (isAll) {
+    var totE=0,totP=0,totA=0,totL=0;
+    var rows=[];
+    for (var ki=0;ki<allKeys.length;ki++) {
+      var sd=attendanceData[allKeys[ki]];
+      if(!sd) continue;
+      var sP=0,sA=0,sL=0;
+      for(var di=0;di<sd.days.length;di++){sP+=sd.days[di].present;sA+=sd.days[di].absent;sL+=sd.days[di].late;}
+      var sDays=sd.days.length;
+      var sRate=sDays>0?((sP/(sd.enrolled*sDays))*100).toFixed(1):'—';
+      totE+=sd.enrolled;totP+=sP;totA+=sA;totL+=sL;
+      rows.push({full:sd.full,enrolled:sd.enrolled,present:sP,absent:sA,late:sL,days:sDays,rate:sRate});
+    }
+    var bRate=totE>0?((totP/(totE*5))*100).toFixed(1):'—';
+
+    c+='<div class="pkpi-grid pkpi-grid--4">';
+    c+='<div class="pkpi-card"><div class="pkpi-label">Total Enrolled</div><div class="pkpi-value">'+totE+'</div><div class="pkpi-sub">board-wide</div></div>';
+    c+='<div class="pkpi-card"><div class="pkpi-label">Avg. Attendance Rate</div><div class="pkpi-value">'+bRate+'%</div><div class="pkpi-sub">across all schools</div></div>';
+    c+='<div class="pkpi-card"><div class="pkpi-label">Total Absences</div><div class="pkpi-value">'+totA+'</div><div class="pkpi-sub">across date range</div></div>';
+    c+='<div class="pkpi-card"><div class="pkpi-label">Total Late Arrivals</div><div class="pkpi-value">'+totL+'</div><div class="pkpi-sub">across date range</div></div>';
+    c+='</div>';
+
+    c+='<div><div style="font-size:12px;font-weight:700;color:#111;padding:8px 0 0;border-bottom:2px solid #111;margin-bottom:0;">School Summary</div>';
+    c+='<div style="font-size:11px;color:#555;padding:4px 0 8px;">Aggregated over the selected date range.</div>';
+    c+='<div style="border:1px solid #ccc;border-radius:0 0 6px 6px;overflow:hidden;"><table class="preview-table"><thead><tr>';
+    c+='<th>School</th><th style="text-align:center;">Enrolled</th><th style="text-align:center;">Days</th><th style="text-align:center;">Absences</th><th style="text-align:center;">Late</th><th style="text-align:center;">Rate</th>';
+    c+='</tr></thead><tbody>';
+    for(var si=0;si<rows.length;si++){
+      var sr=rows[si];
+      var bt=parseFloat(sr.rate)<90;
+      c+='<tr><td style="font-weight:600;color:#111;">'+sr.full+'</td>';
+      c+='<td style="text-align:center;">'+sr.enrolled+'</td>';
+      c+='<td style="text-align:center;">'+sr.days+'</td>';
+      c+='<td style="text-align:center;">'+sr.absent+'</td>';
+      c+='<td style="text-align:center;">'+sr.late+'</td>';
+      c+='<td style="text-align:center;font-weight:'+(bt?'700':'400')+';color:#111;">'+sr.rate+'%'+(bt?' *':'')+'</td></tr>';
+    }
+    c+='</tbody></table></div>';
+    c+='<div style="font-size:10px;color:#555;margin-top:6px;">* Below 90% attendance target</div></div>';
+
+  } else {
+    var sd=attendanceData[scopeKey];
+    if(!sd){document.getElementById('att-content').innerHTML='<p style="padding:20px;text-align:center;color:#555;">No data available for this scope.</p>';document.getElementById('att-modal').classList.remove('is-hidden');return;}
+    var tP=0,tA=0,tL=0;
+    for(var di=0;di<sd.days.length;di++){tP+=sd.days[di].present;tA+=sd.days[di].absent;tL+=sd.days[di].late;}
+    var schRate=sd.days.length>0?((tP/(sd.enrolled*sd.days.length))*100).toFixed(1):'—';
+
+    c+='<div style="background:#1a1a1a;color:#fff;padding:11px 16px;border-radius:6px 6px 0 0;"><div style="font-weight:700;font-size:14px;">'+sd.full+'</div></div>';
+    c+='<div style="display:grid;grid-template-columns:repeat(4,1fr);border:1px solid #ccc;border-top:none;margin-bottom:16px;">';
+    c+='<div style="padding:10px 14px;border-right:1px solid #ccc;"><div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#555;margin-bottom:3px;">Enrolled</div><div style="font-size:22px;font-weight:800;color:#111;">'+sd.enrolled+'</div></div>';
+    c+='<div style="padding:10px 14px;border-right:1px solid #ccc;"><div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#555;margin-bottom:3px;">Attendance Rate</div><div style="font-size:22px;font-weight:800;color:#111;">'+schRate+'%</div></div>';
+    c+='<div style="padding:10px 14px;border-right:1px solid #ccc;"><div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#555;margin-bottom:3px;">Total Absences</div><div style="font-size:22px;font-weight:800;color:#111;">'+tA+'</div></div>';
+    c+='<div style="padding:10px 14px;"><div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#555;margin-bottom:3px;">Late Arrivals</div><div style="font-size:22px;font-weight:800;color:#111;">'+tL+'</div></div>';
+    c+='</div>';
+
+    c+='<div style="font-size:12px;font-weight:700;color:#111;border-bottom:2px solid #111;padding-bottom:4px;margin-bottom:0;">Daily Breakdown</div>';
+    c+='<div style="border:1px solid #ccc;border-top:none;border-radius:0 0 6px 6px;overflow:hidden;margin-bottom:16px;">';
+    c+='<table class="preview-table"><thead><tr><th>Date</th><th>Day</th><th style="text-align:center;">Present</th><th style="text-align:center;">Absent</th><th style="text-align:center;">Late</th><th style="text-align:center;">Rate</th></tr></thead><tbody>';
+    for(var di=0;di<sd.days.length;di++){
+      var day=sd.days[di];
+      var dr=((day.present/sd.enrolled)*100).toFixed(1);
+      var low=parseFloat(dr)<90;
+      c+='<tr><td style="white-space:nowrap;">'+day.date+'</td><td style="color:#555;">'+day.day+'</td>';
+      c+='<td style="text-align:center;">'+day.present+'</td><td style="text-align:center;">'+day.absent+'</td>';
+      c+='<td style="text-align:center;">'+day.late+'</td>';
+      c+='<td style="text-align:center;font-weight:'+(low?'700':'400')+';">'+dr+'%'+(low?' *':'')+'</td></tr>';
+    }
+    c+='</tbody></table></div>';
+
+    var stuSorted=sd.students.slice().sort(function(a,b){return parseFloat(a.rate)-parseFloat(b.rate);});
+    c+='<div style="font-size:12px;font-weight:700;color:#111;border-bottom:2px solid #111;padding-bottom:4px;margin-bottom:0;">Student Attendance Summary</div>';
+    c+='<div style="font-size:11px;color:#555;padding:4px 0 6px;">Sorted by attendance rate, lowest first.</div>';
+    c+='<div style="border:1px solid #ccc;border-radius:0 0 6px 6px;overflow:hidden;">';
+    c+='<table class="preview-table"><thead><tr><th>Student</th><th>Grade</th><th style="text-align:center;">Days</th><th style="text-align:center;">Present</th><th style="text-align:center;">Absent</th><th style="text-align:center;">Late</th><th style="text-align:center;">Rate</th></tr></thead><tbody>';
+    for(var sti=0;sti<stuSorted.length;sti++){
+      var stu=stuSorted[sti];
+      var ls=parseFloat(stu.rate)<80;
+      c+='<tr><td><div style="font-weight:600;color:#111;">'+stu.student+'</div><div style="font-size:11px;color:#555;">'+stu.id+'</div></td>';
+      c+='<td>'+stu.grade+'</td><td style="text-align:center;">'+stu.totalDays+'</td>';
+      c+='<td style="text-align:center;">'+stu.present+'</td><td style="text-align:center;">'+stu.absent+'</td>';
+      c+='<td style="text-align:center;">'+stu.late+'</td>';
+      c+='<td style="text-align:center;font-weight:'+(ls?'700':'400')+';">'+stu.rate+'%'+(ls?' *':'')+'</td></tr>';
+    }
+    c+='</tbody></table></div>';
+    c+='<div style="font-size:10px;color:#555;margin-top:6px;">* Below 80% individual attendance threshold</div>';
+  }
+
+  document.getElementById('att-content').innerHTML = c;
+  document.getElementById('att-modal').classList.remove('is-hidden');
+  document.body.style.overflow = 'hidden';
+}
+
+function hideAttendanceSummary() {
+  document.getElementById('att-modal').classList.add('is-hidden');
+  document.body.style.overflow = '';
+}
+
+/* ═══════════════════════════════════════════════
+   INIT
+═══════════════════════════════════════════════ */
+/* Sort by rate desc initially (highest-rate schools first) then render */
+schoolData.sort(function(a,b){ return b.rate - a.rate; });
+renderRows(schoolData);
+</script>
+</body>
+</html>

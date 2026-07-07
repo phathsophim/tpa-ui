@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ClassTrack — Parent Sign In</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <style>
+    :root {
+      --c-bg:            #F6F8FB;
+      --c-surface:       #FFFFFF;
+      --c-surface-2:     #F8FAFC;
+      --c-border:        #E5E8EE;
+      --c-border-2:      #EEF1F5;
+      --c-border-strong: #CFD5DD;
+      --c-ink:           #0F2546;
+      --c-ink-muted:     #475467;
+      --c-ink-subtle:    #6E7682;
+      --c-brand:         #1B5DAF;
+      --c-brand-ink:     #0E2E55;
+      --c-brand-tint:    #E8F0FA;
+      --c-info:          #0E5C8A;
+      --c-info-tint:     #E0EFF7;
+      --c-info-bord:     #BDD7E8;
+      --c-focus:         #FFB400;
+      --s-2:8px; --s-3:12px; --s-4:16px; --s-5:24px; --s-6:32px; --s-7:48px;
+      --r-sm:6px; --r-md:10px; --r-lg:14px; --r-xl:18px; --r-2xl:24px; --r-pill:999px;
+      --ff: "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      --fs-xs:12px; --fs-sm:13px; --fs-md:14px; --fs-base:15px; --fs-lg:17px;
+      --fs-xl:20px; --fs-2xl:26px;
+      --shadow-xl: 0 20px 56px rgba(15,37,70,0.14);
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; }
+    body {
+      font-family: var(--ff);
+      background:
+        radial-gradient(ellipse at top left,   rgba(27,93,175,0.10), transparent 50%),
+        radial-gradient(ellipse at bottom right, rgba(27,93,175,0.08), transparent 50%),
+        var(--c-bg);
+      min-height: 100vh;
+      display: flex; align-items: center; justify-content: center;
+      padding: var(--s-5);
+      color: var(--c-ink); font-size: var(--fs-base); line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+    a { color: var(--c-brand); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    button { font-family: inherit; cursor: pointer; }
+    :focus-visible { outline: 3px solid var(--c-focus); outline-offset: 2px; border-radius: var(--r-sm); }
+    input::placeholder { color: var(--c-ink-subtle); }
+
+    html[data-lang="fr"] .t-en { display: none !important; }
+    html[data-lang="en"] .t-fr { display: none !important; }
+
+    /* ── Shell ── */
+    .auth-shell {
+      width: 100%; max-width: 1080px;
+      background: var(--c-surface);
+      border: 1px solid var(--c-border);
+      border-radius: var(--r-2xl);
+      overflow: hidden;
+      box-shadow: var(--shadow-xl);
+      display: grid;
+      grid-template-columns: 1fr 1.05fr;
+      min-height: 560px;
+    }
+    @media (max-width: 800px) {
+      .auth-shell { grid-template-columns: 1fr; min-height: auto; }
+      .auth-hero  { display: none; }
+      body { padding: var(--s-4); align-items: flex-start; }
+    }
+
+    /* ── Hero ── */
+    .auth-hero {
+      background: linear-gradient(145deg, #1a4f99 0%, #0E2E55 100%);
+      color: #fff;
+      padding: var(--s-7) var(--s-6);
+      display: flex; flex-direction: column; justify-content: center;
+      position: relative; overflow: hidden;
+    }
+    .auth-hero::before {
+      content: ''; position: absolute;
+      width: 380px; height: 380px; border-radius: 50%;
+      background: rgba(255,255,255,0.05);
+      top: -150px; right: -130px;
+    }
+    .auth-hero::after {
+      content: ''; position: absolute;
+      width: 280px; height: 280px; border-radius: 50%;
+      background: rgba(255,255,255,0.04);
+      bottom: -110px; left: -70px;
+    }
+    .auth-hero > * { position: relative; }
+
+    .hero-logo { display: flex; align-items: center; gap: var(--s-3); }
+    .hero-logo__mark {
+      width: 46px; height: 46px;
+      background: rgba(255,255,255,0.15);
+      border: 1px solid rgba(255,255,255,0.22);
+      border-radius: var(--r-lg);
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 800; font-size: 20px; color: #fff;
+    }
+    .hero-logo__text { font-size: var(--fs-lg); font-weight: 700; }
+    .hero-logo__sub  { font-size: var(--fs-xs); color: rgba(255,255,255,0.65); margin-top: 2px; }
+
+    .hero-headline {
+      margin-top: var(--s-6);
+      font-size: 32px; font-weight: 700;
+      line-height: 1.15; letter-spacing: -0.02em;
+    }
+    .hero-sub {
+      font-size: var(--fs-lg); color: rgba(255,255,255,0.78);
+      line-height: 1.6; max-width: 400px; margin-top: var(--s-3);
+    }
+
+    /* ── Form ── */
+    .auth-form {
+      padding: var(--s-7) var(--s-6);
+      display: flex; flex-direction: column; justify-content: center;
+      max-width: 480px; margin: 0 auto; width: 100%;
+    }
+
+    .auth-title { font-size: var(--fs-2xl); font-weight: 700; letter-spacing: -0.01em; }
+    .auth-sub   { color: var(--c-ink-muted); font-size: var(--fs-base); margin-top: 4px; }
+
+    /* IdP buttons */
+    .idp-stack { display: flex; flex-direction: column; gap: var(--s-2); margin-top: var(--s-5); }
+    .idp-btn {
+      display: flex; align-items: center; gap: var(--s-3);
+      width: 100%; padding: 13px var(--s-4);
+      border: 1.5px solid var(--c-border);
+      border-radius: var(--r-md);
+      background: var(--c-surface); color: var(--c-ink);
+      font-size: var(--fs-base); font-weight: 600;
+      text-decoration: none;
+      transition: background 0.12s, border-color 0.12s;
+    }
+    .idp-btn:hover { background: var(--c-surface-2); border-color: var(--c-brand); text-decoration: none; color: var(--c-ink); }
+    .idp-btn__logo { width: 22px; text-align: center; font-size: 18px; flex-shrink: 0; }
+    .idp-btn__arrow { margin-left: auto; color: var(--c-ink-subtle); font-size: 11px; }
+
+    /* Divider */
+    .divider {
+      display: flex; align-items: center; gap: var(--s-3);
+      color: var(--c-ink-subtle); font-size: 11px; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.08em;
+      margin: var(--s-4) 0;
+    }
+    .divider::before, .divider::after { content: ''; height: 1px; background: var(--c-border); flex: 1; }
+
+    /* Email field */
+    .field-wrap { position: relative; }
+    .field-icon {
+      position: absolute; left: 13px; top: 50%; transform: translateY(-50%);
+      color: var(--c-ink-subtle); font-size: 13px; pointer-events: none;
+    }
+    .field-input {
+      width: 100%; padding: 12px 14px 12px 40px;
+      border: 1.5px solid var(--c-border-strong);
+      border-radius: var(--r-md);
+      background: var(--c-surface); color: var(--c-ink);
+      font-family: inherit; font-size: var(--fs-base);
+      transition: border-color 0.12s, box-shadow 0.12s;
+    }
+    .field-input:focus {
+      outline: none;
+      border-color: var(--c-brand);
+      box-shadow: 0 0 0 3px var(--c-brand-tint);
+    }
+    .field-hint { font-size: var(--fs-xs); color: var(--c-ink-subtle); margin-top: 6px; }
+
+    .btn-primary {
+      display: flex; align-items: center; justify-content: center; gap: var(--s-2);
+      width: 100%; padding: 13px var(--s-5); margin-top: 10px;
+      background: var(--c-brand); border: none;
+      border-radius: var(--r-md); color: #fff;
+      font-family: inherit; font-size: var(--fs-base); font-weight: 700;
+      transition: background 0.12s;
+    }
+    .btn-primary:hover { background: var(--c-brand-ink); }
+
+    /* Notice */
+    .notice {
+      margin-top: var(--s-4);
+      display: flex; align-items: flex-start; gap: var(--s-3);
+      padding: var(--s-3) var(--s-4);
+      background: var(--c-info-tint);
+      border: 1px solid var(--c-info-bord);
+      border-radius: var(--r-md);
+    }
+    .notice__icon { color: var(--c-info); font-size: var(--fs-base); flex-shrink: 0; margin-top: 1px; }
+    .notice__text { font-size: var(--fs-xs); color: var(--c-ink-muted); line-height: 1.5; }
+
+    /* Footer */
+    .auth-links {
+      margin-top: var(--s-5);
+      display: flex; align-items: center; justify-content: center;
+      gap: var(--s-3); flex-wrap: wrap;
+      font-size: var(--fs-xs); color: var(--c-ink-subtle);
+    }
+    .auth-links a { color: var(--c-ink-subtle); }
+    .auth-links a:hover { color: var(--c-brand); }
+    .auth-links__sep { color: var(--c-border-strong); }
+    .lang { display: inline-flex; align-items: center; gap: 4px; }
+    .lang a { color: var(--c-ink-subtle); }
+    .lang a:hover { color: var(--c-brand); }
+    .lang .active { font-weight: 700; color: var(--c-brand); pointer-events: none; }
+  </style>
+</head>
+<body>
+
+<div class="auth-shell" role="main">
+
+  <!-- Hero -->
+  <aside class="auth-hero" aria-hidden="true">
+    <div>
+      <div class="hero-logo">
+        <div class="hero-logo__mark">CT</div>
+        <div>
+          <div class="hero-logo__text">ClassTrack</div>
+          <div class="hero-logo__sub">
+            <span class="t-en">EC Catholic · Parent portal</span>
+            <span class="t-fr">EC Catholic · Portail des parents</span>
+          </div>
+        </div>
+      </div>
+
+      <h1 class="hero-headline">
+        <span class="t-en">Stay close to<br>your child's day.</span>
+        <span class="t-fr">Restez proche de<br>la journée de votre enfant.</span>
+      </h1>
+      <p class="hero-sub">
+        <span class="t-en">Real-time attendance alerts, one-tap justifications, and advance absence declarations — all in one secure place.</span>
+        <span class="t-fr">Alertes de présence en temps réel, justifications en un clic et déclarations d'absence à l'avance — en un seul endroit sécurisé.</span>
+      </p>
+    </div>
+  </aside>
+
+  <!-- Form -->
+  <section class="auth-form">
+
+    <h2 class="auth-title">
+      <span class="t-en">Sign in to ClassTrack</span>
+      <span class="t-fr">Connexion à ClassTrack</span>
+    </h2>
+    <p class="auth-sub">
+      <span class="t-en">Use the email on file with your child's school.</span>
+      <span class="t-fr">Utilisez le courriel au dossier de l'école de votre enfant.</span>
+    </p>
+
+    <div class="idp-stack">
+      <a href="dashboard.html" class="idp-btn">
+        <span class="idp-btn__logo" style="color:#0078D4;" aria-hidden="true"><i class="fa-brands fa-microsoft"></i></span>
+        <span class="t-en">Continue with Microsoft</span>
+        <span class="t-fr">Continuer avec Microsoft</span>
+        <i class="fa-solid fa-arrow-right idp-btn__arrow" aria-hidden="true"></i>
+      </a>
+      <a href="dashboard.html" class="idp-btn">
+        <span class="idp-btn__logo" style="color:#4285F4;" aria-hidden="true"><i class="fa-brands fa-google"></i></span>
+        <span class="t-en">Continue with Google</span>
+        <span class="t-fr">Continuer avec Google</span>
+        <i class="fa-solid fa-arrow-right idp-btn__arrow" aria-hidden="true"></i>
+      </a>
+      <a href="dashboard.html" class="idp-btn">
+        <span class="idp-btn__logo" style="color:#1D1D1F;" aria-hidden="true"><i class="fa-brands fa-apple"></i></span>
+        <span class="t-en">Continue with Apple</span>
+        <span class="t-fr">Continuer avec Apple</span>
+        <i class="fa-solid fa-arrow-right idp-btn__arrow" aria-hidden="true"></i>
+      </a>
+    </div>
+
+    <div class="divider">
+      <span class="t-en">or</span>
+      <span class="t-fr">ou</span>
+    </div>
+
+    <div class="field-wrap">
+      <i class="fa-solid fa-envelope field-icon" aria-hidden="true"></i>
+      <input id="email" type="email" class="field-input" placeholder="your@email.com" aria-label="Email address" />
+    </div>
+    <div class="field-hint">
+      <span class="t-en">We'll send you a secure sign-in link.</span>
+      <span class="t-fr">Nous vous enverrons un lien de connexion sécurisé.</span>
+    </div>
+    <button type="button" class="btn-primary" onclick="window.location.href='dashboard.html'">
+      <i class="fa-solid fa-paper-plane" aria-hidden="true"></i>
+      <span class="t-en">Email me a sign-in link</span>
+      <span class="t-fr">M'envoyer un lien de connexion</span>
+    </button>
+
+    <div class="notice">
+      <i class="fa-solid fa-circle-info notice__icon" aria-hidden="true"></i>
+      <div class="notice__text">
+        <span class="t-en">Can't sign in? ClassTrack uses the email your school has on file. Contact the school office if you need help.</span>
+        <span class="t-fr">Vous ne pouvez pas vous connecter ? ClassTrack utilise le courriel au dossier de votre école. Contactez le secrétariat si vous avez besoin d'aide.</span>
+      </div>
+    </div>
+
+    <div class="auth-links">
+      <a href="#" class="t-en">Help</a><a href="#" class="t-fr">Aide</a>
+      <span class="auth-links__sep">·</span>
+      <a href="#" class="t-en">Privacy</a><a href="#" class="t-fr">Confidentialité</a>
+      <span class="auth-links__sep">·</span>
+      <a href="#" class="t-en">Terms</a><a href="#" class="t-fr">Conditions</a>
+      <span class="auth-links__sep">·</span>
+      <div class="lang">
+        <a href="#" onclick="setLang('en');return false;" id="lang-en" class="active">EN</a>
+        <span>/</span>
+        <a href="#" onclick="setLang('fr');return false;" id="lang-fr">FR</a>
+      </div>
+    </div>
+
+  </section>
+</div>
+
+<script>
+  function setLang(l) {
+    document.documentElement.setAttribute('data-lang', l);
+    document.getElementById('lang-en').className = l==='en'?'active':'';
+    document.getElementById('lang-fr').className = l==='fr'?'active':'';
+  }
+  setLang(new URLSearchParams(location.search).get('lang')==='fr'?'fr':'en');
+</script>
+</body>
+</html>

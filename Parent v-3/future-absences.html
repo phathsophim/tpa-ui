@@ -1,0 +1,944 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ClassTrack — Future absences</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="stylesheet" href="assets/styles.css">
+</head>
+<body>
+
+<a href="#main" class="skip-link" data-en="Skip to content" data-fr="Aller au contenu">Skip to content</a>
+
+<div class="app">
+<aside id="sidebar"></aside>
+<main id="main" class="shell">
+
+  <!-- Hero -->
+  <section class="hero-row">
+    <div>
+      <h1 class="hero-row__title" data-en="Future absences" data-fr="Absences futures">Future absences</h1>
+      <p class="hero-row__sub" data-en="Planned days your children won't be in class — declared by you or organized by the school." data-fr="Journées planifiées d'absence — déclarées par vous ou organisées par l'école.">Planned days your children won't be in class — declared by you or organized by the school.</p>
+    </div>
+    <div class="hero-row__actions">
+      <button type="button" class="btn btn--primary btn--lg" data-open-declare>
+        <i class="fa-solid fa-calendar-plus"></i>
+        <span data-en="Declare a future absence" data-fr="Déclarer une absence future">Declare a future absence</span>
+      </button>
+    </div>
+  </section>
+
+  <!-- Quick summary -->
+  <section class="grid-3">
+    <div class="card">
+      <div class="card__b" style="display: flex; align-items: center; gap: var(--s-3);">
+        <div class="simple-list__icon simple-list__icon--event"><i class="fa-solid fa-calendar-day"></i></div>
+        <div>
+          <div style="font-size: var(--fs-2xl); font-weight: 700; line-height: 1.1;">3</div>
+          <div class="fs-sm text-muted" data-en="Upcoming, total" data-fr="À venir, total">Upcoming, total</div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card__b" style="display: flex; align-items: center; gap: var(--s-3);">
+        <div class="simple-list__icon simple-list__icon--approve"><i class="fa-solid fa-user-check"></i></div>
+        <div>
+          <div style="font-size: var(--fs-2xl); font-weight: 700; line-height: 1.1;">2</div>
+          <div class="fs-sm text-muted" data-en="You declared" data-fr="Déclarées par vous">You declared</div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card__b" style="display: flex; align-items: center; gap: var(--s-3);">
+        <div class="simple-list__icon simple-list__icon--info"><i class="fa-solid fa-school"></i></div>
+        <div>
+          <div style="font-size: var(--fs-2xl); font-weight: 700; line-height: 1.1;">1</div>
+          <div class="fs-sm text-muted" data-en="From the school" data-fr="De l'école">From the school</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Filters -->
+  <section class="row row--between" style="align-items: center;">
+    <div class="tabs">
+      <button class="tab is-active">
+        <i class="fa-solid fa-list"></i>
+        <span data-en="All" data-fr="Toutes">All</span>
+        <span class="num">3</span>
+      </button>
+      <button class="tab">
+        <i class="fa-solid fa-user"></i>
+        <span data-en="Declared by me" data-fr="Déclarées par moi">Declared by me</span>
+        <span class="num">2</span>
+      </button>
+      <button class="tab">
+        <i class="fa-solid fa-school"></i>
+        <span data-en="School events" data-fr="Événements scolaires">School events</span>
+        <span class="num">1</span>
+      </button>
+    </div>
+    <div class="row gap-2">
+      <span class="fs-sm text-muted" data-en="Child:" data-fr="Enfant :">Child:</span>
+      <button class="chip is-active" data-en="All" data-fr="Tous">All</button>
+      <button class="chip"><div class="avatar avatar--blue avatar--sm" style="width:18px;height:18px;font-size:9px;">AC</div> Aaliyah</button>
+      <button class="chip"><div class="avatar avatar--orange avatar--sm" style="width:18px;height:18px;font-size:9px;">JC</div> Jaylen</button>
+    </div>
+  </section>
+
+  <!-- 2-column: Timeline (main) + Right rail with monthly overview -->
+  <div class="grid-2-1">
+
+    <!-- Timeline -->
+    <div class="stack">
+
+      <!-- This week -->
+      <section class="card">
+        <div class="card__h">
+          <div>
+            <div class="card__title" data-en="This week" data-fr="Cette semaine">This week</div>
+            <div class="card__sub" data-en="May 12 – May 18" data-fr="12 – 18 mai">May 12 – May 18</div>
+          </div>
+        </div>
+        <div class="card__b">
+          <div class="timeline">
+
+            <div class="timeline__item">
+              <div class="timeline__date" data-en="Thursday, May 14 · in 2 days" data-fr="Jeudi 14 mai · dans 2 jours">Thursday, May 14 · in 2 days</div>
+              <div class="future-card">
+                <div class="future-card__main">
+                  <div class="row gap-3">
+                    <div class="avatar avatar--blue">AC</div>
+                    <div class="flex-1">
+                      <div class="future-card__title">
+                        <i class="fa-solid fa-trophy text-warning"></i>
+                        <span data-en="Soccer tournament — away game" data-fr="Tournoi de soccer — match à l'extérieur">Soccer tournament — away game</span>
+                      </div>
+                      <div class="future-card__sub">
+                        <strong>Aaliyah Carter</strong> · <span data-en="Periods 3–4 (French, History) · School event" data-fr="Périodes 3–4 (Français, Histoire) · Événement scolaire">Periods 3–4 (French, History) · School event</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="future-card__chips">
+                    <span class="status status--info"><i class="fa-solid fa-school"></i> <span data-en="School event" data-fr="Événement scolaire">School event</span></span>
+                    <span class="status status--excused"><i class="fa-solid fa-check"></i> <span data-en="Auto-excused" data-fr="Auto-motivée">Auto-excused</span></span>
+                    <span class="status status--neutral" data-en="No action needed" data-fr="Aucune action requise">No action needed</span>
+                  </div>
+                </div>
+                <div class="future-card__meta">
+                  <div class="fs-xs text-muted" data-en="Organized by" data-fr="Organisé par">Organized by</div>
+                  <div class="fs-sm font-semibold" data-en="Coach Lévesque" data-fr="Entraîneur Lévesque">Coach Lévesque</div>
+                  <div class="fs-xs text-subtle mt-2" data-en="Athletics dept." data-fr="Dépt. athlétisme">Athletics dept.</div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+      <!-- Later this month -->
+      <section class="card">
+        <div class="card__h">
+          <div>
+            <div class="card__title" data-en="Later this month" data-fr="Plus tard ce mois-ci">Later this month</div>
+            <div class="card__sub" data-en="May 19 – May 31" data-fr="19 – 31 mai">May 19 – May 31</div>
+          </div>
+        </div>
+        <div class="card__b">
+          <div class="timeline">
+
+            <div class="timeline__item">
+              <div class="timeline__date" data-en="Friday, May 22 · in 10 days" data-fr="Vendredi 22 mai · dans 10 jours">Friday, May 22 · in 10 days</div>
+              <div class="future-card">
+                <div class="future-card__main">
+                  <div class="row gap-3">
+                    <div class="avatar avatar--blue">AC</div>
+                    <div class="flex-1">
+                      <div class="future-card__title">
+                        <i class="fa-solid fa-stethoscope text-success"></i>
+                        <span data-en="Family medical appointment" data-fr="Rendez-vous médical familial">Family medical appointment</span>
+                      </div>
+                      <div class="future-card__sub">
+                        <strong>Aaliyah Carter</strong> · <span data-en="Full day (4 periods)" data-fr="Journée complète (4 périodes)">Full day (4 periods)</span>
+                      </div>
+                      <div class="fs-sm text-muted mt-2" style="font-style: italic;" data-en="Appointment with Dr. Mehta at Children's Hospital, 10:00 AM." data-fr="Rendez-vous avec Dr Mehta à l'Hôpital des Enfants, 10 h 00.">Appointment with Dr. Mehta at Children's Hospital, 10:00 AM.</div>
+                    </div>
+                  </div>
+                  <div class="future-card__chips">
+                    <span class="status status--scheduled"><i class="fa-solid fa-user"></i> <span data-en="Declared by you" data-fr="Déclarée par vous">Declared by you</span></span>
+                    <span class="status status--excused"><i class="fa-solid fa-check"></i> <span data-en="Pre-justified" data-fr="Pré-motivée">Pre-justified</span></span>
+                  </div>
+                </div>
+                <div class="future-card__meta">
+                  <div class="fs-xs text-muted" data-en="Submitted" data-fr="Soumis">Submitted</div>
+                  <div class="fs-sm font-semibold" data-en="May 8, 2026" data-fr="8 mai 2026">May 8, 2026</div>
+                  <div class="row gap-2 mt-3">
+                    <button class="btn btn--ghost btn--sm" data-edit="medical" data-en="Edit" data-fr="Modifier">Edit</button>
+                    <button class="btn btn--ghost btn--sm text-danger" data-cancel="medical" data-en="Cancel" data-fr="Annuler">Cancel</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+      <!-- Next month -->
+      <section class="card">
+        <div class="card__h">
+          <div>
+            <div class="card__title" data-en="Next month" data-fr="Mois prochain">Next month</div>
+            <div class="card__sub" data-en="June 2026" data-fr="Juin 2026">June 2026</div>
+          </div>
+        </div>
+        <div class="card__b">
+          <div class="timeline">
+
+            <div class="timeline__item">
+              <div class="timeline__date" data-en="Mon, June 22 – Fri, June 26 · 5 days" data-fr="Lun. 22 juin – Ven. 26 juin · 5 jours">Mon, June 22 – Fri, June 26 · 5 days</div>
+              <div class="future-card">
+                <div class="future-card__main">
+                  <div class="row gap-3">
+                    <div class="row gap-2" style="flex-wrap: nowrap;">
+                      <div class="avatar avatar--blue">AC</div>
+                      <div class="avatar avatar--orange">JC</div>
+                    </div>
+                    <div class="flex-1">
+                      <div class="future-card__title">
+                        <i class="fa-solid fa-plane text-success"></i>
+                        <span data-en="Family vacation" data-fr="Vacances familiales">Family vacation</span>
+                      </div>
+                      <div class="future-card__sub">
+                        <strong data-en="Aaliyah + Jaylen" data-fr="Aaliyah + Jaylen">Aaliyah + Jaylen</strong> · <span data-en="Full week — both children" data-fr="Semaine complète — les deux enfants">Full week — both children</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="future-card__chips">
+                    <span class="status status--scheduled"><i class="fa-solid fa-user"></i> <span data-en="Declared by you" data-fr="Déclarée par vous">Declared by you</span></span>
+                    <span class="status status--pending"><i class="fa-regular fa-clock"></i> <span data-en="Awaiting school approval" data-fr="En attente d'approbation">Awaiting school approval</span></span>
+                  </div>
+                </div>
+                <div class="future-card__meta">
+                  <div class="fs-xs text-muted" data-en="Submitted" data-fr="Soumis">Submitted</div>
+                  <div class="fs-sm font-semibold" data-en="May 10, 2026" data-fr="10 mai 2026">May 10, 2026</div>
+                  <div class="row gap-2 mt-3">
+                    <button class="btn btn--ghost btn--sm" data-edit="vacation" data-en="Edit" data-fr="Modifier">Edit</button>
+                    <button class="btn btn--ghost btn--sm text-danger" data-cancel="vacation" data-en="Cancel" data-fr="Annuler">Cancel</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+    </div>
+
+    <!-- Right rail: month overview + tips -->
+    <aside class="rail">
+
+      <div class="card">
+        <div class="rail-card__h">
+          <div class="rail-card__title" data-en="At a glance" data-fr="En un coup d'œil">At a glance</div>
+        </div>
+        <div class="card__b" style="padding: var(--s-4);">
+          <div class="month-mini">
+            <div class="month-mini__h">
+              <strong>May 2026</strong>
+              <span class="fs-xs text-muted" data-en="Today: 12" data-fr="Aujourd'hui : 12">Today: 12</span>
+            </div>
+            <div class="month-mini__grid">
+              <div class="month-mini__dh">S</div><div class="month-mini__dh">M</div><div class="month-mini__dh">T</div><div class="month-mini__dh">W</div><div class="month-mini__dh">T</div><div class="month-mini__dh">F</div><div class="month-mini__dh">S</div>
+              <!-- Layout: May 2026 starts on Friday -->
+              <span></span><span></span><span></span><span></span><span></span><span>1</span><span class="we">2</span>
+              <span class="we">3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span><span class="we">9</span>
+              <span class="we">10</span><span>11</span><span class="today">12</span><span>13</span><span class="event">14</span><span>15</span><span class="we">16</span>
+              <span class="we">17</span><span>18</span><span>19</span><span>20</span><span>21</span><span class="future">22</span><span class="we">23</span>
+              <span class="we">24</span><span>25</span><span>26</span><span>27</span><span>28</span><span>29</span><span class="we">30</span>
+              <span class="we">31</span>
+            </div>
+            <div class="month-mini__legend">
+              <span class="row gap-2"><span class="dot-pin event-dot"></span> <span data-en="School event" data-fr="Événement">School event</span></span>
+              <span class="row gap-2"><span class="dot-pin future-dot"></span> <span data-en="Pre-declared" data-fr="Pré-déclarée">Pre-declared</span></span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="rail-card__h">
+          <div class="rail-card__title" data-en="How this works" data-fr="Comment ça marche">How this works</div>
+        </div>
+        <div class="card__b" style="padding: var(--s-4); display: flex; flex-direction: column; gap: var(--s-3);">
+          <div class="row gap-3" style="align-items: flex-start;">
+            <div class="simple-list__icon simple-list__icon--info" style="width: 32px; height: 32px; font-size: 14px;"><i class="fa-solid fa-user"></i></div>
+            <div>
+              <div class="fs-sm font-semibold" data-en="You declare" data-fr="Vous déclarez">You declare</div>
+              <div class="fs-sm text-muted" data-en="No notification will be sent on the day. The reason you give is pre-attached." data-fr="Aucune notification ne sera envoyée le jour même. Le motif est pré-attaché.">No notification will be sent on the day. The reason you give is pre-attached.</div>
+            </div>
+          </div>
+          <div class="row gap-3" style="align-items: flex-start;">
+            <div class="simple-list__icon simple-list__icon--event" style="width: 32px; height: 32px; font-size: 14px;"><i class="fa-solid fa-school"></i></div>
+            <div>
+              <div class="fs-sm font-semibold" data-en="The school declares" data-fr="L'école déclare">The school declares</div>
+              <div class="fs-sm text-muted" data-en="Sports, field trips and other events are added by staff and auto-justified. You'll see an informational notification." data-fr="Sports, sorties et événements sont ajoutés par le personnel et auto-motivés. Vous recevrez une notification informative.">Sports, field trips and other events are added by staff and auto-justified. You'll see an informational notification.</div>
+            </div>
+          </div>
+          <div class="row gap-3" style="align-items: flex-start;">
+            <div class="simple-list__icon simple-list__icon--approve" style="width: 32px; height: 32px; font-size: 14px;"><i class="fa-solid fa-check"></i></div>
+            <div>
+              <div class="fs-sm font-semibold" data-en="Approval" data-fr="Approbation">Approval</div>
+              <div class="fs-sm text-muted" data-en="Most absences are pre-justified instantly. Long stays (3+ days) get reviewed by the Attendance Clerk." data-fr="La plupart des absences sont pré-motivées instantanément. Les séjours de 3+ jours sont examinés par le Surveillant.">Most absences are pre-justified instantly. Long stays (3+ days) get reviewed by the Attendance Clerk.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </aside>
+
+  </div>
+
+</main>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     MODAL: Declare a future absence
+════════════════════════════════════════════════════════════ -->
+<div class="modal-backdrop" id="modal-declare" role="dialog" aria-modal="true" aria-labelledby="modal-declare-title">
+  <div class="modal" style="max-width: 720px;">
+
+    <!-- ── Form state ───────────────────────────────────────────── -->
+    <div id="declare-form-state">
+
+      <div class="modal__h">
+        <div>
+          <div class="modal__title" id="modal-declare-title">
+            <i class="fa-solid fa-calendar-plus" style="color:var(--c-brand);"></i>
+            Declare a future absence
+          </div>
+          <div class="modal__sub">Letting the school know in advance pre-justifies the absence — no notification needed on the day.</div>
+        </div>
+        <button class="modal__close" data-close-declare aria-label="Close"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+
+      <div class="modal__b">
+        <div class="stack">
+
+          <!-- Who? -->
+          <div>
+            <div class="field__label" style="margin-bottom: var(--s-2);">Who will be absent?</div>
+            <div class="declare-who-grid">
+              <label class="pick-card is-active" id="pick-aaliyah">
+                <input type="checkbox" checked style="position:absolute;opacity:0;">
+                <div class="avatar avatar--blue">AC</div>
+                <div class="pick-card__body">
+                  <div class="font-bold">Aaliyah Carter</div>
+                  <div class="fs-sm text-muted">Grade 7A · Secondary</div>
+                </div>
+                <i class="fa-solid fa-circle-check pick-card__check"></i>
+              </label>
+              <label class="pick-card" id="pick-jaylen">
+                <input type="checkbox" style="position:absolute;opacity:0;">
+                <div class="avatar avatar--orange">JC</div>
+                <div class="pick-card__body">
+                  <div class="font-bold">Jaylen Carter</div>
+                  <div class="fs-sm text-muted">Grade 4B · Elementary</div>
+                </div>
+                <i class="fa-regular fa-circle pick-card__check pick-card__check--empty"></i>
+              </label>
+            </div>
+          </div>
+
+          <div class="divider"></div>
+
+          <!-- When + Why (two columns) -->
+          <div class="declare-form-cols">
+
+            <!-- When -->
+            <div class="stack">
+              <div class="field__label">When?</div>
+
+              <div class="chip-group row gap-2" id="declare-date-mode-group">
+                <button class="chip is-active" type="button" data-declare-mode="single">Single day</button>
+                <button class="chip" type="button" data-declare-mode="range">Date range</button>
+              </div>
+
+              <div id="declare-single-date">
+                <div class="field">
+                  <label class="field__label" for="declare-date" style="font-weight:400;">Date</label>
+                  <input id="declare-date" class="input" type="date" value="2026-06-25">
+                </div>
+              </div>
+
+              <div id="declare-range-date" style="display:none;">
+                <div class="grid-2" style="gap:var(--s-3);">
+                  <div class="field">
+                    <label class="field__label" for="declare-from" style="font-weight:400;">From</label>
+                    <input id="declare-from" class="input" type="date" value="2026-06-25">
+                  </div>
+                  <div class="field">
+                    <label class="field__label" for="declare-to" style="font-weight:400;">To</label>
+                    <input id="declare-to" class="input" type="date" value="2026-06-26">
+                  </div>
+                </div>
+              </div>
+
+              <div class="field">
+                <label class="field__label" style="font-weight:400;">How long?</label>
+                <div class="chip-group row gap-2" id="declare-duration-group" style="flex-wrap:wrap;">
+                  <button class="chip is-active" type="button" data-val="full">Full day</button>
+                  <button class="chip" type="button" data-val="morning">Morning only</button>
+                  <button class="chip" type="button" data-val="afternoon">Afternoon only</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Why -->
+            <div class="stack">
+              <div class="field__label">Why?</div>
+
+              <div class="field">
+                <label class="field__label" for="declare-reason" style="font-weight:400;">Reason</label>
+                <select class="select" id="declare-reason">
+                  <option value="medical-appointment">Medical appointment</option>
+                  <option value="illness">Planned sick day</option>
+                  <option value="family-personal">Family event</option>
+                  <option value="religious-observance">Religious observance</option>
+                  <option value="bereavement">Bereavement</option>
+                  <option value="travel">Family travel</option>
+                  <option value="other">Other</option>
+                </select>
+              </div>
+
+              <div class="field">
+                <label class="field__label" for="declare-note" style="font-weight:400;">A short note <span style="font-weight:400;color:var(--c-ink-muted);">(optional)</span></label>
+                <textarea class="textarea" id="declare-note" rows="4" placeholder="e.g. Appointment at Children's Hospital, 10:00 AM."></textarea>
+              </div>
+
+              <!-- Live status hint -->
+              <div class="banner banner--success" style="padding:var(--s-3);font-size:var(--fs-sm);">
+                <div class="banner__icon" style="width:32px;height:32px;font-size:var(--fs-md);"><i class="fa-solid fa-circle-check"></i></div>
+                <div class="banner__body">
+                  <div class="banner__title fs-sm">No notification on the day</div>
+                  <div class="banner__sub fs-xs">Because you're declaring in advance.</div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+      </div><!-- /.modal__b -->
+
+      <div class="modal__footer">
+        <button class="btn btn--ghost" data-close-declare type="button">Cancel</button>
+        <button class="btn btn--primary btn--lg" id="declare-submit-btn" type="button">
+          <i class="fa-solid fa-calendar-check"></i> Send to school
+        </button>
+      </div>
+
+    </div><!-- /#declare-form-state -->
+
+    <!-- ── Success state ─────────────────────────────────────────── -->
+    <div id="declare-success-state" style="display:none; text-align:center; padding: var(--s-7) var(--s-6);">
+      <div style="width:72px;height:72px;border-radius:50%;background:var(--c-success-tint);color:var(--c-success);display:flex;align-items:center;justify-content:center;margin:0 auto var(--s-4);font-size:32px;">
+        <i class="fa-solid fa-calendar-check"></i>
+      </div>
+      <h2 style="font-size:var(--fs-2xl);font-weight:700;margin-bottom:var(--s-2);">All set!</h2>
+      <p class="text-muted" style="max-width:420px;margin:0 auto var(--s-5);">The absence has been pre-recorded with your reason. You won't receive a notification that day.</p>
+      <div class="row gap-2" style="justify-content:center;">
+        <button class="btn btn--secondary" data-close-declare type="button">Close</button>
+      </div>
+    </div>
+
+  </div><!-- /.modal -->
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════
+     MODAL: Edit absence
+════════════════════════════════════════════════════════════ -->
+<div class="modal-backdrop" id="modal-edit" role="dialog" aria-modal="true" aria-labelledby="modal-edit-title">
+  <div class="modal" style="max-width: 600px;">
+
+    <div class="modal__h">
+      <div>
+        <div class="modal__title" id="modal-edit-title">
+          <i class="fa-solid fa-pen-to-square" style="color:var(--c-brand);"></i>
+          Edit absence
+        </div>
+        <div class="modal__sub" id="edit-title" style="margin-top: 6px; font-size: var(--fs-base); font-weight: 600; color: var(--c-ink);"></div>
+        <div class="row gap-2 mt-2">
+          <span class="fs-sm text-muted" id="edit-child"></span>
+          <span id="edit-status"></span>
+        </div>
+      </div>
+      <button class="modal__close" data-close aria-label="Close"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+
+    <div class="modal__b">
+      <div class="stack">
+
+        <!-- Date -->
+        <div id="edit-date-wrap">
+          <div class="field" style="margin-bottom: var(--s-3);">
+            <label class="field__label">When?</label>
+            <div class="chip-group row gap-2" style="flex-wrap: nowrap;">
+              <button class="chip" type="button" data-mode="single">Single day</button>
+              <button class="chip" type="button" data-mode="range">Date range</button>
+            </div>
+          </div>
+
+          <div data-for="single">
+            <div class="field">
+              <label class="field__label" for="edit-date">Date</label>
+              <input id="edit-date" class="input" type="date">
+            </div>
+          </div>
+
+          <div data-for="range" style="display:none;">
+            <div class="grid-2" style="gap: var(--s-3);">
+              <div class="field">
+                <label class="field__label" for="edit-date-from">From</label>
+                <input id="edit-date-from" class="input" type="date">
+              </div>
+              <div class="field">
+                <label class="field__label" for="edit-date-to">To</label>
+                <input id="edit-date-to" class="input" type="date">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Duration -->
+        <div class="field">
+          <label class="field__label">How long?</label>
+          <div class="chip-group row gap-2" id="edit-duration-group" style="flex-wrap: wrap;">
+            <button class="chip" type="button" data-val="full">Full day</button>
+            <button class="chip" type="button" data-val="morning">Morning only</button>
+            <button class="chip" type="button" data-val="afternoon">Afternoon only</button>
+          </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <!-- Reason -->
+        <div class="field">
+          <label class="field__label" for="edit-reason">Reason</label>
+          <select class="select" id="edit-reason">
+            <option value="medical-appointment">Medical appointment</option>
+            <option value="illness">Planned sick day</option>
+            <option value="family-personal">Family event</option>
+            <option value="religious-observance">Religious observance</option>
+            <option value="bereavement">Bereavement</option>
+            <option value="travel">Family travel</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
+
+        <!-- Note -->
+        <div class="field">
+          <label class="field__label" for="edit-note">A short note <span style="font-weight:400; color:var(--c-ink-muted);">(optional)</span></label>
+          <textarea class="textarea" id="edit-note" rows="3" placeholder="e.g. Appointment at Children's Hospital, 10:00 AM."></textarea>
+        </div>
+
+        <div class="banner banner--info" style="font-size: var(--fs-sm);">
+          <div class="banner__icon" style="width:32px;height:32px;font-size:var(--fs-md);"><i class="fa-solid fa-circle-info"></i></div>
+          <div class="banner__body">
+            <div class="banner__title fs-sm">Updating will notify the school</div>
+            <div class="banner__sub fs-xs">The attendance clerk will see the revised details immediately.</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="modal__footer">
+      <button class="btn btn--ghost" data-close type="button">Discard changes</button>
+      <button class="btn btn--primary" id="edit-save-btn" type="button">
+        <i class="fa-solid fa-floppy-disk"></i> Save changes
+      </button>
+    </div>
+
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════
+     MODAL: Cancel confirmation
+════════════════════════════════════════════════════════════ -->
+<div class="modal-backdrop" id="modal-cancel" role="dialog" aria-modal="true" aria-labelledby="modal-cancel-title">
+  <div class="modal" style="max-width: 480px;">
+
+    <div class="modal__h">
+      <div>
+        <div class="modal__title" id="modal-cancel-title" style="color: var(--c-danger);">
+          <i class="fa-solid fa-trash-can"></i>
+          Cancel this absence?
+        </div>
+      </div>
+      <button class="modal__close" data-close aria-label="Close"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+
+    <div class="modal__b">
+      <div class="stack">
+
+        <!-- Absence summary -->
+        <div style="background: var(--c-danger-tint); border: 1px solid var(--c-danger-bord); border-radius: var(--r-md); padding: var(--s-4); display: flex; flex-direction: column; gap: var(--s-2);">
+          <div class="fs-sm font-semibold" id="cancel-title" style="color: var(--c-ink);"></div>
+          <div class="row gap-2" style="font-size: var(--fs-sm); color: var(--c-ink-muted);">
+            <i class="fa-solid fa-user" style="font-size: var(--fs-xs);"></i>
+            <span id="cancel-child"></span>
+          </div>
+          <div class="row gap-2" style="font-size: var(--fs-sm); color: var(--c-ink-muted);">
+            <i class="fa-solid fa-calendar" style="font-size: var(--fs-xs);"></i>
+            <span id="cancel-date"></span>
+          </div>
+        </div>
+
+        <p class="fs-sm text-muted">Once cancelled, the school's attendance records will be updated and the absence will be removed from this list. <strong style="color: var(--c-ink);">This can't be undone.</strong></p>
+
+        <p class="fs-sm text-muted">If your child ends up being absent on that day, you'll receive a notification as usual and will be asked to provide a reason.</p>
+
+      </div>
+    </div>
+
+    <div class="modal__footer">
+      <button class="btn btn--secondary" data-close type="button">Keep it</button>
+      <button class="btn btn--primary" id="cancel-confirm-btn" type="button" style="background: var(--c-danger); border-color: var(--c-danger);">
+        <i class="fa-solid fa-trash-can"></i> Yes, cancel absence
+      </button>
+    </div>
+
+  </div>
+</div>
+
+<style>
+  .hero-row {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: var(--s-4); flex-wrap: wrap;
+  }
+  .hero-row__title { font-size: var(--fs-3xl); font-weight: 700; letter-spacing: -0.015em; }
+  .hero-row__sub { color: var(--c-ink-muted); font-size: var(--fs-lg); margin-top: 6px; max-width: 720px; }
+  .hero-row__actions { display: flex; gap: var(--s-2); }
+
+  .future-card {
+    display: grid; grid-template-columns: 1fr 200px; gap: var(--s-4);
+    background: var(--c-surface);
+    border: 1px solid var(--c-border);
+    border-radius: var(--r-md);
+    padding: var(--s-4);
+  }
+  .future-card__main { min-width: 0; display: flex; flex-direction: column; gap: var(--s-3); }
+  .future-card__title { font-size: var(--fs-lg); font-weight: 700; display: flex; align-items: center; gap: var(--s-2); }
+  .future-card__sub { font-size: var(--fs-sm); color: var(--c-ink-muted); margin-top: 4px; }
+  .future-card__chips { display: flex; gap: var(--s-2); flex-wrap: wrap; }
+  .future-card__meta {
+    padding-left: var(--s-4); border-left: 1px solid var(--c-border-2);
+    display: flex; flex-direction: column;
+  }
+  @media (max-width: 720px) {
+    .future-card { grid-template-columns: 1fr; }
+    .future-card__meta { border-left: 0; padding-left: 0; border-top: 1px solid var(--c-border-2); padding-top: var(--s-3); }
+  }
+
+  /* Tighten gap between card header and timeline content */
+  .card__b:has(.timeline) { padding-top: var(--s-3); }
+
+  /* Remove timeline line and left padding */
+  .timeline::before { display: none; }
+  .timeline { padding-left: 0; }
+
+  /* Declare modal layout */
+  .declare-who-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: var(--s-3);
+  }
+  .declare-form-cols {
+    display: grid; grid-template-columns: 1fr 1fr; gap: var(--s-5);
+  }
+  @media (max-width: 600px) {
+    .declare-who-grid  { grid-template-columns: 1fr; }
+    .declare-form-cols { grid-template-columns: 1fr; }
+  }
+
+  /* Pick cards (reuse declare-absence styles) */
+  .pick-card {
+    position: relative; display: flex; align-items: center; gap: var(--s-3);
+    padding: var(--s-3); border: 1.5px solid var(--c-border);
+    border-radius: var(--r-md); background: var(--c-surface); cursor: pointer;
+  }
+  .pick-card:hover { border-color: var(--c-border-strong); }
+  .pick-card.is-active { border-color: var(--c-brand); background: var(--c-brand-tint); }
+  .pick-card__body { flex: 1; min-width: 0; }
+  .pick-card__check { color: var(--c-brand); font-size: 20px; flex-shrink: 0; }
+  .pick-card__check--empty { color: var(--c-border-strong); }
+
+  /* Mini month grid */
+  .month-mini__h { display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--s-2); }
+  .month-mini__grid {
+    display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px;
+    text-align: center;
+  }
+  .month-mini__grid span {
+    aspect-ratio: 1; display: flex; align-items: center; justify-content: center;
+    font-size: 11px; color: var(--c-ink); border-radius: 4px; position: relative;
+  }
+  .month-mini__grid .month-mini__dh { color: var(--c-ink-subtle); font-weight: 700; font-size: 9px; text-transform: uppercase; }
+  .month-mini__grid .we { color: var(--c-ink-subtle); }
+  .month-mini__grid .today { background: var(--c-brand); color: #fff; font-weight: 700; }
+  .month-mini__grid .event { background: var(--c-info-tint); color: var(--c-info); font-weight: 700; }
+  .month-mini__grid .future { background: var(--c-brand-tint); color: var(--c-brand-ink); font-weight: 700; border: 1px dashed var(--c-brand); }
+  .month-mini__legend { display: flex; gap: var(--s-3); margin-top: var(--s-3); font-size: 11px; color: var(--c-ink-muted); flex-wrap: wrap; }
+  .dot-pin { width: 10px; height: 10px; border-radius: 2px; }
+  .event-dot { background: var(--c-info-tint); border: 1px solid var(--c-info); }
+  .future-dot { background: var(--c-brand-tint); border: 1px dashed var(--c-brand); }
+</style>
+
+<script src="assets/app.js"></script>
+<script>
+  document.querySelectorAll('.tab').forEach(function(el){
+    el.addEventListener('click', function(){
+      var group = el.parentElement;
+      if (group) {
+        group.querySelectorAll('.tab').forEach(function(c){ c.classList.remove('is-active'); });
+        el.classList.add('is-active');
+      }
+    });
+  });
+
+  // ── Absence data for each editable card ──────────────────────────────────
+  var absences = {
+    medical: {
+      title: 'Family medical appointment',
+      icon: 'fa-stethoscope',
+      iconClass: 'text-success',
+      child: 'Aaliyah Carter',
+      avatars: [{ initials: 'AC', color: 'avatar--blue' }],
+      dateMode: 'single',
+      date: '2026-05-22',
+      duration: 'full',
+      reason: 'medical-appointment',
+      note: 'Appointment with Dr. Mehta at Children\'s Hospital, 10:00 AM.',
+      status: '<span class="status status--excused"><i class="fa-solid fa-check"></i> Pre-justified</span>'
+    },
+    vacation: {
+      title: 'Family vacation',
+      icon: 'fa-plane',
+      iconClass: 'text-success',
+      child: 'Aaliyah + Jaylen',
+      avatars: [{ initials: 'AC', color: 'avatar--blue' }, { initials: 'JC', color: 'avatar--orange' }],
+      dateMode: 'range',
+      dateFrom: '2026-06-22',
+      dateTo: '2026-06-26',
+      duration: 'full',
+      reason: 'travel',
+      note: '',
+      status: '<span class="status status--pending"><i class="fa-regular fa-clock"></i> Awaiting school approval</span>'
+    }
+  };
+
+  // ── Open / close helpers ─────────────────────────────────────────────────
+  function openModal(id) {
+    var el = document.getElementById(id);
+    el.classList.add('is-open');
+    el.querySelector('[data-close]').focus();
+  }
+  function closeModal(id) {
+    document.getElementById(id).classList.remove('is-open');
+  }
+  document.querySelectorAll('[data-close]').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      closeModal(btn.closest('.modal-backdrop').id);
+    });
+  });
+  document.querySelectorAll('.modal-backdrop').forEach(function(backdrop){
+    backdrop.addEventListener('click', function(e){
+      if (e.target === backdrop) closeModal(backdrop.id);
+    });
+  });
+  document.addEventListener('keydown', function(e){
+    if (e.key === 'Escape') {
+      document.querySelectorAll('.modal-backdrop.is-open').forEach(function(el){
+        closeModal(el.id);
+      });
+    }
+  });
+
+  // ── Chip group toggle (inside modals) ────────────────────────────────────
+  function bindChipGroups(container) {
+    container.querySelectorAll('.chip-group').forEach(function(group){
+      group.querySelectorAll('.chip').forEach(function(chip){
+        chip.addEventListener('click', function(){
+          group.querySelectorAll('.chip').forEach(function(c){ c.classList.remove('is-active'); });
+          chip.classList.add('is-active');
+          // Show/hide date-range vs single
+          if (chip.dataset.mode) {
+            var wrap = container.querySelector('#edit-date-wrap');
+            if (wrap) {
+              wrap.querySelectorAll('[data-for]').forEach(function(el){
+                el.style.display = el.dataset.for === chip.dataset.mode ? '' : 'none';
+              });
+            }
+          }
+        });
+      });
+    });
+  }
+
+  // ── Populate edit modal ──────────────────────────────────────────────────
+  function openEditModal(key) {
+    var d = absences[key];
+    var m = document.getElementById('modal-edit');
+
+    // Header
+    m.querySelector('#edit-title').textContent = d.title;
+    m.querySelector('#edit-child').textContent = d.child;
+    m.querySelector('#edit-status').innerHTML = d.status;
+
+    // Date mode chips
+    m.querySelectorAll('#edit-date-wrap [data-mode]').forEach(function(chip){
+      chip.classList.toggle('is-active', chip.dataset.mode === d.dateMode);
+    });
+    m.querySelector('[data-for="single"]').style.display = d.dateMode === 'single' ? '' : 'none';
+    m.querySelector('[data-for="range"]').style.display  = d.dateMode === 'range'  ? '' : 'none';
+
+    if (d.dateMode === 'single') {
+      m.querySelector('#edit-date').value = d.date || '';
+    } else {
+      m.querySelector('#edit-date-from').value = d.dateFrom || '';
+      m.querySelector('#edit-date-to').value   = d.dateTo   || '';
+    }
+
+    // Duration chips
+    m.querySelectorAll('#edit-duration-group .chip').forEach(function(chip){
+      chip.classList.toggle('is-active', chip.dataset.val === d.duration);
+    });
+
+    // Reason
+    m.querySelector('#edit-reason').value = d.reason || 'other';
+
+    // Note
+    m.querySelector('#edit-note').value = d.note || '';
+
+    // Save button stores the key
+    m.querySelector('#edit-save-btn').dataset.key = key;
+
+    bindChipGroups(m);
+    openModal('modal-edit');
+  }
+
+  document.getElementById('edit-save-btn').addEventListener('click', function(){
+    var key = this.dataset.key;
+    // In a real app we'd POST; here we just dismiss and toast
+    closeModal('modal-edit');
+    showToast('Changes saved');
+  });
+
+  // ── Populate cancel modal ────────────────────────────────────────────────
+  function openCancelModal(key) {
+    var d = absences[key];
+    var m = document.getElementById('modal-cancel');
+    m.querySelector('#cancel-title').textContent = d.title;
+    m.querySelector('#cancel-child').textContent = d.child;
+
+    var dateStr = '';
+    if (d.dateMode === 'single') {
+      dateStr = new Date(d.date + 'T12:00:00').toLocaleDateString('en-US', { weekday:'short', month:'short', day:'numeric', year:'numeric' });
+    } else {
+      var from = new Date(d.dateFrom + 'T12:00:00').toLocaleDateString('en-US', { month:'short', day:'numeric' });
+      var to   = new Date(d.dateTo   + 'T12:00:00').toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' });
+      dateStr = from + ' – ' + to;
+    }
+    m.querySelector('#cancel-date').textContent = dateStr;
+
+    m.querySelector('#cancel-confirm-btn').dataset.key = key;
+    openModal('modal-cancel');
+  }
+
+  document.getElementById('cancel-confirm-btn').addEventListener('click', function(){
+    closeModal('modal-cancel');
+    showToast('Absence cancelled');
+  });
+
+  // ── Wire Edit / Cancel buttons ───────────────────────────────────────────
+  document.querySelectorAll('[data-edit]').forEach(function(btn){
+    btn.addEventListener('click', function(){ openEditModal(btn.dataset.edit); });
+  });
+  document.querySelectorAll('[data-cancel]').forEach(function(btn){
+    btn.addEventListener('click', function(){ openCancelModal(btn.dataset.cancel); });
+  });
+
+  // ── Declare modal open/close ─────────────────────────────────────────────
+  function openDeclare() {
+    // Reset to form state each time
+    document.getElementById('declare-form-state').style.display = '';
+    document.getElementById('declare-success-state').style.display = 'none';
+    openModal('modal-declare');
+  }
+  function closeDeclare() {
+    closeModal('modal-declare');
+  }
+
+  document.querySelector('[data-open-declare]').addEventListener('click', openDeclare);
+
+  document.querySelectorAll('[data-close-declare]').forEach(function(btn){
+    btn.addEventListener('click', closeDeclare);
+  });
+
+  // Click-outside for declare modal (already handled by generic backdrop listener above
+  // since modal-declare is also a .modal-backdrop — no extra code needed)
+
+  // ── Declare: pick-card toggles ───────────────────────────────────────────
+  document.querySelectorAll('#modal-declare .pick-card').forEach(function(card){
+    card.addEventListener('click', function(e){
+      e.preventDefault();
+      card.classList.toggle('is-active');
+      var icon = card.querySelector('.pick-card__check');
+      if (card.classList.contains('is-active')) {
+        icon.className = 'fa-solid fa-circle-check pick-card__check';
+      } else {
+        icon.className = 'fa-regular fa-circle pick-card__check pick-card__check--empty';
+      }
+    });
+  });
+
+  // ── Declare: date mode chips ─────────────────────────────────────────────
+  document.querySelectorAll('#declare-date-mode-group [data-declare-mode]').forEach(function(chip){
+    chip.addEventListener('click', function(){
+      document.querySelectorAll('#declare-date-mode-group .chip').forEach(function(c){ c.classList.remove('is-active'); });
+      chip.classList.add('is-active');
+      var mode = chip.dataset.declareMode;
+      document.getElementById('declare-single-date').style.display = mode === 'single' ? '' : 'none';
+      document.getElementById('declare-range-date').style.display  = mode === 'range'  ? '' : 'none';
+    });
+  });
+
+  // ── Declare: duration chips ──────────────────────────────────────────────
+  document.querySelectorAll('#declare-duration-group .chip').forEach(function(chip){
+    chip.addEventListener('click', function(){
+      document.querySelectorAll('#declare-duration-group .chip').forEach(function(c){ c.classList.remove('is-active'); });
+      chip.classList.add('is-active');
+    });
+  });
+
+  // ── Declare: submit ──────────────────────────────────────────────────────
+  document.getElementById('declare-submit-btn').addEventListener('click', function(){
+    var btn = this;
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Sending…';
+    setTimeout(function(){
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fa-solid fa-calendar-check"></i> Send to school';
+      document.getElementById('declare-form-state').style.display = 'none';
+      document.getElementById('declare-success-state').style.display = '';
+    }, 900);
+  });
+
+  __ct_mountSidebar('future'); __ct_mountProtoSwitcher('parent');
+</script>
+</body>
+</html>

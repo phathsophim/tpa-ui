@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ClassTrack — Aaliyah's attendance</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="stylesheet" href="assets/styles.css">
+</head>
+<body>
+
+<a href="#main" class="skip-link" data-en="Skip to content" data-fr="Aller au contenu">Skip to content</a>
+
+<div class="app">
+<aside id="sidebar"></aside>
+<main id="main" class="shell">
+
+  <a href="children.html" class="back-link">
+    <i class="fa-solid fa-arrow-left"></i>
+    <span data-en="My children" data-fr="Mes enfants">My children</span>
+  </a>
+
+  <section class="child-hero">
+    <div class="row gap-3" style="flex: 1; align-items: center; min-width: 0;">
+      <div class="avatar avatar--blue avatar--2xl">AC</div>
+      <div>
+        <h1 style="font-size: var(--fs-2xl); font-weight: 700;">Aaliyah Carter</h1>
+        <div class="text-muted fs-md mt-2" data-en="Grade 7A · Secondary School · Ms. S. Tremblay" data-fr="7e A · École secondaire · Mme S. Tremblay">Grade 7A · Secondary School · Ms. S. Tremblay</div>
+        <div class="row gap-2 mt-3">
+          <span class="status status--present" style="padding: 4px 12px; font-size: var(--fs-sm);">
+            <i class="fa-solid fa-circle"></i>
+            <span data-en="Present today" data-fr="Présente aujourd'hui">Present today</span>
+          </span>
+          <span class="fs-sm text-subtle" data-en="In French (P3) right now" data-fr="En français (P3) en ce moment">In French (P3) right now</span>
+        </div>
+      </div>
+    </div>
+    <div class="child-hero__stats">
+      <div class="hero-stat">
+        <div class="hero-stat__n text-success">96%</div>
+        <div class="hero-stat__l" data-en="Attendance" data-fr="Présence">Attendance</div>
+      </div>
+      <div class="hero-stat">
+        <div class="hero-stat__n">2</div>
+        <div class="hero-stat__l" data-en="Absences" data-fr="Absences">Absences</div>
+      </div>
+      <div class="hero-stat">
+        <div class="hero-stat__n">1</div>
+        <div class="hero-stat__l" data-en="Late arrivals" data-fr="Retards">Late arrivals</div>
+      </div>
+    </div>
+    <div class="row gap-2" style="flex-shrink: 0;">
+      <a href="declare-absence.html?child=aaliyah" class="btn btn--secondary">
+        <i class="fa-solid fa-calendar-plus"></i>
+        <span data-en="Declare absence" data-fr="Déclarer une absence">Declare absence</span>
+      </a>
+      <a href="submit-reason.html?child=aaliyah" class="btn btn--primary">
+        <i class="fa-solid fa-file-circle-check"></i>
+        <span data-en="Justify absence" data-fr="Justifier une absence">Justify absence</span>
+      </a>
+    </div>
+  </section>
+
+  <div class="grid-3-2">
+    <section class="card">
+      <div class="card__h">
+        <div>
+          <div class="card__title" data-en="Attendance calendar" data-fr="Calendrier de présence">Attendance calendar</div>
+          <div class="card__sub" data-en="Click a day for details." data-fr="Cliquez sur un jour pour voir les détails.">Click a day for details.</div>
+        </div>
+      </div>
+      <div class="calendar">
+        <div class="cal-nav">
+          <div class="cal-month" id="calTitle">May 2026</div>
+          <div class="cal-nav-btns">
+            <button class="cal-nav-btn" onclick="changeMonth(-1)" aria-label="Previous"><i class="fa-solid fa-chevron-left"></i></button>
+            <button class="btn btn--ghost btn--sm" onclick="goToday()" data-en="Today" data-fr="Aujourd'hui">Today</button>
+            <button class="cal-nav-btn" onclick="changeMonth(1)" aria-label="Next"><i class="fa-solid fa-chevron-right"></i></button>
+          </div>
+        </div>
+        <div class="cal-dh-row" id="calDhRow"></div>
+        <div class="cal-days" id="calDays"></div>
+        <div class="cal-legend">
+          <div class="leg-item"><div class="leg-swatch leg-swatch--present"></div><span data-en="Present" data-fr="Présent">Present</span></div>
+          <div class="leg-item"><div class="leg-swatch leg-swatch--absent"></div><span data-en="Absent" data-fr="Absent">Absent</span></div>
+          <div class="leg-item"><div class="leg-swatch leg-swatch--late"></div><span data-en="Late" data-fr="Retard">Late</span></div>
+          <div class="leg-item"><div class="leg-swatch leg-swatch--future"></div><span data-en="Pre-declared" data-fr="Pré-déclarée">Pre-declared</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="card__h">
+        <div class="card__title" data-en="Recent records" data-fr="Dossiers récents">Recent records</div>
+        <button class="btn btn--ghost btn--sm"><i class="fa-solid fa-download"></i> <span data-en="Export" data-fr="Exporter">Export</span></button>
+      </div>
+      <div class="card__b--flush">
+        <div class="simple-list">
+          <div class="simple-list__item record-row">
+            <div class="simple-list__icon simple-list__icon--event"><i class="fa-solid fa-calendar-day"></i></div>
+            <div class="simple-list__body">
+              <div class="simple-list__title" data-en="Friday, May 22" data-fr="Vendredi 22 mai">Friday, May 22</div>
+              <div class="simple-list__sub" data-en="Medical appointment · Full day" data-fr="Rendez-vous médical · Journée complète">Medical appointment · Full day</div>
+            </div>
+            <div class="record-row__action">
+              <span class="status status--scheduled" data-en="Pre-justified" data-fr="Pré-motivée">Pre-justified</span>
+            </div>
+          </div>
+          <div class="simple-list__item record-row">
+            <div class="simple-list__icon simple-list__icon--event"><i class="fa-solid fa-trophy"></i></div>
+            <div class="simple-list__body">
+              <div class="simple-list__title" data-en="Thursday, May 14" data-fr="Jeudi 14 mai">Thursday, May 14</div>
+              <div class="simple-list__sub" data-en="Soccer tournament · P3–P4" data-fr="Tournoi de soccer · P3–P4">Soccer tournament · P3–P4</div>
+            </div>
+            <div class="record-row__action">
+              <span class="status status--info" data-en="School event" data-fr="Événement">School event</span>
+            </div>
+          </div>
+          <div class="simple-list__item record-row">
+            <div class="simple-list__icon simple-list__icon--approve"><i class="fa-solid fa-circle-check"></i></div>
+            <div class="simple-list__body">
+              <div class="simple-list__title" data-en="Monday, May 4" data-fr="Lundi 4 mai">Monday, May 4</div>
+              <div class="simple-list__sub" data-en="All day · Medical / Illness · Doctor's note on file" data-fr="Toute la journée · Médical / maladie · Billet médical au dossier">All day · Medical / Illness · Doctor's note on file</div>
+            </div>
+            <div class="record-row__action">
+              <span class="status status--excused"><i class="fa-solid fa-check"></i> <span data-en="Excused" data-fr="Motivée">Excused</span></span>
+              <button class="btn btn--ghost btn--sm dispute-btn" onclick="openDispute({child:'Aaliyah Carter', date:'May 4, 2026', period:'All day'})">
+                <i class="fa-solid fa-flag"></i>
+                <span data-en="Dispute" data-fr="Contester">Dispute</span>
+              </button>
+            </div>
+          </div>
+          <div class="simple-list__item record-row">
+            <div class="simple-list__icon simple-list__icon--late"><i class="fa-solid fa-clock"></i></div>
+            <div class="simple-list__body">
+              <div class="simple-list__title" data-en="Wednesday, Apr 22" data-fr="Mercredi 22 avr">Wednesday, Apr 22</div>
+              <div class="simple-list__sub" data-en="Period 1 — Math · Late 12 min · Bus delay" data-fr="Période 1 — Maths · Retard 12 min · Retard d'autobus">Period 1 — Math · Late 12 min · Bus delay</div>
+            </div>
+            <div class="record-row__action">
+              <span class="status status--late" data-en="Late" data-fr="Retard">Late</span>
+              <button class="btn btn--ghost btn--sm dispute-btn" onclick="openDispute({child:'Aaliyah Carter', date:'Apr 22, 2026', period:'Period 1 — Math'})">
+                <i class="fa-solid fa-flag"></i>
+                <span data-en="Dispute" data-fr="Contester">Dispute</span>
+              </button>
+            </div>
+          </div>
+          <div class="simple-list__item record-row">
+            <div class="simple-list__icon simple-list__icon--approve"><i class="fa-solid fa-circle-check"></i></div>
+            <div class="simple-list__body">
+              <div class="simple-list__title" data-en="Wednesday, Apr 8" data-fr="Mercredi 8 avr">Wednesday, Apr 8</div>
+              <div class="simple-list__sub" data-en="Periods 3–4 · Family medical appointment" data-fr="Périodes 3–4 · Rendez-vous médical familial">Periods 3–4 · Family medical appointment</div>
+            </div>
+            <div class="record-row__action">
+              <span class="status status--excused" data-en="Excused" data-fr="Motivée">Excused</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card__footer" style="text-align: center;">
+        <a href="#" data-en="Show older records →" data-fr="Voir les dossiers plus anciens →">Show older records →</a>
+      </div>
+    </section>
+  </div>
+
+</main>
+</div>
+
+<style>
+  .child-hero { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: var(--s-5); padding: var(--s-5); background: var(--c-surface); border: 1px solid var(--c-border); border-radius: var(--r-xl); align-items: center; }
+  @media (max-width: 1200px) { .child-hero { grid-template-columns: 1fr; } }
+  .child-hero__stats { display: flex; gap: var(--s-5); padding: 0 var(--s-5); border-left: 1px solid var(--c-border-2); border-right: 1px solid var(--c-border-2); }
+  @media (max-width: 1200px) { .child-hero__stats { border: 0; padding: 0; border-top: 1px solid var(--c-border-2); padding-top: var(--s-4); } }
+  .hero-stat { text-align: center; min-width: 80px; }
+  .hero-stat__n { font-size: var(--fs-2xl); font-weight: 700; line-height: 1.1; font-variant-numeric: tabular-nums; }
+  .hero-stat__l { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--c-ink-muted); margin-top: 4px; }
+  .record-row__action { display: flex; align-items: center; gap: var(--s-2); flex-shrink: 0; }
+  .dispute-btn { opacity: 0; transition: opacity 0.12s; }
+  .record-row:hover .dispute-btn { opacity: 1; }
+  @media (max-width: 720px) { .dispute-btn { opacity: 1; } }
+</style>
+
+<script src="assets/app.js"></script>
+<script>
+  var CAL_DATA = {
+    '2026-05': {1:'present',4:'absent',5:'present',6:'present',7:'present',8:'present',11:'present',12:'today',14:'future',15:'present',18:'present',19:'present',20:'present',21:'present',22:'future',25:'present',26:'present',27:'present',28:'present',29:'present'},
+    '2026-04': {1:'present',2:'present',3:'present',6:'present',7:'present',8:'absent',9:'present',10:'present',13:'present',14:'present',15:'present',16:'present',17:'present',20:'present',21:'present',22:'late',23:'present',24:'present',27:'present',28:'present',29:'present',30:'present'}
+  };
+  var MONTHS_EN=['January','February','March','April','May','June','July','August','September','October','November','December'];
+  var MONTHS_FR=['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
+  var DOW_EN=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  var DOW_FR=['Dim','Lun','Mar','Mer','Jeu','Ven','Sam'];
+  var calYear=2026, calMonth=4;
+  function renderCalendar(){
+    var lang=window.__ct_i18n.getLang();
+    var MONTHS=lang==='fr'?MONTHS_FR:MONTHS_EN, DOW=lang==='fr'?DOW_FR:DOW_EN;
+    var key=calYear+'-'+String(calMonth+1).padStart(2,'0');
+    var data=CAL_DATA[key]||{};
+    document.getElementById('calTitle').textContent=MONTHS[calMonth]+' '+calYear;
+    document.getElementById('calDhRow').innerHTML=DOW.map(function(d){return '<div class="cal-dh">'+d+'</div>';}).join('');
+    var firstDay=new Date(calYear,calMonth,1).getDay();
+    var daysInMonth=new Date(calYear,calMonth+1,0).getDate();
+    var grid=document.getElementById('calDays'); grid.innerHTML='';
+    var LABEL={present:{en:'Present',fr:'Présent'},absent:{en:'Absent',fr:'Absent'},late:{en:'Late',fr:'Retard'},future:{en:'Declared',fr:'Déclarée'}};
+    var ICON={present:'check',absent:'xmark',late:'clock',future:'calendar'};
+    for(var i=0;i<firstDay;i++){var e=document.createElement('div');e.className='cal-day empty';grid.appendChild(e);}
+    for(var d=1;d<=daysInMonth;d++){(function(d){
+      var dow=new Date(calYear,calMonth,d).getDay();
+      var e=document.createElement('div'); var cls='cal-day'; var status=data[d];
+      if(dow===0||dow===6) cls+=' weekend';
+      else if(status==='today'){cls+=' today present'; status='present';}
+      else if(status) cls+=' '+status;
+      e.className=cls;
+      var inner='<div class="cal-day__num">'+d+'</div>';
+      if(status&&status!=='today'&&!(dow===0||dow===6)) inner+='<i class="cal-day__icon fa-solid fa-'+ICON[status]+'"></i>';
+      e.innerHTML=inner;
+      if(dow!==0&&dow!==6) e.onclick=function(){
+        document.querySelectorAll('.cal-day.selected').forEach(function(x){x.classList.remove('selected');});
+        e.classList.add('selected');
+        var name=(status&&LABEL[status])?(lang==='fr'?LABEL[status].fr:LABEL[status].en):(lang==='fr'?'Aucun dossier':'No record');
+        showToast(MONTHS[calMonth].substring(0,3)+' '+d+' — '+name);
+      };
+      grid.appendChild(e);
+    })(d);}
+  }
+  function changeMonth(dir){calMonth+=dir;if(calMonth<0){calMonth=11;calYear--;}if(calMonth>11){calMonth=0;calYear++;}renderCalendar();}
+  function goToday(){calYear=2026;calMonth=4;renderCalendar();}
+  window.__ct_page_rerender=renderCalendar;
+  renderCalendar();
+  __ct_mountSidebar('children');
+  __ct_mountProtoSwitcher('parent');
+</script>
+</body>
+</html>

@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ClassTrack — Sign in</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="stylesheet" href="assets/styles.css">
+<style>
+  body {
+    background:
+      radial-gradient(ellipse at top left, rgba(27,93,175,0.15), transparent 50%),
+      radial-gradient(ellipse at bottom right, rgba(27,93,175,0.12), transparent 50%),
+      var(--c-bg);
+    min-height: 100vh;
+    display: flex; align-items: center; justify-content: center;
+    padding: var(--s-5);
+  }
+  .auth-shell {
+    width: 100%; max-width: 1080px;
+    background: var(--c-surface);
+    border: 1px solid var(--c-border);
+    border-radius: var(--r-xl);
+    overflow: hidden;
+    box-shadow: var(--shadow-xl);
+    display: grid;
+    grid-template-columns: 1fr 1.05fr;
+    min-height: 600px;
+  }
+  @media (max-width: 800px) {
+    .auth-shell { grid-template-columns: 1fr; }
+    .auth-shell__hero { display: none; }
+  }
+
+  .auth-shell__hero {
+    background: linear-gradient(135deg, var(--c-brand) 0%, var(--c-sidebar-2) 100%);
+    color: #fff;
+    padding: var(--s-7) var(--s-6);
+    display: flex; flex-direction: column; justify-content: space-between;
+    position: relative; overflow: hidden;
+  }
+  .auth-shell__hero::before, .auth-shell__hero::after {
+    content: ''; position: absolute; border-radius: 50%;
+    background: rgba(255,255,255,0.06);
+  }
+  .auth-shell__hero::before { width: 300px; height: 300px; top: -120px; right: -100px; }
+  .auth-shell__hero::after  { width: 240px; height: 240px; bottom: -100px; left: -80px; }
+  .auth-shell__hero > * { position: relative; }
+
+  .auth-logo { display: flex; align-items: center; gap: var(--s-3); }
+  .auth-logo__mark {
+    width: 44px; height: 44px; background: rgba(255,255,255,0.15);
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: var(--r-lg);
+    display: flex; align-items: center; justify-content: center;
+    color: #fff; font-weight: 800; font-size: var(--fs-xl);
+  }
+  .auth-logo__text { color: #fff; font-size: var(--fs-lg); font-weight: 700; letter-spacing: -0.01em; }
+  .auth-logo__sub  { color: rgba(255,255,255,0.7); font-size: var(--fs-xs); margin-top: 2px; }
+
+  .auth-hero__title { font-size: var(--fs-display); font-weight: 700; line-height: 1.15; letter-spacing: -0.02em; margin: var(--s-6) 0 var(--s-3); }
+  .auth-hero__sub { font-size: var(--fs-lg); color: rgba(255,255,255,0.78); line-height: 1.55; max-width: 420px; }
+
+  .auth-features { display: flex; flex-direction: column; gap: var(--s-3); margin-top: var(--s-4); }
+  .auth-feature {
+    display: flex; align-items: flex-start; gap: var(--s-3);
+    padding: var(--s-3); background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: var(--r-md);
+  }
+  .auth-feature__icon {
+    width: 32px; height: 32px; flex-shrink: 0;
+    background: rgba(255,255,255,0.15); border-radius: var(--r-md);
+    display: flex; align-items: center; justify-content: center;
+    color: #fff; font-size: var(--fs-md);
+  }
+  .auth-feature__title { font-weight: 600; font-size: var(--fs-sm); }
+  .auth-feature__sub { color: rgba(255,255,255,0.7); font-size: var(--fs-xs); margin-top: 2px; line-height: 1.5; }
+
+  .auth-hero__footer { font-size: var(--fs-xs); color: rgba(255,255,255,0.55); display: flex; align-items: center; gap: var(--s-3); }
+
+  .auth-shell__form {
+    padding: var(--s-7) var(--s-6);
+    display: flex; flex-direction: column; justify-content: center;
+    max-width: 480px; margin: 0 auto; width: 100%;
+  }
+  .auth-form__title { font-size: var(--fs-2xl); font-weight: 700; letter-spacing: -0.01em; }
+  .auth-form__sub { color: var(--c-ink-muted); font-size: var(--fs-md); margin-top: 4px; }
+
+  .idp-btn {
+    display: flex; align-items: center; gap: var(--s-3);
+    width: 100%; padding: var(--s-3) var(--s-4);
+    border: 1px solid var(--c-border-strong); border-radius: var(--r-md);
+    background: var(--c-surface); color: var(--c-ink);
+    font-size: var(--fs-md); font-weight: 600;
+    text-decoration: none;
+    transition: background 0.12s, border-color 0.12s;
+  }
+  .idp-btn:hover { background: var(--c-surface-2); border-color: var(--c-brand); text-decoration: none; color: var(--c-ink); }
+  .idp-btn__icon { width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; font-size: 20px; }
+  .idp-btn__caret { margin-left: auto; color: var(--c-ink-subtle); }
+
+  .auth-divider {
+    display: flex; align-items: center; gap: var(--s-3);
+    color: var(--c-ink-subtle); font-size: var(--fs-xs); font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.08em;
+  }
+  .auth-divider::before, .auth-divider::after { content: ''; height: 1px; background: var(--c-border); flex: 1; }
+</style>
+</head>
+<body>
+
+<div class="auth-shell" role="main">
+
+  <!-- Hero side -->
+  <aside class="auth-shell__hero" aria-hidden="true">
+    <div>
+      <div class="auth-logo">
+        <div class="auth-logo__mark">C</div>
+        <div>
+          <div class="auth-logo__text">ClassTrack</div>
+          <div class="auth-logo__sub" data-en="EC Catholic · Parent portal" data-fr="EC Catholic · Portail des parents">EC Catholic · Parent portal</div>
+        </div>
+      </div>
+
+      <h1 class="auth-hero__title" data-en="Stay close to your child's day." data-fr="Restez proche de la journée de votre enfant.">Stay close to your child's day.</h1>
+      <p class="auth-hero__sub" data-en="Real-time attendance, late-arrival alerts, and one-tap justifications — all from a single secure portal." data-fr="Présence en temps réel, alertes d'arrivée tardive et justifications en un clic — depuis un portail sécurisé.">Real-time attendance, late-arrival alerts, and one-tap justifications — all from a single secure portal.</p>
+
+      <div class="auth-features">
+        <div class="auth-feature">
+          <div class="auth-feature__icon"><i class="fa-solid fa-bell"></i></div>
+          <div>
+            <div class="auth-feature__title" data-en="Real-time notifications" data-fr="Notifications en temps réel">Real-time notifications</div>
+            <div class="auth-feature__sub" data-en="The moment your child is marked absent or late, you'll know." data-fr="Dès que votre enfant est marqué absent ou en retard, vous le saurez.">The moment your child is marked absent or late, you'll know.</div>
+          </div>
+        </div>
+        <div class="auth-feature">
+          <div class="auth-feature__icon"><i class="fa-solid fa-calendar-plus"></i></div>
+          <div>
+            <div class="auth-feature__title" data-en="Declare absences in advance" data-fr="Déclarer une absence à l'avance">Declare absences in advance</div>
+            <div class="auth-feature__sub" data-en="Going on vacation or to a medical appointment? Tell the school in seconds." data-fr="Vacances ou rendez-vous médical ? Prévenez l'école en quelques secondes.">Going on vacation or to a medical appointment? Tell the school in seconds.</div>
+          </div>
+        </div>
+        <div class="auth-feature">
+          <div class="auth-feature__icon"><i class="fa-solid fa-shield-halved"></i></div>
+          <div>
+            <div class="auth-feature__title" data-en="Privacy by design" data-fr="Confidentialité par conception">Privacy by design</div>
+            <div class="auth-feature__sub" data-en="You only see your own children's records. Hosted on EC Catholic's secure Azure tenant." data-fr="Vous ne voyez que les dossiers de vos enfants. Hébergé sur le tenant Azure sécurisé d'EC Catholic.">You only see your own children's records. Hosted on EC Catholic's secure Azure tenant.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="auth-hero__footer">
+      <i class="fa-solid fa-shield-halved"></i>
+      <span data-en="Secured by EC Catholic on Microsoft Azure" data-fr="Sécurisé par EC Catholic sur Microsoft Azure">Secured by EC Catholic on Microsoft Azure</span>
+    </div>
+  </aside>
+
+  <!-- Form side -->
+  <section class="auth-shell__form">
+
+    <h2 class="auth-form__title" data-en="Sign in to ClassTrack" data-fr="Connexion à ClassTrack">Sign in to ClassTrack</h2>
+    <p class="auth-form__sub" data-en="Use the email on file with your child's school." data-fr="Utilisez le courriel au dossier de l'école de votre enfant.">Use the email on file with your child's school.</p>
+
+    <div class="stack mt-4" style="gap: var(--s-3);">
+      <a href="dashboard.html" class="idp-btn">
+        <span class="idp-btn__icon" style="color: #0078D4;"><i class="fa-brands fa-microsoft"></i></span>
+        <span data-en="Continue with Microsoft (Outlook)" data-fr="Continuer avec Microsoft (Outlook)">Continue with Microsoft (Outlook)</span>
+        <i class="fa-solid fa-arrow-right idp-btn__caret"></i>
+      </a>
+      <a href="dashboard.html" class="idp-btn">
+        <span class="idp-btn__icon" style="color: #4285F4;"><i class="fa-brands fa-google"></i></span>
+        <span data-en="Continue with Google" data-fr="Continuer avec Google">Continue with Google</span>
+        <i class="fa-solid fa-arrow-right idp-btn__caret"></i>
+      </a>
+      <a href="dashboard.html" class="idp-btn">
+        <span class="idp-btn__icon" style="color: #000;"><i class="fa-brands fa-apple"></i></span>
+        <span data-en="Continue with Apple" data-fr="Continuer avec Apple">Continue with Apple</span>
+        <i class="fa-solid fa-arrow-right idp-btn__caret"></i>
+      </a>
+    </div>
+
+    <div class="auth-divider mt-4 mb-3"><span data-en="or" data-fr="ou">or</span></div>
+
+    <div class="stack" style="gap: var(--s-3);">
+      <div class="field">
+        <label class="field__label" for="email" data-en="Email address" data-fr="Adresse courriel">Email address</label>
+        <div class="field__icon-wrap">
+          <i class="fa-solid fa-envelope"></i>
+          <input id="email" class="input input--with-icon" type="email" placeholder="marcus.carter@outlook.com">
+        </div>
+        <div class="field__hint" data-en="We'll email you a secure sign-in link." data-fr="Nous vous enverrons un lien de connexion sécurisé.">We'll email you a secure sign-in link.</div>
+      </div>
+      <button type="button" class="btn btn--primary btn--lg btn--block" onclick="window.location.href='dashboard.html'">
+        <i class="fa-solid fa-paper-plane"></i>
+        <span data-en="Email me a sign-in link" data-fr="M'envoyer un lien">Email me a sign-in link</span>
+      </button>
+    </div>
+
+    <div class="banner banner--info mt-4">
+      <i class="banner__icon fa-solid fa-circle-info"></i>
+      <div class="banner__body">
+        <div class="banner__title" data-en="Don't have a ClassTrack account?" data-fr="Pas de compte ClassTrack ?">Don't have a ClassTrack account?</div>
+        <div class="banner__sub" data-en="ClassTrack automatically uses the email your school has on file. If you can't sign in, contact your school office." data-fr="ClassTrack utilise automatiquement le courriel au dossier de l'école. Si vous ne pouvez pas vous connecter, contactez le secrétariat.">ClassTrack automatically uses the email your school has on file. If you can't sign in, contact your school office.</div>
+      </div>
+    </div>
+
+    <div class="row gap-3 mt-4" style="justify-content: center; font-size: var(--fs-xs); color: var(--c-ink-subtle);">
+      <a href="#"><span data-en="Help" data-fr="Aide">Help</span></a>
+      <span>·</span>
+      <a href="#"><span data-en="Privacy" data-fr="Confidentialité">Privacy</span></a>
+      <span>·</span>
+      <a href="#"><span data-en="Terms" data-fr="Conditions">Terms</span></a>
+      <span>·</span>
+      <span><span data-en="EN" data-fr="EN">EN</span> /
+        <a href="?lang=fr"><span data-en="FR" data-fr="FR">FR</span></a>
+      </span>
+    </div>
+
+  </section>
+</div>
+
+<script src="assets/app.js"></script>
+<script>__ct_mountProtoSwitcher('parent');</script>
+</body>
+</html>

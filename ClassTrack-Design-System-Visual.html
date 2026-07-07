@@ -1,0 +1,921 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ClassTrack — Design System Visual Reference v1.1</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+:root {
+  --c-bg:#F4F6FA; --c-surface:#FFFFFF; --c-surface-2:#F8FAFC; --c-surface-alt:#EEF2F7;
+  --c-sidebar:#0F2546; --c-sidebar-2:#0A1B36; --c-sidebar-active:#1B5DAF;
+  --c-border:#D6DBE2; --c-border-2:#E5E8EE; --c-border-strong:#A6ADBB;
+  --c-ink:#0F2546; --c-ink-muted:#475467; --c-ink-subtle:#5C6470;
+  --c-brand:#1B5DAF; --c-brand-ink:#0E2E55; --c-brand-tint:#E8F0FA;
+  --c-success:#1F7A3F; --c-success-tint:#E6F4EC;
+  --c-warning:#9A4708; --c-warning-tint:#FCF1DD; --c-warning-bord:#B97F38;
+  --c-danger:#B42318; --c-danger-tint:#FCE9E7;
+  --c-info:#0E5C8A; --c-info-tint:#E0EFF7;
+  --c-neutral-tint:#EEF1F5; --c-focus:#FFB400;
+  --c-purple:#3F22A6; --c-purple-tint:#EEEAFE; --c-purple-bord:#7E68DC;
+  --s-1:4px;--s-2:8px;--s-3:12px;--s-4:16px;--s-5:24px;--s-6:32px;
+  --r-sm:4px;--r-md:6px;--r-lg:10px;--r-xl:14px;--r-pill:999px;
+  --ff:"Segoe UI",system-ui,-apple-system,BlinkMacSystemFont,Roboto,"Helvetica Neue",Arial,sans-serif;
+  --fs-xs:12px;--fs-sm:13px;--fs-md:14px;--fs-lg:16px;--fs-xl:20px;--fs-2xl:24px;
+  --shadow-md:0 4px 12px rgba(15,37,70,0.08);
+  --shadow-lg:0 8px 28px rgba(15,37,70,0.12);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{font-family:var(--ff);background:var(--c-bg);color:var(--c-ink);font-size:var(--fs-md);line-height:1.55;-webkit-font-smoothing:antialiased;}
+
+/* ── Layout ── */
+.shell{display:grid;grid-template-columns:220px 1fr;min-height:100vh;}
+.nav{background:linear-gradient(180deg,var(--c-sidebar) 0%,var(--c-sidebar-2) 100%);position:sticky;top:0;height:100vh;overflow-y:auto;padding:var(--s-4) var(--s-3);display:flex;flex-direction:column;gap:2px;}
+.nav-logo{padding:var(--s-3) var(--s-3) var(--s-4);display:flex;align-items:center;gap:var(--s-2);margin-bottom:var(--s-2);border-bottom:1px solid rgba(255,255,255,0.08);}
+.nav-logo-mark{width:32px;height:32px;background:var(--c-sidebar-active);border-radius:var(--r-lg);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:14px;}
+.nav-logo-text{color:#fff;font-size:13px;font-weight:700;}
+.nav-logo-sub{color:rgba(255,255,255,0.5);font-size:10px;margin-top:1px;}
+.nav-section{font-size:9px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:rgba(255,255,255,0.4);padding:var(--s-3) var(--s-2) var(--s-1);}
+.nav a{display:flex;align-items:center;gap:var(--s-2);padding:7px var(--s-2);border-radius:var(--r-md);color:rgba(255,255,255,0.7);font-size:12px;font-weight:500;text-decoration:none;}
+.nav a:hover{background:rgba(255,255,255,0.08);color:#fff;}
+.nav a.active{background:var(--c-sidebar-active);color:#fff;font-weight:600;}
+.nav a i{width:16px;text-align:center;font-size:11px;}
+
+.content{padding:var(--s-5);display:flex;flex-direction:column;gap:48px;}
+
+/* ── Page header ── */
+.page-hero{background:linear-gradient(135deg,#0A1B36 0%,#0F2546 60%,#1B5DAF 100%);color:#fff;padding:var(--s-6) var(--s-5);border-radius:var(--r-xl);margin-bottom:8px;}
+.page-hero h1{font-size:28px;font-weight:700;letter-spacing:-0.02em;}
+.page-hero p{color:rgba(255,255,255,0.75);margin-top:6px;font-size:var(--fs-sm);}
+.page-hero-meta{display:flex;gap:var(--s-5);margin-top:var(--s-4);font-size:11px;color:rgba(255,255,255,0.6);}
+.page-hero-meta strong{color:#fff;display:block;font-size:10px;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:2px;opacity:0.6;}
+
+/* ── Section ── */
+.ds-section{scroll-margin-top:24px;}
+.ds-section-title{font-size:var(--fs-2xl);font-weight:700;letter-spacing:-0.01em;color:var(--c-ink);border-bottom:2px solid var(--c-border);padding-bottom:var(--s-3);margin-bottom:var(--s-5);}
+.ds-section-title span{font-size:13px;font-weight:500;color:var(--c-ink-muted);letter-spacing:0;margin-left:var(--s-3);}
+
+/* ── Card ── */
+.ds-card{background:var(--c-surface);border:1px solid var(--c-border);border-radius:var(--r-lg);overflow:hidden;}
+.ds-card-head{padding:var(--s-3) var(--s-4);border-bottom:1px solid var(--c-border-2);display:flex;align-items:center;justify-content:space-between;}
+.ds-card-title{font-size:var(--fs-sm);font-weight:700;color:var(--c-ink);}
+.ds-card-sub{font-size:11px;color:var(--c-ink-subtle);margin-top:1px;}
+.ds-card-body{padding:var(--s-4);}
+.ds-card-body.pad-lg{padding:var(--s-5);}
+
+/* ── Grid helpers ── */
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:var(--s-4);}
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--s-3);}
+.grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:var(--s-3);}
+.flex-wrap{display:flex;flex-wrap:wrap;gap:var(--s-2);align-items:center;}
+.flex-col{display:flex;flex-direction:column;gap:var(--s-3);}
+
+/* ── Label ── */
+.ds-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--c-ink-subtle);margin-bottom:var(--s-2);}
+.ds-sublabel{font-size:11px;color:var(--c-ink-subtle);margin-top:4px;}
+.ds-code{font-family:monospace;font-size:11px;background:var(--c-surface-2);border:1px solid var(--c-border-2);padding:1px 6px;border-radius:var(--r-sm);color:var(--c-brand-ink);}
+
+/* ─────────────── 1. COLORS ─────────────── */
+.swatch-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:var(--s-3);}
+.swatch{border-radius:var(--r-md);overflow:hidden;border:1px solid var(--c-border);}
+.swatch-color{height:56px;}
+.swatch-info{padding:8px 10px;background:var(--c-surface);}
+.swatch-name{font-size:11px;font-weight:700;color:var(--c-ink);}
+.swatch-hex{font-size:10px;color:var(--c-ink-subtle);font-family:monospace;margin-top:1px;}
+.swatch-token{font-size:10px;color:var(--c-brand-ink);font-family:monospace;}
+
+/* ─────────────── 2. TYPOGRAPHY ─────────────── */
+.type-row{display:flex;align-items:baseline;gap:var(--s-4);padding:var(--s-3) 0;border-bottom:1px solid var(--c-border-2);}
+.type-row:last-child{border-bottom:0;}
+.type-meta{min-width:160px;flex-shrink:0;}
+
+/* ─────────────── 3. SPACING ─────────────── */
+.space-row{display:flex;align-items:center;gap:var(--s-3);padding:6px 0;border-bottom:1px solid var(--c-border-2);}
+.space-row:last-child{border-bottom:0;}
+.space-bar-wrap{flex:1;}
+.space-bar{height:20px;background:var(--c-brand-tint);border:1px solid #6E94BF;border-radius:var(--r-sm);}
+.space-meta{font-size:11px;color:var(--c-ink-muted);min-width:60px;}
+.radius-demo{display:flex;gap:var(--s-3);flex-wrap:wrap;align-items:flex-end;}
+.radius-box{width:48px;height:48px;background:var(--c-brand-tint);border:2px solid var(--c-brand);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:var(--c-brand-ink);}
+
+/* ─────────────── 4. CHIPS ─────────────── */
+.chip{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:var(--r-pill);font-size:11px;font-weight:700;letter-spacing:0.02em;border:1px solid transparent;}
+.chip i{font-size:9px;}
+/* Status */
+.chip-present{background:var(--c-success-tint);color:var(--c-success);border-color:#4F9A6C;}
+.chip-late{background:var(--c-warning-tint);color:var(--c-warning);border-color:var(--c-warning-bord);}
+.chip-absent{background:var(--c-danger-tint);color:var(--c-danger);border-color:#B0625A;}
+/* Workflow */
+.chip-awaiting{background:var(--c-info-tint);color:var(--c-info);border-color:#5B96BC;}
+.chip-justified{background:var(--c-success-tint);color:var(--c-success);border-color:#4F9A6C;}
+.chip-unjust{background:var(--c-danger-tint);color:var(--c-danger);border-color:#B0625A;}
+.chip-disputed{background:var(--c-danger-tint);color:var(--c-danger);border-color:#B0625A;}
+.chip-replied{background:var(--c-info-tint);color:var(--c-info);border-color:#5B96BC;}
+.chip-noclass{background:var(--c-warning-tint);color:var(--c-warning);border-color:var(--c-warning-bord);}
+/* Context */
+.chip-event{background:var(--c-purple-tint);color:var(--c-purple);border-color:var(--c-purple-bord);}
+.chip-future{background:var(--c-brand-tint);color:var(--c-brand-ink);border-color:#6E94BF;}
+.chip-period{background:var(--c-neutral-tint);color:var(--c-ink);border-color:var(--c-border-strong);}
+/* Info */
+.chip-grade{background:var(--c-brand-tint);color:var(--c-brand-ink);border-color:#6E94BF;}
+.chip-homeroom{background:var(--c-info-tint);color:var(--c-info);border-color:#5B96BC;}
+.chip-role-t{background:var(--c-brand-tint);color:var(--c-brand-ink);border-color:#6E94BF;}
+.chip-role-c{background:var(--c-warning-tint);color:var(--c-warning);border-color:var(--c-warning-bord);}
+.chip-role-s{background:var(--c-neutral-tint);color:var(--c-ink-muted);border-color:var(--c-border-strong);}
+.chip-count{background:var(--c-neutral-tint);color:var(--c-ink-muted);}
+/* Entity tags — rounded square */
+.etag{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:var(--r-md);font-size:11px;font-weight:700;border:1px solid var(--c-border-strong);background:var(--c-neutral-tint);color:var(--c-ink);}
+.etag-aspen{background:var(--c-info-tint);color:var(--c-info);border-color:#5B96BC;}
+.etag-csv{background:var(--c-warning-tint);color:var(--c-warning);border-color:var(--c-warning-bord);}
+.etag-manual{background:var(--c-success-tint);color:var(--c-success);border-color:#4F9A6C;}
+.etag-sport{background:#FEE4E2;color:#B42318;border-color:#B0625A;}
+.etag-arts{background:var(--c-purple-tint);color:var(--c-purple);border-color:var(--c-purple-bord);}
+.etag-acad{background:var(--c-info-tint);color:var(--c-info);border-color:#5B96BC;}
+.etag-cohort{background:#E0F2FE;color:#0369A1;border-color:#93C5FD;}
+.etag-club{background:var(--c-success-tint);color:var(--c-success);border-color:#4F9A6C;}
+/* Filter chip */
+.chip-filter{background:var(--c-surface);border:1px solid var(--c-border);color:var(--c-ink-muted);padding:6px 12px;border-radius:var(--r-pill);font-size:12px;font-weight:600;min-height:28px;display:inline-flex;align-items:center;gap:6px;}
+.chip-filter.active{background:var(--c-brand-ink);color:#fff;border-color:var(--c-brand-ink);}
+.chip-num{background:rgba(0,0,0,0.08);padding:1px 7px;border-radius:var(--r-pill);font-size:11px;}
+.chip-filter.active .chip-num{background:rgba(255,255,255,0.2);}
+
+/* ─────────────── 5. AVATARS ─────────────── */
+.avatar{display:inline-flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0;}
+.av-circle{border-radius:var(--r-pill);}
+.av-square{border-radius:var(--r-md);}
+.av-28{width:28px;height:28px;font-size:11px;}
+.av-32{width:32px;height:32px;font-size:12px;}
+.av-36{width:36px;height:36px;font-size:13px;}
+.av-40{width:40px;height:40px;font-size:14px;}
+.av-56{width:56px;height:56px;font-size:20px;}
+.av-people{color:#fff;}
+.av-class-7{background:#E8F0FA;color:#0E2E55;font-weight:800;}
+.av-class-8{background:#E0F2FE;color:#0369A1;font-weight:800;}
+.av-class-9{background:var(--c-purple-tint);color:var(--c-purple);font-weight:800;}
+.av-class-10{background:var(--c-success-tint);color:var(--c-success);font-weight:800;}
+.av-class-11{background:var(--c-warning-tint);color:var(--c-warning);font-weight:800;}
+.av-class-12{background:var(--c-danger-tint);color:var(--c-danger);font-weight:800;}
+.av-group-sport{background:#FEE4E2;color:#B42318;}
+.av-group-arts{background:var(--c-purple-tint);color:var(--c-purple);}
+.av-group-acad{background:var(--c-info-tint);color:var(--c-info);}
+.av-group-club{background:var(--c-success-tint);color:var(--c-success);}
+.av-user{background:var(--c-brand-tint);color:var(--c-brand-ink);}
+
+/* ─────────────── 6. BUTTONS ─────────────── */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:8px 14px;border-radius:var(--r-md);font-size:var(--fs-sm);font-weight:600;border:1px solid transparent;min-height:36px;cursor:pointer;font-family:inherit;transition:background 0.12s,border-color 0.12s;}
+.btn--primary{background:var(--c-brand);color:#fff;border-color:var(--c-brand);}
+.btn--primary:hover{background:var(--c-brand-ink);}
+.btn--secondary{background:var(--c-surface);color:var(--c-ink);border-color:var(--c-border-strong);}
+.btn--secondary:hover{background:var(--c-surface-alt);}
+.btn--ghost{background:transparent;color:var(--c-brand);border-color:transparent;}
+.btn--ghost:hover{background:var(--c-brand-tint);}
+.btn--danger{background:var(--c-surface);color:var(--c-danger);border-color:#E1ABA4;}
+.btn--danger:hover{background:var(--c-danger-tint);}
+.btn--sm{padding:4px 10px;min-height:28px;font-size:var(--fs-xs);}
+.btn:disabled,.btn.disabled{opacity:0.45;cursor:not-allowed;pointer-events:none;}
+.icon-btn{width:36px;height:36px;border-radius:var(--r-md);background:transparent;border:1px solid transparent;color:var(--c-ink-muted);display:inline-flex;align-items:center;justify-content:center;font-size:var(--fs-md);cursor:pointer;}
+.icon-btn:hover{background:var(--c-surface-alt);color:var(--c-ink);}
+
+/* ─────────────── 7. PARENT REASONS ─────────────── */
+.reason{display:inline-flex;align-items:center;gap:6px;padding:2px 10px;border-radius:var(--r-pill);font-size:11px;font-weight:700;border:1px solid;}
+.reason-medical{background:var(--c-info-tint);color:var(--c-info);border-color:#5B96BC;}
+.reason-family{background:var(--c-warning-tint);color:var(--c-warning);border-color:var(--c-warning-bord);}
+.reason-religious{background:var(--c-brand-tint);color:var(--c-brand-ink);border-color:#6E94BF;}
+.reason-school{background:var(--c-purple-tint);color:var(--c-purple);border-color:var(--c-purple-bord);}
+.reason-transport{background:var(--c-neutral-tint);color:var(--c-ink-muted);border-color:var(--c-border-strong);}
+.reason-other{background:var(--c-neutral-tint);color:var(--c-ink-muted);border-color:var(--c-border-strong);}
+
+/* ─────────────── 8. ICONS ─────────────── */
+.icon-row{display:flex;align-items:center;gap:var(--s-3);padding:8px 0;border-bottom:1px solid var(--c-border-2);}
+.icon-row:last-child{border-bottom:0;}
+.icon-demo{width:32px;height:32px;display:flex;align-items:center;justify-content:center;border-radius:var(--r-md);font-size:14px;flex-shrink:0;}
+.icon-demo-status{background:var(--c-neutral-tint);color:var(--c-ink);}
+.icon-demo-workflow{background:var(--c-info-tint);color:var(--c-info);}
+.icon-demo-nav{background:rgba(255,255,255,0.1);color:#fff;background:var(--c-sidebar);border-radius:var(--r-sm);}
+.icon-demo-action{background:var(--c-surface-alt);color:var(--c-ink-muted);}
+.icon-meta{flex:1;}
+.icon-name{font-size:12px;font-weight:600;color:var(--c-ink);}
+.icon-code{font-family:monospace;font-size:11px;color:var(--c-brand-ink);}
+.icon-note{font-size:11px;color:var(--c-ink-subtle);margin-top:2px;}
+.badge-new{font-size:9px;font-weight:700;text-transform:uppercase;background:var(--c-success-tint);color:var(--c-success);padding:1px 5px;border-radius:var(--r-sm);margin-left:4px;}
+.badge-changed{font-size:9px;font-weight:700;text-transform:uppercase;background:var(--c-warning-tint);color:var(--c-warning);padding:1px 5px;border-radius:var(--r-sm);margin-left:4px;}
+
+/* ─────────────── 9. SKELETON ─────────────── */
+@keyframes shimmer{0%{background-position:100% 0}100%{background-position:-100% 0}}
+.skeleton-line{height:12px;background:linear-gradient(90deg,var(--c-border-2) 25%,var(--c-surface-alt) 50%,var(--c-border-2) 75%);background-size:400% 100%;animation:shimmer 1.4s ease infinite;border-radius:var(--r-sm);}
+.skeleton-line.lg{height:16px;}
+.skeleton-line.sm{height:8px;}
+.skeleton-avatar-circle{border-radius:var(--r-pill);background:var(--c-border-2);animation:shimmer 1.4s ease infinite;background-size:400% 100%;background-image:linear-gradient(90deg,var(--c-border-2) 25%,var(--c-surface-alt) 50%,var(--c-border-2) 75%);}
+.skeleton-avatar-square{border-radius:var(--r-md);background:var(--c-border-2);animation:shimmer 1.4s ease infinite;background-size:400% 100%;background-image:linear-gradient(90deg,var(--c-border-2) 25%,var(--c-surface-alt) 50%,var(--c-border-2) 75%);}
+.skeleton-row{display:flex;align-items:center;gap:12px;padding:12px;border-bottom:1px solid var(--c-border-2);}
+.skeleton-row:last-child{border-bottom:0;}
+.skeleton-cell{display:flex;flex-direction:column;gap:6px;flex:1;}
+.skeleton-kpi{background:var(--c-surface);border:1px solid var(--c-border);border-radius:var(--r-lg);padding:12px 16px;display:flex;flex-direction:column;gap:8px;}
+
+/* ─────────────── MISC ─────────────── */
+.divider{height:1px;background:var(--c-border-2);margin:var(--s-4) 0;}
+.note{background:var(--c-warning-tint);border:1px solid var(--c-warning-bord);border-radius:var(--r-md);padding:var(--s-3) var(--s-4);font-size:var(--fs-xs);color:var(--c-warning);display:flex;align-items:flex-start;gap:var(--s-2);}
+.note-info{background:var(--c-info-tint);border-color:#5B96BC;color:var(--c-info);}
+.note-success{background:var(--c-success-tint);border-color:#4F9A6C;color:var(--c-success);}
+.two-layer{display:flex;align-items:center;gap:var(--s-3);background:var(--c-surface-2);padding:var(--s-3);border-radius:var(--r-md);border:1px solid var(--c-border-2);}
+.two-layer-label{font-size:11px;font-weight:700;color:var(--c-ink-subtle);text-transform:uppercase;letter-spacing:0.06em;min-width:90px;}
+</style>
+</head>
+<body>
+
+<div class="shell">
+
+<!-- NAV -->
+<nav class="nav">
+  <div class="nav-logo">
+    <div class="nav-logo-mark">CT</div>
+    <div>
+      <div class="nav-logo-text">Design System</div>
+      <div class="nav-logo-sub">v1.1 · May 2026</div>
+    </div>
+  </div>
+  <div class="nav-section">Foundations</div>
+  <a href="#colors" class="active"><i class="fa-solid fa-palette"></i> Colors</a>
+  <a href="#typography"><i class="fa-solid fa-font"></i> Typography</a>
+  <a href="#spacing"><i class="fa-solid fa-ruler-combined"></i> Spacing & Radius</a>
+  <div class="nav-section">Components</div>
+  <a href="#chips"><i class="fa-solid fa-tag"></i> Chips & Badges</a>
+  <a href="#avatars"><i class="fa-solid fa-circle-user"></i> Avatars</a>
+  <a href="#buttons"><i class="fa-solid fa-hand-pointer"></i> Buttons</a>
+  <a href="#reasons"><i class="fa-solid fa-comment-medical"></i> Parent Reasons</a>
+  <a href="#icons"><i class="fa-solid fa-icons"></i> Icon System</a>
+  <a href="#skeleton"><i class="fa-solid fa-bars-staggered"></i> Skeleton / Loading</a>
+</nav>
+
+<!-- CONTENT -->
+<main class="content">
+
+  <!-- Hero -->
+  <div class="page-hero">
+    <h1>ClassTrack Design System</h1>
+    <p>Visual reference for all tokens, chips, avatars, buttons, icons, and loading states. Based on Clerk's Portal V3.1 — 12 screens analyzed.</p>
+    <div class="page-hero-meta">
+      <div><strong>Version</strong>1.1</div>
+      <div><strong>Icon library</strong>Font Awesome 6.5 Solid</div>
+      <div><strong>Compliance</strong>WCAG 2.2 AA</div>
+      <div><strong>Portals</strong>Clerk · Teacher · Parent</div>
+    </div>
+  </div>
+
+  <!-- ══════════ 1. COLORS ══════════ -->
+  <section id="colors" class="ds-section">
+    <div class="ds-section-title">Colors <span>Design Tokens</span></div>
+
+    <div class="flex-col">
+
+      <!-- Background & Surface -->
+      <div class="ds-card">
+        <div class="ds-card-head"><div class="ds-card-title">Background & Surface</div></div>
+        <div class="ds-card-body">
+          <div class="swatch-grid">
+            <div class="swatch"><div class="swatch-color" style="background:#F4F6FA;border-bottom:1px solid #D6DBE2;"></div><div class="swatch-info"><div class="swatch-name">Background</div><div class="swatch-token">--c-bg</div><div class="swatch-hex">#F4F6FA</div></div></div>
+            <div class="swatch"><div class="swatch-color" style="background:#FFFFFF;border-bottom:1px solid #D6DBE2;"></div><div class="swatch-info"><div class="swatch-name">Surface</div><div class="swatch-token">--c-surface</div><div class="swatch-hex">#FFFFFF</div></div></div>
+            <div class="swatch"><div class="swatch-color" style="background:#F8FAFC;border-bottom:1px solid #D6DBE2;"></div><div class="swatch-info"><div class="swatch-name">Surface 2</div><div class="swatch-token">--c-surface-2</div><div class="swatch-hex">#F8FAFC</div></div></div>
+            <div class="swatch"><div class="swatch-color" style="background:#EEF2F7;border-bottom:1px solid #D6DBE2;"></div><div class="swatch-info"><div class="swatch-name">Surface Alt</div><div class="swatch-token">--c-surface-alt</div><div class="swatch-hex">#EEF2F7</div></div></div>
+            <div class="swatch"><div class="swatch-color" style="background:#D6DBE2;"></div><div class="swatch-info"><div class="swatch-name">Border</div><div class="swatch-token">--c-border</div><div class="swatch-hex">#D6DBE2</div></div></div>
+            <div class="swatch"><div class="swatch-color" style="background:#E5E8EE;"></div><div class="swatch-info"><div class="swatch-name">Border 2</div><div class="swatch-token">--c-border-2</div><div class="swatch-hex">#E5E8EE</div></div></div>
+            <div class="swatch"><div class="swatch-color" style="background:#A6ADBB;"></div><div class="swatch-info"><div class="swatch-name">Border Strong</div><div class="swatch-token">--c-border-strong</div><div class="swatch-hex">#A6ADBB</div></div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Ink -->
+      <div class="ds-card">
+        <div class="ds-card-head"><div class="ds-card-title">Ink (Text)</div></div>
+        <div class="ds-card-body">
+          <div class="swatch-grid">
+            <div class="swatch"><div class="swatch-color" style="background:#0F2546;"></div><div class="swatch-info"><div class="swatch-name">Ink</div><div class="swatch-token">--c-ink</div><div class="swatch-hex">#0F2546</div></div></div>
+            <div class="swatch"><div class="swatch-color" style="background:#475467;"></div><div class="swatch-info"><div class="swatch-name">Ink Muted</div><div class="swatch-token">--c-ink-muted</div><div class="swatch-hex">#475467</div></div></div>
+            <div class="swatch"><div class="swatch-color" style="background:#5C6470;"></div><div class="swatch-info"><div class="swatch-name">Ink Subtle</div><div class="swatch-token">--c-ink-subtle</div><div class="swatch-hex">#5C6470</div></div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Semantic -->
+      <div class="ds-card">
+        <div class="ds-card-head"><div class="ds-card-title">Semantic — Status & Workflow Colors</div><div class="ds-card-sub">Two-layer model: student status (Layer 1) · workflow stage (Layer 2)</div></div>
+        <div class="ds-card-body">
+          <div class="swatch-grid">
+            <div class="swatch"><div class="swatch-color" style="background:#1F7A3F;"></div><div class="swatch-info"><div class="swatch-name">Success</div><div class="swatch-token">--c-success</div><div class="swatch-hex">#1F7A3F · Present status, Justified stage</div></div></div>
+            <div class="swatch"><div class="swatch-color" style="background:#E6F4EC;border:1px solid #4F9A6C;"></div><div class="swatch-info"><div class="swatch-name">Success Tint</div><div class="swatch-token">--c-success-tint</div><div class="swatch-hex">#E6F4EC</div></div></div>
+            <div class="swatch"><div class="swatch-color" style="background:#9A4708;"></div><div class="swatch-info"><div class="swatch-name">Warning</div><div class="swatch-token">--c-warning</div><div class="swatch-hex">#9A4708 · Late status</div></div></div>
+            <div class="swatch"><div class="swatch-color" style="background:#FCF1DD;border:1px solid #B97F38;"></div><div class="swatch-info"><div class="swatch-name">Warning Tint</div><div class="swatch-token">--c-warning-tint</div><div class="swatch-hex">#FCF1DD</div></div></div>
+            <div class="swatch"><div class="swatch-color" style="background:#B42318;"></div><div class="swatch-info"><div class="swatch-name">Danger</div><div class="swatch-token">--c-danger</div><div class="swatch-hex">#B42318 · Absent status, Unjustified</div></div></div>
+            <div class="swatch"><div class="swatch-color" style="background:#FCE9E7;border:1px solid #B0625A;"></div><div class="swatch-info"><div class="swatch-name">Danger Tint</div><div class="swatch-token">--c-danger-tint</div><div class="swatch-hex">#FCE9E7</div></div></div>
+            <div class="swatch"><div class="swatch-color" style="background:#0E5C8A;"></div><div class="swatch-info"><div class="swatch-name">Info</div><div class="swatch-token">--c-info</div><div class="swatch-hex">#0E5C8A · Workflow stages</div></div></div>
+            <div class="swatch"><div class="swatch-color" style="background:#E0EFF7;border:1px solid #5B96BC;"></div><div class="swatch-info"><div class="swatch-name">Info Tint</div><div class="swatch-token">--c-info-tint</div><div class="swatch-hex">#E0EFF7</div></div></div>
+            <div class="swatch"><div class="swatch-color" style="background:#EEF1F5;border:1px solid #A6ADBB;"></div><div class="swatch-info"><div class="swatch-name">Neutral Tint</div><div class="swatch-token">--c-neutral-tint</div><div class="swatch-hex">#EEF1F5</div></div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Brand & Special -->
+      <div class="ds-card">
+        <div class="ds-card-head"><div class="ds-card-title">Brand & Special</div></div>
+        <div class="ds-card-body">
+          <div class="swatch-grid">
+            <div class="swatch"><div class="swatch-color" style="background:#1B5DAF;"></div><div class="swatch-info"><div class="swatch-name">Brand</div><div class="swatch-token">--c-brand</div><div class="swatch-hex">#1B5DAF</div></div></div>
+            <div class="swatch"><div class="swatch-color" style="background:#0E2E55;"></div><div class="swatch-info"><div class="swatch-name">Brand Ink</div><div class="swatch-token">--c-brand-ink</div><div class="swatch-hex">#0E2E55</div></div></div>
+            <div class="swatch"><div class="swatch-color" style="background:#E8F0FA;border:1px solid #6E94BF;"></div><div class="swatch-info"><div class="swatch-name">Brand Tint</div><div class="swatch-token">--c-brand-tint</div><div class="swatch-hex">#E8F0FA</div></div></div>
+            <div class="swatch"><div class="swatch-color" style="background:#3F22A6;"></div><div class="swatch-info"><div class="swatch-name">Purple</div><div class="swatch-token">--c-purple</div><div class="swatch-hex">#3F22A6 · Group events</div></div></div>
+            <div class="swatch"><div class="swatch-color" style="background:#EEEAFE;border:1px solid #7E68DC;"></div><div class="swatch-info"><div class="swatch-name">Purple Tint</div><div class="swatch-token">--c-purple-tint</div><div class="swatch-hex">#EEEAFE</div></div></div>
+            <div class="swatch"><div class="swatch-color" style="background:#FFB400;"></div><div class="swatch-info"><div class="swatch-name">Focus</div><div class="swatch-token">--c-focus</div><div class="swatch-hex">#FFB400 · Keyboard focus ring</div></div></div>
+            <div class="swatch"><div class="swatch-color" style="background:linear-gradient(180deg,#0F2546,#0A1B36);"></div><div class="swatch-info"><div class="swatch-name">Sidebar</div><div class="swatch-token">--c-sidebar gradient</div><div class="swatch-hex">#0F2546 → #0A1B36</div></div></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ══════════ 2. TYPOGRAPHY ══════════ -->
+  <section id="typography" class="ds-section">
+    <div class="ds-section-title">Typography <span>Scale & Hierarchy</span></div>
+    <div class="ds-card">
+      <div class="ds-card-head"><div class="ds-card-title">Font Family</div></div>
+      <div class="ds-card-body">
+        <p style="font-size:13px;color:var(--c-ink-muted);">System font stack — no web fonts loaded.</p>
+        <p style="margin-top:8px;" class="ds-code">"Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, Roboto, "Helvetica Neue", Arial, sans-serif</p>
+      </div>
+    </div>
+    <div style="margin-top:var(--s-4);" class="ds-card">
+      <div class="ds-card-head"><div class="ds-card-title">Size & Weight Scale</div></div>
+      <div class="ds-card-body">
+        <div class="type-row">
+          <div class="type-meta"><span class="ds-code">--fs-2xl · 24px · 700</span></div>
+          <div style="font-size:24px;font-weight:700;letter-spacing:-0.01em;">Page Heading — Dashboard</div>
+        </div>
+        <div class="type-row">
+          <div class="type-meta"><span class="ds-code">--fs-xl · 20px · 700</span></div>
+          <div style="font-size:20px;font-weight:700;line-height:1.2;">Drawer Entity Name — Marie Dubois</div>
+        </div>
+        <div class="type-row">
+          <div class="type-meta"><span class="ds-code">--fs-lg · 16px · 700</span></div>
+          <div style="font-size:16px;font-weight:700;">Drawer Title / Section Heading</div>
+        </div>
+        <div class="type-row">
+          <div class="type-meta"><span class="ds-code">--fs-md · 14px · 700</span></div>
+          <div style="font-size:14px;font-weight:700;">Card Title — Today's records</div>
+        </div>
+        <div class="type-row">
+          <div class="type-meta"><span class="ds-code">--fs-md · 14px · 400</span></div>
+          <div style="font-size:14px;font-weight:400;color:var(--c-ink-muted);">Body text — Standard paragraph text in cards and drawers.</div>
+        </div>
+        <div class="type-row">
+          <div class="type-meta"><span class="ds-code">--fs-sm · 13px · 700</span></div>
+          <div style="font-size:13px;font-weight:700;">Table row name — Liam Tremblay</div>
+        </div>
+        <div class="type-row">
+          <div class="type-meta"><span class="ds-code">--fs-sm · 13px · 500</span></div>
+          <div style="font-size:13px;font-weight:500;">Nav items · Drawer detail values</div>
+        </div>
+        <div class="type-row">
+          <div class="type-meta"><span class="ds-code">--fs-xs · 12px · 600</span></div>
+          <div style="font-size:12px;font-weight:600;color:var(--c-ink-muted);">Timestamps · Labels · Button small · Card footer</div>
+        </div>
+        <div class="type-row">
+          <div class="type-meta"><span class="ds-code">11px · 700 · uppercase</span></div>
+          <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--c-ink-muted);">TABLE HEADER · DRAWER SECTION</div>
+        </div>
+        <div class="type-row">
+          <div class="type-meta"><span class="ds-code">11px · 700</span></div>
+          <div style="font-size:11px;font-weight:700;">Chip labels · Badge text · Row metadata names</div>
+        </div>
+        <div class="type-row">
+          <div class="type-meta"><span class="ds-code">10px · 700 · uppercase</span></div>
+          <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.12em;color:rgba(255,255,255,0.55);background:var(--c-sidebar);padding:4px 8px;border-radius:var(--r-sm);">SIDEBAR SECTION LABEL</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════ 3. SPACING & RADIUS ══════════ -->
+  <section id="spacing" class="ds-section">
+    <div class="ds-section-title">Spacing & Radius</div>
+    <div class="grid-2">
+      <div class="ds-card">
+        <div class="ds-card-head"><div class="ds-card-title">Spacing Scale</div></div>
+        <div class="ds-card-body">
+          <div class="space-row"><span class="ds-code" style="min-width:55px;">--s-1</span><div class="space-bar-wrap"><div class="space-bar" style="width:4px;"></div></div><span class="space-meta">4px</span></div>
+          <div class="space-row"><span class="ds-code" style="min-width:55px;">--s-2</span><div class="space-bar-wrap"><div class="space-bar" style="width:8px;"></div></div><span class="space-meta">8px</span></div>
+          <div class="space-row"><span class="ds-code" style="min-width:55px;">--s-3</span><div class="space-bar-wrap"><div class="space-bar" style="width:12px;"></div></div><span class="space-meta">12px</span></div>
+          <div class="space-row"><span class="ds-code" style="min-width:55px;">--s-4</span><div class="space-bar-wrap"><div class="space-bar" style="width:16px;"></div></div><span class="space-meta">16px</span></div>
+          <div class="space-row"><span class="ds-code" style="min-width:55px;">--s-5</span><div class="space-bar-wrap"><div class="space-bar" style="width:24px;"></div></div><span class="space-meta">24px</span></div>
+          <div class="space-row"><span class="ds-code" style="min-width:55px;">--s-6</span><div class="space-bar-wrap"><div class="space-bar" style="width:32px;"></div></div><span class="space-meta">32px</span></div>
+        </div>
+      </div>
+      <div class="ds-card">
+        <div class="ds-card-head"><div class="ds-card-title">Border Radius</div></div>
+        <div class="ds-card-body">
+          <div class="radius-demo">
+            <div style="text-align:center;"><div class="radius-box" style="border-radius:4px;">sm</div><div class="ds-sublabel">--r-sm · 4px</div></div>
+            <div style="text-align:center;"><div class="radius-box" style="border-radius:6px;">md</div><div class="ds-sublabel">--r-md · 6px</div></div>
+            <div style="text-align:center;"><div class="radius-box" style="border-radius:10px;">lg</div><div class="ds-sublabel">--r-lg · 10px</div></div>
+            <div style="text-align:center;"><div class="radius-box" style="border-radius:14px;">xl</div><div class="ds-sublabel">--r-xl · 14px</div></div>
+            <div style="text-align:center;"><div class="radius-box" style="border-radius:999px;width:56px;height:56px;">pill</div><div class="ds-sublabel">--r-pill · 999px</div></div>
+          </div>
+          <div class="divider"></div>
+          <div class="ds-label">Usage Rule</div>
+          <div style="font-size:12px;color:var(--c-ink-muted);line-height:1.6;">
+            <strong style="color:var(--c-ink);">Pill (999px)</strong> — Status chips, role chips, people avatars, filter buttons, nav badges<br>
+            <strong style="color:var(--c-ink);">--r-md (6px)</strong> — Entity/category tags, buttons, inputs, group/class icons, period cards<br>
+            <strong style="color:var(--c-ink);">--r-lg (10px)</strong> — All cards, drawers, filter bars, banners<br>
+            <strong style="color:var(--c-ink);">--r-xl (14px)</strong> — Modals
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════ 4. CHIPS & BADGES ══════════ -->
+  <section id="chips" class="ds-section">
+    <div class="ds-section-title">Chips & Badges</div>
+
+    <!-- Two-layer model -->
+    <div class="note note-info" style="margin-bottom:var(--s-4);">
+      <i class="fa-solid fa-circle-info"></i>
+      <div><strong>Two-layer model.</strong> Student status and workflow stage are always displayed as <em>separate chips</em>. They do not override each other. Example: a Late student with a Justified resolution shows both <span class="chip chip-late" style="display:inline-flex;"><i class="fa-solid fa-circle-exclamation"></i> Late</span> and <span class="chip chip-justified" style="display:inline-flex;margin-left:4px;"><i class="fa-solid fa-circle-check"></i> Justified</span></div>
+    </div>
+
+    <div class="flex-col">
+
+      <!-- Student Status -->
+      <div class="ds-card">
+        <div class="ds-card-head"><div><div class="ds-card-title">Layer 1 — Student Status Chips</div><div class="ds-card-sub">These colors are immutable — workflow outcomes never change them</div></div></div>
+        <div class="ds-card-body">
+          <div class="flex-wrap" style="gap:var(--s-3);align-items:flex-start;">
+            <div style="text-align:center;"><span class="chip chip-present"><i class="fa-solid fa-circle-check"></i> Present</span><div class="ds-sublabel">fa-circle-check</div></div>
+            <div style="text-align:center;"><span class="chip chip-late"><i class="fa-solid fa-circle-exclamation"></i> Late</span><div class="ds-sublabel">fa-circle-exclamation</div></div>
+            <div style="text-align:center;"><span class="chip chip-absent"><i class="fa-solid fa-circle-xmark"></i> Absent</span><div class="ds-sublabel">fa-circle-xmark</div></div>
+          </div>
+          <div class="divider"></div>
+          <div class="note note-success">
+            <i class="fa-solid fa-circle-check"></i>
+            <div><strong>Absent stays red. Present stays green. Always.</strong> These are permanent status colors tied to what happened to the student, not what the clerk did about it.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Workflow -->
+      <div class="ds-card">
+        <div class="ds-card-head"><div><div class="ds-card-title">Layer 2 — Workflow Stage Chips</div><div class="ds-card-sub">Where the record is in the clerk's workflow — displayed alongside the status chip</div></div></div>
+        <div class="ds-card-body">
+          <div class="flex-wrap" style="gap:var(--s-3);align-items:flex-start;">
+            <div style="text-align:center;"><span class="chip chip-awaiting"><i class="fa-solid fa-hourglass-half"></i> Awaiting check-in</span><div class="ds-sublabel">fa-hourglass-half</div></div>
+            <div style="text-align:center;"><span class="chip chip-awaiting"><i class="fa-solid fa-hourglass-half"></i> Awaiting parent reply</span><div class="ds-sublabel">fa-hourglass-half</div></div>
+            <div style="text-align:center;"><span class="chip chip-awaiting"><i class="fa-solid fa-hourglass-half"></i> Pending approval</span><div class="ds-sublabel">fa-hourglass-half</div></div>
+            <div style="text-align:center;"><span class="chip chip-justified"><i class="fa-solid fa-circle-check"></i> Justified</span><div class="ds-sublabel">Workflow complete ✓ Green</div></div>
+            <div style="text-align:center;"><span class="chip chip-unjust"><i class="fa-solid fa-clock"></i> Unjustified · Past 24h</span><div class="ds-sublabel">fa-clock</div></div>
+            <div style="text-align:center;"><span class="chip chip-disputed"><i class="fa-solid fa-flag"></i> Disputed</span><div class="ds-sublabel">fa-flag</div></div>
+            <div style="text-align:center;"><span class="chip chip-replied"><i class="fa-solid fa-envelope-open-text"></i> Parent replied</span><div class="ds-sublabel">fa-envelope-open-text</div></div>
+            <div style="text-align:center;"><span class="chip chip-noclass"><i class="fa-solid fa-person-circle-exclamation"></i> Did not reach class</span><div class="ds-sublabel">fa-person-circle-exclamation</div></div>
+          </div>
+          <div class="divider"></div>
+          <div class="note">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+            <div><strong>All "awaiting / pending" workflow stages use <code>fa-hourglass-half</code> (sand clock).</strong> This visually distinguishes workflow chips from student status chips, which use circle icons (fa-circle-*).</div>
+          </div>
+          <div class="divider"></div>
+          <div class="ds-label" style="margin-top:0;">Two-chip example — Late student, workflow justified</div>
+          <div class="two-layer">
+            <span class="two-layer-label">Student status</span>
+            <span class="chip chip-late"><i class="fa-solid fa-circle-exclamation"></i> Late</span>
+            <span style="color:var(--c-ink-subtle);font-size:13px;">+</span>
+            <span class="two-layer-label">Workflow stage</span>
+            <span class="chip chip-justified"><i class="fa-solid fa-circle-check"></i> Justified</span>
+            <span style="font-size:11px;color:var(--c-ink-subtle);margin-left:var(--s-2);">= clerk resolved it; student was still late</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Context chips -->
+      <div class="ds-card">
+        <div class="ds-card-head"><div class="ds-card-title">Context / Informational Chips (Pill)</div></div>
+        <div class="ds-card-body">
+          <div class="flex-wrap">
+            <div style="text-align:center;"><span class="chip chip-event"><i class="fa-solid fa-bus"></i> Group event</span><div class="ds-sublabel">Purple</div></div>
+            <div style="text-align:center;"><span class="chip chip-future"><i class="fa-solid fa-calendar-days"></i> Future absence</span><div class="ds-sublabel">Brand blue</div></div>
+            <div style="text-align:center;"><span class="chip chip-period"><i class="fa-solid fa-clock"></i> P2</span><div class="ds-sublabel">Neutral</div></div>
+            <div style="text-align:center;"><span class="chip chip-grade">Gr 9</span><div class="ds-sublabel">Grade chip</div></div>
+            <div style="text-align:center;"><span class="chip chip-homeroom">9A</span><div class="ds-sublabel">Homeroom</div></div>
+            <div style="text-align:center;"><span class="chip chip-role-t"><i class="fa-solid fa-chalkboard-user"></i> Homeroom</span><div class="ds-sublabel">Role</div></div>
+            <div style="text-align:center;"><span class="chip chip-role-c"><i class="fa-solid fa-whistle"></i> Coach</span><div class="ds-sublabel">Role</div></div>
+            <div style="text-align:center;"><span class="chip chip-role-s">Supply</span><div class="ds-sublabel">Role</div></div>
+            <div style="text-align:center;"><span class="chip chip-count">24</span><div class="ds-sublabel">Count pill</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Entity tags -->
+      <div class="ds-card">
+        <div class="ds-card-head"><div><div class="ds-card-title">Entity / Category Tags (Rounded Square — r-md)</div><div class="ds-card-sub">Used consistently for "what something is", not its state. Square on every screen that uses them.</div></div></div>
+        <div class="ds-card-body">
+          <div class="ds-label">Period & Class Labels</div>
+          <div class="flex-wrap" style="margin-bottom:var(--s-4);">
+            <span class="etag">P1</span>
+            <span class="etag">P2</span>
+            <span class="etag">P3</span>
+            <span class="etag">P4</span>
+            <span class="etag">9A</span>
+            <span class="etag">10B</span>
+          </div>
+          <div class="ds-label">Source Badges</div>
+          <div class="flex-wrap" style="margin-bottom:var(--s-4);">
+            <span class="etag etag-aspen"><i class="fa-solid fa-database"></i> Aspen</span>
+            <span class="etag etag-csv"><i class="fa-solid fa-file-csv"></i> CSV</span>
+            <span class="etag etag-manual"><i class="fa-solid fa-pen"></i> Manual</span>
+          </div>
+          <div class="ds-label">Group Type Tags</div>
+          <div class="flex-wrap">
+            <span class="etag etag-sport"><i class="fa-solid fa-futbol"></i> Sport</span>
+            <span class="etag etag-arts"><i class="fa-solid fa-music"></i> Arts</span>
+            <span class="etag etag-acad"><i class="fa-solid fa-graduation-cap"></i> Academic</span>
+            <span class="etag etag-cohort"><i class="fa-solid fa-people-group"></i> Cohort</span>
+            <span class="etag etag-club"><i class="fa-solid fa-comments"></i> Club</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Filter chips -->
+      <div class="ds-card">
+        <div class="ds-card-head"><div class="ds-card-title">Filter / Toggle Chips (Interactive)</div></div>
+        <div class="ds-card-body">
+          <div class="flex-wrap">
+            <button class="chip-filter active">All <span class="chip-num">32</span></button>
+            <button class="chip-filter">Homeroom <span class="chip-num">18</span></button>
+            <button class="chip-filter">Subject <span class="chip-num">12</span></button>
+            <button class="chip-filter">Overdue P2 <span class="chip-num">2</span></button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ══════════ 5. AVATARS ══════════ -->
+  <section id="avatars" class="ds-section">
+    <div class="ds-section-title">Identity & Avatar System</div>
+
+    <div class="flex-col">
+
+      <div class="ds-card">
+        <div class="ds-card-head"><div><div class="ds-card-title">Shape Rule</div><div class="ds-card-sub">Circles for people · Rounded squares for entities</div></div></div>
+        <div class="ds-card-body">
+          <div class="grid-2">
+            <div>
+              <div class="ds-label">People — Circle (r-pill)</div>
+              <div class="flex-wrap" style="align-items:flex-end;">
+                <div style="text-align:center;"><span class="avatar av-circle av-28 av-people" style="background:#1B5DAF;">MT</span><div class="ds-sublabel">28px</div></div>
+                <div style="text-align:center;"><span class="avatar av-circle av-36 av-people" style="background:#6366F1;">LK</span><div class="ds-sublabel">36px</div></div>
+                <div style="text-align:center;"><span class="avatar av-circle av-40 av-people" style="background:#10B981;">MD</span><div class="ds-sublabel">40px</div></div>
+                <div style="text-align:center;"><span class="avatar av-circle av-56 av-people" style="background:#EC4899;">OB</span><div class="ds-sublabel">56px drawer hero</div></div>
+              </div>
+            </div>
+            <div>
+              <div class="ds-label">Entities — Rounded Square (r-md)</div>
+              <div class="flex-wrap" style="align-items:flex-end;">
+                <div style="text-align:center;"><span class="avatar av-square av-36 av-class-9" style="font-size:12px;font-weight:800;">9A</span><div class="ds-sublabel">Class 36px</div></div>
+                <div style="text-align:center;"><span class="avatar av-square av-40 av-class-10" style="font-size:13px;font-weight:800;">10B</span><div class="ds-sublabel">Class 40px</div></div>
+                <div style="text-align:center;"><span class="avatar av-square av-40 av-group-sport"><i class="fa-solid fa-futbol"></i></span><div class="ds-sublabel">Group 40px</div></div>
+                <div style="text-align:center;"><span class="avatar av-square av-56 av-group-arts" style="font-size:22px;"><i class="fa-solid fa-music"></i></span><div class="ds-sublabel">56px drawer hero</div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="ds-card">
+        <div class="ds-card-head"><div class="ds-card-title">People — 8-Color Rotation</div></div>
+        <div class="ds-card-body">
+          <div class="flex-wrap">
+            <div style="text-align:center;"><span class="avatar av-circle av-40 av-people" style="background:#1B5DAF;">AB</span><div class="ds-sublabel">--c-avatar-1</div></div>
+            <div style="text-align:center;"><span class="avatar av-circle av-40 av-people" style="background:#6366F1;">CD</span><div class="ds-sublabel">--c-avatar-2</div></div>
+            <div style="text-align:center;"><span class="avatar av-circle av-40 av-people" style="background:#10B981;">EF</span><div class="ds-sublabel">--c-avatar-3</div></div>
+            <div style="text-align:center;"><span class="avatar av-circle av-40 av-people" style="background:#F59E0B;">GH</span><div class="ds-sublabel">--c-avatar-4</div></div>
+            <div style="text-align:center;"><span class="avatar av-circle av-40 av-people" style="background:#EC4899;">IJ</span><div class="ds-sublabel">--c-avatar-5</div></div>
+            <div style="text-align:center;"><span class="avatar av-circle av-40 av-people" style="background:#0891B2;">KL</span><div class="ds-sublabel">--c-avatar-6</div></div>
+            <div style="text-align:center;"><span class="avatar av-circle av-40 av-people" style="background:#8B5CF6;">MN</span><div class="ds-sublabel">--c-avatar-7</div></div>
+            <div style="text-align:center;"><span class="avatar av-circle av-40 av-people" style="background:#EF4444;">OP</span><div class="ds-sublabel">--c-avatar-8</div></div>
+          </div>
+          <div class="ds-sublabel" style="margin-top:var(--s-3);">Assign by entity ID hash — same person always gets the same color across all portals.</div>
+        </div>
+      </div>
+
+      <div class="ds-card">
+        <div class="ds-card-head"><div class="ds-card-title">Classes — Color by Grade</div></div>
+        <div class="ds-card-body">
+          <div class="flex-wrap">
+            <div style="text-align:center;"><span class="avatar av-square av-40 av-class-7" style="font-size:13px;">7A</span><div class="ds-sublabel">Grade 7</div></div>
+            <div style="text-align:center;"><span class="avatar av-square av-40 av-class-8" style="font-size:13px;">8B</span><div class="ds-sublabel">Grade 8</div></div>
+            <div style="text-align:center;"><span class="avatar av-square av-40 av-class-9" style="font-size:13px;">9A</span><div class="ds-sublabel">Grade 9</div></div>
+            <div style="text-align:center;"><span class="avatar av-square av-40 av-class-10" style="font-size:13px;">10A</span><div class="ds-sublabel">Grade 10</div></div>
+            <div style="text-align:center;"><span class="avatar av-square av-40 av-class-11" style="font-size:13px;">11B</span><div class="ds-sublabel">Grade 11</div></div>
+            <div style="text-align:center;"><span class="avatar av-square av-40 av-class-12" style="font-size:13px;">12A</span><div class="ds-sublabel">Grade 12</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="ds-card">
+        <div class="ds-card-head"><div class="ds-card-title">Groups & Events — Color by Category</div></div>
+        <div class="ds-card-body">
+          <div class="flex-wrap">
+            <div style="text-align:center;"><span class="avatar av-square av-40 av-group-sport"><i class="fa-solid fa-futbol"></i></span><div class="ds-sublabel">Sport</div></div>
+            <div style="text-align:center;"><span class="avatar av-square av-40 av-group-arts"><i class="fa-solid fa-music"></i></span><div class="ds-sublabel">Arts</div></div>
+            <div style="text-align:center;"><span class="avatar av-square av-40 av-group-acad"><i class="fa-solid fa-graduation-cap"></i></span><div class="ds-sublabel">Academic</div></div>
+            <div style="text-align:center;"><span class="avatar av-square av-40 av-group-club"><i class="fa-solid fa-comments"></i></span><div class="ds-sublabel">Club</div></div>
+            <div style="text-align:center;"><span class="avatar av-square av-40" style="background:#E0F2FE;color:#0369A1;"><i class="fa-solid fa-people-group"></i></span><div class="ds-sublabel">Cohort</div></div>
+            <div style="text-align:center;"><span class="avatar av-square av-40" style="background:var(--c-neutral-tint);color:var(--c-ink-muted);"><i class="fa-solid fa-ellipsis"></i></span><div class="ds-sublabel">Custom</div></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ══════════ 6. BUTTONS ══════════ -->
+  <section id="buttons" class="ds-section">
+    <div class="ds-section-title">Buttons</div>
+    <div class="flex-col">
+
+      <div class="ds-card">
+        <div class="ds-card-head"><div class="ds-card-title">Variants — Default Size</div></div>
+        <div class="ds-card-body">
+          <div class="flex-wrap">
+            <div style="text-align:center;"><button class="btn btn--primary"><i class="fa-solid fa-circle-check"></i> Primary</button><div class="ds-sublabel">btn--primary</div></div>
+            <div style="text-align:center;"><button class="btn btn--secondary"><i class="fa-solid fa-file-export"></i> Secondary</button><div class="ds-sublabel">btn--secondary</div></div>
+            <div style="text-align:center;"><button class="btn btn--ghost"><i class="fa-solid fa-arrow-right"></i> Ghost</button><div class="ds-sublabel">btn--ghost</div></div>
+            <div style="text-align:center;"><button class="btn btn--danger"><i class="fa-solid fa-trash"></i> Danger</button><div class="ds-sublabel">btn--danger</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="ds-card">
+        <div class="ds-card-head"><div class="ds-card-title">Small Variants</div></div>
+        <div class="ds-card-body">
+          <div class="flex-wrap">
+            <div style="text-align:center;"><button class="btn btn--primary btn--sm"><i class="fa-solid fa-circle-check"></i> Approve P1</button><div class="ds-sublabel">primary sm</div></div>
+            <div style="text-align:center;"><button class="btn btn--secondary btn--sm">Open record</button><div class="ds-sublabel">secondary sm</div></div>
+            <div style="text-align:center;"><button class="btn btn--ghost btn--sm">View all <i class="fa-solid fa-arrow-right"></i></button><div class="ds-sublabel">ghost sm</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="ds-card">
+        <div class="ds-card-head"><div class="ds-card-title">Disabled State</div></div>
+        <div class="ds-card-body">
+          <div class="flex-wrap">
+            <div style="text-align:center;"><button class="btn btn--primary disabled">Primary</button><div class="ds-sublabel">opacity: 0.45</div></div>
+            <div style="text-align:center;"><button class="btn btn--secondary disabled">Secondary</button><div class="ds-sublabel">cursor: not-allowed</div></div>
+            <div style="text-align:center;"><button class="btn btn--ghost disabled">Ghost</button><div class="ds-sublabel">pointer-events: none</div></div>
+          </div>
+          <div class="ds-sublabel" style="margin-top:var(--s-3);">Apply <span class="ds-code">opacity:0.45; cursor:not-allowed; pointer-events:none</span> to all variants. Colors do not change — reduced opacity is the universal disabled signal.</div>
+        </div>
+      </div>
+
+      <div class="ds-card">
+        <div class="ds-card-head"><div class="ds-card-title">Icon Buttons (Topbar)</div></div>
+        <div class="ds-card-body">
+          <div class="flex-wrap">
+            <div style="text-align:center;"><button class="icon-btn"><i class="fa-solid fa-magnifying-glass"></i></button><div class="ds-sublabel">Search</div></div>
+            <div style="text-align:center;"><button class="icon-btn"><i class="fa-solid fa-bell"></i></button><div class="ds-sublabel">Notifications</div></div>
+            <div style="text-align:center;"><button class="icon-btn"><i class="fa-solid fa-circle-question"></i></button><div class="ds-sublabel">Help</div></div>
+            <div style="text-align:center;"><button class="icon-btn"><i class="fa-solid fa-rotate"></i></button><div class="ds-sublabel">Refresh</div></div>
+            <div style="text-align:center;"><button class="icon-btn"><i class="fa-solid fa-xmark"></i></button><div class="ds-sublabel">Close</div></div>
+          </div>
+          <div class="ds-sublabel" style="margin-top:var(--s-3);">36×36px · r-md · Always include <span class="ds-code">aria-label</span></div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ══════════ 7. PARENT REASONS ══════════ -->
+  <section id="reasons" class="ds-section">
+    <div class="ds-section-title">Parent Reason Chips <span>Standardized from Future Absences screen</span></div>
+    <div class="ds-card">
+      <div class="ds-card-head"><div><div class="ds-card-title">Reason Categories</div><div class="ds-card-sub">Same reason = same color + same icon across all portals and screens, always</div></div></div>
+      <div class="ds-card-body">
+        <div class="flex-col">
+          <div class="flex-wrap">
+            <div style="text-align:center;"><span class="reason reason-medical"><i class="fa-solid fa-stethoscope"></i> Medical</span><div class="ds-sublabel">Info blue · fa-stethoscope</div></div>
+            <div style="text-align:center;"><span class="reason reason-family"><i class="fa-solid fa-house-heart"></i> Family</span><div class="ds-sublabel">Warning amber · fa-house-heart</div></div>
+            <div style="text-align:center;"><span class="reason reason-religious"><i class="fa-solid fa-star-and-crescent"></i> Religious</span><div class="ds-sublabel">Brand blue · fa-star-and-crescent</div></div>
+            <div style="text-align:center;"><span class="reason reason-school"><i class="fa-solid fa-graduation-cap"></i> School</span><div class="ds-sublabel">Purple · fa-graduation-cap</div></div>
+            <div style="text-align:center;"><span class="reason reason-transport"><i class="fa-solid fa-bus"></i> Transportation</span><div class="ds-sublabel">Neutral gray · fa-bus</div></div>
+            <div style="text-align:center;"><span class="reason reason-other"><i class="fa-solid fa-ellipsis"></i> Other</span><div class="ds-sublabel">Neutral gray · fa-ellipsis</div></div>
+          </div>
+          <div class="note">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+            <div>These categories are sourced directly from the Future Absences screen (<code>reason-tag</code> classes). Apply them everywhere: Clerk portal, Teacher portal, Parent portal, reports.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════ 8. ICONS ══════════ -->
+  <section id="icons" class="ds-section">
+    <div class="ds-section-title">Icon System <span>Font Awesome 6.5 Solid</span></div>
+
+    <div class="flex-col">
+      <div class="note note-info">
+        <i class="fa-solid fa-circle-info"></i>
+        <div><strong>Core principle:</strong> Student status icons use <strong>circles</strong> (fa-circle-*). Workflow stage icons use <strong>time/process</strong> shapes (fa-hourglass-half, fa-clock, fa-flag). A clerk can read icon shape alone to distinguish status from workflow.</div>
+      </div>
+
+      <div class="grid-2">
+        <div class="ds-card">
+          <div class="ds-card-head"><div class="ds-card-title">Student Status Icons — Circle Family</div></div>
+          <div class="ds-card-body">
+            <div class="icon-row"><div class="icon-demo" style="background:var(--c-success-tint);color:var(--c-success);"><i class="fa-solid fa-circle-check"></i></div><div class="icon-meta"><div class="icon-name">Present</div><div class="icon-code">fa-circle-check</div></div></div>
+            <div class="icon-row"><div class="icon-demo" style="background:var(--c-warning-tint);color:var(--c-warning);"><i class="fa-solid fa-circle-exclamation"></i></div><div class="icon-meta"><div class="icon-name">Late <span class="badge-changed">Updated</span></div><div class="icon-code">fa-circle-exclamation</div><div class="icon-note">Replaces fa-door-open</div></div></div>
+            <div class="icon-row"><div class="icon-demo" style="background:var(--c-danger-tint);color:var(--c-danger);"><i class="fa-solid fa-circle-xmark"></i></div><div class="icon-meta"><div class="icon-name">Absent</div><div class="icon-code">fa-circle-xmark</div></div></div>
+            <div class="icon-row"><div class="icon-demo" style="background:var(--c-warning-tint);color:var(--c-warning);"><i class="fa-solid fa-person-circle-exclamation"></i></div><div class="icon-meta"><div class="icon-name">Did not reach class</div><div class="icon-code">fa-person-circle-exclamation</div></div></div>
+          </div>
+        </div>
+
+        <div class="ds-card">
+          <div class="ds-card-head"><div class="ds-card-title">Workflow Stage Icons — Sand Clock Family</div></div>
+          <div class="ds-card-body">
+            <div class="icon-row"><div class="icon-demo" style="background:var(--c-info-tint);color:var(--c-info);"><i class="fa-solid fa-hourglass-half"></i></div><div class="icon-meta"><div class="icon-name">Awaiting / Pending <span class="badge-new">Standard</span></div><div class="icon-code">fa-hourglass-half</div><div class="icon-note">All workflow waiting states</div></div></div>
+            <div class="icon-row"><div class="icon-demo" style="background:var(--c-danger-tint);color:var(--c-danger);"><i class="fa-solid fa-clock"></i></div><div class="icon-meta"><div class="icon-name">Unjustified / Past due</div><div class="icon-code">fa-clock</div></div></div>
+            <div class="icon-row"><div class="icon-demo" style="background:var(--c-danger-tint);color:var(--c-danger);"><i class="fa-solid fa-flag"></i></div><div class="icon-meta"><div class="icon-name">Disputed</div><div class="icon-code">fa-flag</div></div></div>
+            <div class="icon-row"><div class="icon-demo" style="background:var(--c-info-tint);color:var(--c-info);"><i class="fa-solid fa-envelope-open-text"></i></div><div class="icon-meta"><div class="icon-name">Parent replied / Pending replies</div><div class="icon-code">fa-envelope-open-text</div></div></div>
+            <div class="icon-row"><div class="icon-demo" style="background:var(--c-success-tint);color:var(--c-success);"><i class="fa-solid fa-circle-check"></i></div><div class="icon-meta"><div class="icon-name">Justified (workflow complete)</div><div class="icon-code">fa-circle-check</div></div></div>
+          </div>
+        </div>
+
+        <div class="ds-card">
+          <div class="ds-card-head"><div class="ds-card-title">Navigation Icons</div></div>
+          <div class="ds-card-body">
+            <div class="icon-row"><div class="icon-demo icon-demo-action"><i class="fa-solid fa-gauge-high"></i></div><div class="icon-meta"><div class="icon-name">Dashboard</div><div class="icon-code">fa-gauge-high</div></div></div>
+            <div class="icon-row"><div class="icon-demo icon-demo-action"><i class="fa-solid fa-clipboard-list"></i></div><div class="icon-meta"><div class="icon-name">Today's records</div><div class="icon-code">fa-clipboard-list</div></div></div>
+            <div class="icon-row"><div class="icon-demo icon-demo-action"><i class="fa-solid fa-table-list"></i></div><div class="icon-meta"><div class="icon-name">School roster</div><div class="icon-code">fa-table-list</div></div></div>
+            <div class="icon-row"><div class="icon-demo icon-demo-action"><i class="fa-solid fa-envelope-open-text"></i></div><div class="icon-meta"><div class="icon-name">Pending parent replies</div><div class="icon-code">fa-envelope-open-text</div></div></div>
+            <div class="icon-row"><div class="icon-demo icon-demo-action"><i class="fa-solid fa-triangle-exclamation"></i></div><div class="icon-meta"><div class="icon-name">Disputes</div><div class="icon-code">fa-triangle-exclamation</div></div></div>
+            <div class="icon-row"><div class="icon-demo icon-demo-action"><i class="fa-solid fa-calendar-days"></i></div><div class="icon-meta"><div class="icon-name">Future absences</div><div class="icon-code">fa-calendar-days</div></div></div>
+            <div class="icon-row"><div class="icon-demo icon-demo-action"><i class="fa-solid fa-bus"></i></div><div class="icon-meta"><div class="icon-name">Group events</div><div class="icon-code">fa-bus</div></div></div>
+            <div class="icon-row"><div class="icon-demo icon-demo-action"><i class="fa-solid fa-chalkboard"></i></div><div class="icon-meta"><div class="icon-name">Classes</div><div class="icon-code">fa-chalkboard</div></div></div>
+            <div class="icon-row"><div class="icon-demo icon-demo-action"><i class="fa-solid fa-user-graduate"></i></div><div class="icon-meta"><div class="icon-name">Students</div><div class="icon-code">fa-user-graduate</div></div></div>
+            <div class="icon-row"><div class="icon-demo icon-demo-action"><i class="fa-solid fa-chalkboard-user"></i></div><div class="icon-meta"><div class="icon-name">Teachers</div><div class="icon-code">fa-chalkboard-user</div></div></div>
+            <div class="icon-row"><div class="icon-demo icon-demo-action"><i class="fa-solid fa-people-group"></i></div><div class="icon-meta"><div class="icon-name">Groups</div><div class="icon-code">fa-people-group</div></div></div>
+            <div class="icon-row"><div class="icon-demo icon-demo-action"><i class="fa-solid fa-chart-column"></i></div><div class="icon-meta"><div class="icon-name">Daily attendance</div><div class="icon-code">fa-chart-column</div></div></div>
+            <div class="icon-row"><div class="icon-demo icon-demo-action"><i class="fa-solid fa-clock-rotate-left"></i></div><div class="icon-meta"><div class="icon-name">Audit log</div><div class="icon-code">fa-clock-rotate-left</div></div></div>
+          </div>
+        </div>
+
+        <div class="ds-card">
+          <div class="ds-card-head"><div class="ds-card-title">Action Icons</div></div>
+          <div class="ds-card-body">
+            <div class="icon-row"><div class="icon-demo icon-demo-action"><i class="fa-solid fa-magnifying-glass"></i></div><div class="icon-meta"><div class="icon-name">Search</div><div class="icon-code">fa-magnifying-glass</div></div></div>
+            <div class="icon-row"><div class="icon-demo icon-demo-action"><i class="fa-solid fa-bell"></i></div><div class="icon-meta"><div class="icon-name">Notifications · Remind action</div><div class="icon-code">fa-bell</div></div></div>
+            <div class="icon-row"><div class="icon-demo icon-demo-action"><i class="fa-solid fa-paper-plane"></i></div><div class="icon-meta"><div class="icon-name">Send / Remind all</div><div class="icon-code">fa-paper-plane</div></div></div>
+            <div class="icon-row"><div class="icon-demo icon-demo-action"><i class="fa-solid fa-rotate"></i></div><div class="icon-meta"><div class="icon-name">Refresh / Sync</div><div class="icon-code">fa-rotate</div></div></div>
+            <div class="icon-row"><div class="icon-demo icon-demo-action"><i class="fa-solid fa-file-export"></i></div><div class="icon-meta"><div class="icon-name">Export</div><div class="icon-code">fa-file-export</div></div></div>
+            <div class="icon-row"><div class="icon-demo icon-demo-action"><i class="fa-solid fa-print"></i></div><div class="icon-meta"><div class="icon-name">Print</div><div class="icon-code">fa-print</div></div></div>
+            <div class="icon-row"><div class="icon-demo icon-demo-action"><i class="fa-solid fa-xmark"></i></div><div class="icon-meta"><div class="icon-name">Close panel</div><div class="icon-code">fa-xmark</div></div></div>
+            <div class="icon-row"><div class="icon-demo icon-demo-action"><i class="fa-solid fa-envelope"></i></div><div class="icon-meta"><div class="icon-name">Email teacher / parent</div><div class="icon-code">fa-envelope</div></div></div>
+            <div class="icon-row"><div class="icon-demo icon-demo-action"><i class="fa-solid fa-people-roof"></i></div><div class="icon-meta"><div class="icon-name">Parents & guardians</div><div class="icon-code">fa-people-roof</div></div></div>
+            <div class="icon-row"><div class="icon-demo icon-demo-action"><i class="fa-solid fa-arrow-up-right-from-square"></i></div><div class="icon-meta"><div class="icon-name">Open in Aspen</div><div class="icon-code">fa-arrow-up-right-from-square</div></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════ 9. SKELETON ══════════ -->
+  <section id="skeleton" class="ds-section">
+    <div class="ds-section-title">Skeleton / Loading State <span>New — v1.1</span></div>
+    <div class="flex-col">
+
+      <div class="ds-card">
+        <div class="ds-card-head"><div class="ds-card-title">Skeleton Table Rows</div></div>
+        <div class="ds-card-body" style="padding:0;">
+          <div style="border-bottom:1px solid var(--c-border-2);padding:10px 16px;font-size:11px;color:var(--c-ink-muted);font-weight:600;">Showing skeleton while data loads…</div>
+          <div class="skeleton-row">
+            <span class="skeleton-avatar-circle" style="width:36px;height:36px;flex-shrink:0;"></span>
+            <div class="skeleton-cell">
+              <div class="skeleton-line lg" style="width:55%;"></div>
+              <div class="skeleton-line sm" style="width:35%;"></div>
+            </div>
+            <div class="skeleton-cell" style="max-width:100px;">
+              <div class="skeleton-line" style="width:70%;"></div>
+            </div>
+            <div class="skeleton-cell" style="max-width:140px;">
+              <div class="skeleton-line" style="width:80%;"></div>
+              <div class="skeleton-line sm" style="width:50%;"></div>
+            </div>
+            <div class="skeleton-cell" style="max-width:80px;align-items:flex-end;">
+              <div class="skeleton-line" style="width:60%;"></div>
+            </div>
+          </div>
+          <div class="skeleton-row">
+            <span class="skeleton-avatar-circle" style="width:36px;height:36px;flex-shrink:0;"></span>
+            <div class="skeleton-cell">
+              <div class="skeleton-line lg" style="width:45%;"></div>
+              <div class="skeleton-line sm" style="width:30%;"></div>
+            </div>
+            <div class="skeleton-cell" style="max-width:100px;">
+              <div class="skeleton-line" style="width:60%;"></div>
+            </div>
+            <div class="skeleton-cell" style="max-width:140px;">
+              <div class="skeleton-line" style="width:90%;"></div>
+              <div class="skeleton-line sm" style="width:40%;"></div>
+            </div>
+            <div class="skeleton-cell" style="max-width:80px;align-items:flex-end;">
+              <div class="skeleton-line" style="width:55%;"></div>
+            </div>
+          </div>
+          <div class="skeleton-row">
+            <span class="skeleton-avatar-circle" style="width:36px;height:36px;flex-shrink:0;"></span>
+            <div class="skeleton-cell">
+              <div class="skeleton-line lg" style="width:60%;"></div>
+              <div class="skeleton-line sm" style="width:38%;"></div>
+            </div>
+            <div class="skeleton-cell" style="max-width:100px;">
+              <div class="skeleton-line" style="width:75%;"></div>
+            </div>
+            <div class="skeleton-cell" style="max-width:140px;">
+              <div class="skeleton-line" style="width:65%;"></div>
+              <div class="skeleton-line sm" style="width:45%;"></div>
+            </div>
+            <div class="skeleton-cell" style="max-width:80px;align-items:flex-end;">
+              <div class="skeleton-line" style="width:50%;"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="ds-card">
+        <div class="ds-card-head"><div class="ds-card-title">Skeleton KPI Tiles</div></div>
+        <div class="ds-card-body">
+          <div class="grid-4">
+            <div class="skeleton-kpi"><div class="skeleton-line lg" style="width:40%;"></div><div class="skeleton-line sm" style="width:70%;"></div><div class="skeleton-line sm" style="width:55%;"></div></div>
+            <div class="skeleton-kpi"><div class="skeleton-line lg" style="width:30%;"></div><div class="skeleton-line sm" style="width:80%;"></div><div class="skeleton-line sm" style="width:50%;"></div></div>
+            <div class="skeleton-kpi"><div class="skeleton-line lg" style="width:35%;"></div><div class="skeleton-line sm" style="width:65%;"></div><div class="skeleton-line sm" style="width:60%;"></div></div>
+            <div class="skeleton-kpi"><div class="skeleton-line lg" style="width:45%;"></div><div class="skeleton-line sm" style="width:75%;"></div><div class="skeleton-line sm" style="width:45%;"></div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="ds-card">
+        <div class="ds-card-head"><div class="ds-card-title">Skeleton CSS</div></div>
+        <div class="ds-card-body">
+          <pre style="font-size:11px;font-family:monospace;background:var(--c-surface-2);padding:var(--s-4);border-radius:var(--r-md);border:1px solid var(--c-border-2);overflow-x:auto;line-height:1.7;color:var(--c-ink);">@keyframes shimmer {
+  0%   { background-position: 100% 0; }
+  100% { background-position: -100% 0; }
+}
+
+.skeleton-line {
+  height: 12px;
+  background: linear-gradient(
+    90deg,
+    var(--c-border-2) 25%,
+    var(--c-surface-alt) 50%,
+    var(--c-border-2) 75%
+  );
+  background-size: 400% 100%;
+  animation: shimmer 1.4s ease infinite;
+  border-radius: var(--r-sm);
+}
+
+/* Size modifiers */
+.skeleton-line.lg { height: 16px; }
+.skeleton-line.sm { height: 8px; }
+
+/* Avatar skeletons */
+.skeleton-avatar { background-image: same gradient; }
+.skeleton-avatar.circle { border-radius: var(--r-pill); }
+.skeleton-avatar.square { border-radius: var(--r-md); }</pre>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+</main>
+</div>
+
+<script>
+// Active nav highlight on scroll
+const sections = document.querySelectorAll('.ds-section');
+const navLinks = document.querySelectorAll('.nav a');
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      navLinks.forEach(l => l.classList.remove('active'));
+      const link = document.querySelector('.nav a[href="#' + e.target.id + '"]');
+      if (link) link.classList.add('active');
+    }
+  });
+}, { rootMargin: '-20% 0px -70% 0px' });
+sections.forEach(s => observer.observe(s));
+</script>
+</body>
+</html>

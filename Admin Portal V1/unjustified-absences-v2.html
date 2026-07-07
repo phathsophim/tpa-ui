@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ClassTrack — Board Admin · Reports · Unjustified Absences</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+:root{
+  --c-bg:#F0F2F7;--c-surface:#FFFFFF;--c-surface-2:#F8FAFC;--c-surface-alt:#EEF2F7;
+  --c-sidebar:#0F2546;--c-sidebar-2:#0A1B36;--c-sidebar-hover:rgba(255,255,255,0.08);--c-sidebar-active:#1B5DAF;
+  --c-border:#D6DBE2;--c-border-2:#E5E8EE;--c-border-strong:#A6ADBB;
+  --c-ink:#0F2546;--c-ink-muted:#475467;--c-ink-subtle:#5C6470;
+  --c-brand:#1B5DAF;--c-brand-ink:#0E2E55;--c-brand-tint:#E8F0FA;
+  --c-success:#1F7A3F;--c-success-tint:#E6F4EC;
+  --c-warning:#9A4708;--c-warning-tint:#FCF1DD;--c-warning-bord:#B97F38;
+  --c-danger:#B42318;--c-danger-tint:#FCE9E7;
+  --c-info:#0E5C8A;--c-info-tint:#E0EFF7;
+  --c-neutral-tint:#EEF1F5;--c-purple-tint:#EEEAFE;--c-purple:#3F22A6;
+  --ff:"Segoe UI",system-ui,-apple-system,sans-serif;
+  --shadow-sm:0 1px 3px rgba(15,37,70,0.06);--shadow-md:0 4px 12px rgba(15,37,70,0.08);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;}
+body{font-family:var(--ff);background:var(--c-bg);color:var(--c-ink);font-size:14px;line-height:1.55;-webkit-font-smoothing:antialiased;}
+a{color:var(--c-brand);text-decoration:none;}a:hover{text-decoration:underline;}
+button{font-family:inherit;cursor:pointer;}
+
+/* ── Banner ── */
+.wf-banner{background:#F0EFFE;border-bottom:1px solid #C8C0F0;color:#3F22A6;font-size:12px;padding:6px 16px;display:flex;align-items:center;justify-content:space-between;gap:16px;}
+.wf-banner__left{display:flex;align-items:center;gap:8px;}
+.wf-banner a{color:#3F22A6;}
+
+/* ── Layout ── */
+.app{display:grid;grid-template-columns:240px 1fr;min-height:calc(100vh - 32px);}
+
+/* ── Sidebar ── */
+.sidebar{background:linear-gradient(180deg,var(--c-sidebar) 0%,var(--c-sidebar-2) 100%);color:rgba(255,255,255,0.85);display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow-y:auto;}
+.sidebar__logo{padding:24px 16px 16px;border-bottom:1px solid rgba(255,255,255,0.08);display:flex;align-items:center;gap:12px;}
+.sidebar__logo-mark{width:36px;height:36px;background:var(--c-sidebar-active);border-radius:10px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:16px;}
+.sidebar__logo-text{color:#fff;font-size:16px;font-weight:700;}
+.sidebar__logo-sub{color:rgba(255,255,255,0.6);font-size:11px;margin-top:2px;}
+.sidebar__role-badge{margin:8px 16px 0;background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.2);border-radius:999px;padding:3px 10px;font-size:10px;font-weight:700;color:rgba(255,255,255,0.9);letter-spacing:0.06em;text-transform:uppercase;text-align:center;}
+.sidebar__section{padding:16px 12px 4px;}
+.sidebar__section-label{text-transform:uppercase;font-size:10px;font-weight:700;letter-spacing:0.12em;color:rgba(255,255,255,0.45);padding:0 12px;margin-bottom:4px;}
+.nav-item{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:6px;color:rgba(255,255,255,0.78);font-size:13px;font-weight:500;min-height:36px;text-decoration:none;}
+.nav-item:hover{background:var(--c-sidebar-hover);color:#fff;text-decoration:none;}
+.nav-item.is-active{background:var(--c-sidebar-active);color:#fff;font-weight:600;}
+.nav-item .nav-icon{width:20px;text-align:center;font-size:14px;}
+.nav-item .nav-badge{margin-left:auto;background:var(--c-danger);color:#fff;font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px;}
+.nav-item .nav-badge--warn{background:#7A3500;color:#fff;}
+.sidebar__user{margin-top:auto;padding:12px 16px;border-top:1px solid rgba(255,255,255,0.08);display:flex;align-items:center;gap:12px;}
+.avatar{width:36px;height:36px;border-radius:999px;background:var(--c-brand-tint);color:var(--c-brand-ink);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;flex-shrink:0;}
+.sidebar__user-name{color:#fff;font-size:13px;font-weight:600;}
+.sidebar__user-role{color:rgba(255,255,255,0.6);font-size:11px;}
+
+/* ── Main ── */
+.main{display:flex;flex-direction:column;min-width:0;}
+.topbar{background:var(--c-surface);border-bottom:1px solid var(--c-border);display:flex;align-items:center;gap:16px;padding:0 24px;position:sticky;top:0;z-index:50;min-height:64px;}
+.topbar__left{display:flex;flex-direction:column;gap:2px;}
+.topbar__title{font-size:15px;font-weight:700;color:var(--c-ink);}
+.topbar__breadcrumb{font-size:12px;color:var(--c-ink-subtle);}
+.topbar__breadcrumb span{color:var(--c-ink-muted);}
+.topbar__scope{background:var(--c-purple-tint);color:var(--c-purple);border:1px solid #C8C0F0;padding:6px 12px;border-radius:6px;font-size:12px;font-weight:600;display:inline-flex;align-items:center;gap:8px;margin-left:auto;}
+.topbar__actions{display:flex;align-items:center;gap:8px;}
+.icon-btn{width:36px;height:36px;border-radius:6px;background:transparent;border:none;color:var(--c-ink-muted);display:inline-flex;align-items:center;justify-content:center;position:relative;font-size:14px;}
+.icon-btn:hover{background:var(--c-surface-alt);}
+.icon-btn__count{position:absolute;top:2px;right:2px;background:var(--c-danger);color:#fff;font-size:10px;font-weight:700;min-width:18px;height:18px;border-radius:999px;display:flex;align-items:center;justify-content:center;padding:0 4px;border:2px solid var(--c-surface);}
+.lang-toggle{display:inline-flex;border:1px solid var(--c-border-strong);border-radius:6px;overflow:hidden;}
+.lang-toggle button{background:var(--c-surface);border:0;padding:6px 12px;font-size:12px;font-weight:700;color:var(--c-ink-muted);min-height:32px;}
+.lang-toggle button[aria-pressed="true"]{background:var(--c-brand);color:#fff;}
+.user-chip{display:inline-flex;align-items:center;gap:8px;padding:4px 10px 4px 4px;border:1px solid var(--c-border);border-radius:999px;font-size:12px;color:var(--c-ink-muted);min-height:36px;}
+
+/* ── Buttons ── */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:6px;font-size:13px;font-weight:600;border:1px solid transparent;min-height:34px;cursor:pointer;text-decoration:none;}
+.btn--primary{background:var(--c-brand);color:#fff;border-color:var(--c-brand);}
+.btn--primary:hover{background:var(--c-brand-ink);}
+.btn--secondary{background:var(--c-surface);color:var(--c-ink);border-color:var(--c-border-strong);}
+.btn--secondary:hover{background:var(--c-surface-alt);}
+.btn--sm{padding:4px 10px;min-height:28px;font-size:12px;}
+
+/* ── Page Header ── */
+.page-header{background:var(--c-surface);border-bottom:1px solid var(--c-border);padding:14px 24px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;}
+.page-header__left{display:flex;align-items:center;gap:10px;flex:1;min-width:0;}
+.live-dot{width:8px;height:8px;border-radius:50%;background:#22C55E;flex-shrink:0;animation:pulse-dot 2s ease-in-out infinite;}
+@keyframes pulse-dot{0%,100%{box-shadow:0 0 0 0 rgba(34,197,94,0.5);}50%{box-shadow:0 0 0 5px rgba(34,197,94,0);}}
+.page-header__title{font-size:15px;font-weight:700;color:var(--c-ink);}
+.page-header__sep{color:var(--c-border-strong);font-size:16px;}
+.term-select{font-size:12px;font-weight:600;color:var(--c-ink-muted);border:1px solid var(--c-border);border-radius:6px;padding:4px 10px;background:var(--c-surface-2);cursor:pointer;height:28px;}
+.page-header__sync{font-size:11px;color:var(--c-ink-subtle);white-space:nowrap;}
+.page-header__sync i{color:#22C55E;}
+.page-header__actions{display:flex;align-items:center;gap:8px;flex-shrink:0;}
+
+/* ── Attention Bar ── */
+.attention-bar{background:var(--c-danger-tint);border-bottom:2px solid #B42318;padding:9px 24px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+.attention-bar__icon{color:var(--c-danger);font-size:14px;flex-shrink:0;}
+.attention-bar__msg{font-size:12px;font-weight:600;color:#7A1A10;flex:1;}
+.attention-bar__chips{display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
+.attn-chip{display:inline-flex;align-items:center;gap:5px;background:#fff;border:1px solid #D6685F;border-radius:999px;padding:3px 10px;font-size:11px;font-weight:700;color:#7A1A10;cursor:pointer;white-space:nowrap;}
+.attn-chip:hover{background:#FCE9E7;}
+.attn-chip__swatch{width:8px;height:8px;border-radius:50%;}
+
+/* ── Tabs ── */
+.report-tabs{background:var(--c-surface);border-bottom:1px solid var(--c-border);padding:0 24px;display:flex;gap:0;}
+.report-tab{font-size:13px;font-weight:500;padding:10px 16px;color:var(--c-ink-muted);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;user-select:none;background:none;border-top:0;border-left:0;border-right:0;}
+.report-tab:hover{color:var(--c-ink);}
+.report-tab.is-active{color:var(--c-brand);border-bottom-color:var(--c-brand);font-weight:600;}
+.tab-panel{display:none;}
+.tab-panel.is-active{display:block;}
+
+/* ── KPI Cards ── */
+.kpi-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;padding:20px 24px 0;}
+.kpi-card{background:var(--c-surface);border:1px solid var(--c-border-2);border-radius:8px;padding:14px 16px 12px;position:relative;overflow:hidden;box-shadow:var(--shadow-sm);}
+.kpi-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:8px 8px 0 0;}
+.kpi-card--ok::before{background:var(--c-success);}
+.kpi-card--warn::before{background:var(--c-warning);}
+.kpi-card--alert::before{background:var(--c-danger);}
+.kpi-card--neutral::before{background:var(--c-brand);}
+.kpi-card--purple::before{background:var(--c-purple);}
+.kpi-card__label{font-size:10px;font-weight:700;color:var(--c-ink-muted);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:5px;}
+.kpi-card__value{font-size:26px;font-weight:800;color:var(--c-ink);line-height:1.1;}
+.kpi-card--alert .kpi-card__value{color:var(--c-danger);}
+.kpi-card--warn .kpi-card__value{color:var(--c-warning);}
+.kpi-card__sub{font-size:11px;color:var(--c-ink-subtle);margin-top:3px;}
+.kpi-card__trend{display:inline-flex;align-items:center;gap:4px;margin-top:7px;padding:2px 8px;border-radius:999px;font-size:11px;font-weight:700;border:1px solid transparent;}
+.kpi-card__trend--up-bad{background:var(--c-danger-tint);color:var(--c-danger);border-color:#B0625A;}
+.kpi-card__trend--neutral{background:var(--c-neutral-tint);color:var(--c-ink-muted);border-color:var(--c-border-strong);}
+.kpi-card__trend--warn{background:var(--c-warning-tint);color:var(--c-warning);border-color:var(--c-warning-bord);}
+.kpi-card__trend--ok{background:var(--c-success-tint);color:var(--c-success);border-color:#4F9A6C;}
+
+/* ── Table Section ── */
+.table-section{padding:16px 24px 24px;}
+.table-toolbar{display:flex;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap;}
+.search-input{display:flex;align-items:center;gap:8px;background:var(--c-surface);border:1px solid var(--c-border-strong);border-radius:6px;padding:6px 10px;min-width:220px;}
+.search-input i{color:var(--c-ink-subtle);font-size:12px;}
+.search-input input{border:none;outline:none;font-family:var(--ff);font-size:13px;color:var(--c-ink);background:transparent;width:100%;}
+.search-input input::placeholder{color:var(--c-ink-subtle);}
+.toggle-group{display:inline-flex;border:1px solid var(--c-border-strong);border-radius:6px;overflow:hidden;}
+.toggle-btn{background:var(--c-surface);border:0;padding:5px 12px;font-family:var(--ff);font-size:12px;font-weight:600;color:var(--c-ink-muted);min-height:32px;cursor:pointer;white-space:nowrap;}
+.toggle-btn:hover{background:var(--c-surface-alt);color:var(--c-ink);}
+.toggle-btn.is-active{background:var(--c-brand);color:#fff;}
+.toggle-btn.is-active--alert{background:var(--c-danger);color:#fff;}
+.toggle-btn.is-active--warn{background:var(--c-warning);color:#fff;}
+.filter-select{font-size:12px;font-weight:500;padding:5px 10px;border:1px solid var(--c-border-strong);border-radius:6px;background:var(--c-surface);color:var(--c-ink);height:32px;cursor:pointer;}
+.result-count{margin-left:auto;font-size:12px;color:var(--c-ink-subtle);}
+.result-count strong{color:var(--c-ink);}
+
+/* ── Portal Table ── */
+.portal-table{width:100%;border-collapse:collapse;font-size:13px;background:var(--c-surface);border-radius:8px;overflow:hidden;border:1px solid var(--c-border-2);box-shadow:var(--shadow-sm);}
+.portal-table thead th{padding:10px 14px;text-align:left;font-size:11px;font-weight:700;color:var(--c-ink-muted);background:var(--c-surface-2);border-bottom:1px solid var(--c-border);text-transform:uppercase;letter-spacing:0.06em;white-space:nowrap;user-select:none;}
+.portal-table thead th.sortable{cursor:pointer;}
+.portal-table thead th.sortable:hover{background:var(--c-surface-alt);color:var(--c-ink);}
+.portal-table thead th .sort-icon{margin-left:4px;opacity:0.4;font-size:10px;}
+.portal-table thead th.sort-active .sort-icon{opacity:1;color:var(--c-brand);}
+.portal-table tbody tr{border-bottom:1px solid var(--c-border-2);transition:background 0.1s;}
+.portal-table tbody tr:last-child{border-bottom:0;}
+.portal-table tbody tr:hover{background:var(--c-surface-2);}
+.portal-table td{padding:11px 14px;vertical-align:middle;}
+.portal-table td.center{text-align:center;}
+
+/* ── Cell types ── */
+.student-cell__name{font-weight:600;color:var(--c-ink);}
+.student-cell__id{font-size:11px;color:var(--c-ink-subtle);margin-top:1px;}
+.school-swatch-row{display:flex;align-items:center;gap:7px;}
+.school-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;}
+.school-label{font-size:12px;color:var(--c-ink-muted);}
+.subject-cell{font-size:12px;color:var(--c-ink-muted);}
+.date-cell{font-size:12px;color:var(--c-ink-muted);white-space:nowrap;}
+
+/* ── Days Open Badge ── */
+.days-badge{display:inline-flex;align-items:center;justify-content:center;min-width:28px;height:24px;border-radius:6px;font-size:12px;font-weight:700;padding:0 8px;}
+.days-badge--low{background:var(--c-neutral-tint);color:var(--c-ink-muted);border:1px solid var(--c-border-strong);}
+.days-badge--med{background:var(--c-warning-tint);color:var(--c-warning);border:1px solid var(--c-warning-bord);}
+.days-badge--high{background:var(--c-danger-tint);color:var(--c-danger);border:1px solid #B0625A;}
+
+/* ── Status ── */
+.status{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:999px;font-size:11px;font-weight:700;border:1px solid transparent;white-space:nowrap;}
+.status--alert{background:var(--c-danger-tint);color:var(--c-danger);border-color:#B0625A;}
+.status--warn{background:var(--c-warning-tint);color:var(--c-warning);border-color:var(--c-warning-bord);}
+.status--neutral{background:var(--c-neutral-tint);color:var(--c-ink-muted);border-color:var(--c-border-strong);}
+
+/* ── History ── */
+.history-body{padding:24px;display:flex;flex-direction:column;gap:8px;}
+.history-row{display:flex;align-items:center;gap:16px;padding:12px 16px;background:var(--c-surface);border:1px solid var(--c-border);border-radius:8px;font-size:13px;box-shadow:var(--shadow-sm);}
+.history-row:hover{background:var(--c-surface-2);}
+.history-row__icon{width:32px;height:32px;border-radius:6px;background:var(--c-surface-alt);border:1px solid var(--c-border-2);display:flex;align-items:center;justify-content:center;font-size:13px;color:var(--c-brand);flex-shrink:0;}
+.history-row__name{font-weight:600;color:var(--c-ink);flex:1;}
+.history-row__meta{color:var(--c-ink-subtle);font-size:12px;min-width:180px;}
+.history-row__user{color:var(--c-ink-subtle);font-size:12px;min-width:140px;}
+
+/* ── Modals ── */
+.modal-backdrop{position:fixed;inset:0;background:rgba(15,37,70,0.48);z-index:100;display:flex;align-items:center;justify-content:center;padding:16px;}
+.modal-backdrop.is-hidden{display:none;}
+.modal{background:var(--c-surface);border-radius:14px;box-shadow:0 8px 28px rgba(15,37,70,0.18);width:100%;max-width:480px;display:flex;flex-direction:column;}
+.modal__h{padding:16px 24px;border-bottom:1px solid var(--c-border-2);display:flex;align-items:center;justify-content:space-between;}
+.modal__title{font-size:15px;font-weight:700;color:var(--c-ink);}
+.modal__close{width:32px;height:32px;border:none;background:transparent;border-radius:6px;display:flex;align-items:center;justify-content:center;color:var(--c-ink-muted);cursor:pointer;font-size:14px;}
+.modal__close:hover{background:var(--c-surface-alt);}
+.modal__b{padding:20px 24px;display:flex;flex-direction:column;gap:16px;}
+.modal__f{padding:12px 24px;border-top:1px solid var(--c-border-2);display:flex;justify-content:flex-end;gap:8px;}
+.modal-field{display:flex;flex-direction:column;gap:6px;}
+.modal-label{font-size:12px;font-weight:600;color:var(--c-ink-muted);}
+.modal-select{padding:8px 12px;border:1px solid var(--c-border-strong);border-radius:6px;font-size:13px;background:var(--c-surface);color:var(--c-ink);width:100%;}
+.modal-summary{background:var(--c-surface-2);border:1px solid var(--c-border-2);border-radius:8px;padding:12px 14px;font-size:12px;color:var(--c-ink-muted);display:flex;flex-direction:column;gap:4px;}
+.modal-summary__row{display:flex;justify-content:space-between;}
+.modal-summary__val{font-weight:600;color:var(--c-ink);}
+.format-toggle{display:flex;gap:8px;}
+.format-option{flex:1;display:flex;align-items:center;justify-content:center;gap:6px;padding:10px;border:2px solid var(--c-border);border-radius:8px;font-size:13px;font-weight:600;color:var(--c-ink-muted);cursor:pointer;background:var(--c-surface);transition:border-color 0.15s,color 0.15s;}
+.format-option:hover{border-color:var(--c-border-strong);}
+.format-option.is-active{border-color:var(--c-brand);color:var(--c-brand);background:var(--c-brand-tint);}
+
+/* ── Preview Modal ── */
+.modal--preview{max-width:960px;max-height:92vh;}
+.modal--preview .modal__b{overflow-y:auto;flex:1;padding:20px 24px;}
+.preview-meta{display:flex;gap:24px;font-size:12px;color:var(--c-ink-muted);flex-wrap:wrap;}
+.preview-meta span{display:flex;align-items:center;gap:5px;}
+.preview-meta strong{color:var(--c-ink);}
+
+/* ── Preview (document-style) ── */
+.preview-kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px;}
+.preview-kpi{background:var(--c-surface-2);border:1px solid var(--c-border-2);border-radius:8px;padding:12px 14px;}
+.preview-kpi__label{font-size:10px;font-weight:700;color:var(--c-ink-muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px;}
+.preview-kpi__value{font-size:22px;font-weight:800;color:var(--c-ink);line-height:1.1;}
+.preview-kpi__sub{font-size:11px;color:var(--c-ink-subtle);margin-top:2px;}
+.preview-table{width:100%;border-collapse:collapse;font-size:12px;}
+.preview-table thead th{padding:8px 10px;text-align:left;font-size:11px;font-weight:700;color:#fff;background:#1a1a1a;text-transform:uppercase;letter-spacing:0.05em;border-right:1px solid rgba(255,255,255,0.2);}
+.preview-table tbody tr{border-bottom:1px solid #eee;}
+.preview-table tbody tr:nth-child(even){background:#f8f8f8;}
+.preview-table td{padding:8px 10px;border-right:1px solid #e0e0e0;}
+</style>
+</head>
+<body>
+
+<div class="wf-banner">
+  <div class="wf-banner__left"><i class="fa-solid fa-triangle-exclamation"></i><strong>Wireframe / Prototype</strong> — Not for distribution. Data is fictitious.</div>
+  <div style="display:flex;gap:12px;"><a href="#">Feedback</a><a href="#">Docs</a></div>
+</div>
+
+<div class="app">
+  <nav class="sidebar">
+    <div class="sidebar__logo">
+      <div class="sidebar__logo-mark">CT</div>
+      <div><div class="sidebar__logo-text">ClassTrack</div><div class="sidebar__logo-sub">Board Admin Console</div></div>
+    </div>
+    <div class="sidebar__role-badge">Board Administrator</div><nav class="sidebar__section"><div class="sidebar__section-label">Overview</div><a href="dashboard.html" class="nav-item"><span class="nav-icon"><i class="fa-solid fa-gauge-high"></i></span>Dashboard</a></nav><nav class="sidebar__section"><div class="sidebar__section-label">Management</div><a href="schools.html" class="nav-item"><span class="nav-icon"><i class="fa-solid fa-school"></i></span>Schools<span class="nav-badge nav-badge--neutral">8</span></a><a href="users.html" class="nav-item"><span class="nav-icon"><i class="fa-solid fa-users-gear"></i></span>Users<span class="nav-badge nav-badge--neutral">247</span></a><a href="registered-contacts.html" class="nav-item"><span class="nav-icon"><i class="fa-solid fa-id-badge"></i></span>Registered Contacts<span class="nav-badge nav-badge--neutral">14</span></a></nav><nav class="sidebar__section"><div class="sidebar__section-label">Reports</div><a href="attendance-summary-v3.html" class="nav-item"><span class="nav-icon"><i class="fa-solid fa-chart-bar"></i></span>Attendance Summary</a><a href="absence-trends-v2.html" class="nav-item"><span class="nav-icon"><i class="fa-solid fa-chart-line"></i></span>Absence Trends</a><a href="chronic-absenteeism-v2.html" class="nav-item"><span class="nav-icon"><i class="fa-solid fa-user-clock"></i></span>Chronic Absenteeism</a><a href="unjustified-absences-v2.html" class="nav-item is-active" aria-current="page"><span class="nav-icon"><i class="fa-solid fa-circle-exclamation"></i></span>Unjustified Absences</a><a href="submission-compliance-v2.html" class="nav-item"><span class="nav-icon"><i class="fa-solid fa-clipboard-check"></i></span>Submission Compliance</a><a href="open-disputes-v2.html" class="nav-item"><span class="nav-icon"><i class="fa-solid fa-scale-balanced"></i></span>Open Disputes</a><a href="grade-threshold-v2.html" class="nav-item"><span class="nav-icon"><i class="fa-solid fa-graduation-cap"></i></span>Grade Threshold</a></nav><nav class="sidebar__section"><div class="sidebar__section-label">System</div><a href="aspen.html" class="nav-item"><span class="nav-icon"><i class="fa-solid fa-arrows-rotate"></i></span>Aspen Sync<span class="nav-badge nav-badge--warn">1</span></a><a href="configuration.html" class="nav-item"><span class="nav-icon"><i class="fa-solid fa-calendar-days"></i></span>Calendar &amp; Periods</a><a href="notifications.html" class="nav-item"><span class="nav-icon"><i class="fa-solid fa-bell-slash"></i></span>Notifications</a></nav><div class="sidebar__user">
+      <div class="avatar">MA</div>
+      <div><div class="sidebar__user-name">M. Archambault</div><div class="sidebar__user-role">Board Administrator</div></div>
+    </div>
+  </nav>
+
+  <main class="main">
+    <!-- Topbar -->
+    <div class="topbar">
+      <div class="topbar__left">
+        <div class="topbar__title">Unjustified Absences</div>
+        <div class="topbar__breadcrumb">Reports &rsaquo; <span>Unjustified Absences</span></div>
+      </div>
+      <div class="topbar__scope"><i class="fa-solid fa-building-columns"></i> Board-wide &mdash; All Schools</div>
+      <div class="topbar__actions">
+        <div class="lang-toggle"><button aria-pressed="true">EN</button><button aria-pressed="false">FR</button></div>
+        <button class="icon-btn"><i class="fa-solid fa-bell"></i><span class="icon-btn__count">3</span></button>
+        <div class="user-chip"><div class="avatar" style="width:28px;height:28px;font-size:11px;">MA</div>M. Archambault</div>
+      </div>
+    </div>
+
+    <!-- Page Header -->
+    <div class="page-header">
+      <div class="page-header__left">
+        <span class="live-dot"></span>
+        <span class="page-header__title">Unjustified Absences</span>
+        <span class="page-header__sep">·</span>
+        <select class="term-select">
+          <option>Term 1 · 2025–26</option>
+          <option>Term 2 · 2024–25</option>
+        </select>
+        <span class="page-header__sync"><i class="fa-solid fa-circle-check"></i> Synced Jun 24, 2026 at 8:45 AM</span>
+      </div>
+      <div class="page-header__actions">
+        <button class="btn btn--secondary btn--sm" onclick="switchTab('history')"><i class="fa-regular fa-clock"></i> History (6)</button>
+        <button class="btn btn--primary btn--sm" onclick="openExportModal()"><i class="fa-solid fa-file-export"></i> Export Report</button>
+      </div>
+    </div>
+
+    <!-- Attention Bar -->
+    <div class="attention-bar">
+      <i class="attention-bar__icon fa-solid fa-circle-exclamation"></i>
+      <span class="attention-bar__msg">12 unjustified absences remain unresolved &mdash; oldest record is <strong>6 days old</strong> (Lena Bergeron, Notre-Dame)</span>
+      <div class="attention-bar__chips">
+        <button class="attn-chip" onclick="filterBySchool('Notre-Dame')">
+          <span class="attn-chip__swatch" style="background:#1F7A3F;"></span>Notre-Dame (5)
+        </button>
+        <button class="attn-chip" onclick="filterBySchool('Sainte-Croix')">
+          <span class="attn-chip__swatch" style="background:#0E5C8A;"></span>Sainte-Croix (4)
+        </button>
+        <button class="attn-chip" onclick="filterBySchool('Saint-Michel')">
+          <span class="attn-chip__swatch" style="background:#9A4708;"></span>Saint-Michel (2)
+        </button>
+        <button class="attn-chip" onclick="filterBySchool('Saint-Luc')">
+          <span class="attn-chip__swatch" style="background:#3F22A6;"></span>Saint-Luc (1)
+        </button>
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="report-tabs">
+      <button class="report-tab is-active" id="tab-live" onclick="switchTab('live')">Live Data</button>
+      <button class="report-tab" id="tab-history" onclick="switchTab('history')" id="tab-history-btn">Reports History (6)</button>
+    </div>
+
+    <!-- Live Data Tab -->
+    <div class="tab-panel is-active" id="panel-live">
+
+      <!-- KPI Cards -->
+      <div class="kpi-grid">
+        <div class="kpi-card kpi-card--alert">
+          <div class="kpi-card__label">Open Records</div>
+          <div class="kpi-card__value">12</div>
+          <div class="kpi-card__sub">unresolved board-wide</div>
+          <div class="kpi-card__trend kpi-card__trend--up-bad"><i class="fa-solid fa-arrow-up"></i> +3 vs. last week</div>
+        </div>
+        <div class="kpi-card kpi-card--alert">
+          <div class="kpi-card__label">Unresolved</div>
+          <div class="kpi-card__value">7</div>
+          <div class="kpi-card__sub">no response yet</div>
+          <div class="kpi-card__trend kpi-card__trend--up-bad"><i class="fa-solid fa-arrow-up"></i> +2 vs. last week</div>
+        </div>
+        <div class="kpi-card kpi-card--warn">
+          <div class="kpi-card__label">Pending Response</div>
+          <div class="kpi-card__value">5</div>
+          <div class="kpi-card__sub">awaiting parent reply</div>
+          <div class="kpi-card__trend kpi-card__trend--warn"><i class="fa-solid fa-arrow-up"></i> +1 vs. last week</div>
+        </div>
+        <div class="kpi-card kpi-card--neutral">
+          <div class="kpi-card__label">Students Affected</div>
+          <div class="kpi-card__value">10</div>
+          <div class="kpi-card__sub">unique students</div>
+          <div class="kpi-card__trend kpi-card__trend--neutral"><i class="fa-solid fa-minus"></i> same as last week</div>
+        </div>
+        <div class="kpi-card kpi-card--alert">
+          <div class="kpi-card__label">Oldest Record</div>
+          <div class="kpi-card__value">6 days</div>
+          <div class="kpi-card__sub">Lena Bergeron · Jun 13</div>
+          <div class="kpi-card__trend kpi-card__trend--up-bad"><i class="fa-solid fa-hourglass-end"></i> French Language Arts</div>
+        </div>
+      </div>
+
+      <!-- Records Table -->
+      <div class="table-section">
+        <div class="table-toolbar">
+          <div class="search-input">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="text" id="search-input" placeholder="Search student name or ID…" oninput="applyFilters()">
+          </div>
+          <select class="filter-select" id="school-filter" onchange="applyFilters()">
+            <option value="all">All Schools</option>
+            <option value="Notre-Dame">École Notre-Dame</option>
+            <option value="Sainte-Croix">École Sainte-Croix</option>
+            <option value="Saint-Michel">École Saint-Michel</option>
+            <option value="Saint-Luc">École Saint-Luc</option>
+          </select>
+          <div class="toggle-group">
+            <button class="toggle-btn is-active" onclick="setStatusFilter('all',this)">All (12)</button>
+            <button class="toggle-btn" onclick="setStatusFilter('unresolved',this)">Unresolved (7)</button>
+            <button class="toggle-btn" onclick="setStatusFilter('pending',this)">Pending (5)</button>
+          </div>
+          <span class="result-count" id="result-count"><strong>12</strong> records shown</span>
+        </div>
+
+        <table class="portal-table">
+          <thead>
+            <tr>
+              <th class="sortable" onclick="sortRecords('student')">Student <i class="fa-solid fa-sort sort-icon"></i></th>
+              <th class="sortable" onclick="sortRecords('school')">School <i class="fa-solid fa-sort sort-icon"></i></th>
+              <th class="sortable" onclick="sortRecords('grade')">Grade <i class="fa-solid fa-sort sort-icon"></i></th>
+              <th class="sortable" onclick="sortRecords('date')">Absence Date <i class="fa-solid fa-sort sort-icon"></i></th>
+              <th class="sortable" onclick="sortRecords('subject')">Subject <i class="fa-solid fa-sort sort-icon"></i></th>
+              <th class="sortable center" onclick="sortRecords('daysOpen')" id="th-days">Days Open <i class="fa-solid fa-sort-down sort-icon"></i></th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="records-tbody"></tbody>
+        </table>
+      </div>
+    </div><!-- /panel-live -->
+
+    <!-- History Tab -->
+    <div class="tab-panel" id="panel-history">
+      <div class="history-body" id="history-body"></div>
+    </div>
+
+  </main>
+</div><!-- /app -->
+
+<!-- Export Modal -->
+<div class="modal-backdrop is-hidden" id="export-modal" onclick="handleBackdropClick(event,'export-modal')">
+  <div class="modal">
+    <div class="modal__h">
+      <div class="modal__title"><i class="fa-solid fa-file-export" style="color:var(--c-brand);margin-right:6px;"></i>Export Report</div>
+      <button class="modal__close" onclick="closeExportModal()"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="modal__b">
+      <div class="modal-field">
+        <div class="modal-label">SCHOOL SCOPE</div>
+        <select class="modal-select" id="exp-school">
+          <option value="all">All Schools (Board-wide)</option>
+          <option value="Notre-Dame">École Notre-Dame</option>
+          <option value="Sainte-Croix">École Sainte-Croix</option>
+          <option value="Saint-Michel">École Saint-Michel</option>
+          <option value="Saint-Luc">École Saint-Luc</option>
+        </select>
+      </div>
+      <div class="modal-field">
+        <div class="modal-label">TERM</div>
+        <select class="modal-select" id="exp-term">
+          <option>Term 1 · 2025–26</option>
+          <option>Term 2 · 2024–25</option>
+        </select>
+      </div>
+      <div class="modal-field">
+        <div class="modal-label">FORMAT</div>
+        <div class="format-toggle">
+          <div class="format-option is-active" id="fmt-pdf" onclick="setFormat('pdf')"><i class="fa-regular fa-file-pdf"></i> PDF</div>
+          <div class="format-option" id="fmt-csv" onclick="setFormat('csv')"><i class="fa-solid fa-table"></i> CSV</div>
+        </div>
+      </div>
+      <div class="modal-summary">
+        <div class="modal-summary__row"><span>Report</span><span class="modal-summary__val">Unjustified Absences</span></div>
+        <div class="modal-summary__row"><span>Scope</span><span class="modal-summary__val">Board-wide</span></div>
+        <div class="modal-summary__row"><span>Term</span><span class="modal-summary__val">Term 1 · 2025–26</span></div>
+      </div>
+    </div>
+    <div class="modal__f">
+      <button class="btn btn--secondary" onclick="closeExportModal()">Cancel</button>
+      <button class="btn btn--primary" onclick="generateReport()"><i class="fa-solid fa-file-export"></i> Export</button>
+    </div>
+  </div>
+</div>
+
+<!-- Preview Modal -->
+<div class="modal-backdrop is-hidden" id="preview-modal" onclick="handleBackdropClick(event,'preview-modal')">
+  <div class="modal modal--preview">
+    <div class="modal__h">
+      <div class="modal__title"><i class="fa-regular fa-file-lines" style="color:var(--c-brand);margin-right:6px;"></i>Unjustified Absences Report</div>
+      <button class="modal__close" onclick="hidePreview()"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="modal__b">
+      <div id="preview-meta-bar" class="preview-meta"></div>
+      <div id="preview-content" style="margin-top:16px;"></div>
+    </div>
+    <div class="modal__f">
+      <button class="btn btn--secondary" onclick="hidePreview()">Close</button>
+      <button class="btn btn--primary"><i class="fa-solid fa-download"></i> Download PDF</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ─── Data ─── */
+var unjustifiedData = {
+  'Notre-Dame':{full:'École Notre-Dame',color:'#1F7A3F',records:[
+    {student:'Lena Bergeron',id:'STD-2294',grade:'Gr 11',date:'Jun 18, 2026',dateSort:'2026-06-18',subject:'Mathematics',daysOpen:1,status:'unresolved'},
+    {student:'Lena Bergeron',id:'STD-2294',grade:'Gr 11',date:'Jun 13, 2026',dateSort:'2026-06-13',subject:'French Language Arts',daysOpen:6,status:'pending'},
+    {student:'Marcus Okonkwo',id:'STD-1882',grade:'Gr 10',date:'Jun 18, 2026',dateSort:'2026-06-18',subject:'Geography',daysOpen:1,status:'unresolved'},
+    {student:'Aisha Ndiaye',id:'STD-3340',grade:'Gr 9',date:'Jun 17, 2026',dateSort:'2026-06-17',subject:'Mathematics',daysOpen:2,status:'unresolved'},
+    {student:'Aisha Ndiaye',id:'STD-3340',grade:'Gr 9',date:'Jun 16, 2026',dateSort:'2026-06-16',subject:'Science',daysOpen:3,status:'pending'}
+  ]},
+  'Sainte-Croix':{full:'École Sainte-Croix',color:'#0E5C8A',records:[
+    {student:'Omar Hassane',id:'STD-1560',grade:'Gr 10',date:'Jun 18, 2026',dateSort:'2026-06-18',subject:'Mathematics',daysOpen:1,status:'unresolved'},
+    {student:'Camille Dubois',id:'STD-2413',grade:'Gr 11',date:'Jun 17, 2026',dateSort:'2026-06-17',subject:'English Language Arts',daysOpen:2,status:'pending'},
+    {student:'Priya Natarajan',id:'STD-3107',grade:'Gr 9',date:'Jun 16, 2026',dateSort:'2026-06-16',subject:'Science',daysOpen:3,status:'unresolved'},
+    {student:'Elise Carrier',id:'STD-3881',grade:'Gr 9',date:'Jun 15, 2026',dateSort:'2026-06-15',subject:'French Language Arts',daysOpen:4,status:'pending'}
+  ]},
+  'Saint-Michel':{full:'École Saint-Michel',color:'#9A4708',records:[
+    {student:'Fatou Diallo',id:'STD-1723',grade:'Gr 11',date:'Jun 18, 2026',dateSort:'2026-06-18',subject:'Science',daysOpen:1,status:'unresolved'},
+    {student:'Thomas Villeneuve',id:'STD-0891',grade:'Gr 12',date:'Jun 17, 2026',dateSort:'2026-06-17',subject:'History',daysOpen:2,status:'pending'}
+  ]},
+  'Saint-Luc':{full:'École Saint-Luc',color:'#3F22A6',records:[
+    {student:'Anais Cote-Leblanc',id:'STD-4412',grade:'Gr 8',date:'Jun 18, 2026',dateSort:'2026-06-18',subject:'Mathematics',daysOpen:1,status:'unresolved'}
+  ]}
+};
+var schoolKeys = ['Notre-Dame','Sainte-Croix','Saint-Michel','Saint-Luc'];
+
+/* Flat records array */
+var allRecords = [];
+schoolKeys.forEach(function(sk){
+  var sd = unjustifiedData[sk];
+  sd.records.forEach(function(r){
+    allRecords.push(Object.assign({},r,{school:sk,schoolFull:sd.full,schoolColor:sd.color}));
+  });
+});
+
+/* ─── State ─── */
+var sortCol = 'daysOpen';
+var sortDir = -1;
+var statusFilter = 'all';
+
+/* ─── Tabs ─── */
+function switchTab(tab){
+  document.getElementById('tab-live').classList.toggle('is-active', tab==='live');
+  document.getElementById('tab-history').classList.toggle('is-active', tab==='history');
+  document.getElementById('panel-live').classList.toggle('is-active', tab==='live');
+  document.getElementById('panel-history').classList.toggle('is-active', tab==='history');
+}
+
+/* ─── Attention chip filter ─── */
+function filterBySchool(school){
+  document.getElementById('school-filter').value = school;
+  switchTab('live');
+  applyFilters();
+}
+
+/* ─── Table sorting ─── */
+var colOrder = ['student','school','grade','date','subject','daysOpen'];
+function sortRecords(col){
+  if(sortCol === col){ sortDir *= -1; }
+  else { sortCol = col; sortDir = (col==='daysOpen' || col==='date') ? -1 : 1; }
+  document.querySelectorAll('.portal-table thead th.sortable').forEach(function(th,i){
+    th.classList.remove('sort-active');
+    var ico = th.querySelector('.sort-icon');
+    if(ico) ico.className = 'fa-solid fa-sort sort-icon';
+  });
+  document.querySelectorAll('.portal-table thead th.sortable').forEach(function(th,i){
+    if(colOrder[i] === sortCol){
+      th.classList.add('sort-active');
+      var ico = th.querySelector('.sort-icon');
+      if(ico) ico.className = 'fa-solid '+(sortDir===1?'fa-sort-up':'fa-sort-down')+' sort-icon';
+    }
+  });
+  applyFilters();
+}
+
+/* ─── Status filter ─── */
+function setStatusFilter(val, btn){
+  statusFilter = val;
+  document.querySelectorAll('.toggle-group .toggle-btn').forEach(function(b){
+    b.classList.remove('is-active','is-active--alert','is-active--warn');
+  });
+  if(val==='unresolved') btn.classList.add('is-active--alert');
+  else if(val==='pending') btn.classList.add('is-active--warn');
+  else btn.classList.add('is-active');
+  applyFilters();
+}
+
+/* ─── Filter + render ─── */
+function applyFilters(){
+  var q = document.getElementById('search-input').value.toLowerCase().trim();
+  var school = document.getElementById('school-filter').value;
+  var filtered = allRecords.filter(function(r){
+    if(statusFilter !== 'all' && r.status !== statusFilter) return false;
+    if(school !== 'all' && r.school !== school) return false;
+    if(q && r.student.toLowerCase().indexOf(q)<0 && r.id.toLowerCase().indexOf(q)<0) return false;
+    return true;
+  });
+  filtered.sort(function(a,b){
+    var av = sortCol==='date' ? a.dateSort : a[sortCol];
+    var bv = sortCol==='date' ? b.dateSort : b[sortCol];
+    if(typeof av==='string') av = av.toLowerCase();
+    if(typeof bv==='string') bv = bv.toLowerCase();
+    if(av < bv) return -sortDir;
+    if(av > bv) return sortDir;
+    return 0;
+  });
+  renderRows(filtered);
+  document.getElementById('result-count').innerHTML = '<strong>'+filtered.length+'</strong> record'+(filtered.length!==1?'s':'')+' shown';
+}
+
+function renderRows(data){
+  var tbody = document.getElementById('records-tbody');
+  if(!data.length){
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:32px;color:var(--c-ink-subtle);"><i class="fa-solid fa-magnifying-glass" style="font-size:20px;display:block;margin-bottom:8px;opacity:0.4;"></i>No records match the current filters</td></tr>';
+    return;
+  }
+  var html = '';
+  data.forEach(function(r){
+    var daysCls = r.daysOpen >= 5 ? 'days-badge--high' : (r.daysOpen >= 3 ? 'days-badge--med' : 'days-badge--low');
+    var statusCls = r.status==='unresolved' ? 'status--alert' : 'status--warn';
+    var statusLabel = r.status==='unresolved'
+      ? '<i class="fa-solid fa-circle-xmark"></i> Unresolved'
+      : '<i class="fa-solid fa-clock"></i> Pending Response';
+    html += '<tr>';
+    html += '<td><div class="student-cell__name">'+r.student+'</div><div class="student-cell__id">'+r.id+'</div></td>';
+    html += '<td><div class="school-swatch-row"><span class="school-dot" style="background:'+r.schoolColor+';"></span><span class="school-label">'+r.schoolFull.replace('École ','')+'</span></div></td>';
+    html += '<td style="font-size:12px;color:var(--c-ink-muted);font-weight:500;">'+r.grade+'</td>';
+    html += '<td class="date-cell">'+r.date+'</td>';
+    html += '<td class="subject-cell">'+r.subject+'</td>';
+    html += '<td class="center"><span class="days-badge '+daysCls+'">'+r.daysOpen+'d</span></td>';
+    html += '<td><span class="status '+statusCls+'">'+statusLabel+'</span></td>';
+    html += '</tr>';
+  });
+  tbody.innerHTML = html;
+}
+
+/* ─── History ─── */
+var _rows = [
+  {date:'Jun 19, 2026',time:'10:15 AM',schoolKey:'all',term:'Term 1 · 2025–26'},
+  {date:'Jun 12, 2026',time:'2:30 PM',schoolKey:'all',term:'Term 1 · 2025–26'},
+  {date:'Jun 5, 2026',time:'9:00 AM',schoolKey:'Notre-Dame',term:'Term 1 · 2025–26'},
+  {date:'May 29, 2026',time:'11:45 AM',schoolKey:'all',term:'Term 1 · 2025–26'},
+  {date:'May 22, 2026',time:'3:15 PM',schoolKey:'all',term:'Term 1 · 2025–26'},
+  {date:'May 8, 2026',time:'10:00 AM',schoolKey:'all',term:'Term 2 · 2024–25'}
+];
+
+function rowLabel(r){
+  var scope = r.schoolKey==='all' ? 'All Schools' : (unjustifiedData[r.schoolKey] ? unjustifiedData[r.schoolKey].full : r.schoolKey);
+  return 'Unjustified Absences · '+scope+' · '+r.term;
+}
+
+function renderHistory(){
+  var html = '';
+  _rows.forEach(function(r,i){
+    html += '<div class="history-row">';
+    html += '<div class="history-row__icon"><i class="fa-regular fa-file-lines"></i></div>';
+    html += '<div class="history-row__name">'+rowLabel(r)+'</div>';
+    html += '<div class="history-row__meta"><i class="fa-regular fa-calendar"></i> '+r.date+' · '+r.time+'</div>';
+    html += '<div class="history-row__user"><i class="fa-solid fa-user"></i> M. Archambault</div>';
+    html += '<button class="btn btn--secondary btn--sm" onclick="openReportRow('+i+')"><i class="fa-solid fa-eye"></i> View</button>';
+    html += '</div>';
+  });
+  document.getElementById('history-body').innerHTML = html;
+}
+
+function openReportRow(idx){
+  var r = _rows[idx];
+  showPreview(r.schoolKey, r.term, r.date+' · '+r.time);
+}
+
+/* ─── Preview Modal ─── */
+function getSchoolStats(key){
+  var d = unjustifiedData[key];
+  if(!d) return null;
+  var students = {}, totalDays=0, maxDays=0;
+  d.records.forEach(function(r){
+    students[r.id]=true; totalDays+=r.daysOpen;
+    if(r.daysOpen>maxDays) maxDays=r.daysOpen;
+  });
+  return {full:d.full,studentsAffected:Object.keys(students).length,totalRecords:d.records.length,avgDays:(totalDays/d.records.length).toFixed(1),longestDays:maxDays};
+}
+
+function renderReportContent(scopeKey){
+  var isAll = (scopeKey==='all');
+  var keysToUse = isAll ? schoolKeys : [scopeKey];
+  var html = '';
+  if(isAll){
+    var grandStudents=0, grandRecords=0, grandMaxDays=0;
+    var stats = [];
+    keysToUse.forEach(function(k){
+      var st = getSchoolStats(k);
+      if(st){ grandStudents+=st.studentsAffected; grandRecords+=st.totalRecords; if(st.longestDays>grandMaxDays) grandMaxDays=st.longestDays; stats.push(st); }
+    });
+    html += '<div class="preview-kpi-grid">';
+    html += '<div class="preview-kpi"><div class="preview-kpi__label">Total Unresolved</div><div class="preview-kpi__value">'+grandRecords+'</div><div class="preview-kpi__sub">across all schools</div></div>';
+    html += '<div class="preview-kpi" style="border-left:3px solid var(--c-brand)"><div class="preview-kpi__label" style="color:var(--c-brand)">Schools Affected</div><div class="preview-kpi__value" style="color:var(--c-brand)">'+stats.length+'</div><div class="preview-kpi__sub">of 4 schools</div></div>';
+    html += '<div class="preview-kpi" style="border-left:3px solid var(--c-info)"><div class="preview-kpi__label" style="color:var(--c-info)">Students Affected</div><div class="preview-kpi__value" style="color:var(--c-info)">'+grandStudents+'</div><div class="preview-kpi__sub">board-wide</div></div>';
+    html += '<div class="preview-kpi" style="border-left:3px solid var(--c-danger)"><div class="preview-kpi__label" style="color:var(--c-danger)">Longest Outstanding</div><div class="preview-kpi__value" style="color:var(--c-danger)">'+grandMaxDays+' days</div><div class="preview-kpi__sub">board-wide maximum</div></div>';
+    html += '</div>';
+    html += '<div style="font-size:12px;font-weight:700;color:#111;padding:8px 0 6px;border-bottom:2px solid #111;">School Summary</div>';
+    html += '<div style="overflow-x:auto;margin-top:0;border:1px solid #ccc;border-radius:0 0 6px 6px;overflow:hidden;">';
+    html += '<table class="preview-table"><thead><tr>';
+    html += '<th>School</th><th style="text-align:center">Students Affected</th><th style="text-align:center">Open Records</th><th style="text-align:center">Avg. Days Open</th><th style="text-align:center">Longest Outstanding</th>';
+    html += '</tr></thead><tbody>';
+    stats.forEach(function(s){
+      html += '<tr><td style="font-weight:600">'+s.full+'</td><td style="text-align:center">'+s.studentsAffected+'</td><td style="text-align:center;font-weight:700">'+s.totalRecords+'</td><td style="text-align:center">'+s.avgDays+'</td><td style="text-align:center;font-weight:'+(s.longestDays>=5?'700':'400')+'">'+s.longestDays+' days</td></tr>';
+    });
+    html += '</tbody></table></div>';
+  } else {
+    var sd = unjustifiedData[scopeKey];
+    if(!sd) return '';
+    var st = getSchoolStats(scopeKey);
+    html += '<div style="background:#1a1a1a;color:#fff;padding:11px 16px;border-radius:6px 6px 0 0;">';
+    html += '<div style="font-weight:700;font-size:14px;">'+sd.full+'</div></div>';
+    html += '<div style="display:grid;grid-template-columns:repeat(4,1fr);border:1px solid #ccc;border-top:none;margin-bottom:20px;">';
+    html += '<div style="padding:10px 14px;border-right:1px solid #ccc;"><div style="font-size:10px;font-weight:700;text-transform:uppercase;color:#555;margin-bottom:3px;">Students Affected</div><div style="font-size:22px;font-weight:800">'+st.studentsAffected+'</div></div>';
+    html += '<div style="padding:10px 14px;border-right:1px solid #ccc;"><div style="font-size:10px;font-weight:700;text-transform:uppercase;color:#555;margin-bottom:3px;">Open Records</div><div style="font-size:22px;font-weight:800">'+st.totalRecords+'</div></div>';
+    html += '<div style="padding:10px 14px;border-right:1px solid #ccc;"><div style="font-size:10px;font-weight:700;text-transform:uppercase;color:#555;margin-bottom:3px;">Avg. Days Open</div><div style="font-size:22px;font-weight:800">'+st.avgDays+'</div></div>';
+    html += '<div style="padding:10px 14px;"><div style="font-size:10px;font-weight:700;text-transform:uppercase;color:#555;margin-bottom:3px;">Longest Outstanding</div><div style="font-size:22px;font-weight:800">'+st.longestDays+' days</div></div>';
+    html += '</div>';
+    /* per-student records */
+    var byStudent = {}, order = [];
+    sd.records.forEach(function(r){
+      if(!byStudent[r.id]){ order.push(r.id); byStudent[r.id]={student:r.student,id:r.id,grade:r.grade,records:[]}; }
+      byStudent[r.id].records.push(r);
+    });
+    order.sort(function(a,b){
+      var ma=0,mb=0;
+      byStudent[a].records.forEach(function(r){if(r.daysOpen>ma)ma=r.daysOpen;});
+      byStudent[b].records.forEach(function(r){if(r.daysOpen>mb)mb=r.daysOpen;});
+      return mb-ma;
+    });
+    order.forEach(function(sid){
+      var stu = byStudent[sid];
+      html += '<div style="margin-bottom:14px;">';
+      html += '<div style="background:#1a1a1a;color:#fff;padding:7px 14px;border-radius:4px 4px 0 0;display:flex;align-items:center;justify-content:space-between;">';
+      html += '<div><span style="font-weight:700;font-size:13px;">'+stu.student+'</span><span style="font-size:11px;color:rgba(255,255,255,0.6);margin-left:10px;">'+stu.id+' · '+stu.grade+'</span></div>';
+      html += '<span style="font-size:11px;color:rgba(255,255,255,0.7);">'+stu.records.length+' record'+(stu.records.length>1?'s':'')+'</span></div>';
+      html += '<div style="border:1px solid #ccc;border-top:none;border-radius:0 0 4px 4px;overflow:hidden;">';
+      html += '<table class="preview-table"><thead><tr>';
+      html += '<th>Date</th><th>Subject</th><th style="text-align:center">Days Open</th><th>Status</th>';
+      html += '</tr></thead><tbody>';
+      stu.records.forEach(function(r){
+        html += '<tr><td style="white-space:nowrap">'+r.date+'</td><td>'+r.subject+'</td>';
+        html += '<td style="text-align:center;font-weight:'+(r.daysOpen>=5?'700':'400')+'">'+r.daysOpen+'</td>';
+        html += '<td>'+(r.status==='unresolved'?'Unresolved':'Pending Response')+'</td></tr>';
+      });
+      html += '</tbody></table></div></div>';
+    });
+  }
+  return html;
+}
+
+function showPreview(scopeKey, term, dateGenerated){
+  var label = scopeKey==='all' ? 'All Schools (Board-wide)' : (unjustifiedData[scopeKey] ? unjustifiedData[scopeKey].full : scopeKey);
+  document.getElementById('preview-meta-bar').innerHTML =
+    '<span><i class="fa-solid fa-building-columns"></i> <strong>'+label+'</strong></span>'+
+    '<span><i class="fa-solid fa-tag"></i> <strong>'+term+'</strong></span>'+
+    '<span><i class="fa-solid fa-clock"></i> Generated <strong>'+dateGenerated+'</strong></span>';
+  document.getElementById('preview-content').innerHTML = renderReportContent(scopeKey);
+  document.getElementById('preview-modal').classList.remove('is-hidden');
+}
+
+function hidePreview(){
+  document.getElementById('preview-modal').classList.add('is-hidden');
+}
+
+/* ─── Export ─── */
+var selectedFormat = 'pdf';
+function setFormat(fmt){
+  selectedFormat = fmt;
+  document.getElementById('fmt-pdf').classList.toggle('is-active', fmt==='pdf');
+  document.getElementById('fmt-csv').classList.toggle('is-active', fmt==='csv');
+}
+function openExportModal(){ document.getElementById('export-modal').classList.remove('is-hidden'); }
+function closeExportModal(){ document.getElementById('export-modal').classList.add('is-hidden'); }
+function generateReport(){
+  var school = document.getElementById('exp-school').value;
+  var term = document.getElementById('exp-term').value;
+  var dateStr = new Date().toLocaleDateString('en-CA',{year:'numeric',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});
+  _rows.unshift({date:dateStr,time:'',schoolKey:school,term:term});
+  closeExportModal();
+  renderHistory();
+  showPreview(school, term, dateStr);
+}
+
+function handleBackdropClick(e,id){
+  if(e.target===document.getElementById(id)) document.getElementById(id).classList.add('is-hidden');
+}
+document.addEventListener('keydown',function(e){ if(e.key==='Escape'){ closeExportModal(); hidePreview(); } });
+
+/* ─── Init ─── */
+document.addEventListener('DOMContentLoaded',function(){
+  applyFilters();
+  renderHistory();
+});
+</script>
+</body>
+</html>

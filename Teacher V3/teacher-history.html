@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ClassTrack — Attendance History</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background: #F0F4F9; color: #1A2B45; display: flex; min-height: 100vh; font-size: 14px; }
+
+    /* ── Sidebar ── */
+    .sidebar { width: 240px; min-height: 100vh; background: #0F2546; display: flex; flex-direction: column; flex-shrink: 0; position: fixed; top: 0; left: 0; bottom: 0; z-index: 100; }
+    .sidebar-logo { padding: 28px 24px 20px; border-bottom: 1px solid rgba(255,255,255,0.08); }
+    .logo-mark { display: flex; align-items: center; gap: 10px; }
+    .logo-icon { width: 36px; height: 36px; background: #2E7DD1; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 16px; color: #fff; }
+    .logo-text { color: #fff; font-size: 17px; font-weight: 700; letter-spacing: -0.3px; }
+    .logo-sub { color: rgba(255,255,255,0.45); font-size: 11px; margin-top: 2px; }
+    .sidebar-nav { flex: 1; overflow-y: auto; padding: 12px 0; }
+    .sidebar-section { padding: 18px 12px 6px; }
+    .sidebar-section-label { text-transform: uppercase; font-size: 10px; font-weight: 600; letter-spacing: 1.2px; color: rgba(255,255,255,0.35); padding: 0 12px; margin-bottom: 6px; }
+    .nav-item { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 8px; cursor: pointer; color: rgba(255,255,255,0.6); font-size: 13.5px; font-weight: 500; transition: all 0.15s; text-decoration: none; margin-bottom: 2px; }
+    .nav-item:hover { background: rgba(255,255,255,0.07); color: #fff; }
+    .nav-item.active { background: #2E7DD1; color: #fff; }
+    .nav-item .nav-icon { font-size: 15px; width: 20px; text-align: center; color: inherit; }
+    .nav-badge { margin-left: auto; background: #E53E3E; color: #fff; font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 10px; }
+    .sidebar-footer { margin-top: auto; padding: 16px 12px; border-top: 1px solid rgba(255,255,255,0.08); }
+    .user-info { display: flex; align-items: center; gap: 10px; padding: 8px 12px; border-radius: 8px; cursor: pointer; transition: background 0.15s; }
+    .user-info:hover { background: rgba(255,255,255,0.07); }
+    .user-avatar { width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, #2E7DD1, #1A5FA8); color: #fff; font-weight: 700; font-size: 13px; display: flex; align-items: center; justify-content: center; }
+    .user-name { color: #fff; font-size: 13px; font-weight: 600; }
+    .user-role { color: rgba(255,255,255,0.45); font-size: 11px; }
+
+    /* ── Layout ── */
+    .main { margin-left: 240px; flex: 1; display: flex; flex-direction: column; min-height: 100vh; }
+    .topbar { background: #fff; border-bottom: 1px solid #E2E8F0; padding: 0 32px; height: 64px; display: flex; align-items: center; gap: 16px; position: sticky; top: 0; z-index: 90; }
+    .topbar-title { font-size: 18px; font-weight: 700; color: #0F2546; }
+    .topbar-right { margin-left: auto; display: flex; align-items: center; gap: 12px; }
+    .icon-btn { width: 36px; height: 36px; border-radius: 8px; border: 1px solid #E2E8F0; background: #fff; display: flex; align-items: center; justify-content: center; color: #4A5568; cursor: pointer; font-size: 15px; position: relative; }
+    .icon-btn:hover { background: #F7FAFC; }
+    .notif-dot { position: absolute; top: 7px; right: 7px; width: 7px; height: 7px; border-radius: 50%; background: #E53E3E; border: 1.5px solid #fff; }
+    .term-badge { display: flex; align-items: center; gap: 6px; padding: 6px 12px; border: 1px solid #E2E8F0; border-radius: 8px; background: #fff; font-size: 13px; font-weight: 500; color: #1A2B45; cursor: pointer; }
+    .term-badge i { color: #718096; font-size: 12px; }
+    .page-body { padding: 28px 32px; flex: 1; }
+
+    /* ── Filters ── */
+    .filter-bar { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; }
+    .filter-select { padding: 8px 12px; border: 1px solid #E2E8F0; border-radius: 8px; background: #fff; font-size: 13px; color: #1A2B45; cursor: pointer; outline: none; }
+    .filter-select:focus { border-color: #2E7DD1; }
+    .filter-btn { display: inline-flex; align-items: center; gap: 7px; padding: 8px 14px; border-radius: 8px; font-size: 13px; font-weight: 500; cursor: pointer; border: 1px solid #2E7DD1; background: #EBF4FF; color: #2E7DD1; transition: all .15s; }
+    .filter-btn:hover { background: #DBEAFE; }
+
+    /* ── Two-column layout ── */
+    .layout-grid { display: grid; grid-template-columns: 320px 1fr; gap: 20px; align-items: start; }
+
+    /* ── Calendar ── */
+    .card { background: #fff; border-radius: 12px; border: 1px solid #E2E8F0; overflow: hidden; }
+    .card-header { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; border-bottom: 1px solid #F1F5F9; }
+    .card-title { font-size: 14px; font-weight: 700; color: #0F2546; }
+    .month-nav { display: flex; align-items: center; gap: 8px; }
+    .month-btn { width: 28px; height: 28px; border: 1px solid #E2E8F0; border-radius: 7px; background: #fff; cursor: pointer; display: flex; align-items: center; justify-content: center; color: #718096; font-size: 13px; transition: all .15s; }
+    .month-btn:hover { background: #F0F4F9; border-color: #CBD5E0; }
+    .cal-body { padding: 16px; }
+    .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+    .cal-dh { text-align: center; font-size: 10.5px; font-weight: 700; text-transform: uppercase; color: #A0AEC0; padding: 4px 2px; letter-spacing: .04em; }
+    .cal-day { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; border-radius: 8px; font-size: 12.5px; font-weight: 500; cursor: pointer; transition: all .12s; }
+    .cal-day:hover:not(.empty):not(.weekend) { background: #EBF4FF; }
+    .cal-day.empty { visibility: hidden; }
+    .cal-day.weekend { color: #CBD5E0; cursor: default; }
+    .cal-day.today { box-shadow: inset 0 0 0 2px #2E7DD1; color: #2E7DD1; font-weight: 700; }
+    .cal-day.present { background: #ECFDF5; color: #065F46; }
+    .cal-day.absent  { background: #FEF2F2; color: #991B1B; }
+    .cal-day.late    { background: #FFFBEB; color: #92400E; }
+    .cal-day.partial { background: #EBF4FF; color: #1D4ED8; }
+    .cal-day.selected { box-shadow: inset 0 0 0 2px #2E7DD1 !important; }
+    .cal-legend { display: flex; gap: 12px; padding: 0 16px 16px; flex-wrap: wrap; }
+    .leg-item { display: flex; align-items: center; gap: 5px; font-size: 11.5px; color: #718096; }
+    .leg-dot { width: 10px; height: 10px; border-radius: 3px; }
+
+    /* ── Stats ── */
+    .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; padding: 16px 20px; border-bottom: 1px solid #F1F5F9; }
+    .stat-item { text-align: center; }
+    .stat-val { font-size: 22px; font-weight: 700; color: #1A2B45; line-height: 1; }
+    .stat-lbl { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .05em; color: #A0AEC0; margin-top: 4px; }
+
+    /* ── Table ── */
+    table { width: 100%; border-collapse: collapse; }
+    thead th { padding: 11px 16px; text-align: left; font-size: 11.5px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; color: #718096; background: #F8FAFC; border-bottom: 1px solid #E2E8F0; white-space: nowrap; }
+    tbody tr { border-bottom: 1px solid #F1F5F9; transition: background .12s; cursor: pointer; }
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:hover { background: #F7FAFC; }
+    td { padding: 12px 16px; font-size: 13.5px; color: #2D3748; vertical-align: middle; }
+
+    /* ── Student cell ── */
+    .student-cell { display: flex; align-items: center; gap: 10px; }
+    .s-avatar { width: 32px; height: 32px; border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; color: #fff; }
+    .s-name { font-weight: 600; color: #1A2B45; font-size: 13px; }
+    .s-id { font-size: 11px; color: #A0AEC0; }
+
+    /* ── Status chips — 4 values only, matching teacher-attendance.html ── */
+    .state-chip { display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px; border-radius: 99px; font-size: 11.5px; font-weight: 600; white-space: nowrap; }
+    .state-chip .sd { width: 6px; height: 6px; border-radius: 50%; }
+    .chip-present   { background: #ECFDF5; color: #059669;  } .chip-present .sd   { background: #059669; }
+    .chip-absent    { background: #FEF2F2; color: #DC2626;  } .chip-absent .sd    { background: #DC2626; }
+    .chip-late      { background: #FFFBEB; color: #D97706;  } .chip-late .sd      { background: #D97706; }
+    .chip-signed-in { background: #E3F1FA; color: #0E5C8A;  } .chip-signed-in .sd { background: #0E5C8A; }
+
+    /* ── Stage chips — 4 values only, matching teacher-attendance.html ── */
+    .stage-chip { display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px; border-radius: 99px; font-size: 11.5px; font-weight: 600; white-space: nowrap; border: 1px solid transparent; }
+    .stage-chip i { font-size: 10px; opacity: .85; }
+    .stage-await-checkin { background: #FFFBEB; color: #92400E; border-color: #FDE68A; }
+    .stage-did-not-reach { background: #FEF2F2; color: #991B1B; border-color: #FCA5A5; }
+    .stage-justified     { background: #ECFDF5; color: #065F46; border-color: #A7F3D0; }
+    .stage-unjustified   { background: #FEF2F2; color: #991B1B; border-color: #FCA5A5; }
+
+    /* ── Reason category pill, matching teacher-attendance.html ── */
+    .reason-cat { display: inline-flex; align-items: center; gap: 5px; padding: 3px 8px; border-radius: 99px; font-size: 11px; font-weight: 600; background: #EEF1F5; color: #475467; white-space: nowrap; }
+    .reason-cat i { font-size: 9px; opacity: .7; }
+    .reason-cat.reason-event { background: #F3F4FF; color: #4338CA; border: 1px solid #C7D2FE; }
+
+    /* ── Period / Subject chips ── */
+    .period-chip  { display:inline-flex; align-items:center; padding:3px 9px; border-radius:99px; font-size:11.5px; font-weight:600; background:#F8FAFC; color:#475467; border:1px solid #E2E8F0; white-space:nowrap; }
+    .subject-chip { display:inline-flex; align-items:center; padding:3px 9px; border-radius:99px; font-size:11.5px; font-weight:600; background:#F0FDFA; color:#0F766E; border:1px solid #99F6E4; white-space:nowrap; }
+
+    /* ── Misc ── */
+    .corrected-tag { display: inline-flex; align-items: center; gap: 4px; padding: 2px 7px; border-radius: 99px; background: #F3F4FF; color: #4338CA; font-size: 10.5px; font-weight: 700; margin-left: 5px; }
+    .corrected-tag i { font-size: 8px; }
+    .edit-btn { padding: 5px 10px; border-radius: 7px; background: #fff; border: 1px solid #E2E8F0; color: #4A5568; font-size: 12px; font-weight: 500; cursor: pointer; display: inline-flex; align-items: center; gap: 5px; transition: all .15s; }
+    .edit-btn:hover { background: #EBF4FF; border-color: #2E7DD1; color: #2E7DD1; }
+    .edit-btn i { font-size: 10px; }
+    .toast { position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%) translateY(20px); background: #1A2B45; color: #fff; padding: 10px 20px; border-radius: 8px; font-size: 13px; opacity: 0; transition: all .25s; pointer-events: none; z-index: 999; }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    /* ── Modal ── */
+    .modal-backdrop { position: fixed; inset: 0; background: rgba(15,37,70,.55); z-index: 1000; display: none; align-items: center; justify-content: center; padding: 20px; }
+    .modal-backdrop.show { display: flex; }
+    .modal { background: #fff; border-radius: 14px; max-width: 540px; width: 100%; box-shadow: 0 20px 60px rgba(0,0,0,.25); display: flex; flex-direction: column; max-height: 90vh; overflow: hidden; }
+    .modal-h { padding: 18px 22px; border-bottom: 1px solid #F1F5F9; display: flex; align-items: center; justify-content: space-between; }
+    .modal-h h3 { font-size: 16px; font-weight: 700; color: #0F2546; }
+    .modal-close { background: transparent; border: none; color: #718096; font-size: 18px; cursor: pointer; padding: 4px 8px; border-radius: 6px; }
+    .modal-close:hover { background: #F0F4F9; }
+    .modal-b { padding: 20px 22px; flex: 1; overflow-y: auto; }
+    .modal-f { padding: 14px 22px; border-top: 1px solid #F1F5F9; display: flex; justify-content: flex-end; gap: 10px; background: #F8FAFC; }
+    .modal-context { background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 9px; padding: 12px 14px; margin-bottom: 16px; font-size: 13px; color: #4A5568; }
+    .modal-context .ctx-label { font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: #A0AEC0; }
+    .field-label { font-size: 11.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: #718096; margin-bottom: 8px; display: block; }
+    .status-options { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
+    .status-option { padding: 11px 14px; border: 2px solid #E2E8F0; border-radius: 9px; background: #fff; font-size: 13.5px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: all .15s; }
+    .status-option.is-on { border-color: #2E7DD1; background: #EBF4FF; color: #1D4ED8; }
+    .status-option .opt-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+    .reason-textarea { width: 100%; border: 1px solid #E2E8F0; border-radius: 9px; padding: 11px 13px; font-size: 13px; font-family: inherit; resize: vertical; min-height: 80px; outline: none; }
+    .reason-textarea:focus { border-color: #2E7DD1; box-shadow: 0 0 0 3px rgba(46,125,209,.08); }
+    .modal-audit-banner { background: #FFFBEB; border: 1px solid #FDE68A; border-radius: 8px; padding: 9px 12px; font-size: 11.5px; color: #92400E; margin-top: 12px; display: flex; gap: 8px; align-items: flex-start; }
+    .modal-audit-banner i { margin-top: 1px; font-size: 11px; }
+    .btn { padding: 9px 18px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; border: 1px solid transparent; display: inline-flex; align-items: center; gap: 6px; }
+    .btn-cancel { background: #fff; color: #4A5568; border-color: #E2E8F0; }
+    .btn-cancel:hover { background: #F7FAFC; }
+    .btn-save { background: #2E7DD1; color: #fff; border-color: #2E7DD1; }
+    .btn-save:hover { background: #2563EB; }
+    .btn-save:disabled { opacity: .5; cursor: not-allowed; }
+
+    /* ── Corrections audit log ── */
+    .corr-audit-list { padding: 0; }
+    .corr-audit-item { padding: 13px 20px; border-bottom: 1px solid #F1F5F9; display: grid; grid-template-columns: 36px 1fr auto; gap: 12px; align-items: flex-start; }
+    .corr-audit-item:last-child { border-bottom: none; }
+    .corr-audit-icon { width: 32px; height: 32px; border-radius: 8px; background: #F3F4FF; color: #4F46E5; display: flex; align-items: center; justify-content: center; font-size: 12px; }
+    .corr-audit-title { font-size: 13px; font-weight: 600; color: #1A2B45; }
+    .corr-audit-meta { font-size: 11.5px; color: #718096; margin-top: 3px; line-height: 1.55; }
+    .corr-audit-meta .old { color: #DC2626; text-decoration: line-through; }
+    .corr-audit-meta .new { color: #059669; font-weight: 600; }
+    .corr-audit-meta i.fa-arrow-right { font-size: 9px; color: #CBD5E0; margin: 0 4px; }
+    .corr-audit-reason { font-size: 12px; color: #4A5568; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 7px; padding: 7px 10px; margin-top: 6px; font-style: italic; }
+    .corr-audit-when { font-size: 11px; color: #A0AEC0; white-space: nowrap; }
+  </style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-mark">
+      <div class="logo-icon">CT</div>
+      <div><div class="logo-text">ClassTrack</div><div class="logo-sub" data-en="Teacher Portal" data-fr="Portail enseignant">Teacher Portal</div></div>
+    </div>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="sidebar-section">
+      <div class="sidebar-section-label" data-en="Overview" data-fr="Vue d'ensemble">Overview</div>
+      <a class="nav-item" href="teacher-dashboard.html"><span class="nav-icon"><i class="fa-solid fa-gauge-high"></i></span> <span data-en="Dashboard" data-fr="Tableau de bord">Dashboard</span></a>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-section-label" data-en="Teaching" data-fr="Enseignement">Teaching</div>
+      <a class="nav-item" href="teacher-attendance.html"><span class="nav-icon"><i class="fa-solid fa-clipboard-check"></i></span> <span data-en="Mark Attendance" data-fr="Saisir les présences">Mark Attendance</span><span class="nav-badge">1</span></a>
+      <a class="nav-item" href="teacher-schedule-axon file.html"><span class="nav-icon"><i class="fa-solid fa-calendar-week"></i></span> <span data-en="My Classes" data-fr="Mes classes">My Classes</span></a>
+      <a class="nav-item active" href="teacher-history.html"><span class="nav-icon"><i class="fa-solid fa-calendar-days"></i></span> <span data-en="Attendance History" data-fr="Historique des présences">Attendance History</span></a>
+      <a class="nav-item" href="teacher-disputes.html"><span class="nav-icon"><i class="fa-solid fa-scale-balanced"></i></span> <span data-en="Disputes" data-fr="Contestations">Disputes</span><span class="nav-badge" style="background:#4F46E5">2</span></a>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-section-label" data-en="System" data-fr="Système">System</div>
+      <a class="nav-item" onclick="showToast(T('settings_soon'))"><span class="nav-icon"><i class="fa-solid fa-gear"></i></span> <span data-en="Settings" data-fr="Paramètres">Settings</span></a>
+    </div>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="user-info">
+      <div class="user-avatar">ST</div>
+      <div><div class="user-name" data-en="Ms. S. Tremblay" data-fr="Mme S. Tremblay">Ms. S. Tremblay</div><div class="user-role" data-en="Science Dept · Grade 7A" data-fr="Dépt. Sciences · 7e A">Science Dept · Grade 7A</div></div>
+    </div>
+  </div>
+</aside>
+
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-title" data-en="Attendance History" data-fr="Historique des présences">Attendance History</div>
+    <div class="topbar-right">
+      <div class="term-badge"><i class="fa-solid fa-calendar-alt"></i> <span data-en="Term 2 — 2025/26" data-fr="Étape 2 — 2025/26">Term 2 — 2025/26</span> <i class="fa-solid fa-chevron-down"></i></div>
+      <div class="icon-btn" title="Notifications"><i class="fa-solid fa-bell"></i><span class="notif-dot"></span></div>
+    </div>
+  </div>
+
+  <div class="page-body">
+    <div class="filter-bar">
+      <select class="filter-select" id="classFilter" onchange="applyFilters()">
+        <option value="7A" data-en="Grade 7A" data-fr="7e A">Grade 7A</option>
+        <option value="8B" data-en="Grade 8B" data-fr="8e B">Grade 8B</option>
+      </select>
+      <select class="filter-select" id="studentFilter" onchange="applyFilters()">
+        <option value="" data-en="All Students" data-fr="Tous les élèves">All Students</option>
+        <option>Aaliyah Carter</option>
+        <option>Ben Okafor</option>
+        <option>Chloe Nguyen</option>
+        <option>Daniel Ferreira</option>
+        <option>Emma Kowalski</option>
+        <option>Yara Hassan</option>
+      </select>
+      <select class="filter-select" id="statusFilter" onchange="applyFilters()">
+        <option value=""          data-en="All Statuses"  data-fr="Tous les statuts">All Statuses</option>
+        <option value="present"   data-en="Present"       data-fr="Présent">Present</option>
+        <option value="absent"    data-en="Absent"        data-fr="Absent">Absent</option>
+        <option value="late"      data-en="Late"          data-fr="En retard">Late</option>
+        <option value="signed-in" data-en="Signed in"     data-fr="Inscrit(e)">Signed in</option>
+      </select>
+      <select class="filter-select" id="subjectFilter" onchange="applyFilters()">
+        <option value=""          data-en="All Subjects"       data-fr="Toutes les matières">All Subjects</option>
+        <option value="science"   data-en="Science"            data-fr="Sciences">Science</option>
+        <option value="math"      data-en="Math"               data-fr="Mathématiques">Math</option>
+        <option value="geography" data-en="Geography"          data-fr="Géographie">Geography</option>
+        <option value="spanish"   data-en="Spanish"            data-fr="Espagnol">Spanish</option>
+      </select>
+      <button class="filter-btn" onclick="showToast(T('export_soon'))"><i class="fa-solid fa-download"></i> <span data-en="Export CSV" data-fr="Exporter CSV">Export CSV</span></button>
+    </div>
+
+    <div class="layout-grid">
+      <!-- Calendar -->
+      <div>
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title" id="calMonthTitle">March 2026</span>
+            <div class="month-nav">
+              <button class="month-btn" onclick="changeMonth(-1)"><i class="fa-solid fa-chevron-left"></i></button>
+              <button class="month-btn" onclick="changeMonth(1)"><i class="fa-solid fa-chevron-right"></i></button>
+            </div>
+          </div>
+          <div class="cal-body">
+            <div class="cal-grid" id="calGrid"></div>
+          </div>
+          <div class="cal-legend">
+            <div class="leg-item"><div class="leg-dot" style="background:#ECFDF5;border:1px solid #059669"></div><span data-en="All present" data-fr="Tous présents">All present</span></div>
+            <div class="leg-item"><div class="leg-dot" style="background:#FEF2F2;border:1px solid #DC2626"></div><span data-en="Absent(s)" data-fr="Absent(s)">Absent(s)</span></div>
+            <div class="leg-item"><div class="leg-dot" style="background:#FFFBEB;border:1px solid #D97706"></div><span data-en="Late(s)" data-fr="En retard">Late(s)</span></div>
+            <div class="leg-item"><div class="leg-dot" style="background:#EBF4FF;border:1px solid #2E7DD1"></div><span data-en="Partial" data-fr="Partiel">Partial</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right panel -->
+      <div>
+        <div class="card">
+          <div class="stats-row" id="statsRow"></div>
+          <table>
+            <thead>
+              <tr>
+                <th data-en="Student"  data-fr="Élève">Student</th>
+                <th data-en="Date"     data-fr="Date">Date</th>
+                <th data-en="Period"   data-fr="Période">Period</th>
+                <th data-en="Subject"  data-fr="Matière">Subject</th>
+                <th data-en="Status"   data-fr="Statut">Status</th>
+                <th data-en="Stage"    data-fr="Étape">Stage</th>
+                <th data-en="Reason"   data-fr="Motif">Reason</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="historyBody"></tbody>
+          </table>
+        </div>
+
+        <div class="card" style="margin-top:20px">
+          <div class="card-header">
+            <span class="card-title" data-en="Attendance Corrections — Audit Log" data-fr="Journal des corrections">Attendance Corrections — Audit Log</span>
+            <span style="font-size:12px;color:#A0AEC0" data-en="Edited by · timestamp · original → new · reason" data-fr="Modifié par · horodatage · ancien → nouveau · motif">Edited by · timestamp · original → new · reason</span>
+          </div>
+          <div class="corr-audit-list" id="correctionsAudit"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Correction modal -->
+<div class="modal-backdrop" id="modalBackdrop" onclick="if(event.target===this)closeModal()">
+  <div class="modal">
+    <div class="modal-h">
+      <h3 data-en="Correct attendance record" data-fr="Corriger un dossier de présence">Correct attendance record</h3>
+      <button class="modal-close" onclick="closeModal()"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="modal-b" id="modalBody"></div>
+    <div class="modal-f">
+      <button class="btn btn-cancel" onclick="closeModal()" data-en="Cancel" data-fr="Annuler">Cancel</button>
+      <button class="btn btn-save" id="modalSaveBtn" onclick="submitCorrection()" disabled data-en="Save correction" data-fr="Enregistrer la correction">Save correction</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  const AVATAR_COLORS = ['#2E7DD1','#6366F1','#10B981','#F59E0B','#EF4444','#8B5CF6','#EC4899','#0891B2'];
+  const MONTHS_EN = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  const MONTHS_FR = ['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'];
+  const MON_SHORT_EN = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const MON_SHORT_FR = ['janv.','févr.','mars','avr.','mai','juin','juil.','août','sept.','oct.','nov.','déc.'];
+  let curMonth = 2, curYear = 2026;
+
+  const STRINGS = {
+    en: {
+      present:'Present', absent:'Absent', late:'Late', signed_in:'Signed in', rate:'Rate',
+      // Stage labels — exactly matching teacher-attendance.html
+      stage_await_checkin:'Awaiting check-in',
+      stage_did_not_reach:'Did not reach class',
+      stage_justified:'Justified',
+      stage_unjustified:'Unjustified',
+      // Periods
+      p_1:'Period 1', p_2:'Period 2', p_3:'Period 3',
+      // Subjects
+      subj_science:'Science', subj_math:'Math', subj_geography:'Geography', subj_spanish:'Spanish',
+      all_subjects:'All Subjects', subject:'Subject',
+      // UI
+      day_loaded:'— attendance loaded',
+      export_soon:'Export coming soon', settings_soon:'Settings coming soon',
+      edit:'Edit', corrected:'Corrected',
+      modal_ctx_label:'Record being corrected',
+      modal_new_status:'New status',
+      modal_reason:'Reason for correction (required)',
+      modal_reason_ph:'Why are you changing this record?',
+      modal_warning:'A correction creates a permanent audit log entry visible to the Attendance Clerk and reflected in the Aspen export.',
+      modal_present:'Present', modal_absent:'Absent',
+      saved_correction:'✓ Correction saved · audit log updated',
+      current_status:'Current status',
+      no_corrections:'No corrections yet.',
+      corr_audit_by:'Edited by Ms. S. Tremblay',
+      corr_audit_at_today:'today',
+      corr_aaliyah_title:'Aaliyah Carter — Mar 21 · Period 1',
+      corr_aaliyah_reason:'Marked Late in error — student was here on time, bus delay applied to wrong class.',
+      corr_ben_title:'Ben Okafor — Mar 19 · Period 3',
+      corr_ben_reason:'Parent confirmed late arrival, not full absence. Updated record accordingly.',
+      corr_grace_title:'Grace Osei — Mar 18 · Period 3',
+      corr_grace_reason:'Initial Absent mark was a clerical error — Grace was present.',
+      ago_2hr:'2 hr ago', ago_yest:'Yesterday', ago_2d:'2 days ago',
+    },
+    fr: {
+      present:'Présent', absent:'Absent', late:'En retard', signed_in:'Inscrit(e)', rate:'Taux',
+      stage_await_checkin:'À accepter en classe',
+      stage_did_not_reach:'N\'a pas rejoint la classe',
+      stage_justified:'Motivé',
+      stage_unjustified:'Non motivé',
+      p_1:'Période 1', p_2:'Période 2', p_3:'Période 3',
+      // Subjects
+      subj_science:'Sciences', subj_math:'Mathématiques', subj_geography:'Géographie', subj_spanish:'Espagnol',
+      all_subjects:'Toutes les matières', subject:'Matière',
+      day_loaded:'— présences chargées',
+      export_soon:'Exportation — bientôt disponible', settings_soon:'Paramètres — bientôt disponibles',
+      edit:'Modifier', corrected:'Corrigé',
+      modal_ctx_label:'Dossier à corriger',
+      modal_new_status:'Nouveau statut',
+      modal_reason:'Motif de la correction (obligatoire)',
+      modal_reason_ph:'Pourquoi modifiez-vous ce dossier ?',
+      modal_warning:'Une correction crée une entrée permanente dans le journal d\'audit visible par la surveillante et reflétée dans l\'exportation Aspen.',
+      modal_present:'Présent', modal_absent:'Absent',
+      saved_correction:'✓ Correction enregistrée · journal d\'audit mis à jour',
+      current_status:'Statut actuel',
+      no_corrections:'Aucune correction pour l\'instant.',
+      corr_audit_by:'Modifié par Mme S. Tremblay',
+      corr_audit_at_today:'aujourd\'hui',
+      corr_aaliyah_title:'Aaliyah Carter — 21 mars · Période 1',
+      corr_aaliyah_reason:'Retard saisi par erreur — l\'élève était à l\'heure.',
+      corr_ben_title:'Ben Okafor — 19 mars · Période 3',
+      corr_ben_reason:'Le parent a confirmé un retard, pas une absence.',
+      corr_grace_title:'Grace Osei — 18 mars · Période 3',
+      corr_grace_reason:'Marquage Absente initial — erreur cléricale. Grace était présente.',
+      ago_2hr:'il y a 2 h', ago_yest:'Hier', ago_2d:'il y a 2 j',
+    }
+  };
+  function T(k){ var lang=(window.__ct_i18n&&window.__ct_i18n.getLang())||'en'; return (STRINGS[lang]&&STRINGS[lang][k])||STRINGS.en[k]||k; }
+  function monthName(m){ var lang=(window.__ct_i18n&&window.__ct_i18n.getLang())||'en'; return (lang==='fr'?MONTHS_FR:MONTHS_EN)[m]; }
+  function displayDate(s){
+    var m=/^([A-Za-z]+)\s+(\d+)$/.exec(s); if(!m) return s;
+    var idx=MON_SHORT_EN.indexOf(m[1]); if(idx<0) return s;
+    var lang=(window.__ct_i18n&&window.__ct_i18n.getLang())||'en';
+    return lang==='fr'?(m[2]+' '+MON_SHORT_FR[idx]):s;
+  }
+
+  // ── Reason category labels — exactly matching teacher-attendance.html ──────
+  const REASON_LABELS = {
+    'medical-appointment':    'Medical appointment',
+    'illness':                'Illness',
+    'bereavement':            'Bereavement',
+    'religious-observance':   'Religious observance',
+    'school-sanctioned-event':'School-sanctioned event',
+    'transportation':         'Transportation / weather',
+    'family-personal':        'Family / personal',
+    'other':                  'Other',
+  };
+
+  // ── Records ──────────────────────────────────────────────────────────────────
+  // Each record carries:
+  //   status    — one of: 'present' | 'absent' | 'late' | 'signed-in'
+  //   stage     — one of: 'await-checkin' | 'did-not-reach' | 'justified' | 'unjustified' | null
+  //   reasonCat — absence reason category key, or null (teacher sees label only, per §2 privacy gradient)
+  const RECORDS = [
+    // Recent — Signed in · Awaiting check-in (state 4, teacher action needed)
+    { student:'Yara Hassan',    id:'ST-1136', date:'Mar 22', periodKey:'p_2', subject:'science', status:'signed-in', stage:'await-checkin',  reasonCat:null },
+    // Mar 21
+    { student:'Aaliyah Carter', id:'ST-1041', date:'Mar 21', periodKey:'p_1', subject:'science', status:'present',   stage:null,             reasonCat:null },
+    { student:'Ben Okafor',     id:'ST-1082', date:'Mar 21', periodKey:'p_1', subject:'science', status:'absent',    stage:'justified',      reasonCat:'medical-appointment' },
+    { student:'Emma Kowalski',  id:'ST-1074', date:'Mar 21', periodKey:'p_1', subject:'science', status:'late',      stage:'justified',      reasonCat:'transportation' },
+    // Mar 20
+    { student:'Daniel Ferreira',id:'ST-1067', date:'Mar 20', periodKey:'p_2', subject:'science', status:'absent',    stage:'justified',      reasonCat:'school-sanctioned-event' },
+    { student:'Isabel Martins', id:'ST-1091', date:'Mar 20', periodKey:'p_2', subject:'science', status:'absent',    stage:'justified',      reasonCat:'school-sanctioned-event' },
+    { student:'Aaliyah Carter', id:'ST-1041', date:'Mar 20', periodKey:'p_3', subject:'science', status:'present',   stage:null,             reasonCat:null },
+    { student:'Chloe Nguyen',   id:'ST-1055', date:'Mar 20', periodKey:'p_3', subject:'science', status:'absent',    stage:'justified',      reasonCat:'illness' },
+    // Mar 19
+    { student:'Daniel Ferreira',id:'ST-1067', date:'Mar 19', periodKey:'p_1', subject:'science', status:'present',   stage:null,             reasonCat:null },
+    { student:'Emma Kowalski',  id:'ST-1074', date:'Mar 19', periodKey:'p_3', subject:'science', status:'present',   stage:null,             reasonCat:null },
+    // Mar 18
+    { student:'Ben Okafor',     id:'ST-1082', date:'Mar 18', periodKey:'p_1', subject:'science', status:'absent',    stage:null,             reasonCat:null },
+    { student:'Grace Osei',     id:'ST-1083', date:'Mar 18', periodKey:'p_3', subject:'science', status:'late',      stage:'justified',      reasonCat:'transportation' },
+    // Mar 17
+    { student:'Aaliyah Carter', id:'ST-1041', date:'Mar 17', periodKey:'p_1', subject:'science', status:'present',   stage:null,             reasonCat:null },
+    { student:'Luca Esposito',  id:'ST-1109', date:'Mar 17', periodKey:'p_3', subject:'science', status:'absent',    stage:'unjustified',    reasonCat:null },
+    // Older
+    { student:'Maya Robinson',  id:'ST-1115', date:'Mar 14', periodKey:'p_1', subject:'science', status:'present',   stage:null,             reasonCat:null },
+    { student:'Noah Petersen',  id:'ST-1121', date:'Mar 13', periodKey:'p_3', subject:'science', status:'late',      stage:'unjustified',    reasonCat:null },
+    { student:'Olivia Thompson',id:'ST-1128', date:'Mar 12', periodKey:'p_1', subject:'science', status:'present',   stage:null,             reasonCat:null },
+  ];
+
+  // Calendar
+  const CAL_DATA = {
+    3:'present',4:'present',5:'absent',6:'present',7:'present',
+    10:'present',11:'present',12:'late',13:'present',14:'present',
+    17:'absent',18:'absent',19:'present',20:'partial',21:'absent',
+    22:'partial',24:'partial'
+  };
+
+  function initials(n){ return n.split(' ').map(function(w){ return w[0]; }).join('').slice(0,2).toUpperCase(); }
+  function avatarColor(n){ let h=0; for(let c of n) h=(h*31+c.charCodeAt(0))&0xFFFFFF; return AVATAR_COLORS[Math.abs(h)%AVATAR_COLORS.length]; }
+
+  function changeMonth(dir){
+    curMonth+=dir;
+    if(curMonth<0){curMonth=11;curYear--;}
+    if(curMonth>11){curMonth=0;curYear++;}
+    renderCalendar();
+  }
+  function renderCalendar(){
+    document.getElementById('calMonthTitle').textContent=monthName(curMonth)+' '+curYear;
+    const firstDay=(new Date(curYear,curMonth,1).getDay()+6)%7;
+    const daysInMonth=new Date(curYear,curMonth+1,0).getDate();
+    const isMarch=curMonth===2&&curYear===2026;
+    var lang=(window.__ct_i18n&&window.__ct_i18n.getLang())||'en';
+    var dh=lang==='fr'?['L','M','M','J','V','S','D']:['M','T','W','T','F','S','S'];
+    let html=dh.map(function(d){return'<div class="cal-dh">'+d+'</div>';}).join('');
+    for(let i=0;i<firstDay;i++) html+='<div class="cal-day empty"></div>';
+    for(let d=1;d<=daysInMonth;d++){
+      const dow=(new Date(curYear,curMonth,d).getDay()+6)%7;
+      const isWE=dow>=5;
+      const isToday=isMarch&&d===23;
+      const dc=isMarch&&CAL_DATA[d]?CAL_DATA[d]:'';
+      html+='<div class="cal-day '+(isWE?'weekend':dc)+' '+(isToday?'today':'')+'" onclick="selectDay('+d+')">'+d+'</div>';
+    }
+    document.getElementById('calGrid').innerHTML=html;
+  }
+  function selectDay(d){
+    document.querySelectorAll('.cal-day').forEach(function(el){el.classList.remove('selected');});
+    document.querySelectorAll('.cal-day:not(.empty)').forEach(function(el){if(parseInt(el.textContent)===d)el.classList.add('selected');});
+    var lang=(window.__ct_i18n&&window.__ct_i18n.getLang())||'en';
+    var prefix=lang==='fr'?(d+' '+MON_SHORT_FR[2]+' '):('March '+d+' ');
+    showToast(prefix+T('day_loaded'));
+  }
+
+  function applyFilters(){
+    const sf=document.getElementById('statusFilter').value;
+    const stf=document.getElementById('studentFilter').value;
+    const sbf=document.getElementById('subjectFilter').value;
+    const list=RECORDS.filter(function(r){
+      return(!sf||r.status===sf)&&(!stf||r.student===stf)&&(!sbf||r.subject===sbf);
+    });
+    renderHistory(list);
+    renderStats(list);
+  }
+
+  function renderStats(list){
+    const p=list.filter(function(r){return r.status==='present';}).length;
+    const a=list.filter(function(r){return r.status==='absent';}).length;
+    const l=list.filter(function(r){return r.status==='late'||r.status==='signed-in';}).length;
+    const rate=list.length>0?Math.round((p/list.length)*100):0;
+    document.getElementById('statsRow').innerHTML=
+      '<div class="stat-item"><div class="stat-val" style="color:#059669">'+p+'</div><div class="stat-lbl">'+T('present')+'</div></div>'+
+      '<div class="stat-item"><div class="stat-val" style="color:#DC2626">'+a+'</div><div class="stat-lbl">'+T('absent')+'</div></div>'+
+      '<div class="stat-item"><div class="stat-val" style="color:#D97706">'+l+'</div><div class="stat-lbl">'+T('late')+'</div></div>'+
+      '<div class="stat-item"><div class="stat-val">'+rate+'%</div><div class="stat-lbl">'+T('rate')+'</div></div>';
+  }
+
+  // ── Status chip — 4 values, same classes as teacher-attendance.html ─────────
+  function renderStatusChip(status){
+    var map={
+      'present':  '<span class="state-chip chip-present"><span class="sd"></span>'  +T('present')  +'</span>',
+      'absent':   '<span class="state-chip chip-absent"><span class="sd"></span>'   +T('absent')   +'</span>',
+      'late':     '<span class="state-chip chip-late"><span class="sd"></span>'     +T('late')     +'</span>',
+      'signed-in':'<span class="state-chip chip-signed-in"><span class="sd"></span>'+T('signed_in')+'</span>',
+    };
+    return map[status]||map['absent'];
+  }
+
+  // ── Stage chip — 4 values, same classes as teacher-attendance.html ──────────
+  function renderStageChip(stage){
+    if(!stage) return '<span style="color:#A0AEC0;font-size:12.5px">—</span>';
+    var map={
+      'await-checkin':{ cls:'stage-await-checkin', icon:'fa-right-to-bracket',          key:'stage_await_checkin' },
+      'did-not-reach':{ cls:'stage-did-not-reach', icon:'fa-person-circle-exclamation', key:'stage_did_not_reach' },
+      'justified':    { cls:'stage-justified',     icon:'fa-circle-check',              key:'stage_justified' },
+      'unjustified':  { cls:'stage-unjustified',   icon:'fa-circle-xmark',              key:'stage_unjustified' },
+    };
+    var d=map[stage];
+    if(!d) return '<span style="color:#A0AEC0;font-size:12.5px">—</span>';
+    return '<span class="stage-chip '+d.cls+'"><i class="fa-solid '+d.icon+'"></i> '+T(d.key)+'</span>';
+  }
+
+  // ── Subject chip ─────────────────────────────────────────────────────────────
+  function renderSubjectChip(subject){
+    if(!subject) return '<span style="color:#A0AEC0;font-size:12.5px">—</span>';
+    var label=T('subj_'+subject)||subject;
+    return '<span class="subject-chip">'+label+'</span>';
+  }
+
+  // ── Reason category pill — same as teacher-attendance.html ──────────────────
+  function renderReasonPill(reasonCat){
+    if(!reasonCat||!REASON_LABELS[reasonCat]) return '<em style="color:#A0AEC0">—</em>';
+    var isEvent=(reasonCat==='school-sanctioned-event');
+    return '<span class="reason-cat'+(isEvent?' reason-event':'')+'"><i class="fa-solid fa-tag"></i> '+REASON_LABELS[reasonCat]+'</span>';
+  }
+
+  function renderHistory(list){
+    document.getElementById('historyBody').innerHTML=list.map(function(r){
+      var correctedTag=r.corrected?'<span class="corrected-tag"><i class="fa-solid fa-pen"></i> '+T('corrected')+'</span>':'';
+      var realIdx=RECORDS.indexOf(r);
+      return '<tr>'+
+        '<td onclick="window.location=\'teacher-absence-details.html?id='+r.id+'\'" style="cursor:pointer">'+
+          '<div class="student-cell">'+
+            '<div class="s-avatar" style="background:'+avatarColor(r.student)+'">'+initials(r.student)+'</div>'+
+            '<div><div class="s-name">'+r.student+'</div><div class="s-id">'+r.id+'</div></div>'+
+          '</div>'+
+        '</td>'+
+        '<td style="font-size:13px">'+displayDate(r.date)+'</td>'+
+        '<td><span class="period-chip">'+T(r.periodKey)+'</span></td>'+
+        '<td>'+renderSubjectChip(r.subject)+'</td>'+
+        '<td>'+renderStatusChip(r.status)+correctedTag+'</td>'+
+        '<td>'+renderStageChip(r.stage)+'</td>'+
+        '<td>'+renderReasonPill(r.reasonCat)+'</td>'+
+        '<td style="text-align:right"><button class="edit-btn" onclick="openCorrectionModal('+realIdx+')"><i class="fa-solid fa-pen-to-square"></i> '+T('edit')+'</button></td>'+
+      '</tr>';
+    }).join('');
+  }
+
+  // ── Corrections audit log ──────────────────────────────────────────────────
+  let CORRECTIONS=[
+    {titleKey:'corr_aaliyah_title',oldStatus:'late',  newStatus:'present',reasonKey:'corr_aaliyah_reason',timeKey:'ago_2hr'},
+    {titleKey:'corr_ben_title',    oldStatus:'absent', newStatus:'late',   reasonKey:'corr_ben_reason',    timeKey:'ago_yest'},
+    {titleKey:'corr_grace_title',  oldStatus:'absent', newStatus:'present',reasonKey:'corr_grace_reason',  timeKey:'ago_2d'},
+  ];
+
+  function statusLabel(s){
+    var map={'present':T('present'),'absent':T('absent'),'late':T('late'),'signed-in':T('signed_in')};
+    return map[s]||s;
+  }
+
+  function renderCorrectionsAudit(){
+    var list=document.getElementById('correctionsAudit');
+    if(!list) return;
+    if(CORRECTIONS.length===0){list.innerHTML='<div style="padding:30px;text-align:center;color:#A0AEC0;font-size:13px">'+T('no_corrections')+'</div>';return;}
+    list.innerHTML=CORRECTIONS.map(function(c){
+      var rawTitle=c.titleLiteral||T(c.titleKey);
+      var rawReason=c.reasonLiteral||T(c.reasonKey);
+      var when=c.timeLiteral||T(c.timeKey);
+      return'<div class="corr-audit-item">'+
+        '<div class="corr-audit-icon"><i class="fa-solid fa-pen-to-square"></i></div>'+
+        '<div>'+
+          '<div class="corr-audit-title">'+rawTitle+'</div>'+
+          '<div class="corr-audit-meta">'+T('corr_audit_by')+' · <span class="old">'+statusLabel(c.oldStatus)+'</span><i class="fa-solid fa-arrow-right"></i><span class="new">'+statusLabel(c.newStatus)+'</span></div>'+
+          '<div class="corr-audit-reason">"'+rawReason+'"</div>'+
+        '</div>'+
+        '<div class="corr-audit-when">'+when+'</div>'+
+      '</div>';
+    }).join('');
+  }
+
+  let modalState={recordIdx:null,newStatus:null};
+
+  function openCorrectionModal(recordIdx){
+    var r=RECORDS[recordIdx]; if(!r) return;
+    modalState={recordIdx:recordIdx,newStatus:null};
+    var body=document.getElementById('modalBody');
+    body.innerHTML=
+      '<div class="modal-context">'+
+        '<div class="ctx-label">'+T('modal_ctx_label')+'</div>'+
+        '<div style="margin-top:6px;display:flex;align-items:center;gap:8px;flex-wrap:wrap"><strong>'+r.student+'</strong> <span style="color:#A0AEC0">·</span> '+displayDate(r.date)+' <span class="period-chip" style="font-size:11px">'+T(r.periodKey)+'</span>'+renderSubjectChip(r.subject)+'</div>'+
+        '<div style="margin-top:6px;font-size:12px">'+T('current_status')+': <strong>'+statusLabel(r.status)+'</strong></div>'+
+      '</div>'+
+      '<label class="field-label">'+T('modal_new_status')+'</label>'+
+      '<div class="status-options">'+
+        '<div class="status-option" data-val="present" onclick="selectModalStatus(\'present\',this)"><span class="opt-dot" style="background:#059669"></span> '+T('modal_present')+'</div>'+
+        '<div class="status-option" data-val="absent"  onclick="selectModalStatus(\'absent\',this)"><span class="opt-dot" style="background:#DC2626"></span> '+T('modal_absent')+'</div>'+
+      '</div>'+
+      '<label class="field-label">'+T('modal_reason')+'</label>'+
+      '<textarea class="reason-textarea" id="modalReason" placeholder="'+T('modal_reason_ph')+'" oninput="checkModalEnable()"></textarea>'+
+      '<div class="modal-audit-banner"><i class="fa-solid fa-circle-info"></i> <span>'+T('modal_warning')+'</span></div>';
+    document.getElementById('modalSaveBtn').disabled=true;
+    document.getElementById('modalBackdrop').classList.add('show');
+  }
+
+  function selectModalStatus(val,el){
+    modalState.newStatus=val;
+    document.querySelectorAll('.status-option').forEach(function(o){o.classList.remove('is-on');});
+    el.classList.add('is-on');
+    checkModalEnable();
+  }
+  function checkModalEnable(){
+    var r=(document.getElementById('modalReason').value||'').trim();
+    document.getElementById('modalSaveBtn').disabled=!(modalState.newStatus&&r.length>3);
+  }
+  function closeModal(){document.getElementById('modalBackdrop').classList.remove('show');}
+
+  function submitCorrection(){
+    if(modalState.recordIdx==null||!modalState.newStatus) return;
+    var r=RECORDS[modalState.recordIdx];
+    var reasonText=(document.getElementById('modalReason').value||'').trim();
+    if(!reasonText) return;
+    var oldStatus=r.status;
+    r.status=modalState.newStatus;
+    r.stage=null; r.reasonCat=null;
+    r.corrected=true;
+    var now=new Date();
+    CORRECTIONS.unshift({
+      titleLiteral:r.student+' — '+r.date+' · '+T(r.periodKey),
+      oldStatus:oldStatus, newStatus:modalState.newStatus,
+      reasonLiteral:reasonText,
+      timeLiteral:T('corr_audit_at_today')+' · '+now.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}),
+    });
+    closeModal();
+    showToast(T('saved_correction'));
+    applyFilters();
+    renderCorrectionsAudit();
+  }
+
+  function showToast(msg){
+    const t=document.getElementById('toast');
+    t.textContent=msg; t.classList.add('show');
+    setTimeout(function(){t.classList.remove('show');},2500);
+  }
+
+  function ctRerender(){renderCalendar();applyFilters();renderCorrectionsAudit();}
+  window.__ct_page_rerender=ctRerender;
+
+  renderCalendar();
+  applyFilters();
+  renderCorrectionsAudit();
+</script>
+
+<!-- Prototype cross-portal switcher -->
+<div id="proto-switcher" style="position:fixed;bottom:16px;right:16px;z-index:9999;background:rgba(15,37,70,.95);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.1);padding:5px;border-radius:999px;box-shadow:0 8px 24px rgba(0,0,0,.25);font-family:'Segoe UI',system-ui,sans-serif;display:flex;gap:2px;align-items:center;"><span style="color:rgba(255,255,255,.4);font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:0 6px 0 10px;">Prototype</span><a href="index.html" style="display:inline-flex;align-items:center;gap:4px;padding:6px 12px;border-radius:999px;font-size:12px;font-weight:600;text-decoration:none;letter-spacing:.02em;transition:all .15s;background:transparent;color:#CBD5E0;">Index</a><a href="admin-dashboard.html" style="display:inline-flex;align-items:center;gap:4px;padding:6px 12px;border-radius:999px;font-size:12px;font-weight:600;text-decoration:none;letter-spacing:.02em;transition:all .15s;background:transparent;color:#CBD5E0;">Admin</a><a href="teacher-dashboard.html" style="display:inline-flex;align-items:center;gap:4px;padding:6px 12px;border-radius:999px;font-size:12px;font-weight:600;text-decoration:none;letter-spacing:.02em;transition:all .15s;background:#2E7DD1;color:#fff;">Teacher</a><a href="parent-app.html" style="display:inline-flex;align-items:center;gap:4px;padding:6px 12px;border-radius:999px;font-size:12px;font-weight:600;text-decoration:none;letter-spacing:.02em;transition:all .15s;background:transparent;color:#CBD5E0;">Parent</a><span style="color:rgba(255,255,255,.2);padding:0 4px;">|</span><a href="#" class="lang-btn" data-lang="en" onclick="event.preventDefault();window.__ct_i18n.setLang('en');" style="display:inline-flex;align-items:center;gap:4px;padding:6px 10px;border-radius:999px;font-size:11px;font-weight:700;text-decoration:none;letter-spacing:.04em;background:#2E7DD1;color:#fff;">EN</a><a href="#" class="lang-btn" data-lang="fr" onclick="event.preventDefault();window.__ct_i18n.setLang('fr');" style="display:inline-flex;align-items:center;gap:4px;padding:6px 10px;border-radius:999px;font-size:11px;font-weight:700;text-decoration:none;letter-spacing:.04em;background:transparent;color:#CBD5E0;">FR</a></div>
+
+<script id="i18n-core">
+(function(){
+  function getLang(){ var p=new URLSearchParams(window.location.search); return p.get('lang')==='fr'?'fr':'en'; }
+  function setLangUrl(href,lang){
+    if(!href||href.startsWith('http')||href.startsWith('#')||href.startsWith('javascript:')) return href;
+    var base=href.split('?')[0].split('#')[0];
+    var hash=href.indexOf('#')>=0?href.substring(href.indexOf('#')):'';
+    if(!base.endsWith('.html')) return href;
+    return base+(lang==='fr'?'?lang=fr':'')+hash;
+  }
+  function applyLang(){
+    var lang=getLang();
+    document.documentElement.lang=lang;
+    document.body&&(document.body.dataset.lang=lang);
+    document.querySelectorAll('[data-en]').forEach(function(el){
+      var val=el.getAttribute('data-'+lang);
+      if(val!==null){ if(el.hasAttribute('data-html'))el.innerHTML=val; else el.textContent=val; }
+    });
+    document.querySelectorAll('[data-title-en]').forEach(function(el){
+      var val=el.getAttribute('data-title-'+lang); if(val!==null)el.setAttribute('title',val);
+    });
+    document.querySelectorAll('a[href]').forEach(function(a){
+      a.setAttribute('href',setLangUrl(a.getAttribute('href'),lang));
+    });
+    document.querySelectorAll('.lang-btn').forEach(function(btn){
+      var on=btn.getAttribute('data-lang')===lang;
+      btn.style.background=on?'#2E7DD1':'transparent';
+      btn.style.color=on?'#fff':'#CBD5E0';
+    });
+    if(typeof window.__ct_page_rerender==='function') window.__ct_page_rerender();
+  }
+  function setLang(lang){
+    var p=new URLSearchParams(window.location.search);
+    if(lang==='fr')p.set('lang','fr'); else p.delete('lang');
+    var qs=p.toString();
+    window.history.replaceState({},'',window.location.pathname+(qs?'?'+qs:'')+window.location.hash);
+    applyLang();
+  }
+  window.__ct_i18n={getLang:getLang,applyLang:applyLang,setLang:setLang};
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',applyLang);
+  else applyLang();
+})();
+</script>
+</body>
+</html>

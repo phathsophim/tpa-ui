@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ClassTrack — Justify an absence</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="stylesheet" href="assets/styles.css">
+</head>
+<body>
+
+<a href="#main" class="skip-link" data-en="Skip to content" data-fr="Aller au contenu">Skip to content</a>
+
+<div class="app">
+<aside id="sidebar"></aside>
+<main id="main" class="shell" data-state="form">
+
+  <a href="dashboard.html" class="back-link">
+    <i class="fa-solid fa-arrow-left"></i>
+    <span data-en="Back to home" data-fr="Retour à l'accueil">Back to home</span>
+  </a>
+
+  <section class="hero-row">
+    <div>
+      <h1 class="hero-row__title" data-en="Justify an absence" data-fr="Justifier une absence">Justify an absence</h1>
+      <p class="hero-row__sub" data-en="Tell the school why your child was absent or late. The Attendance Clerk will review your reply." data-fr="Dites à l'école pourquoi votre enfant était absent ou en retard. Le Surveillant examinera votre réponse.">Tell the school why your child was absent or late. The Attendance Clerk will review your reply.</p>
+    </div>
+  </section>
+
+  <div class="grid-1-2">
+
+    <aside>
+      <section class="card">
+        <div class="card__h">
+          <div>
+            <div class="card__title" data-en="Pick an absence" data-fr="Choisir une absence">Pick an absence</div>
+            <div class="card__sub" data-en="These are waiting for a reason." data-fr="En attente d'un motif.">These are waiting for a reason.</div>
+          </div>
+        </div>
+        <div class="card__b--flush">
+          <div class="simple-list">
+            <label class="simple-list__item picker is-active">
+              <input type="radio" name="absence" checked style="position: absolute; opacity: 0;">
+              <div class="simple-list__icon simple-list__icon--absent"><i class="fa-solid fa-circle-minus"></i></div>
+              <div class="simple-list__body">
+                <div class="simple-list__title"><strong>Jaylen</strong></div>
+                <div class="simple-list__sub" data-en="May 11 · Reading (Period 2)" data-fr="11 mai · Lecture (Période 2)">May 11 · Reading (Period 2)</div>
+                <div class="simple-list__meta"><i class="fa-regular fa-clock"></i> <span data-en="14 h left" data-fr="14 h restantes">14 h left</span></div>
+              </div>
+              <i class="fa-solid fa-circle-check picker__check"></i>
+            </label>
+            <label class="simple-list__item picker">
+              <input type="radio" name="absence" style="position: absolute; opacity: 0;">
+              <div class="simple-list__icon simple-list__icon--late"><i class="fa-solid fa-clock"></i></div>
+              <div class="simple-list__body">
+                <div class="simple-list__title"><strong>Jaylen</strong></div>
+                <div class="simple-list__sub" data-en="Today · Late arrival (22 min)" data-fr="Aujourd'hui · Arrivée tardive (22 min)">Today · Late arrival (22 min)</div>
+                <div class="simple-list__meta" data-en="No deadline" data-fr="Sans échéance">No deadline</div>
+              </div>
+              <i class="fa-regular fa-circle picker__check picker__check--empty"></i>
+            </label>
+          </div>
+        </div>
+      </section>
+
+      <div class="card mt-4">
+        <div class="rail-card__h">
+          <div class="rail-card__title" data-en="What happens next" data-fr="Ce qui se passe ensuite">What happens next</div>
+        </div>
+        <div class="card__b" style="padding: var(--s-4); display: flex; flex-direction: column; gap: var(--s-3);">
+          <div class="row gap-2" style="align-items: flex-start;">
+            <span class="step-num">1</span>
+            <div class="fs-sm text-muted" data-en="The school receives your reason instantly." data-fr="L'école reçoit votre motif instantanément.">The school receives your reason instantly.</div>
+          </div>
+          <div class="row gap-2" style="align-items: flex-start;">
+            <span class="step-num">2</span>
+            <div class="fs-sm text-muted" data-en="The Attendance Clerk reviews it — usually same day." data-fr="Le Surveillant l'examine — généralement le jour même.">The Attendance Clerk reviews it — usually same day.</div>
+          </div>
+          <div class="row gap-2" style="align-items: flex-start;">
+            <span class="step-num">3</span>
+            <div class="fs-sm text-muted" data-en="You'll get a notification with the decision." data-fr="Vous recevrez une notification avec la décision.">You'll get a notification with the decision.</div>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <section class="card">
+      <div class="card__h">
+        <div>
+          <div class="card__title" data-en="What happened?" data-fr="Que s'est-il passé ?">What happened?</div>
+          <div class="card__sub" data-en="A short explanation helps the school." data-fr="Une courte explication aide l'école.">A short explanation helps the school.</div>
+        </div>
+      </div>
+      <div class="card__b">
+        <div class="form-grid">
+          <div class="field">
+            <label class="field__label" for="reasonType">
+              <span data-en="Reason category" data-fr="Catégorie de motif">Reason category</span>
+              <span class="req">*</span>
+            </label>
+            <select class="select" id="reasonType" onchange="checkForm()">
+              <option value="" data-en="Choose a reason…" data-fr="Choisir un motif…">Choose a reason…</option>
+              <option value="illness" data-en="Illness / Sick" data-fr="Maladie">Illness / Sick</option>
+              <option value="medical-appointment" data-en="Medical appointment" data-fr="Rendez-vous médical">Medical appointment</option>
+              <option value="bereavement" data-en="Bereavement" data-fr="Décès">Bereavement</option>
+              <option value="religious-observance" data-en="Religious observance" data-fr="Observance religieuse">Religious observance</option>
+              <option value="family-personal" data-en="Family / personal" data-fr="Famille / personnel">Family / personal</option>
+              <option value="transportation" data-en="Transportation / weather" data-fr="Transport / météo">Transportation / weather</option>
+              <option value="other" data-en="Other" data-fr="Autre">Other</option>
+            </select>
+          </div>
+          <div class="field">
+            <label class="field__label" for="reasonText" data-en="A few words for the school" data-fr="Un mot pour l'école">A few words for the school</label>
+            <div class="field__hint" data-en="Visible to school staff only." data-fr="Visible seulement par le personnel scolaire.">Visible to school staff only.</div>
+            <textarea class="textarea" id="reasonText" rows="5" maxlength="400" data-placeholder-en="e.g. Jaylen had a fever and saw his doctor." data-placeholder-fr="p. ex. Jaylen avait de la fièvre et a vu son médecin." placeholder="" oninput="checkForm(); updateCount();"></textarea>
+            <div class="row row--between">
+              <span class="field__hint" data-en="Minimum 10 characters" data-fr="Minimum 10 caractères">Minimum 10 characters</span>
+              <span class="field__hint" id="charCount">0 / 400</span>
+            </div>
+          </div>
+          <div class="field" style="grid-column: 1 / -1;">
+            <label class="field__label">
+              <span data-en="Doctor's note or supporting document" data-fr="Billet médical ou document">Doctor's note or supporting document</span>
+              <span class="text-muted" style="font-weight: 500;" data-en="(optional)" data-fr="(facultatif)">(optional)</span>
+            </label>
+            <button type="button" class="attach-btn" id="attachBtn" onclick="simulateAttach()">
+              <i class="fa-solid fa-paperclip"></i>
+              <span data-en="Click to attach a file" data-fr="Cliquez pour joindre un fichier">Click to attach a file</span>
+            </button>
+            <div class="attach-preview" id="attachPreview" style="display:none;">
+              <i class="fa-solid fa-file-pdf" style="color: var(--c-danger); font-size: 20px;"></i>
+              <div>
+                <div class="font-semibold">doctors-note.pdf</div>
+                <div class="fs-xs text-muted">142 KB · PDF</div>
+              </div>
+              <button type="button" class="remove" onclick="removeAttach()" aria-label="Remove file"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card__footer" style="display: flex; justify-content: space-between; align-items: center;">
+        <a href="dashboard.html" class="btn btn--ghost" data-en="Cancel" data-fr="Annuler">Cancel</a>
+        <button type="button" class="btn btn--primary btn--lg" id="submitBtn" disabled onclick="handleSubmit()">
+          <i class="fa-solid fa-paper-plane"></i>
+          <span data-en="Send to school" data-fr="Envoyer à l'école">Send to school</span>
+        </button>
+      </div>
+    </section>
+
+  </div>
+
+</main>
+
+<main id="successState" class="shell shell--narrow" style="display: none;">
+  <section class="card" style="text-align: center;">
+    <div class="card__b" style="padding: var(--s-7) var(--s-5);">
+      <div style="width: 80px; height: 80px; border-radius: 50%; background: var(--c-success-tint); color: var(--c-success); display: flex; align-items: center; justify-content: center; margin: 0 auto var(--s-4); font-size: 36px;">
+        <i class="fa-solid fa-check"></i>
+      </div>
+      <h2 style="font-size: var(--fs-2xl); font-weight: 700; margin-bottom: var(--s-2);" data-en="Thanks — your reason was sent" data-fr="Merci — votre motif a été envoyé">Thanks — your reason was sent</h2>
+      <p class="text-muted" style="max-width: 420px; margin: 0 auto var(--s-5);" data-en="The school received your reply. You'll get a notification once the Attendance Clerk reviews it." data-fr="L'école a reçu votre réponse.">The school received your reply. You'll get a notification once the Attendance Clerk reviews it.</p>
+      <div class="row gap-2" style="justify-content: center;">
+        <a href="dashboard.html" class="btn btn--secondary" data-en="Back to home" data-fr="Retour à l'accueil">Back to home</a>
+        <a href="child-detail.html?child=jaylen" class="btn btn--primary"><span data-en="View Jaylen's record" data-fr="Voir le dossier de Jaylen">View Jaylen's record</span> <i class="fa-solid fa-arrow-right"></i></a>
+      </div>
+    </div>
+  </section>
+</main>
+</div>
+
+<style>
+  .hero-row { display: flex; align-items: center; justify-content: space-between; gap: var(--s-4); flex-wrap: wrap; }
+  .hero-row__title { font-size: var(--fs-3xl); font-weight: 700; letter-spacing: -0.015em; }
+  .hero-row__sub { color: var(--c-ink-muted); font-size: var(--fs-lg); margin-top: 6px; max-width: 720px; }
+  .picker { cursor: pointer; position: relative; }
+  .picker.is-active { background: var(--c-brand-tint); }
+  .picker.is-active:hover { background: var(--c-brand-tint); }
+  .picker__check { color: var(--c-brand); font-size: 20px; flex-shrink: 0; }
+  .picker__check--empty { color: var(--c-border-strong); }
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s-4); }
+  .form-grid > .field:nth-child(2) { grid-column: 1 / -1; }
+  @media (max-width: 720px) { .form-grid { grid-template-columns: 1fr; } }
+  .step-num { width: 24px; height: 24px; flex-shrink: 0; border-radius: 50%; background: var(--c-brand); color: #fff; display: inline-flex; align-items: center; justify-content: center; font-weight: 700; font-size: var(--fs-xs); }
+</style>
+
+<script src="assets/app.js"></script>
+<script>
+  document.querySelectorAll('.picker').forEach(function(el){
+    el.addEventListener('click', function(){
+      document.querySelectorAll('.picker').forEach(function(p){ p.classList.remove('is-active'); var c=p.querySelector('.picker__check'); if(c) c.className='fa-regular fa-circle picker__check picker__check--empty'; });
+      el.classList.add('is-active');
+      var c=el.querySelector('.picker__check'); if(c) c.className='fa-solid fa-circle-check picker__check';
+    });
+  });
+  function checkForm(){var t=document.getElementById('reasonType').value;var txt=document.getElementById('reasonText').value.trim();document.getElementById('submitBtn').disabled=!(t&&txt.length>=10);}
+  function updateCount(){var ta=document.getElementById('reasonText');var cc=document.getElementById('charCount');cc.textContent=ta.value.length+' / 400';cc.style.color=ta.value.length>380?'var(--c-danger)':'var(--c-ink-muted)';}
+  function simulateAttach(){document.getElementById('attachBtn').style.display='none';document.getElementById('attachPreview').style.display='flex';showToast(window.__ct_i18n.getLang()==='fr'?'Fichier joint':'File attached','success');}
+  function removeAttach(){document.getElementById('attachBtn').style.display='flex';document.getElementById('attachPreview').style.display='none';}
+  function handleSubmit(){var btn=document.getElementById('submitBtn');btn.disabled=true;btn.innerHTML='<i class="fa-solid fa-spinner fa-spin"></i> '+(window.__ct_i18n.getLang()==='fr'?'Envoi…':'Sending…');setTimeout(function(){document.querySelector('[data-state="form"]').style.display='none';document.getElementById('successState').style.display='flex';window.scrollTo({top:0,behavior:'smooth'});},1000);}
+  __ct_mountSidebar('active-records');
+  __ct_mountProtoSwitcher('parent');
+</script>
+</body>
+</html>

@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="en-CA" data-lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ClassTrack — Board Admin · Schools</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+  :root{--c-bg:#F4F6FA;--c-surface:#FFFFFF;--c-surface-2:#F8FAFC;--c-surface-alt:#EEF2F7;--c-sidebar:#0F2546;--c-sidebar-2:#0A1B36;--c-sidebar-hover:rgba(255,255,255,0.08);--c-sidebar-active:#1B5DAF;--c-border:#D6DBE2;--c-border-2:#E5E8EE;--c-border-strong:#A6ADBB;--c-ink:#0F2546;--c-ink-muted:#475467;--c-ink-subtle:#5C6470;--c-brand:#1B5DAF;--c-brand-ink:#0E2E55;--c-brand-tint:#E8F0FA;--c-success:#1F7A3F;--c-success-tint:#E6F4EC;--c-warning:#9A4708;--c-warning-tint:#FCF1DD;--c-warning-bord:#B97F38;--c-danger:#B42318;--c-danger-tint:#FCE9E7;--c-info:#0E5C8A;--c-info-tint:#E0EFF7;--c-neutral-tint:#EEF1F5;--c-purple-tint:#EEEAFE;--c-purple:#3F22A6;--c-focus:#FFB400;--ff:"Segoe UI",system-ui,-apple-system,sans-serif;--shadow-md:0 4px 12px rgba(15,37,70,0.08);--shadow-lg:0 8px 28px rgba(15,37,70,0.14);}
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}html,body{height:100%;}
+  body{font-family:var(--ff);background:var(--c-bg);color:var(--c-ink);font-size:14px;line-height:1.55;-webkit-font-smoothing:antialiased;}
+  a{color:var(--c-brand);text-decoration:none;}a:hover{text-decoration:underline;}button{font-family:inherit;cursor:pointer;}
+  .skip-link{position:absolute;top:-40px;left:12px;background:var(--c-focus);color:#5C3F00;padding:8px 12px;border-radius:6px;font-weight:600;z-index:200;text-decoration:none;}.skip-link:focus{top:8px;}
+  .wf-banner{background:#F0EFFE;border-bottom:1px solid #C8C0F0;color:#3F22A6;font-size:12px;padding:6px 16px;display:flex;align-items:center;justify-content:space-between;gap:16px;}
+  .wf-banner__left{display:flex;align-items:center;gap:8px;}.wf-banner__right{display:flex;align-items:center;gap:12px;}.wf-banner a{color:#3F22A6;}
+
+  /* Layout — sidebar + main; main splits into content + drawer when drawer open */
+  .app{display:grid;grid-template-columns:240px 1fr;min-height:calc(100vh - 32px);}
+
+  /* Sidebar */
+  .sidebar{background:linear-gradient(180deg,var(--c-sidebar) 0%,var(--c-sidebar-2) 100%);color:rgba(255,255,255,0.85);display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow-y:auto;}
+  .sidebar__logo{padding:24px 16px 16px;border-bottom:1px solid rgba(255,255,255,0.08);display:flex;align-items:center;gap:12px;}
+  .sidebar__logo-mark{width:36px;height:36px;background:var(--c-sidebar-active);border-radius:10px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:16px;}
+  .sidebar__logo-text{color:#fff;font-size:16px;font-weight:700;}.sidebar__logo-sub{color:rgba(255,255,255,0.6);font-size:11px;margin-top:2px;}
+  .sidebar__role-badge{margin:8px 16px 0;background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.2);border-radius:999px;padding:3px 10px;font-size:10px;font-weight:700;color:rgba(255,255,255,0.9);letter-spacing:0.06em;text-transform:uppercase;text-align:center;}
+  .sidebar__section{padding:16px 12px 4px;}.sidebar__section-label{text-transform:uppercase;font-size:10px;font-weight:700;letter-spacing:0.12em;color:rgba(255,255,255,0.45);padding:0 12px;margin-bottom:4px;}
+  .nav-item{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:6px;color:rgba(255,255,255,0.78);font-size:13px;font-weight:500;min-height:36px;text-decoration:none;}
+  .nav-item:hover{background:var(--c-sidebar-hover);color:#fff;text-decoration:none;}.nav-item.is-active{background:var(--c-sidebar-active);color:#fff;font-weight:600;}
+  .nav-item .nav-icon{width:20px;text-align:center;font-size:14px;}.nav-item .nav-badge{margin-left:auto;background:var(--c-danger);color:#fff;font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px;}.nav-item .nav-badge--neutral{background:rgba(255,255,255,0.18);color:#fff;}.nav-item .nav-badge--warn{background:var(--c-warning);color:#fff;}
+  .sidebar__user{margin-top:auto;padding:12px 16px;border-top:1px solid rgba(255,255,255,0.08);display:flex;align-items:center;gap:12px;}
+  .avatar{width:36px;height:36px;border-radius:999px;background:var(--c-brand-tint);color:var(--c-brand-ink);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;flex-shrink:0;}
+  .sidebar__user-name{color:#fff;font-size:13px;font-weight:600;}.sidebar__user-role{color:rgba(255,255,255,0.6);font-size:11px;}
+
+  /* Main area */
+  .main{display:flex;flex-direction:column;min-width:0;position:relative;}
+  .topbar{background:var(--c-surface);border-bottom:1px solid var(--c-border);display:flex;align-items:center;gap:16px;padding:12px 24px;position:sticky;top:0;z-index:50;min-height:64px;}
+  .topbar__crumbs{display:flex;align-items:center;gap:8px;color:var(--c-ink-subtle);font-size:12px;}.topbar__crumbs strong{color:var(--c-ink);font-weight:600;}
+  .topbar__scope{margin-left:auto;background:var(--c-purple-tint);color:var(--c-purple);border:1px solid #C8C0F0;padding:6px 12px;border-radius:6px;font-size:12px;font-weight:600;display:inline-flex;align-items:center;gap:8px;}
+  .topbar__actions{display:flex;align-items:center;gap:8px;}
+  .icon-btn{width:36px;height:36px;border-radius:6px;background:transparent;border:none;color:var(--c-ink-muted);display:inline-flex;align-items:center;justify-content:center;position:relative;font-size:14px;cursor:pointer;}.icon-btn:hover{background:var(--c-surface-alt);}
+  .icon-btn__count{position:absolute;top:2px;right:2px;background:var(--c-danger);color:#fff;font-size:10px;font-weight:700;min-width:18px;height:18px;border-radius:999px;display:flex;align-items:center;justify-content:center;padding:0 4px;border:2px solid var(--c-surface);}
+  .lang-toggle{display:inline-flex;border:1px solid var(--c-border-strong);border-radius:6px;overflow:hidden;}.lang-toggle button{background:var(--c-surface);border:0;padding:6px 12px;font-size:12px;font-weight:700;color:var(--c-ink-muted);min-height:32px;}.lang-toggle button[aria-pressed="true"]{background:var(--c-brand);color:#fff;}
+  .user-chip{display:inline-flex;align-items:center;gap:8px;padding:4px 10px 4px 4px;border:1px solid var(--c-border);border-radius:999px;font-size:12px;color:var(--c-ink-muted);min-height:36px;}
+
+  /* Content + drawer layout */
+  .main-body{display:flex;flex:1;min-height:0;position:relative;}
+  .content{padding:24px;flex:1;display:flex;flex-direction:column;gap:16px;min-width:0;transition:padding-right 0.25s;}
+  .main-body.drawer-open .content{padding-right:24px;}
+
+  /* Buttons */
+  .btn{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:6px;font-size:13px;font-weight:600;border:1px solid transparent;min-height:36px;text-decoration:none;cursor:pointer;}
+  .btn--primary{background:var(--c-brand);color:#fff;border-color:var(--c-brand);}.btn--primary:hover{background:var(--c-brand-ink);}
+  .btn--secondary{background:var(--c-surface);color:var(--c-ink);border-color:var(--c-border-strong);}.btn--secondary:hover{background:var(--c-surface-alt);}
+  .btn--ghost{background:transparent;color:var(--c-brand);}.btn--ghost:hover{background:var(--c-brand-tint);}
+  .btn--danger-ghost{background:transparent;color:var(--c-danger);}.btn--danger-ghost:hover{background:var(--c-danger-tint);}
+  .btn--sm{padding:4px 10px;min-height:28px;font-size:12px;}
+
+  /* Page header */
+  .page-header{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap;}
+  .page-header h1{font-size:24px;font-weight:700;letter-spacing:-0.01em;}
+  .page-header p{color:var(--c-ink-muted);font-size:14px;margin-top:4px;}
+  .page-header__actions{display:flex;gap:8px;}
+
+  /* Tabs */
+  .tabs{display:flex;border-bottom:2px solid var(--c-border);}
+  .tab-btn{padding:12px 16px;font-size:13px;font-weight:600;color:var(--c-ink-muted);background:transparent;border:0;border-bottom:2px solid transparent;margin-bottom:-2px;cursor:pointer;display:flex;align-items:center;gap:8px;}
+  .tab-btn:hover{color:var(--c-ink);}.tab-btn.is-active{color:var(--c-brand);border-bottom-color:var(--c-brand);}
+  .tab-panel{display:none;}.tab-panel.is-active{display:flex;flex-direction:column;gap:16px;}
+
+  /* Filter bar */
+  .filter-bar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+  .filter-bar input[type="search"]{flex:1;min-width:200px;max-width:320px;padding:8px 12px;border:1px solid var(--c-border-strong);border-radius:6px;font-size:13px;background:var(--c-surface);color:var(--c-ink);}
+  .filter-bar select{padding:7px 12px;border:1px solid var(--c-border-strong);border-radius:6px;font-size:13px;background:var(--c-surface);color:var(--c-ink);}
+
+  /* Card */
+  .card{background:var(--c-surface);border:1px solid var(--c-border);border-radius:10px;overflow:hidden;display:flex;flex-direction:column;}
+  .card__h{padding:12px 16px;border-bottom:1px solid var(--c-border-2);display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;}
+  .card__title{font-size:14px;font-weight:700;color:var(--c-ink);display:flex;align-items:center;gap:8px;}
+  .card__title-count{background:var(--c-neutral-tint);color:var(--c-ink-muted);padding:2px 8px;border-radius:999px;font-size:12px;font-weight:700;}
+  .card__sub{font-size:12px;color:var(--c-ink-subtle);margin-top:2px;}
+  .card__footer{padding:8px 16px;background:var(--c-surface-2);border-top:1px solid var(--c-border-2);display:flex;align-items:center;justify-content:space-between;font-size:12px;color:var(--c-ink-subtle);}
+
+  /* Status / role chips */
+  .status{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:999px;font-size:11px;font-weight:700;border:1px solid transparent;}
+  .status--ok{background:var(--c-success-tint);color:var(--c-success);border-color:#4F9A6C;}
+  .status--warn{background:var(--c-warning-tint);color:var(--c-warning);border-color:var(--c-warning-bord);}
+  .status--alert{background:var(--c-danger-tint);color:var(--c-danger);border-color:#B0625A;}
+  .status--info{background:var(--c-info-tint);color:var(--c-info);border-color:#5B96BC;}
+  .status--neutral{background:var(--c-neutral-tint);color:var(--c-ink-muted);border-color:var(--c-border-strong);}
+  .status--inactive{background:#F1F3F5;color:#6C7A8A;border-color:#C4CAD4;}
+  .status--board{background:var(--c-purple-tint);color:var(--c-purple);border-color:#7E68DC;}
+  .role-badge{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:999px;font-size:11px;font-weight:700;border:1px solid transparent;}
+  .role-badge--admin{background:var(--c-purple-tint);color:var(--c-purple);border-color:#7E68DC;}
+  .role-badge--clerk{background:var(--c-brand-tint);color:var(--c-brand-ink);border-color:#6E94BF;}
+  .role-badge--teacher{background:var(--c-success-tint);color:var(--c-success);border-color:#4F9A6C;}
+  .role-badge--third{background:var(--c-warning-tint);color:var(--c-warning);border-color:var(--c-warning-bord);}
+
+  /* Data table */
+  .data-table{width:100%;border-collapse:collapse;font-size:13px;}
+  .data-table thead tr{border-bottom:2px solid var(--c-border);}
+  .data-table thead th{padding:8px 12px;text-align:left;font-size:11px;font-weight:700;color:var(--c-ink-muted);background:var(--c-surface-2);white-space:nowrap;}
+  .data-table tbody tr{border-bottom:1px solid var(--c-border-2);}
+  .data-table tbody tr:hover{background:var(--c-surface-2);cursor:pointer;}
+  .data-table tbody tr.is-selected{background:var(--c-brand-tint);border-left:3px solid var(--c-brand);}
+  .data-table td{padding:10px 12px;vertical-align:middle;}
+  .cell-primary{font-weight:600;color:var(--c-ink);}
+  .cell-sub{font-size:11px;color:var(--c-ink-subtle);margin-top:2px;}
+  .cell-actions{display:flex;gap:4px;justify-content:flex-end;}
+
+  /* Rate bar */
+  .rate-bar{display:flex;align-items:center;gap:8px;}
+  .rate-track{flex:1;height:6px;background:var(--c-surface-alt);border-radius:999px;overflow:hidden;min-width:60px;}
+  .rate-fill{height:100%;border-radius:999px;}
+  .rate-fill--ok{background:var(--c-success);}
+  .rate-fill--warn{background:var(--c-warning);}
+  .rate-fill--alert{background:var(--c-danger);}
+  .rate-pct{font-size:13px;font-weight:700;font-variant-numeric:tabular-nums;min-width:36px;text-align:right;}
+  .rate-pct--ok{color:var(--c-success);}
+  .rate-pct--warn{color:var(--c-warning);}
+  .rate-pct--alert{color:var(--c-danger);}
+
+  /* ===== DETAIL DRAWER ===== */
+  .drawer{position:sticky;top:64px; /* below topbar */height:calc(100vh - 64px - 32px);width:0;overflow:hidden;background:var(--c-surface);border-left:0 solid var(--c-border);transition:width 0.25s,border-width 0.25s;display:flex;flex-direction:column;flex-shrink:0;}
+  .drawer.is-open{width:400px;border-left-width:1px;}
+  .drawer__h{padding:14px 16px;border-bottom:1px solid var(--c-border-2);display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-shrink:0;}
+  .drawer__school-name{font-size:15px;font-weight:700;color:var(--c-ink);}
+  .drawer__school-sub{font-size:12px;color:var(--c-ink-subtle);margin-top:2px;}
+  .drawer__close{width:32px;height:32px;border-radius:6px;background:transparent;border:none;color:var(--c-ink-muted);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;}.drawer__close:hover{background:var(--c-surface-alt);}
+  .drawer__body{flex:1;overflow-y:auto;}
+
+  /* Drawer tabs */
+  .drawer-tabs{display:flex;border-bottom:2px solid var(--c-border);padding:0 4px;}
+  .drawer-tab-btn{padding:10px 14px;font-size:12px;font-weight:600;color:var(--c-ink-muted);background:transparent;border:0;border-bottom:2px solid transparent;margin-bottom:-2px;cursor:pointer;}
+  .drawer-tab-btn:hover{color:var(--c-ink);}.drawer-tab-btn.is-active{color:var(--c-brand);border-bottom-color:var(--c-brand);}
+  .drawer-tab-panel{display:none;padding:16px;}.drawer-tab-panel.is-active{display:flex;flex-direction:column;gap:14px;}
+
+  /* Drawer stat row */
+  .drawer-stats{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+  .drawer-stat{background:var(--c-surface-2);border:1px solid var(--c-border-2);border-radius:8px;padding:10px 12px;}
+  .drawer-stat__val{font-size:20px;font-weight:800;font-variant-numeric:tabular-nums;}
+  .drawer-stat__lbl{font-size:11px;color:var(--c-ink-subtle);margin-top:2px;}
+
+  /* Sparkline for drawer */
+  .sparkline-wrap{background:var(--c-surface-2);border:1px solid var(--c-border-2);border-radius:8px;padding:12px;}
+  .sparkline-wrap__title{font-size:12px;font-weight:700;color:var(--c-ink-muted);margin-bottom:8px;}
+  .sparkline-wrap svg{width:100%;height:60px;}
+  .sparkline-legend{display:flex;gap:16px;margin-top:6px;}
+  .sparkline-legend__item{display:flex;align-items:center;gap:4px;font-size:11px;color:var(--c-ink-subtle);}
+  .sparkline-legend__dot{width:8px;height:8px;border-radius:50%;}
+
+  /* Staff list in drawer */
+  .drawer-user-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--c-border-2);}
+  .drawer-user-row:last-child{border-bottom:0;}
+  .drawer-user-row__name{font-size:13px;font-weight:600;color:var(--c-ink);flex:1;}
+  .drawer-user-row__role{font-size:11px;color:var(--c-ink-subtle);}
+
+  /* Modal */
+  .modal-backdrop{position:fixed;inset:0;background:rgba(15,37,70,0.45);z-index:100;display:flex;align-items:center;justify-content:center;padding:16px;}
+  .modal{background:var(--c-surface);border-radius:14px;box-shadow:var(--shadow-lg);width:100%;max-width:480px;display:flex;flex-direction:column;}
+  .modal__h{padding:16px 24px;border-bottom:1px solid var(--c-border-2);display:flex;align-items:center;justify-content:space-between;}
+  .modal__title{font-size:16px;font-weight:700;color:var(--c-ink);}
+  .modal__b{padding:24px;display:flex;flex-direction:column;gap:16px;}
+  .modal__f{padding:12px 24px;border-top:1px solid var(--c-border-2);display:flex;justify-content:flex-end;gap:8px;}
+  .form-group{display:flex;flex-direction:column;gap:4px;}
+  .form-label{font-size:13px;font-weight:600;color:var(--c-ink-muted);}
+  .form-input{padding:9px 12px;border:1px solid var(--c-border-strong);border-radius:6px;font-size:13px;background:var(--c-surface);color:var(--c-ink);font-family:inherit;}
+  .form-select{padding:9px 12px;border:1px solid var(--c-border-strong);border-radius:6px;font-size:13px;background:var(--c-surface);color:var(--c-ink);font-family:inherit;}
+  .form-hint{font-size:11px;color:var(--c-ink-subtle);}
+  .form-row-2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+</style>
+<script>
+  /* Drawer */
+  const schools = {
+    'notre-dame': {
+      name:"École Notre-Dame", type:"Elementary", students:286, staff:18, clerks:1,
+      rate:"96.8%", ratePct:96.8, rateClass:"ok", termRate:"95.2%",
+      status:"ok", statusLabel:"On target",
+      unjustified:0, missing:0, aspen:"OK",
+      address:"123 rue Notre-Dame, Ottawa, ON",
+      principal:"M. Leblanc",
+      clerksDetail:[{name:"Diane Bélanger",role:"Attendance Clerk"}],
+    },
+    'sainte-croix': {
+      name:"École Sainte-Croix", type:"Secondary", students:412, staff:36, clerks:2,
+      rate:"95.2%", ratePct:95.2, rateClass:"ok", termRate:"93.8%",
+      status:"ok", statusLabel:"On target",
+      unjustified:3, missing:2, aspen:"OK",
+      address:"45 av. Sainte-Croix, Ottawa, ON",
+      principal:"Mme Tremblay",
+      clerksDetail:[{name:"Marguerite Tremblay",role:"Attendance Clerk"},{name:"Carlos Mendez",role:"Attendance Clerk"}],
+    },
+    'saint-joseph': {
+      name:"École Saint-Joseph", type:"Secondary", students:389, staff:34, clerks:2,
+      rate:"93.5%", ratePct:93.5, rateClass:"ok", termRate:"92.1%",
+      status:"ok", statusLabel:"On target",
+      unjustified:0, missing:0, aspen:"OK",
+      address:"78 blvd Saint-Joseph, Ottawa, ON",
+      principal:"M. Fontaine",
+      clerksDetail:[{name:"Sofia Marić",role:"Attendance Clerk"},{name:"Jean-Paul Roy",role:"Attendance Clerk"}],
+    },
+    'saint-luc': {
+      name:"École Saint-Luc", type:"Elementary", students:312, staff:20, clerks:1,
+      rate:"92.1%", ratePct:92.1, rateClass:"ok", termRate:"91.4%",
+      status:"ok", statusLabel:"On target",
+      unjustified:1, missing:0, aspen:"OK",
+      address:"22 rue Saint-Luc, Ottawa, ON",
+      principal:"Mme Gauthier",
+      clerksDetail:[{name:"Nadia Osei",role:"Attendance Clerk"}],
+    },
+    'saint-michel': {
+      name:"École sec. Saint-Michel", type:"Secondary", students:441, staff:38, clerks:2,
+      rate:"91.4%", ratePct:91.4, rateClass:"ok", termRate:"90.8%",
+      status:"warn", statusLabel:"Aspen warning",
+      unjustified:1, missing:1, aspen:"Warning — D. Park unmatched",
+      address:"99 ch. Saint-Michel, Ottawa, ON",
+      principal:"M. Park",
+      clerksDetail:[{name:"Hana Yamamoto",role:"Attendance Clerk"},{name:"Rajiv Sharma",role:"Attendance Clerk"}],
+    },
+    'sainte-marie': {
+      name:"École sec. Sainte-Marie", type:"Secondary", students:403, staff:35, clerks:2,
+      rate:"90.8%", ratePct:90.8, rateClass:"ok", termRate:"91.2%",
+      status:"ok", statusLabel:"On target",
+      unjustified:0, missing:0, aspen:"OK",
+      address:"55 promenade Sainte-Marie, Ottawa, ON",
+      principal:"Mme Côté",
+      clerksDetail:[{name:"Louis Bernard",role:"Attendance Clerk"},{name:"Priya Singh",role:"Attendance Clerk"}],
+    },
+    'carrefour': {
+      name:"École sec. du Carrefour", type:"Secondary", students:478, staff:41, clerks:2,
+      rate:"87.3%", ratePct:87.3, rateClass:"warn", termRate:"86.1%",
+      status:"warn", statusLabel:"Below target",
+      unjustified:7, missing:2, aspen:"OK",
+      address:"101 rue du Carrefour, Ottawa, ON",
+      principal:"M. Desrochers",
+      clerksDetail:[{name:"Aiko Tanaka",role:"Attendance Clerk"},{name:"Patrick O'Brien",role:"Attendance Clerk"}],
+    },
+    'avenir': {
+      name:"École sec. de l'Avenir", type:"Secondary", students:502, staff:43, clerks:2,
+      rate:"84.1%", ratePct:84.1, rateClass:"alert", termRate:"83.6%",
+      status:"alert", statusLabel:"Below target",
+      unjustified:9, missing:3, aspen:"OK",
+      address:"200 av. de l'Avenir, Ottawa, ON",
+      principal:"Mme Boisvert",
+      clerksDetail:[{name:"Éric Nadeau",role:"Attendance Clerk"},{name:"Fatima Zia",role:"Attendance Clerk"}],
+    },
+  };
+
+  const sparkPoints = {
+    'notre-dame':  [90,88,93,95,94,97,97],
+    'sainte-croix':[88,90,92,94,95,94,95],
+    'saint-joseph':[91,89,91,93,92,93,94],
+    'saint-luc':   [90,91,90,92,91,92,92],
+    'saint-michel':[89,90,91,91,90,91,91],
+    'sainte-marie':[91,92,91,90,91,90,91],
+    'carrefour':   [92,90,89,88,87,87,87],
+    'avenir':      [90,88,87,85,84,83,84],
+  };
+
+  function makeSparkPath(pts, w, h){
+    const min=79, max=100;
+    return pts.map((v,i)=>{
+      const x = (i/(pts.length-1))*w;
+      const y = h - ((v-min)/(max-min))*h;
+      return (i===0?'M':'L')+x.toFixed(1)+','+y.toFixed(1);
+    }).join(' ');
+  }
+
+  function openDrawer(id){
+    const s = schools[id];
+    if(!s) return;
+    // Mark selected row
+    document.querySelectorAll('.school-row-body').forEach(r=>r.classList.remove('is-selected'));
+    const row = document.querySelector('[data-school="'+id+'"]');
+    if(row) row.classList.add('is-selected');
+    // Header
+    document.getElementById('drawer-name').textContent = s.name;
+    document.getElementById('drawer-sub').textContent = s.type+' · '+s.students+' students · '+s.staff+' staff';
+    // Overview tab
+    const rateColor = s.rateClass==='ok'?'var(--c-success)':s.rateClass==='warn'?'var(--c-warning)':'var(--c-danger)';
+    const ujColor = s.unjustified>0?'var(--c-danger)':'var(--c-success)';
+    const msColor = s.missing>0?'var(--c-warning)':'var(--c-success)';
+    document.getElementById('d-rate').innerHTML = '<div class="drawer-stat__val" style="color:'+rateColor+'">'+s.rate+'</div><div class="drawer-stat__lbl">Attendance today</div>';
+    document.getElementById('d-term').innerHTML = '<div class="drawer-stat__val">'+s.termRate+'</div><div class="drawer-stat__lbl">Term 4 rate</div>';
+    document.getElementById('d-unjust').innerHTML = '<div class="drawer-stat__val" style="color:'+ujColor+'">'+s.unjustified+'</div><div class="drawer-stat__lbl">Unjustified &gt;24h</div>';
+    document.getElementById('d-missing').innerHTML = '<div class="drawer-stat__val" style="color:'+msColor+'">'+s.missing+'</div><div class="drawer-stat__lbl">Missing submissions</div>';
+    // Details
+    document.getElementById('d-principal').textContent = s.principal;
+    document.getElementById('d-address').textContent = s.address;
+    document.getElementById('d-aspen').innerHTML = s.aspen === 'OK'
+      ? '<span class="status status--ok"><i class="fa-solid fa-circle-check"></i> Synced</span>'
+      : '<span class="status status--warn"><i class="fa-solid fa-triangle-exclamation"></i> '+s.aspen+'</span>';
+    // Staff list
+    const staffEl = document.getElementById('d-staff-list');
+    staffEl.innerHTML = s.clerksDetail.map(c=>`
+      <div class="drawer-user-row">
+        <div class="avatar" style="width:28px;height:28px;font-size:11px;">${c.name.split(' ').map(x=>x[0]).join('')}</div>
+        <div><div class="drawer-user-row__name">${c.name}</div><div class="drawer-user-row__role">${c.role}</div></div>
+        <span class="role-badge role-badge--clerk" style="font-size:10px;">Clerk</span>
+      </div>`).join('');
+    // Trend sparkline
+    const pts = sparkPoints[id] || [90,90,90,90,90,90,90];
+    const W=340, H=60;
+    const path = makeSparkPath(pts, W, H);
+    const target = makeSparkPath(pts.map(()=>90), W, H);
+    document.getElementById('d-spark').innerHTML = `
+      <svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">
+        <path d="${target}" fill="none" stroke="var(--c-border-strong)" stroke-width="1" stroke-dasharray="4 3"/>
+        <path d="${path}" fill="none" stroke="${rateColor}" stroke-width="2.5" stroke-linejoin="round"/>
+        <circle cx="${W}" cy="${H-((pts[pts.length-1]-79)/(100-79))*H}" r="4" fill="${rateColor}"/>
+      </svg>
+      <div class="sparkline-legend">
+        <div class="sparkline-legend__item"><div class="sparkline-legend__dot" style="background:${rateColor};"></div>Attendance rate</div>
+        <div class="sparkline-legend__item"><div style="width:16px;height:2px;border-top:1px dashed var(--c-border-strong);"></div>90% target</div>
+      </div>`;
+    // Open
+    document.getElementById('drawer').classList.add('is-open');
+    document.getElementById('main-body').classList.add('drawer-open');
+    showDrawerTab('overview');
+  }
+
+  function closeDrawer(){
+    document.getElementById('drawer').classList.remove('is-open');
+    document.getElementById('main-body').classList.remove('drawer-open');
+    document.querySelectorAll('.school-row-body').forEach(r=>r.classList.remove('is-selected'));
+  }
+
+  function showDrawerTab(id){
+    document.querySelectorAll('.drawer-tab-btn').forEach(b=>b.classList.remove('is-active'));
+    document.querySelectorAll('.drawer-tab-panel').forEach(p=>p.classList.remove('is-active'));
+    const btn = document.getElementById('dtab-'+id);
+    const panel = document.getElementById('dpanel-'+id);
+    if(btn) btn.classList.add('is-active');
+    if(panel) panel.classList.add('is-active');
+  }
+
+</script>
+</head>
+<body>
+<a href="#main" class="skip-link">Skip to main content</a>
+<div class="wf-banner">
+  <div class="wf-banner__left"><i class="fa-solid fa-pencil-ruler"></i><strong>Wireframe — Admin Portal V1 · Schools</strong><span>· EC Catholic · Board Admin</span></div>
+  <div class="wf-banner__right"><a href="dashboard.html">Dashboard</a><a href="aspen.html">Aspen</a><a href="configuration.html">Configuration</a><a href="reports.html">Reports</a></div>
+</div>
+<div class="app">
+  <aside class="sidebar">
+    <div class="sidebar__logo"><div class="sidebar__logo-mark">CT</div><div><div class="sidebar__logo-text">ClassTrack</div><div class="sidebar__logo-sub">EC Catholic · Board</div></div></div>
+    <div class="sidebar__role-badge">Board Administrator</div><nav class="sidebar__section"><div class="sidebar__section-label">Overview</div><a href="dashboard.html" class="nav-item"><span class="nav-icon"><i class="fa-solid fa-gauge-high"></i></span>Dashboard</a></nav><nav class="sidebar__section"><div class="sidebar__section-label">Management</div><a href="schools.html" class="nav-item is-active" aria-current="page"><span class="nav-icon"><i class="fa-solid fa-school"></i></span>Schools<span class="nav-badge nav-badge--neutral">8</span></a><a href="users.html" class="nav-item"><span class="nav-icon"><i class="fa-solid fa-users-gear"></i></span>Users<span class="nav-badge nav-badge--neutral">247</span></a><a href="registered-contacts.html" class="nav-item"><span class="nav-icon"><i class="fa-solid fa-id-badge"></i></span>Registered Contacts<span class="nav-badge nav-badge--neutral">14</span></a></nav><nav class="sidebar__section"><div class="sidebar__section-label">Reports</div><a href="attendance-summary-v3.html" class="nav-item"><span class="nav-icon"><i class="fa-solid fa-chart-bar"></i></span>Attendance Summary</a><a href="absence-trends-v2.html" class="nav-item"><span class="nav-icon"><i class="fa-solid fa-chart-line"></i></span>Absence Trends</a><a href="chronic-absenteeism-v2.html" class="nav-item"><span class="nav-icon"><i class="fa-solid fa-user-clock"></i></span>Chronic Absenteeism</a><a href="unjustified-absences-v2.html" class="nav-item"><span class="nav-icon"><i class="fa-solid fa-circle-exclamation"></i></span>Unjustified Absences</a><a href="submission-compliance-v2.html" class="nav-item"><span class="nav-icon"><i class="fa-solid fa-clipboard-check"></i></span>Submission Compliance</a><a href="open-disputes-v2.html" class="nav-item"><span class="nav-icon"><i class="fa-solid fa-scale-balanced"></i></span>Open Disputes</a><a href="grade-threshold-v2.html" class="nav-item"><span class="nav-icon"><i class="fa-solid fa-graduation-cap"></i></span>Grade Threshold</a></nav><nav class="sidebar__section"><div class="sidebar__section-label">System</div><a href="aspen.html" class="nav-item"><span class="nav-icon"><i class="fa-solid fa-arrows-rotate"></i></span>Aspen Sync<span class="nav-badge nav-badge--warn">1</span></a><a href="configuration.html" class="nav-item"><span class="nav-icon"><i class="fa-solid fa-calendar-days"></i></span>Calendar &amp; Periods</a><a href="notifications.html" class="nav-item"><span class="nav-icon"><i class="fa-solid fa-bell-slash"></i></span>Notifications</a></nav><div class="sidebar__user"><div class="avatar">AR</div><div><div class="sidebar__user-name">André Rousseau</div><div class="sidebar__user-role">Board Administrator</div></div></div>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <div class="topbar__crumbs"><a href="dashboard.html">Board</a><span>›</span><strong>Schools</strong></div>
+      <div class="topbar__scope"><i class="fa-solid fa-school"></i> EC Catholic · All Schools</div>
+      <div class="topbar__actions">
+        <div class="lang-toggle"><button aria-pressed="true">EN</button><button aria-pressed="false">FR</button></div>
+        <button class="icon-btn"><i class="fa-solid fa-bell"></i><span class="icon-btn__count">3</span></button>
+        <span class="user-chip"><span class="avatar" style="width:28px;height:28px;font-size:12px;">AR</span>André R. · Board Admin</span>
+      </div>
+    </header>
+
+    <div class="main-body" id="main-body">
+      <main id="main" class="content" tabindex="-1">
+        <div class="page-header">
+          <div><h1>Schools</h1><p>Manage schools across the board</p></div>
+          <div class="page-header__actions">
+            <button class="btn btn--secondary"><i class="fa-solid fa-file-export"></i> Export</button>
+          </div>
+        </div>
+
+
+          <div class="filter-bar">
+            <input type="search" placeholder="Search schools…" aria-label="Search schools">
+            <select aria-label="Filter by type"><option>All types</option><option>Secondary</option><option>Elementary</option></select>
+            <select aria-label="Filter by status"><option>All statuses</option><option>On target</option><option>Below target</option><option>Alert</option></select>
+          </div>
+          <div class="card">
+            <div class="card__h">
+              <div><h2 class="card__title"><i class="fa-solid fa-school" style="color:var(--c-brand);font-size:13px;"></i> All Schools <span class="card__title-count">8</span></h2><div class="card__sub">Click a row to view school details</div></div>
+            </div>
+            <div style="overflow-x:auto;">
+              <table class="data-table">
+                <thead>
+                  <tr><th>School</th><th>Type</th><th>Students</th><th>Staff</th><th>Attendance rate</th><th>Unjustified &gt;24h</th><th>Aspen</th><th>Status</th></tr>
+                </thead>
+                <tbody>
+                  <tr class="school-row-body" data-school="notre-dame" onclick="openDrawer('notre-dame')" tabindex="0">
+                    <td><div class="cell-primary">École Notre-Dame</div><div class="cell-sub">123 rue Notre-Dame, Ottawa</div></td>
+                    <td><span class="status status--neutral">Elementary</span></td>
+                    <td style="font-variant-numeric:tabular-nums;">286</td>
+                    <td style="font-variant-numeric:tabular-nums;">18</td>
+                    <td style="min-width:140px;"><div class="rate-bar"><div class="rate-track"><div class="rate-fill rate-fill--ok" style="width:96.8%;"></div></div><span class="rate-pct rate-pct--ok">96.8%</span></div></td>
+                    <td style="font-size:13px;font-weight:700;color:var(--c-success);">0</td>
+                    <td><span class="status status--ok"><i class="fa-solid fa-circle-check"></i> Synced</span></td>
+                    <td><span class="status status--ok"><i class="fa-solid fa-circle-check"></i> On target</span></td>
+                  </tr>
+                  <tr class="school-row-body" data-school="sainte-croix" onclick="openDrawer('sainte-croix')" tabindex="0">
+                    <td><div class="cell-primary">École Sainte-Croix</div><div class="cell-sub">45 av. Sainte-Croix, Ottawa</div></td>
+                    <td><span class="status status--board">Secondary</span></td>
+                    <td style="font-variant-numeric:tabular-nums;">412</td>
+                    <td style="font-variant-numeric:tabular-nums;">36</td>
+                    <td style="min-width:140px;"><div class="rate-bar"><div class="rate-track"><div class="rate-fill rate-fill--ok" style="width:95.2%;"></div></div><span class="rate-pct rate-pct--ok">95.2%</span></div></td>
+                    <td style="font-size:13px;font-weight:700;color:var(--c-danger);">3</td>
+                    <td><span class="status status--ok"><i class="fa-solid fa-circle-check"></i> Synced</span></td>
+                    <td><span class="status status--ok"><i class="fa-solid fa-circle-check"></i> On target</span></td>
+                  </tr>
+                  <tr class="school-row-body" data-school="saint-joseph" onclick="openDrawer('saint-joseph')" tabindex="0">
+                    <td><div class="cell-primary">École Saint-Joseph</div><div class="cell-sub">78 blvd Saint-Joseph, Ottawa</div></td>
+                    <td><span class="status status--board">Secondary</span></td>
+                    <td style="font-variant-numeric:tabular-nums;">389</td>
+                    <td style="font-variant-numeric:tabular-nums;">34</td>
+                    <td style="min-width:140px;"><div class="rate-bar"><div class="rate-track"><div class="rate-fill rate-fill--ok" style="width:93.5%;"></div></div><span class="rate-pct rate-pct--ok">93.5%</span></div></td>
+                    <td style="font-size:13px;font-weight:700;color:var(--c-success);">0</td>
+                    <td><span class="status status--ok"><i class="fa-solid fa-circle-check"></i> Synced</span></td>
+                    <td><span class="status status--ok"><i class="fa-solid fa-circle-check"></i> On target</span></td>
+                  </tr>
+                  <tr class="school-row-body" data-school="saint-luc" onclick="openDrawer('saint-luc')" tabindex="0">
+                    <td><div class="cell-primary">École Saint-Luc</div><div class="cell-sub">22 rue Saint-Luc, Ottawa</div></td>
+                    <td><span class="status status--neutral">Elementary</span></td>
+                    <td style="font-variant-numeric:tabular-nums;">312</td>
+                    <td style="font-variant-numeric:tabular-nums;">20</td>
+                    <td style="min-width:140px;"><div class="rate-bar"><div class="rate-track"><div class="rate-fill rate-fill--ok" style="width:92.1%;"></div></div><span class="rate-pct rate-pct--ok">92.1%</span></div></td>
+                    <td style="font-size:13px;font-weight:700;color:var(--c-danger);">1</td>
+                    <td><span class="status status--ok"><i class="fa-solid fa-circle-check"></i> Synced</span></td>
+                    <td><span class="status status--ok"><i class="fa-solid fa-circle-check"></i> On target</span></td>
+                  </tr>
+                  <tr class="school-row-body" data-school="saint-michel" onclick="openDrawer('saint-michel')" tabindex="0">
+                    <td><div class="cell-primary">École sec. Saint-Michel</div><div class="cell-sub">99 ch. Saint-Michel, Ottawa</div></td>
+                    <td><span class="status status--board">Secondary</span></td>
+                    <td style="font-variant-numeric:tabular-nums;">441</td>
+                    <td style="font-variant-numeric:tabular-nums;">38</td>
+                    <td style="min-width:140px;"><div class="rate-bar"><div class="rate-track"><div class="rate-fill rate-fill--ok" style="width:91.4%;"></div></div><span class="rate-pct rate-pct--ok">91.4%</span></div></td>
+                    <td style="font-size:13px;font-weight:700;color:var(--c-danger);">1</td>
+                    <td><span class="status status--warn"><i class="fa-solid fa-triangle-exclamation"></i> Warning</span></td>
+                    <td><span class="status status--warn"><i class="fa-solid fa-triangle-exclamation"></i> Aspen issue</span></td>
+                  </tr>
+                  <tr class="school-row-body" data-school="sainte-marie" onclick="openDrawer('sainte-marie')" tabindex="0">
+                    <td><div class="cell-primary">École sec. Sainte-Marie</div><div class="cell-sub">55 promenade Sainte-Marie, Ottawa</div></td>
+                    <td><span class="status status--board">Secondary</span></td>
+                    <td style="font-variant-numeric:tabular-nums;">403</td>
+                    <td style="font-variant-numeric:tabular-nums;">35</td>
+                    <td style="min-width:140px;"><div class="rate-bar"><div class="rate-track"><div class="rate-fill rate-fill--ok" style="width:90.8%;"></div></div><span class="rate-pct rate-pct--ok">90.8%</span></div></td>
+                    <td style="font-size:13px;font-weight:700;color:var(--c-success);">0</td>
+                    <td><span class="status status--ok"><i class="fa-solid fa-circle-check"></i> Synced</span></td>
+                    <td><span class="status status--ok"><i class="fa-solid fa-circle-check"></i> On target</span></td>
+                  </tr>
+                  <tr class="school-row-body" data-school="carrefour" onclick="openDrawer('carrefour')" tabindex="0" style="background:#FFFAF5;">
+                    <td><div class="cell-primary">École sec. du Carrefour</div><div class="cell-sub">101 rue du Carrefour, Ottawa</div></td>
+                    <td><span class="status status--board">Secondary</span></td>
+                    <td style="font-variant-numeric:tabular-nums;">478</td>
+                    <td style="font-variant-numeric:tabular-nums;">41</td>
+                    <td style="min-width:140px;"><div class="rate-bar"><div class="rate-track"><div class="rate-fill rate-fill--warn" style="width:87.3%;"></div></div><span class="rate-pct rate-pct--warn">87.3%</span></div></td>
+                    <td style="font-size:13px;font-weight:700;color:var(--c-danger);">7</td>
+                    <td><span class="status status--ok"><i class="fa-solid fa-circle-check"></i> Synced</span></td>
+                    <td><span class="status status--warn"><i class="fa-solid fa-triangle-exclamation"></i> Below target</span></td>
+                  </tr>
+                  <tr class="school-row-body" data-school="avenir" onclick="openDrawer('avenir')" tabindex="0" style="background:#FFF5F4;">
+                    <td><div class="cell-primary">École sec. de l'Avenir</div><div class="cell-sub">200 av. de l'Avenir, Ottawa</div></td>
+                    <td><span class="status status--board">Secondary</span></td>
+                    <td style="font-variant-numeric:tabular-nums;">502</td>
+                    <td style="font-variant-numeric:tabular-nums;">43</td>
+                    <td style="min-width:140px;"><div class="rate-bar"><div class="rate-track"><div class="rate-fill rate-fill--alert" style="width:84.1%;"></div></div><span class="rate-pct rate-pct--alert">84.1%</span></div></td>
+                    <td style="font-size:13px;font-weight:700;color:var(--c-danger);">9</td>
+                    <td><span class="status status--ok"><i class="fa-solid fa-circle-check"></i> Synced</span></td>
+                    <td><span class="status status--alert"><i class="fa-solid fa-circle-exclamation"></i> Below target</span></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="card__footer"><span>8 schools · board avg: 91.4% · 2 below target</span></div>
+          </div>
+
+      </main>
+
+      <!-- DETAIL DRAWER -->
+      <aside id="drawer" class="drawer" aria-label="School detail">
+        <div class="drawer__h">
+          <div>
+            <div id="drawer-name" class="drawer__school-name">School name</div>
+            <div id="drawer-sub" class="drawer__school-sub">Type · students · staff</div>
+          </div>
+          <button class="drawer__close" onclick="closeDrawer()" aria-label="Close detail panel"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div class="drawer__body">
+          <div class="drawer-tabs">
+            <button id="dtab-overview" class="drawer-tab-btn is-active" onclick="showDrawerTab('overview')">Overview</button>
+            <button id="dtab-trend" class="drawer-tab-btn" onclick="showDrawerTab('trend')">Trend</button>
+            <button id="dtab-staff" class="drawer-tab-btn" onclick="showDrawerTab('staff')">Staff</button>
+          </div>
+
+          <!-- Overview tab -->
+          <div id="dpanel-overview" class="drawer-tab-panel is-active">
+            <div class="drawer-stats">
+              <div id="d-rate" class="drawer-stat"></div>
+              <div id="d-term" class="drawer-stat"></div>
+              <div id="d-unjust" class="drawer-stat"></div>
+              <div id="d-missing" class="drawer-stat"></div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:8px;">
+              <div style="font-size:12px;font-weight:700;color:var(--c-ink-muted);text-transform:uppercase;letter-spacing:0.06em;">Details</div>
+              <div style="font-size:13px;display:flex;flex-direction:column;gap:6px;">
+                <div style="display:flex;justify-content:space-between;"><span style="color:var(--c-ink-subtle);">Principal</span><span id="d-principal" style="font-weight:600;"></span></div>
+                <div style="display:flex;justify-content:space-between;"><span style="color:var(--c-ink-subtle);">Address</span><span id="d-address" style="font-weight:500;font-size:12px;text-align:right;max-width:200px;"></span></div>
+                <div style="display:flex;justify-content:space-between;align-items:center;"><span style="color:var(--c-ink-subtle);">Aspen sync</span><span id="d-aspen"></span></div>
+              </div>
+            </div>
+            <div style="display:flex;gap:8px;padding-top:4px;">
+              <button class="btn btn--secondary btn--sm" style="flex:1;"><i class="fa-solid fa-arrow-up-right-from-square"></i> Open Clerk View</button>
+              <button class="btn btn--ghost btn--sm"><i class="fa-solid fa-file-export"></i> Report</button>
+            </div>
+          </div>
+
+          <!-- Trend tab -->
+          <div id="dpanel-trend" class="drawer-tab-panel">
+            <div class="sparkline-wrap">
+              <div class="sparkline-wrap__title">Attendance Rate — Last 7 Weeks</div>
+              <div id="d-spark"></div>
+            </div>
+            <div style="background:var(--c-surface-2);border:1px solid var(--c-border-2);border-radius:8px;padding:10px 12px;font-size:12px;color:var(--c-ink-subtle);">Term 4 target: <strong style="color:var(--c-ink);">≥ 90%</strong> · Dashed line = target threshold</div>
+            <a href="reports.html" class="btn btn--secondary btn--sm"><i class="fa-solid fa-chart-column"></i> Full compliance report</a>
+          </div>
+
+          <!-- Staff tab -->
+          <div id="dpanel-staff" class="drawer-tab-panel">
+            <div style="font-size:12px;font-weight:700;color:var(--c-ink-muted);text-transform:uppercase;letter-spacing:0.06em;">Attendance Clerks</div>
+            <div id="d-staff-list"></div>
+            <a href="users.html" class="btn btn--ghost btn--sm"><i class="fa-solid fa-users-gear"></i> Manage all users</a>
+          </div>
+        </div>
+      </aside>
+    </div><!-- end main-body -->
+  </div><!-- end main -->
+</div><!-- end app -->
+
+</body>
+</html>

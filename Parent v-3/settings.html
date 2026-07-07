@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ClassTrack — Settings</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="stylesheet" href="assets/styles.css">
+</head>
+<body>
+
+<a href="#main" class="skip-link" data-en="Skip to content" data-fr="Aller au contenu">Skip to content</a>
+
+<div class="app">
+<aside id="sidebar"></aside>
+<main id="main" class="shell">
+
+  <section class="hero-row">
+    <div>
+      <h1 class="hero-row__title" data-en="Settings" data-fr="Paramètres">Settings</h1>
+      <p class="hero-row__sub" data-en="Manage your account, notifications, and accessibility preferences." data-fr="Gérez votre compte, vos notifications et préférences d'accessibilité.">Manage your account, notifications, and accessibility preferences.</p>
+    </div>
+  </section>
+
+  <div class="settings-grid">
+
+    <aside class="settings-nav">
+      <a href="#profile" class="settings-nav__item is-active"><i class="fa-solid fa-user"></i> <span data-en="Profile" data-fr="Profil">Profile</span></a>
+      <a href="#notifications" class="settings-nav__item"><i class="fa-solid fa-bell"></i> <span data-en="Notifications" data-fr="Notifications">Notifications</span></a>
+      <a href="#language" class="settings-nav__item"><i class="fa-solid fa-globe"></i> <span data-en="Language" data-fr="Langue">Language</span></a>
+      <a href="#linked" class="settings-nav__item"><i class="fa-solid fa-link"></i> <span data-en="How you sign in" data-fr="Connexion">How you sign in</span></a>
+      <a href="#privacy" class="settings-nav__item"><i class="fa-solid fa-shield-halved"></i> <span data-en="Privacy" data-fr="Confidentialité">Privacy</span></a>
+      <a href="#about" class="settings-nav__item"><i class="fa-solid fa-circle-info"></i> <span data-en="About & help" data-fr="À propos et aide">About & help</span></a>
+    </aside>
+
+    <div class="stack">
+
+      <section class="card" id="profile">
+        <div class="card__h">
+          <div class="card__title" data-en="Your profile" data-fr="Votre profil">Your profile</div>
+        </div>
+        <div class="card__b">
+          <div class="row gap-3" style="margin-bottom: var(--s-4);">
+            <div class="avatar avatar--2xl">MC</div>
+            <div>
+              <div class="font-bold fs-lg">Marcus Carter</div>
+              <div class="text-muted fs-sm">marcus.carter@outlook.com</div>
+              <div class="text-subtle fs-xs mt-2" data-en="Signed in with Microsoft Outlook" data-fr="Connecté avec Microsoft Outlook">Signed in with Microsoft Outlook</div>
+            </div>
+          </div>
+          <div class="form-grid">
+            <div class="field">
+              <label class="field__label" data-en="Display name" data-fr="Nom d'affichage">Display name</label>
+              <input class="input" value="Marcus Carter">
+            </div>
+            <div class="field">
+              <label class="field__label" data-en="Phone (for emergencies)" data-fr="Téléphone (urgences)">Phone (for emergencies)</label>
+              <input class="input" value="(613) 555-0142">
+            </div>
+            <div class="field">
+              <label class="field__label" data-en="Email on file" data-fr="Courriel au dossier">Email on file</label>
+              <input class="input" value="marcus.carter@outlook.com" disabled>
+              <div class="field__hint" data-en="Set by your school. Contact the school office to change it." data-fr="Défini par l'école. Contactez le secrétariat pour le modifier.">Set by your school. Contact the school office to change it.</div>
+            </div>
+            <div class="field">
+              <label class="field__label" data-en="Relationship" data-fr="Lien de parenté">Relationship</label>
+              <select class="select">
+                <option data-en="Father / Guardian" data-fr="Père / tuteur">Father / Guardian</option>
+                <option data-en="Mother / Guardian" data-fr="Mère / tutrice">Mother / Guardian</option>
+                <option data-en="Other guardian" data-fr="Autre tuteur">Other guardian</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="card__footer" style="display: flex; justify-content: flex-end;">
+          <button class="btn btn--primary" data-en="Save" data-fr="Enregistrer">Save</button>
+        </div>
+      </section>
+
+      <section class="card" id="notifications">
+        <div class="card__h">
+          <div>
+            <div class="card__title" data-en="How you hear from us" data-fr="Comment vous êtes informé">How you hear from us</div>
+            <div class="card__sub" data-en="Choose where you'd like to be notified for each type of update." data-fr="Choisissez où être informé pour chaque type de mise à jour.">Choose where you'd like to be notified for each type of update.</div>
+          </div>
+        </div>
+        <div class="card__b--flush">
+          <div class="simple-list">
+
+            <div class="simple-list__item pref-row">
+              <div class="simple-list__icon simple-list__icon--absent"><i class="fa-solid fa-triangle-exclamation"></i></div>
+              <div class="simple-list__body">
+                <div class="simple-list__title" data-en="Absence recorded" data-fr="Absence consignée">Absence recorded</div>
+                <div class="simple-list__sub" data-en="When your child is marked absent." data-fr="Lorsque votre enfant est marqué absent.">When your child is marked absent.</div>
+              </div>
+              <div class="row gap-3 nowrap">
+                <label class="pref-toggle"><span class="pref-toggle__l" data-en="In-app" data-fr="App">In-app</span><label class="toggle"><input type="checkbox" checked><span></span></label></label>
+                <label class="pref-toggle"><span class="pref-toggle__l" data-en="Email" data-fr="Courriel">Email</span><label class="toggle"><input type="checkbox" checked><span></span></label></label>
+                <label class="pref-toggle"><span class="pref-toggle__l">SMS</span><label class="toggle"><input type="checkbox" disabled><span></span></label></label>
+              </div>
+            </div>
+
+            <div class="simple-list__item pref-row">
+              <div class="simple-list__icon simple-list__icon--late"><i class="fa-solid fa-clock"></i></div>
+              <div class="simple-list__body">
+                <div class="simple-list__title" data-en="Late arrival" data-fr="Arrivée tardive">Late arrival</div>
+                <div class="simple-list__sub" data-en="When your child arrives late to class." data-fr="Lorsque votre enfant arrive en retard.">When your child arrives late to class.</div>
+              </div>
+              <div class="row gap-3 nowrap">
+                <label class="pref-toggle"><span class="pref-toggle__l" data-en="In-app" data-fr="App">In-app</span><label class="toggle"><input type="checkbox" checked><span></span></label></label>
+                <label class="pref-toggle"><span class="pref-toggle__l" data-en="Email" data-fr="Courriel">Email</span><label class="toggle"><input type="checkbox" checked><span></span></label></label>
+                <label class="pref-toggle"><span class="pref-toggle__l">SMS</span><label class="toggle"><input type="checkbox" disabled><span></span></label></label>
+              </div>
+            </div>
+
+            <div class="simple-list__item pref-row">
+              <div class="simple-list__icon simple-list__icon--approve"><i class="fa-solid fa-circle-check"></i></div>
+              <div class="simple-list__body">
+                <div class="simple-list__title" data-en="Decision from the school" data-fr="Décision de l'école">Decision from the school</div>
+                <div class="simple-list__sub" data-en="When the school approves or asks more about a reason you submitted." data-fr="Lorsque l'école approuve ou demande plus d'information.">When the school approves or asks more about a reason you submitted.</div>
+              </div>
+              <div class="row gap-3 nowrap">
+                <label class="pref-toggle"><span class="pref-toggle__l" data-en="In-app" data-fr="App">In-app</span><label class="toggle"><input type="checkbox" checked><span></span></label></label>
+                <label class="pref-toggle"><span class="pref-toggle__l" data-en="Email" data-fr="Courriel">Email</span><label class="toggle"><input type="checkbox" checked><span></span></label></label>
+                <label class="pref-toggle"><span class="pref-toggle__l">SMS</span><label class="toggle"><input type="checkbox" disabled><span></span></label></label>
+              </div>
+            </div>
+
+            <div class="simple-list__item pref-row">
+              <div class="simple-list__icon simple-list__icon--event"><i class="fa-solid fa-trophy"></i></div>
+              <div class="simple-list__body">
+                <div class="simple-list__title" data-en="School events involving your child" data-fr="Événements scolaires">School events involving your child</div>
+                <div class="simple-list__sub" data-en="Trips, tournaments — informational only." data-fr="Sorties, tournois — informatif seulement.">Trips, tournaments — informational only.</div>
+              </div>
+              <div class="row gap-3 nowrap">
+                <label class="pref-toggle"><span class="pref-toggle__l" data-en="In-app" data-fr="App">In-app</span><label class="toggle"><input type="checkbox" checked><span></span></label></label>
+                <label class="pref-toggle"><span class="pref-toggle__l" data-en="Email" data-fr="Courriel">Email</span><label class="toggle"><input type="checkbox"><span></span></label></label>
+                <label class="pref-toggle"><span class="pref-toggle__l">SMS</span><label class="toggle"><input type="checkbox" disabled><span></span></label></label>
+              </div>
+            </div>
+
+          </div>
+        </div>
+        <div class="card__footer">
+          <span class="text-subtle fs-xs" data-en="Emails come from notifications@ecatholic.ca · SMS coming later this year" data-fr="Courriels depuis notifications@ecatholic.ca · SMS plus tard">Emails come from notifications@ecatholic.ca · SMS coming later this year</span>
+        </div>
+      </section>
+
+      <section class="card" id="language">
+        <div class="card__h">
+          <div class="card__title" data-en="Language" data-fr="Langue">Language</div>
+        </div>
+        <div class="card__b">
+          <div class="row gap-2">
+            <button class="chip is-active">English</button>
+            <button class="chip">Français</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="card" id="linked">
+        <div class="card__h">
+          <div>
+            <div class="card__title" data-en="How you sign in" data-fr="Comment vous vous connectez">How you sign in</div>
+            <div class="card__sub" data-en="ClassTrack uses your existing email account." data-fr="ClassTrack utilise votre compte courriel existant.">ClassTrack uses your existing email account.</div>
+          </div>
+        </div>
+        <div class="card__b--flush">
+          <div class="simple-list">
+            <div class="simple-list__item">
+              <div class="simple-list__icon" style="background: #fff; color: #0078D4; border: 1px solid var(--c-border);"><i class="fa-brands fa-microsoft"></i></div>
+              <div class="simple-list__body">
+                <div class="simple-list__title">Microsoft Outlook</div>
+                <div class="simple-list__sub">marcus.carter@outlook.com</div>
+              </div>
+              <span class="status status--excused"><i class="fa-solid fa-check"></i> <span data-en="Connected" data-fr="Connecté">Connected</span></span>
+            </div>
+            <div class="simple-list__item">
+              <div class="simple-list__icon" style="background: #fff; color: #4285F4; border: 1px solid var(--c-border);"><i class="fa-brands fa-google"></i></div>
+              <div class="simple-list__body">
+                <div class="simple-list__title">Google</div>
+                <div class="simple-list__sub" data-en="Not connected" data-fr="Non connecté">Not connected</div>
+              </div>
+              <button class="btn btn--secondary btn--sm" data-en="Connect" data-fr="Connecter">Connect</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="card" id="privacy">
+        <div class="card__h">
+          <div class="card__title" data-en="Privacy & security" data-fr="Confidentialité et sécurité">Privacy & security</div>
+        </div>
+        <div class="card__b--flush">
+          <div class="simple-list">
+            <div class="simple-list__item">
+              <div class="simple-list__icon simple-list__icon--info"><i class="fa-solid fa-laptop"></i></div>
+              <div class="simple-list__body">
+                <div class="simple-list__title" data-en="Active sessions" data-fr="Sessions actives">Active sessions</div>
+                <div class="simple-list__sub" data-en="2 devices · Last sign-in: today, 8:21 AM from Ottawa" data-fr="2 appareils · Dernière connexion : aujourd'hui, 8 h 21 d'Ottawa">2 devices · Last sign-in: today, 8:21 AM from Ottawa</div>
+              </div>
+              <button class="btn btn--secondary btn--sm" data-en="Manage" data-fr="Gérer">Manage</button>
+            </div>
+            <div class="simple-list__item">
+              <div class="simple-list__icon simple-list__icon--info"><i class="fa-solid fa-download"></i></div>
+              <div class="simple-list__body">
+                <div class="simple-list__title" data-en="Export your data" data-fr="Exporter vos données">Export your data</div>
+                <div class="simple-list__sub" data-en="Download attendance records for your children." data-fr="Téléchargez les dossiers de présence de vos enfants.">Download attendance records for your children.</div>
+              </div>
+              <button class="btn btn--secondary btn--sm" data-en="Request" data-fr="Demander">Request</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="card" id="about">
+        <div class="card__h">
+          <div class="card__title" data-en="About & help" data-fr="À propos et aide">About & help</div>
+        </div>
+        <div class="card__b">
+          <div class="form-grid">
+            <div>
+              <div class="fs-xs font-semibold text-muted mb-2" style="text-transform: uppercase;" data-en="Application" data-fr="Application">Application</div>
+              <div class="fs-sm"><strong>ClassTrack</strong> v0.9.0 · EC Catholic</div>
+              <div class="fs-xs text-muted" data-en="Hosted on Microsoft Azure" data-fr="Hébergé sur Microsoft Azure">Hosted on Microsoft Azure</div>
+            </div>
+            <div>
+              <div class="fs-xs font-semibold text-muted mb-2" style="text-transform: uppercase;" data-en="Get help" data-fr="Aide">Get help</div>
+              <div class="row gap-3">
+                <a href="#" data-en="Help center" data-fr="Centre d'aide">Help center</a>
+                <a href="#" data-en="Contact school" data-fr="Contacter l'école">Contact school</a>
+                <a href="#" data-en="Privacy policy" data-fr="Politique de confidentialité">Privacy policy</a>
+              </div>
+            </div>
+          </div>
+          <div class="divider"></div>
+          <a class="btn btn--secondary" href="index.html"><i class="fa-solid fa-arrow-right-from-bracket"></i> <span data-en="Sign out" data-fr="Déconnexion">Sign out</span></a>
+        </div>
+      </section>
+
+    </div>
+
+  </div>
+
+</main>
+</div>
+
+<style>
+  .hero-row { display: flex; align-items: center; justify-content: space-between; gap: var(--s-4); flex-wrap: wrap; }
+  .hero-row__title { font-size: var(--fs-3xl); font-weight: 700; letter-spacing: -0.015em; }
+  .hero-row__sub { color: var(--c-ink-muted); font-size: var(--fs-lg); margin-top: 6px; }
+  .settings-grid { display: grid; grid-template-columns: 240px 1fr; gap: var(--s-5); align-items: flex-start; }
+  @media (max-width: 900px) { .settings-grid { grid-template-columns: 1fr; } }
+  .settings-nav { display: flex; flex-direction: column; gap: 2px; position: sticky; top: var(--s-5); }
+  .settings-nav__item { display: flex; align-items: center; gap: var(--s-3); padding: 10px var(--s-3); border-radius: var(--r-md); color: var(--c-ink-muted); font-size: var(--fs-sm); font-weight: 500; border-left: 3px solid transparent; }
+  .settings-nav__item:hover { background: var(--c-surface-2); color: var(--c-ink); text-decoration: none; }
+  .settings-nav__item.is-active { background: var(--c-brand-tint); color: var(--c-brand-ink); font-weight: 600; border-left-color: var(--c-brand); }
+  .settings-nav__item i { width: 18px; text-align: center; }
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s-4); }
+  @media (max-width: 720px) { .form-grid { grid-template-columns: 1fr; } }
+  .pref-row { flex-wrap: wrap; }
+  .pref-toggle { display: inline-flex; align-items: center; gap: 6px; font-size: var(--fs-xs); color: var(--c-ink-muted); font-weight: 600; }
+  .pref-toggle__l { min-width: 36px; text-align: right; }
+  @media (max-width: 700px) { .pref-row { flex-direction: column; align-items: flex-start; gap: var(--s-3); } }
+</style>
+
+<script src="assets/app.js"></script>
+<script>
+  document.querySelectorAll('.chip').forEach(function(el){
+    el.addEventListener('click', function(){
+      var group = el.parentElement;
+      if (group) { group.querySelectorAll('.chip').forEach(function(c){ c.classList.remove('is-active'); }); el.classList.add('is-active'); }
+    });
+  });
+  document.querySelectorAll('.settings-nav__item').forEach(function(el){
+    el.addEventListener('click', function(){
+      document.querySelectorAll('.settings-nav__item').forEach(function(x){ x.classList.remove('is-active'); });
+      el.classList.add('is-active');
+    });
+  });
+  __ct_mountSidebar('settings');
+  __ct_mountProtoSwitcher('parent');
+</script>
+</body>
+</html>

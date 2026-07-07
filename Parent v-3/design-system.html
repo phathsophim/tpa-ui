@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ClassTrack — Parent Portal Design System</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="stylesheet" href="assets/styles.css">
+</head>
+<body>
+
+<header class="topnav">
+  <div class="topnav__inner">
+    <a href="dashboard.html" class="topnav__brand">
+      <div class="topnav__mark">C</div>
+      <span>ClassTrack</span>
+    </a>
+    <nav class="topnav__links">
+      <a href="dashboard.html" class="topnav__link" data-en="Home" data-fr="Accueil">Home</a>
+      <a href="children.html" class="topnav__link" data-en="My children" data-fr="Mes enfants">My children</a>
+      <a href="notifications.html" class="topnav__link">Alerts <span class="badge-dot">3</span></a>
+    </nav>
+    <div class="topnav__right">
+      <a href="settings.html" class="topnav__user"><div class="avatar avatar--sm">MC</div><span>Marcus</span></a>
+    </div>
+  </div>
+</header>
+
+<main class="shell">
+
+  <div class="page-h">
+    <div>
+      <h1>Design System</h1>
+      <p>Visual tokens from Clerk V3, but a calmer parent-friendly layout — soft cards, generous whitespace, top-nav not sidebar, fewer numbers per view.</p>
+    </div>
+  </div>
+
+  <!-- Page catalog -->
+  <section class="card">
+    <div class="card__h">
+      <div class="card__title">Pages</div>
+      <div class="card__sub">All seven screens in the prototype.</div>
+    </div>
+    <div class="card__b" style="padding-top: 0;">
+      <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: var(--s-3); margin-top: var(--s-4);">
+        <a href="index.html" class="page-card">
+          <i class="fa-solid fa-right-to-bracket page-card__icon"></i>
+          <div class="page-card__title">Sign-in</div>
+          <div class="page-card__sub">Microsoft / Google / Apple</div>
+        </a>
+        <a href="dashboard.html" class="page-card">
+          <i class="fa-solid fa-house page-card__icon"></i>
+          <div class="page-card__title">Home</div>
+          <div class="page-card__sub">Today's status across kids</div>
+        </a>
+        <a href="children.html" class="page-card">
+          <i class="fa-solid fa-children page-card__icon"></i>
+          <div class="page-card__title">My children</div>
+          <div class="page-card__sub">Two friendly child cards</div>
+        </a>
+        <a href="child-detail.html" class="page-card">
+          <i class="fa-regular fa-calendar page-card__icon"></i>
+          <div class="page-card__title">Child detail</div>
+          <div class="page-card__sub">Calendar + simple records</div>
+        </a>
+        <a href="notifications.html" class="page-card">
+          <i class="fa-regular fa-bell page-card__icon"></i>
+          <div class="page-card__title">Alerts</div>
+          <div class="page-card__sub">Simple grouped list</div>
+        </a>
+        <a href="submit-reason.html" class="page-card">
+          <i class="fa-solid fa-file-circle-check page-card__icon"></i>
+          <div class="page-card__title">Justify absence</div>
+          <div class="page-card__sub">Single-column form</div>
+        </a>
+        <a href="declare-absence.html" class="page-card">
+          <i class="fa-solid fa-calendar-plus page-card__icon"></i>
+          <div class="page-card__title">Declare absence</div>
+          <div class="page-card__sub">Who · When · Why — sectioned</div>
+        </a>
+        <a href="settings.html" class="page-card">
+          <i class="fa-solid fa-gear page-card__icon"></i>
+          <div class="page-card__title">Settings</div>
+          <div class="page-card__sub">Single page, no tabs</div>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- What we changed -->
+  <section class="card">
+    <div class="card__h">
+      <div class="card__title">What changed in this iteration</div>
+      <div class="card__sub">Stripping back from the Clerk-style layout to a calmer parent experience.</div>
+    </div>
+    <div class="card__b">
+      <div class="stack--lg" style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--s-5);">
+        <div>
+          <h3 class="font-bold mb-2" style="font-size: var(--fs-base);">Removed (too admin-heavy)</h3>
+          <ul style="color: var(--c-ink-muted); padding-left: var(--s-4); list-style: disc; font-size: var(--fs-sm);">
+            <li>Dark navy sidebar with sectioned navigation, children quick-switch, account chip</li>
+            <li>Breadcrumbs and current-period indicator in the top bar</li>
+            <li>Multi-card dashboards with KPI strips, right rails, and dense lists</li>
+            <li>Period-by-period grid display on every child card</li>
+            <li>Settings page sub-navigation with anchored sections</li>
+            <li>Table-style records view on the child detail page</li>
+            <li>Many filter chips and search affordances per page</li>
+          </ul>
+        </div>
+        <div>
+          <h3 class="font-bold mb-2" style="font-size: var(--fs-base);">Added (parent-friendly)</h3>
+          <ul style="color: var(--c-ink-muted); padding-left: var(--s-4); list-style: disc; font-size: var(--fs-sm);">
+            <li>Lightweight horizontal top nav (Home · My children · Alerts) — 3 destinations, that's it</li>
+            <li>One headline status per child today, in plain language ("Present at school", "Arrived 22 min late")</li>
+            <li>Large, calm child cards with status + 3 simple term numbers + one CTA</li>
+            <li>Big touch targets (48px inputs, 42px buttons) and softer corners (10–18px radii)</li>
+            <li>Single-column forms, no enterprise right rails</li>
+            <li>Simple lists instead of tables — easier to scan</li>
+            <li>Action banner for "needs your attention" — always one obvious next step</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Color -->
+  <section class="card">
+    <div class="card__h"><div class="card__title">Color</div></div>
+    <div class="card__b">
+      <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: var(--s-3);">
+        <div class="swatch"><div class="swatch__chip" style="background:#1B5DAF; color:#fff;">Brand</div><div class="swatch__meta">#1B5DAF</div></div>
+        <div class="swatch"><div class="swatch__chip" style="background:#0E2E55; color:#fff;">Brand ink</div><div class="swatch__meta">#0E2E55</div></div>
+        <div class="swatch"><div class="swatch__chip" style="background:#E8F0FA; color:#0F2546;">Brand tint</div><div class="swatch__meta">#E8F0FA</div></div>
+        <div class="swatch"><div class="swatch__chip" style="background:#1F7A3F; color:#fff;">Success</div><div class="swatch__meta">#1F7A3F</div></div>
+        <div class="swatch"><div class="swatch__chip" style="background:#9A4708; color:#fff;">Warning</div><div class="swatch__meta">#9A4708</div></div>
+        <div class="swatch"><div class="swatch__chip" style="background:#B42318; color:#fff;">Danger</div><div class="swatch__meta">#B42318</div></div>
+        <div class="swatch"><div class="swatch__chip" style="background:#0E5C8A; color:#fff;">Info</div><div class="swatch__meta">#0E5C8A</div></div>
+        <div class="swatch"><div class="swatch__chip" style="background:#F6F8FB; color:#0F2546; border-bottom: 1px solid var(--c-border);">Bg</div><div class="swatch__meta">#F6F8FB</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Components -->
+  <section class="card">
+    <div class="card__h"><div class="card__title">Components</div></div>
+    <div class="card__b" style="display: flex; flex-direction: column; gap: var(--s-5);">
+
+      <div>
+        <div class="font-bold mb-2" style="font-size: var(--fs-base);">Buttons</div>
+        <div class="row gap-2" style="padding: var(--s-3); background: var(--c-surface-2); border-radius: var(--r-md);">
+          <button class="btn btn--primary">Primary</button>
+          <button class="btn btn--secondary">Secondary</button>
+          <button class="btn btn--ghost">Ghost</button>
+          <button class="btn btn--success">Success</button>
+        </div>
+      </div>
+
+      <div>
+        <div class="font-bold mb-2" style="font-size: var(--fs-base);">Status pills</div>
+        <div class="row gap-2" style="padding: var(--s-3); background: var(--c-surface-2); border-radius: var(--r-md);">
+          <span class="status status--present"><i class="fa-solid fa-circle"></i> Present</span>
+          <span class="status status--absent"><i class="fa-solid fa-circle"></i> Absent</span>
+          <span class="status status--late"><i class="fa-solid fa-clock"></i> Late</span>
+          <span class="status status--excused"><i class="fa-solid fa-check"></i> Excused</span>
+          <span class="status status--scheduled">Pre-justified</span>
+          <span class="status status--info">Informational</span>
+        </div>
+      </div>
+
+      <div>
+        <div class="font-bold mb-2" style="font-size: var(--fs-base);">Banners</div>
+        <div class="stack--sm">
+          <div class="banner banner--warning">
+            <div class="banner__icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
+            <div class="banner__body">
+              <div class="banner__title">1 absence needs your attention</div>
+              <div class="banner__sub">Reply within 14 hours to keep the record clean.</div>
+            </div>
+            <div class="banner__action"><button class="btn btn--primary">Justify now</button></div>
+          </div>
+          <div class="banner banner--success">
+            <div class="banner__icon"><i class="fa-solid fa-check"></i></div>
+            <div class="banner__body">
+              <div class="banner__title">All set!</div>
+              <div class="banner__sub">Your reply was sent to the school.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="font-bold mb-2" style="font-size: var(--fs-base);">Child card (the hero pattern)</div>
+        <div class="children-grid" style="max-width: 420px;">
+          <a href="child-detail.html?child=aaliyah" class="child-card">
+            <div class="child-card__head">
+              <div class="avatar avatar--blue avatar--xl">AC</div>
+              <div>
+                <div class="child-card__name">Aaliyah</div>
+                <div class="child-card__sub">Grade 7A · Ms. Tremblay</div>
+              </div>
+            </div>
+            <div class="child-card__status child-card__status--present">
+              <div class="child-card__status-icon"><i class="fa-solid fa-circle-check"></i></div>
+              <div class="child-card__status-text">
+                <div class="child-card__status-title">Present at school</div>
+                <div class="child-card__status-sub">In French class right now</div>
+              </div>
+            </div>
+            <div class="child-card__stats">
+              <div class="child-card__stat"><div class="child-card__stat-n text-success">96%</div><div class="child-card__stat-l">Attendance</div></div>
+              <div class="child-card__stat"><div class="child-card__stat-n">2</div><div class="child-card__stat-l">Absences</div></div>
+              <div class="child-card__stat"><div class="child-card__stat-n">1</div><div class="child-card__stat-l">Late</div></div>
+            </div>
+            <div class="child-card__cta">
+              <span>View attendance</span>
+              <i class="fa-solid fa-arrow-right"></i>
+            </div>
+          </a>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+</main>
+
+<style>
+  .page-card {
+    display: flex; flex-direction: column; gap: 4px;
+    padding: var(--s-4); background: var(--c-surface);
+    border: 1px solid var(--c-border); border-radius: var(--r-md);
+    text-decoration: none; color: inherit;
+  }
+  .page-card:hover { border-color: var(--c-brand); text-decoration: none; color: inherit; transform: translateY(-1px); }
+  .page-card__icon { font-size: var(--fs-xl); color: var(--c-brand); margin-bottom: var(--s-2); }
+  .page-card__title { font-weight: 700; }
+  .page-card__sub { color: var(--c-ink-muted); font-size: var(--fs-sm); }
+
+  .swatch { border: 1px solid var(--c-border); border-radius: var(--r-md); overflow: hidden; }
+  .swatch__chip { height: 70px; display: flex; align-items: flex-end; padding: var(--s-2) var(--s-3); font-weight: 700; font-size: var(--fs-sm); }
+  .swatch__meta { font-family: var(--ff-mono); font-size: 11px; color: var(--c-ink-muted); padding: 6px var(--s-3); background: var(--c-surface-2); }
+</style>
+
+<script src="assets/app.js"></script>
+<script>__ct_mountProtoSwitcher('parent');</script>
+</body>
+</html>

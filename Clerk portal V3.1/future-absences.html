@@ -1,0 +1,1646 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ClassTrack — <span data-en="Future Absences" data-fr="Absences futures">Future Absences</span> (V4)</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+  :root {
+    --c-bg:#F4F6FA; --c-surface:#FFFFFF; --c-surface-2:#F8FAFC; --c-surface-alt:#EEF2F7;
+    --c-sidebar:#0F2546; --c-sidebar-2:#0A1B36; --c-sidebar-hover:rgba(255,255,255,0.08);
+    --c-sidebar-active:#1B5DAF;
+    --c-border:#D6DBE2; --c-border-2:#E5E8EE; --c-border-strong:#A6ADBB;
+    --c-ink:#0F2546; --c-ink-muted:#475467; --c-ink-subtle:#5C6470;
+    --c-brand:#1B5DAF; --c-brand-ink:#0E2E55; --c-brand-tint:#E8F0FA;
+    --c-success:#1F7A3F; --c-success-tint:#E6F4EC;
+    --c-warning:#9A4708; --c-warning-tint:#FCF1DD; --c-warning-bord:#B97F38;
+    --c-danger:#B42318;  --c-danger-tint:#FCE9E7;
+    --c-info:#0E5C8A;    --c-info-tint:#E0EFF7;
+    --c-neutral-tint:#EEF1F5; --c-focus:#FFB400;
+    --s-1:4px; --s-2:8px; --s-3:12px; --s-4:16px; --s-5:24px; --s-6:32px;
+    --r-sm:4px; --r-md:6px; --r-lg:10px; --r-xl:14px; --r-pill:999px;
+    --ff:"Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, Roboto, "Helvetica Neue", Arial, sans-serif;
+    --fs-xs:12px; --fs-sm:13px; --fs-md:14px; --fs-lg:16px; --fs-xl:20px; --fs-2xl:24px;
+    --shadow-md: 0 4px 12px rgba(15,37,70,0.08);
+    --shadow-lg: 0 8px 28px rgba(15,37,70,0.12);
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  body { font-family: var(--ff); background: var(--c-bg); color: var(--c-ink); font-size: var(--fs-md); line-height: 1.55; -webkit-font-smoothing: antialiased; }
+  a { color: var(--c-brand); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  button { font-family: inherit; cursor: pointer; }
+  :focus-visible { outline: 3px solid var(--c-focus); outline-offset: 0; box-shadow: 0 0 0 6px var(--c-sidebar); border-radius: 2px; }
+  .sidebar :focus-visible { box-shadow: none; outline-offset: 2px; }
+  .skip-link { position:absolute; top:-40px; left:var(--s-3); background:var(--c-focus); color:#5C3F00; padding:var(--s-2) var(--s-3); border-radius:var(--r-md); font-weight:600; z-index:200; }
+  .skip-link:focus { top: var(--s-2); }
+  .sr-only { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
+
+  .wf-banner { background:#FFF6DD; border-bottom:1px solid #F0DA9A; color:#5C3F00; font-size:var(--fs-xs); padding:6px var(--s-4); display:flex; align-items:center; justify-content:space-between; gap:var(--s-4); }
+  .wf-banner__left { display:flex; align-items:center; gap:var(--s-2); }
+  .wf-banner__right { display:flex; align-items:center; gap:var(--s-3); }
+  .wf-banner a { color:#5C3F00; }
+
+  .app { display:grid; grid-template-columns:240px 1fr; min-height:calc(100vh - 32px); }
+
+  /* Sidebar */
+  .sidebar { background: linear-gradient(180deg, var(--c-sidebar) 0%, var(--c-sidebar-2) 100%); color: rgba(255,255,255,0.85); display:flex; flex-direction:column; position:sticky; top:0; height:100vh; overflow-y:auto; }
+  .sidebar__logo { padding:var(--s-5) var(--s-4) var(--s-4); border-bottom:1px solid rgba(255,255,255,0.08); display:flex; align-items:center; gap:var(--s-3); }
+  .sidebar__logo-mark { width:36px; height:36px; background: var(--c-sidebar-active); border-radius:var(--r-lg); display:flex; align-items:center; justify-content:center; color:#fff; font-weight:800; font-size:var(--fs-lg); }
+  .sidebar__logo-text { color:#fff; font-size:16px; font-weight:700; letter-spacing:-0.01em; }
+  .sidebar__logo-sub { color: rgba(255,255,255,0.6); font-size:11px; margin-top:2px; }
+  .sidebar__section { padding:var(--s-4) var(--s-3) var(--s-1); }
+  .sidebar__section-label { text-transform:uppercase; font-size:10px; font-weight:700; letter-spacing:0.12em; color: rgba(255,255,255,0.55); padding:0 var(--s-3); margin-bottom:var(--s-1); }
+  .nav-item { display:flex; align-items:center; gap:var(--s-3); padding:10px var(--s-3); border-radius:var(--r-md); color:rgba(255,255,255,0.78); font-size:var(--fs-sm); font-weight:500; min-height:36px; text-decoration:none; }
+  .nav-item:hover { background:var(--c-sidebar-hover); color:#fff; text-decoration:none; }
+  .nav-item.is-active { background:var(--c-sidebar-active); color:#fff; font-weight:600; }
+  .nav-item .nav-icon { width:20px; text-align:center; font-size:14px; color:inherit; }
+  .nav-item .nav-badge { margin-left:auto; background:var(--c-danger); color:#fff; font-size:11px; font-weight:700; padding:2px 8px; border-radius:var(--r-pill); min-width:22px; text-align:center; }
+  .nav-item .nav-badge--neutral { background: rgba(255,255,255,0.18); color:#fff; }
+  .sidebar__user { margin-top:auto; padding:var(--s-3) var(--s-4); border-top:1px solid rgba(255,255,255,0.08); display:flex; align-items:center; gap:var(--s-3); }
+  .avatar { width:36px; height:36px; border-radius:var(--r-pill); background:var(--c-brand-tint); color:var(--c-brand-ink); display:flex; align-items:center; justify-content:center; font-weight:700; font-size:var(--fs-sm); flex-shrink:0; }
+  .sidebar__user-name { color:#fff; font-size:var(--fs-sm); font-weight:600; }
+  .sidebar__user-role { color: rgba(255,255,255,0.6); font-size:11px; }
+
+  /* Main + topbar */
+  .main { display:flex; flex-direction:column; min-width:0; }
+  .topbar { background:var(--c-surface); border-bottom:1px solid var(--c-border); display:flex; align-items:center; gap:var(--s-4); padding:var(--s-3) var(--s-5); position:sticky; top:0; z-index:50; min-height:64px; }
+  .topbar__crumbs { display:flex; align-items:center; gap:var(--s-2); color:var(--c-ink-subtle); font-size:var(--fs-xs); }
+  .topbar__crumbs strong { color:var(--c-ink); font-weight:600; }
+  .topbar__period { margin-left:auto; background:var(--c-brand-tint); color:var(--c-brand-ink); border:1px solid #6E94BF; padding:6px var(--s-3); border-radius:var(--r-md); font-size:var(--fs-xs); font-weight:600; display:inline-flex; align-items:center; gap:var(--s-2); }
+  .topbar__period .dot { width:8px; height:8px; background:var(--c-success); border-radius:50%; }
+  .topbar__actions { display:flex; align-items:center; gap:var(--s-2); }
+  .icon-btn { width:36px; height:36px; border-radius:var(--r-md); background:transparent; border:1px solid transparent; color:var(--c-ink-muted); display:inline-flex; align-items:center; justify-content:center; position:relative; font-size:var(--fs-md); }
+  .icon-btn:hover { background:var(--c-surface-alt); color:var(--c-ink); }
+  .icon-btn__count { position:absolute; top:2px; right:2px; background:var(--c-danger); color:#fff; font-size:10px; font-weight:700; min-width:18px; height:18px; border-radius:var(--r-pill); display:flex; align-items:center; justify-content:center; padding:0 4px; border:2px solid var(--c-surface); }
+  .lang-toggle { display:inline-flex; border:1px solid var(--c-border-strong); border-radius:var(--r-md); overflow:hidden; }
+  .lang-toggle button { background:var(--c-surface); border:0; padding:6px var(--s-3); font-size:var(--fs-xs); font-weight:700; letter-spacing:0.04em; color:var(--c-ink-muted); min-height:32px; min-width:36px; }
+  .lang-toggle button[aria-pressed="true"] { background:var(--c-brand); color:#fff; }
+  .user-chip { display:inline-flex; align-items:center; gap:var(--s-2); padding:4px 10px 4px 4px; border:1px solid var(--c-border); border-radius:var(--r-pill); background:var(--c-surface); font-size:var(--fs-xs); color:var(--c-ink-muted); min-height:36px; }
+  .user-chip .avatar { width:28px; height:28px; font-size:12px; }
+
+  .content { padding:var(--s-5); flex:1; display:flex; flex-direction:column; gap:var(--s-4); }
+  .page-header { display:flex; align-items:flex-end; justify-content:space-between; gap:var(--s-4); flex-wrap:wrap; }
+  .page-header h1 { font-size:var(--fs-2xl); font-weight:700; letter-spacing:-0.01em; }
+  .page-header__sub { color:var(--c-ink-muted); font-size:var(--fs-md); margin-top:4px; max-width:62ch; }
+  .page-header__actions { display:flex; gap: var(--s-2); flex-wrap: wrap; }
+
+  .btn { display:inline-flex; align-items:center; justify-content:center; gap:6px; padding:8px 14px; border-radius:var(--r-md); font-size:var(--fs-sm); font-weight:600; border:1px solid transparent; min-height:36px; transition:background 0.12s, border-color 0.12s; text-decoration:none; }
+  .btn--primary { background:var(--c-brand); color:#fff; border-color:var(--c-brand); }
+  .btn--primary:hover { background:var(--c-brand-ink); border-color:var(--c-brand-ink); }
+  .btn--secondary { background:var(--c-surface); color:var(--c-ink); border-color:var(--c-border-strong); }
+  .btn--secondary:hover { background:var(--c-surface-alt); }
+  .btn--ghost { background:transparent; color:var(--c-brand); border-color:transparent; }
+  .btn--ghost:hover { background:var(--c-brand-tint); }
+  .btn--danger { background:var(--c-surface); color:var(--c-danger); border-color:#E1ABA4; }
+  .btn--danger:hover { background:var(--c-danger-tint); }
+  .btn--sm { padding:4px 10px; min-height:28px; font-size:var(--fs-xs); }
+
+  .summary { background: var(--c-surface); border:1px solid var(--c-border); border-radius: var(--r-lg); padding: var(--s-3) var(--s-4); display:flex; gap: var(--s-5); flex-wrap:wrap; align-items:center; font-size: var(--fs-sm); }
+  .summary__stat { display:flex; align-items:baseline; gap:6px; }
+  .summary__stat .v { font-weight:700; color: var(--c-ink); font-variant-numeric:tabular-nums; font-size: var(--fs-lg); }
+  .summary__stat .l { color: var(--c-ink-muted); font-size: var(--fs-xs); }
+  .summary__stat--info .v   { color: var(--c-info); }
+  .summary__stat--brand .v  { color: var(--c-brand-ink); }
+  .summary__stat--warn .v   { color: var(--c-warning); }
+
+  /* Filter chips */
+  .filter-bar { background: var(--c-surface); border: 1px solid var(--c-border); border-radius: var(--r-lg); padding: var(--s-3) var(--s-4); display: flex; align-items: center; gap: var(--s-3); flex-wrap: wrap; }
+  .chip-btn { background:var(--c-surface); border:1px solid var(--c-border); color:var(--c-ink-muted); padding:6px 12px; border-radius:var(--r-pill); font-size:var(--fs-xs); font-weight:600; min-height:28px; display:inline-flex; align-items:center; gap:6px; font-family:inherit; }
+  .chip-btn[aria-pressed="true"] { background:var(--c-brand-ink); color:#fff; border-color:var(--c-brand-ink); }
+  .chip-btn .chip-num { background: rgba(0,0,0,0.08); color:inherit; padding:1px 7px; border-radius:var(--r-pill); font-size:11px; }
+  .chip-btn[aria-pressed="true"] .chip-num { background: rgba(255,255,255,0.2); }
+  .filter-bar__sep { width: 1px; height: 24px; background: var(--c-border-2); }
+  .filter-bar__group-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--c-ink-subtle); }
+
+  /* Master-detail */
+  .panel-area { display: grid; grid-template-columns: 1fr; gap: 0; align-items: stretch; flex: 1 1 auto; min-height: 0; }
+  .panel-area.has-drawer { grid-template-columns: 1fr minmax(360px, 480px); gap: var(--s-4); }
+  .panel-list { display: flex; flex-direction: column; gap: 0; min-width: 0; }
+
+  .table-card { background: var(--c-surface); border:1px solid var(--c-border); border-radius: var(--r-lg); overflow: hidden; display:flex; flex-direction: column; }
+  .table-card__h { padding: var(--s-3) var(--s-4); border-bottom: 1px solid var(--c-border-2); display:flex; align-items:center; justify-content: space-between; font-size: var(--fs-xs); color: var(--c-ink-muted); font-weight: 600; }
+  .table-wrap { overflow:auto; min-height: 280px; }
+  table.list { width: 100%; border-collapse: collapse; font-size: var(--fs-sm); }
+  table.list thead th { position: sticky; top: 0; z-index: 1; background: var(--c-surface-2); border-bottom: 1px solid var(--c-border); text-align: left; padding: 10px var(--s-3); font-size: 11px; font-weight: 700; color: var(--c-ink-muted); text-transform: uppercase; letter-spacing: 0.06em; }
+  table.list tbody tr { border-bottom: 1px solid var(--c-border-2); }
+  table.list tbody tr:hover { background: var(--c-surface-2); cursor: pointer; }
+  table.list tbody tr.is-selected { background: var(--c-brand-tint); box-shadow: inset 4px 0 0 var(--c-brand); }
+  table.list tbody td { padding: var(--s-3); vertical-align: middle; }
+  table.list .col-student { min-width: 200px; }
+  table.list .col-dates   { min-width: 180px; }
+  table.list .col-periods { min-width: 120px; }
+  table.list .col-reason  { min-width: 180px; }
+  table.list .col-declared{ min-width: 160px; }
+  table.list .col-count   { min-width: 110px; white-space: nowrap; }
+  table.list .col-actions { width: 110px; text-align: right; white-space: nowrap; }
+
+  .student-cell { display: grid; grid-template-columns: 32px 1fr; gap: var(--s-3); align-items: center; min-width: 0; }
+  .student-cell .avatar { width: 32px; height: 32px; font-size: 12px; }
+  .student-cell__name { font-weight: 600; color: var(--c-ink); }
+  .student-cell__meta { font-size: 11px; color: var(--c-ink-subtle); }
+
+  .dates-cell { font-size: var(--fs-sm); color: var(--c-ink); }
+  .dates-cell__main { font-weight: 600; }
+  .dates-cell__sub  { font-size: 11px; color: var(--c-ink-subtle); margin-top: 2px; }
+  .dates-cell__multi { background: var(--c-brand-tint); color: var(--c-brand-ink); padding: 1px 7px; border-radius: var(--r-pill); font-size: 10px; font-weight: 700; margin-left: 6px; }
+
+  /* Reason category chips */
+  .reason-tag { display: inline-flex; align-items: center; gap: 6px; padding: 2px 10px; border-radius: var(--r-pill); font-size: 11px; font-weight: 700; }
+  .reason-tag--medical    { background: var(--c-info-tint); color: var(--c-info); border: 1px solid #5B96BC; }
+  .reason-tag--family     { background: var(--c-warning-tint); color: var(--c-warning); border: 1px solid var(--c-warning-bord); }
+  .reason-tag--religious  { background: var(--c-brand-tint); color: var(--c-brand-ink); border: 1px solid #6E94BF; }
+  .reason-tag--school     { background: #EEEAFE; color: #3F22A6; border: 1px solid #7E68DC; }
+  .reason-tag--transport  { background: var(--c-neutral-tint); color: var(--c-ink-muted); border: 1px solid var(--c-border-strong); }
+
+  .countdown {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 4px 10px; border-radius: var(--r-pill);
+    background: var(--c-surface-2);
+    border: 1px solid var(--c-border-2);
+    font-size: 11px; font-weight: 700;
+    color: var(--c-ink-muted);
+    white-space: nowrap;
+  }
+  .countdown--today    { background: var(--c-warning-tint); color: var(--c-warning); border-color: var(--c-warning-bord); }
+  .countdown--tomorrow { background: var(--c-info-tint); color: var(--c-info); border-color: #5B96BC; }
+  .countdown--soon     { background: var(--c-info-tint); color: var(--c-info); border-color: #5B96BC; }
+  .countdown--later    { background: var(--c-neutral-tint); color: var(--c-ink-muted); }
+
+  /* Drawer */
+  .drawer { background: var(--c-surface); border: 1px solid var(--c-border); border-radius: var(--r-lg); box-shadow: var(--shadow-md); display: flex; flex-direction: column; overflow: hidden; min-height: 0; }
+  .drawer[hidden] { display: none; }
+  .drawer.is-on { display: flex; }
+  .drawer__h { padding: var(--s-3) var(--s-4); border-bottom: 1px solid var(--c-border-2); display: flex; align-items: center; justify-content: space-between; gap: var(--s-3); background: var(--c-surface-2); }
+  .drawer__h h2 { font-size: var(--fs-lg); font-weight: 700; }
+  .drawer__b { padding: var(--s-4); flex: 1 1 auto; overflow-y: auto; }
+  .drawer__hero { display:flex; gap: var(--s-3); align-items: center; margin-bottom: var(--s-3); }
+  .drawer__avatar { width:48px; height:48px; border-radius:var(--r-pill); background: var(--c-brand-tint); color: var(--c-brand-ink); display:flex; align-items:center; justify-content:center; font-weight:700; font-size:18px; flex-shrink:0; }
+  .drawer__name { font-size: var(--fs-lg); font-weight: 700; color: var(--c-ink); }
+  .drawer__meta { font-size: var(--fs-xs); color: var(--c-ink-muted); }
+  .drawer__id   { font-size: 11px; color: var(--c-ink-subtle); margin-top: 2px; font-variant-numeric: tabular-nums; }
+
+  .drawer-section { margin-top: var(--s-4); }
+  .drawer-section h3 { font-size: 11px; font-weight: 700; color: var(--c-ink-muted); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: var(--s-2); display:flex; align-items:center; gap:6px; }
+
+  /* Collapsible section — native <details>/<summary> */
+  details.drawer-section > summary {
+    list-style: none; cursor: pointer;
+    display: flex; align-items: center; gap: 6px;
+    margin-bottom: var(--s-2); user-select: none;
+  }
+  details.drawer-section > summary::-webkit-details-marker { display: none; }
+  details.drawer-section > summary::marker { content: ''; }
+  details.drawer-section > summary h3 { margin-bottom: 0; display: inline-flex; align-items: center; gap: 6px; flex: 1 1 auto; }
+  .collapsible-chevron { color: var(--c-ink-subtle); font-size: 11px; transition: transform 0.15s ease; }
+  details[open] > summary .collapsible-chevron { transform: rotate(180deg); }
+  details.drawer-section > summary:focus-visible { outline: 3px solid var(--c-focus); outline-offset: 2px; border-radius: var(--r-sm); }
+
+  /* Case context */
+  .context-list { display: grid; grid-template-columns: max-content 1fr; gap: var(--s-2) var(--s-4); padding: var(--s-3) var(--s-4); background: var(--c-surface-2); border: 1px solid var(--c-border-2); border-radius: var(--r-md); font-size: var(--fs-sm); margin: 0; }
+  .context-list dt { color: var(--c-ink-subtle); font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; font-weight: 700; align-self: center; }
+  .context-list dd { color: var(--c-ink); font-weight: 500; display: flex; align-items: center; gap: var(--s-2); flex-wrap: wrap; }
+
+  /* Declaration bubble */
+  .declaration {
+    display: grid; grid-template-columns: auto 1fr; gap: var(--s-2);
+    align-items: flex-start;
+  }
+  .declaration__avatar {
+    width: 28px; height: 28px; border-radius: var(--r-pill);
+    flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 11px;
+    background: var(--c-brand-tint); color: var(--c-brand-ink);
+  }
+  .declaration__bubble { border-radius: var(--r-md); padding: var(--s-3); background: var(--c-brand-tint); border: 1px solid #6E94BF; color: var(--c-ink); font-size: var(--fs-sm); }
+  .declaration__h { display: flex; align-items: baseline; gap: var(--s-2); flex-wrap: wrap; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; color: var(--c-brand-ink); margin-bottom: 4px; }
+  .declaration__when { font-weight: 500; color: var(--c-ink-subtle); text-transform: none; letter-spacing: 0; }
+  .declaration__quote { font-style: italic; color: var(--c-ink); }
+  .declaration__source {
+    display: inline-flex; align-items: center; gap: 4px;
+    font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em;
+    padding: 2px 8px; border-radius: var(--r-pill);
+    background: rgba(255,255,255,0.5); color: var(--c-brand-ink);
+  }
+
+  /* Affected periods preview — small day-strip per affected date */
+  .day-strips { display: flex; flex-direction: column; gap: var(--s-3); }
+  .day-strip-row { display: flex; flex-direction: column; gap: 6px; }
+  .day-strip-row__label { font-size: 11px; font-weight: 700; color: var(--c-ink-muted); text-transform: uppercase; letter-spacing: 0.04em; }
+  .day-strip { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+  .day-strip__cell {
+    background: var(--c-surface-2);
+    border: 1px solid var(--c-border-2);
+    border-radius: var(--r-md);
+    padding: var(--s-2);
+    text-align: center;
+  }
+  .day-strip__cell--affected { background: var(--c-brand-tint); border-color: #6E94BF; }
+  .day-strip__lbl { font-size: 10px; color: var(--c-ink-subtle); text-transform: uppercase; letter-spacing: 0.06em; font-weight: 700; }
+  .day-strip__time { font-size: 10px; color: var(--c-ink-subtle); margin-bottom: 4px; }
+  .day-strip__chip {
+    display: inline-flex; align-items: center; gap: 3px;
+    padding: 2px 6px; border-radius: var(--r-pill);
+    font-size: 10px; font-weight: 700;
+    background: var(--c-brand); color: #fff;
+  }
+  .day-strip__chip--present { background: var(--c-success-tint); color: var(--c-success); border: 1px solid #4F9A6C; }
+
+  /* Audit trail */
+  .audit { list-style:none; }
+  .audit li { position:relative; padding: 0 0 var(--s-3) 24px; font-size: var(--fs-sm); }
+  .audit li::before { content:""; position:absolute; left:7px; top:6px; bottom:-4px; width:2px; background:var(--c-border); }
+  .audit li:last-child::before { display:none; }
+  .audit li::after { content:""; position:absolute; left:3px; top:4px; width:10px; height:10px; border-radius:50%; background: var(--c-brand); border:2px solid var(--c-surface); box-shadow: 0 0 0 1px var(--c-brand); }
+  .audit__when { color: var(--c-ink-subtle); font-size: 11px; }
+  .audit__who  { font-weight: 600; color: var(--c-ink); }
+
+  /* Status chip (used for hero, for "today/upcoming" etc.) */
+  .status { display:inline-flex; align-items:center; gap:4px; padding:2px 8px; border-radius:var(--r-pill); font-size:11px; font-weight:700; letter-spacing:0.02em; border:1px solid transparent; }
+  .status--future { background: var(--c-brand-tint); color: var(--c-brand-ink); border-color: #6E94BF; }
+  .status--active-today { background: var(--c-warning-tint); color: var(--c-warning); border-color: var(--c-warning-bord); }
+  .status--period    { background: var(--c-neutral-tint); color: var(--c-ink); border-color: var(--c-border-strong); }
+
+  .drawer__actions { padding: var(--s-3) var(--s-4); border-top: 1px solid var(--c-border-2); background: var(--c-surface-2); display: flex; gap: var(--s-2); flex-wrap: wrap; align-items: center; }
+
+  /* Pending-acknowledgment highlight */
+  .needs-ack-badge {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 2px 8px; border-radius: var(--r-pill);
+    background: var(--c-warning-tint); color: var(--c-warning);
+    border: 1px solid var(--c-warning-bord);
+    font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em;
+  }
+  tr.needs-ack { background: #FFFCF5; }
+  tr.needs-ack:hover { background: var(--c-warning-tint) !important; }
+  tr.needs-ack.is-selected { background: var(--c-brand-tint) !important; box-shadow: inset 4px 0 0 var(--c-brand); }
+
+  /* ── More (…) overflow menu ───────────────────────────────── */
+  .more-menu { position:relative; display:inline-block; }
+  .more-menu__dropdown {
+    display:none; position:absolute; bottom:calc(100% + 6px); right:0; z-index:60;
+    background:var(--c-surface); border:1px solid var(--c-border); border-radius:var(--r-md);
+    box-shadow:var(--shadow-lg); min-width:196px; overflow:hidden;
+  }
+  .more-menu__dropdown.is-open { display:block; }
+  .more-menu__label {
+    font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:0.06em;
+    color:var(--c-ink-subtle); padding:8px 12px 4px; display:block;
+  }
+  .more-menu__item {
+    display:flex; align-items:center; gap:var(--s-2);
+    padding:8px 12px; font-size:var(--fs-sm); color:var(--c-ink);
+    background:none; border:none; width:100%; text-align:left;
+    font-family:inherit; cursor:pointer; line-height:1.3;
+  }
+  .more-menu__item:hover { background:var(--c-surface-alt); }
+  .more-menu__item i { width:14px; text-align:center; color:var(--c-ink-subtle); font-size:12px; }
+
+
+  /* Modal — native <dialog> for focused single-task input */
+  dialog.modal {
+    width: 560px; max-width: 92vw;
+    border: 1px solid var(--c-border);
+    border-radius: var(--r-xl);
+    padding: 0;
+    background: var(--c-surface);
+    box-shadow: 0 24px 64px rgba(15,37,70,0.25);
+    color: var(--c-ink);
+    margin: auto;
+    font-family: inherit;
+  }
+  dialog.modal::backdrop {
+    background: rgba(15,37,70,0.45);
+    backdrop-filter: blur(2px);
+  }
+  .modal__h {
+    padding: var(--s-4) var(--s-5);
+    border-bottom: 1px solid var(--c-border-2);
+    display: flex; align-items: center; justify-content: space-between;
+    gap: var(--s-3);
+    background: var(--c-surface-2);
+    border-radius: var(--r-xl) var(--r-xl) 0 0;
+  }
+  .modal__h h2 { font-size: var(--fs-lg); font-weight: 700; color: var(--c-ink); display: flex; align-items: center; gap: var(--s-2); }
+  .modal__b { padding: var(--s-4) var(--s-5); max-height: 70vh; overflow-y: auto; }
+  .modal__f {
+    padding: var(--s-3) var(--s-5);
+    border-top: 1px solid var(--c-border-2);
+    background: var(--c-surface-2);
+    display: flex; align-items: center; justify-content: space-between;
+    gap: var(--s-3); flex-wrap: wrap;
+    border-radius: 0 0 var(--r-xl) var(--r-xl);
+  }
+  .modal__f-actions { display: flex; gap: var(--s-2); flex-wrap: wrap; }
+
+  /* Form */
+  .form-field { margin-bottom: var(--s-4); }
+  .form-field__label {
+    display: block;
+    font-size: var(--fs-xs); font-weight: 700; color: var(--c-ink);
+    margin-bottom: var(--s-2);
+  }
+  .form-field__label .req { color: var(--c-danger); font-weight: 700; margin-left: 2px; }
+  .form-field__hint {
+    display: block;
+    font-size: 11px; color: var(--c-ink-subtle);
+    margin-top: 4px;
+  }
+  .form-field input[type="text"],
+  .form-field input[type="search"],
+  .form-field input[type="date"],
+  .form-field select,
+  .form-field textarea {
+    width: 100%;
+    padding: 8px var(--s-3);
+    border: 1px solid var(--c-border-strong);
+    border-radius: var(--r-md);
+    background: var(--c-surface);
+    font-family: inherit; font-size: var(--fs-sm);
+    color: var(--c-ink);
+    min-height: 36px;
+  }
+  .form-field input:focus, .form-field select:focus, .form-field textarea:focus { outline: none; }
+  .form-field textarea { min-height: 72px; resize: vertical; }
+  .form-field__row { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s-3); }
+
+  /* Radio / checkbox group */
+  .radio-group { display: flex; flex-direction: column; gap: var(--s-2); }
+  .radio-group--inline { flex-direction: row; flex-wrap: wrap; }
+  .radio-card {
+    display: flex; align-items: flex-start; gap: var(--s-2);
+    padding: var(--s-2) var(--s-3);
+    border: 1px solid var(--c-border);
+    border-radius: var(--r-md);
+    background: var(--c-surface);
+    cursor: pointer;
+    transition: border-color 0.12s, background 0.12s;
+  }
+  .radio-card:hover { border-color: var(--c-border-strong); }
+  .radio-card input { margin-top: 2px; flex-shrink: 0; }
+  .radio-card__main { flex: 1 1 auto; min-width: 0; }
+  .radio-card__label { font-size: var(--fs-sm); font-weight: 600; color: var(--c-ink); display: block; }
+  .radio-card__hint { font-size: 11px; color: var(--c-ink-subtle); display: block; margin-top: 2px; }
+  .radio-card:has(input:checked) { border-color: var(--c-brand); background: var(--c-brand-tint); }
+
+  .check-group { display: flex; flex-wrap: wrap; gap: var(--s-2); }
+  .check-pill {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 6px 12px;
+    border: 1px solid var(--c-border);
+    border-radius: var(--r-pill);
+    background: var(--c-surface);
+    font-size: var(--fs-xs); font-weight: 600; color: var(--c-ink-muted);
+    cursor: pointer;
+  }
+  .check-pill:has(input:checked) { background: var(--c-brand-ink); color: #fff; border-color: var(--c-brand-ink); }
+  .check-pill input { display: none; }
+
+  /* Toggle card — card-style checkbox with readable selected state (light tint, not dark fill) */
+  .toggle-card {
+    display: flex; align-items: flex-start; gap: var(--s-2);
+    padding: var(--s-3);
+    border: 1px solid var(--c-border);
+    border-radius: var(--r-md);
+    background: var(--c-surface);
+    cursor: pointer;
+    transition: border-color 0.12s, background 0.12s;
+  }
+  .toggle-card:hover { border-color: var(--c-border-strong); }
+  .toggle-card:has(input:checked) {
+    border-color: var(--c-brand);
+    background: var(--c-brand-tint);
+  }
+  .toggle-card input { margin-top: 3px; flex-shrink: 0; }
+  .toggle-card__main { flex: 1 1 auto; min-width: 0; color: var(--c-ink); font-weight: 500; }
+  .toggle-card__hint { display: block; font-size: 11px; color: var(--c-ink-subtle); margin-top: 4px; font-weight: 500; }
+
+
+  /* Category dropdown with §2.1 indicator */
+  .cat-indicator {
+    margin-top: var(--s-2);
+    display: flex; align-items: center; gap: 6px;
+    font-size: 11px; padding: 4px 10px; border-radius: var(--r-md);
+    background: var(--c-warning-tint); color: var(--c-warning);
+    border: 1px solid var(--c-warning-bord);
+    width: fit-content;
+  }
+  .cat-indicator--excluded { background: var(--c-success-tint); color: var(--c-success); border-color: #4F9A6C; }
+
+  /* File picker (visual stub) */
+  .file-input {
+    display: flex; align-items: center; gap: var(--s-2);
+    padding: var(--s-3);
+    border: 2px dashed var(--c-border-strong);
+    border-radius: var(--r-md);
+    background: var(--c-surface-2);
+    font-size: var(--fs-sm); color: var(--c-ink-muted);
+    cursor: pointer;
+  }
+  .file-input:hover { border-color: var(--c-brand); color: var(--c-brand); background: var(--c-brand-tint); }
+
+  @media (max-width: 880px) {
+    .app { grid-template-columns: 1fr; }
+    .sidebar { position:relative; height:auto; flex-direction:row; overflow-x:auto; overflow-y:hidden; }
+    .sidebar__section { padding:var(--s-2); display:flex; flex-direction:row; gap:4px; }
+    .sidebar__section-label, .sidebar__user, .sidebar__logo-text, .sidebar__logo-sub { display:none; }
+    .nav-item { white-space:nowrap; }
+    .topbar { flex-wrap:wrap; }
+    .panel-area.has-drawer { grid-template-columns: 1fr; }
+  }
+  @media print { .sidebar, .topbar, .wf-banner, .drawer { display:none; } .content { padding:0; } }
+</style>
+<script>/* CT-CLERK-I18N */
+(function(){
+  var FR={"Attendance Clerk": "Responsable des présences", "Today": "Aujourd'hui", "Justifications": "Justifications", "Workflows": "Flux de travail", "Directory": "Annuaire", "Reports": "Rapports", "Dashboard": "Tableau de bord", "Today's records": "Registres du jour", "Pending replies": "En attente de la réponse des parents", "Disputes": "Contestation", "Future absences": "Absences futures", "Group events": "Évenements de groupe", "Students": "Étudiants", "Classes": "Cours", "Teachers": "Enseignants", "Groups": "Groupes", "Daily attendance": "Présence quotidienne", "Audit log": "Journal d'audit", "Period": "Période", "Notifications unread": "Notifications non lues", "Help": "Aide", "Skip to main content": "Passer au contenu principal", "Sort": "Trier", "Refresh": "Rafraîchir", "Print": "Imprimer", "Export": "Exporter", "Load more": "Charger plus", "Today's status": "Statut d'aujourd'hui", "Awaiting check-in": "En attente d'enregistrement", "Pending your approval": "En attente de votre approbation", "Awaiting parent reply": "En attente de la réponse des parents", "Unjustified > 24h": "Injustifié > 24h", "Did not reach class": "N'a pas atteint le cours", "Remind all": "Rappeler tous", "Re-send": "Renvoyer", "Send": "Envoyer", "Open record": "Dossier public", "Follow up": "Suivi", "Approve P1": "Approuver P1", "View all records": "Afficher tous les enregistrements", "Not yet reminded": "Pas encore rappelé", "Reminded [time]": "Rappel [heure]", "2 classes missing P2": "2 cours manquants P2", "Soccer tournament — away": "Tournoi de football — à l'extérieur", "Regional band competition": "Concours régional de fanfares", "Science museum field trip": "sortie scolaire au musée des sciences", "Today's Records · Secondary": "Résultats du jour · Secondaire", "Late and absent records opened today": "Les dossiers en retard et absents ont été ouverts aujourd'hui", "P1 · 8:30–9:45 · submitted": "P1 · 8:30–9:45 · soumis", "P2 · 10:35–11:50 · active now": "P2 · 10:35–11:50 · actif actuellement", "P3 · 1:05–2:20 · upcoming": "P3 · 1:05–2:20 · à venir", "P4 · 2:25–3:40 · upcoming": "P4 · 2:25–3:40 · à venir", "All periods today": "Toutes les périodes aujourd'hui", "Search by name or ID…": "Recherche par nom ou identifiant…", "Late & absent": "En retard et absent", "Late only": "En retard seulement", "Absent only": "Absent seulement", "All teachers": "Tous les enseignants", "New": "Nouveau", "In progress": "En cours", "Resolved today": "Résolu aujourd'hui", "All": "Tous", "Student": "Étudiant", "Period(s)": "Période(s)", "Attendance": "Présence", "Record status": "État de l'enregistrement", "Absent": "Absent", "Signed in": "Connecté", "Late": "En retard", "Pending approval": "En attente d'approbation", "Justified · closed": "Justifié · fermé", "Unjustified · closed": "Injustifié · fermé", "Notification sent · [time] · no action taken": "Notification envoyée · [heure] · aucune action prise", "Signed in at office · [time] · timer running": "Connecté au bureau · [heure] · Minuteur en cours", "Teacher marked Late directly · [time]": "L'enseignant a signalé le retard directement · [heure]", "Unable to locate · status reverted to Absent": "Impossible de localiser · Statut rétabli à Absent", "Parent replied · [time] · Family / personal": "Réponse d'un parent · [heure] · Famille / personnel", "Parent reply approved · [time] · Medical appointment": "Réponse du parent approuvée · [heure] · Rendez-vous médical", "Justified by clerk · [time] · Medical appointment": "Justifié par le responsable · [heure] · Rendez-vous médical", "Clerk override · [time] · No valid justification": "Intervention du responsable · [heure] · Aucune justification valable", "No records in this view.": "Aucun enregistrement dans cette vue.", "Showing 10 of 108 records · scroll to load more": "Affichage de 10 résultats sur 108 · Faites défiler pour en charger davantage", "X selected": "X sélectionné", "Approve": "Approuver", "Override": "Outrepasser", "Notify parents": "Avertir les parents", "Clear": "Tout désélectionner", "Student record": "Dossier étudiant", "Pending replies": "Réponses des parents en attente", "Click a row to review the conversation and approve, dispute, or follow up.": "Cliquez sur une ligne pour consulter la conversation et l'approuver, la contester, ou faire un suivi.", "awaiting your approval": "en attente de votre approbation", "awaiting parent reply": "En attente de la réponse des parents", "past 24h · §7 escalation": "24 heures passées · §7 escalade", "approved today": "approuvé aujourd'hui", "Awaiting your approval": "En attente de votre approbation", "Student status": "Statut d'étudiant", "Parent reply": "Réponse des parents", "Replied": "Répondu", "Action": "Action", "Notification sent": "Notification envoyée", "Elapsed": "Temps écoulé", "Pending clerk approval": "En attente de l'approbation du responsable", "Awaiting parent · Past 24h": "En attente d'un parent · Plus de 24 heures", "Remind": "Rappeler", "Call parent": "Appeler les parents", "Showing 4 of 8 · 4 more records similar to above": "Affichage de 4 sur 8 · 4 autres résultats similaires à ceux ci-dessus", "Reply detail": "Détails de la réponse", "Record type": "Type d'enregistrement", "Date": "Date", "Class": "Cours", "Reported by": "Signalé par", "System notification": "Notification système", "No reply received": "Aucune réponse reçue", "Approve P1 absence": "Approuver l'absence de P1", "Approve full-day absence": "Approuver une absence d'une journée complète", "Approve absence": "Approuver l'absence", "Reply for clarification": "Réponse pour clarification", "Mark dispute": "Signaler une contestation", "Re-send reminder": "Renvoyer le rappel", "Justify on behalf": "Justifier au nom du parent", "Send reminder now": "Envoyer un rappel maintenant", "Records contested by parents or other parties. Each dispute pauses further automated action on the record until you decide whether to uphold the original or change it.": "Les dossiers peuvent être contestés par les parents ou d'autres parties. Chaque contestation suspend le traitement automatisé du dossier jusqu'à ce que vous décidiez de maintenir ou de modifier la version originale.", "open disputes": "contestations ouvertes", "awaiting evidence": "en attente de preuves", "in your review queue": "dans votre file d'attente de révision", "resolved this week": "résolu cette semaine", "Resolved (this week)": "Résolu (cette semaine)", "Disputed record": "Dossier contesté", "Dispute status": "État de la contestations", "Raised by": "Soumis par", "Submitted": "Soumis le", "Open": "Ouvrir", "Dispute detail": "Détails de la contestation", "Final state": "État final", "Audit trail": "Piste d'audit", "Your review note (private, clerks only)": "Votre note d'évaluation (privée, réservée aux employés)", "Change to Absent · justified": "Passage à Absent · justifié", "Uphold original (Unjustified)": "Maintenir l'original (injustifié)", "Request more evidence": "Demander des preuves supplémentaires", "Future Absences": "Absences futures", "All upcoming absences in one place — parent-declared via the portal (§5.3), clerk-entered on behalf, and multi-student school events from the Group events screen (§5.4). All pre-justified · informational only on the day · cancel if circumstances change.": "Toutes les absences futures regroupées au même endroit — déclarées par les parents via le portail (§5.3), saisies par le secrétariat au nom du parent, et événements scolaires multi-élèves créés depuis l'écran des événements de groupe (§5.4). Toutes pré-justifiées · à titre informatif le jour J · modifiables en cas de changement de situation.", "Calendar view": "Vue du calendrier", "Add future absence": "Ajouter une absence future", "today (informational)": "aujourd'hui (informationnel)", "this week": "cette semaine", "next 14 days": "les 14 prochains jours", "declared this month": "déclaré ce mois-ci", "All upcoming": "À venir", "This week": "Cette semaine", "Multi-day": "Plusieurs jours", "Medical": "Médical", "Family": "Famille", "Religious": "Religieux", "School event": "événement scolaire", "1 needs acknowledgment": "1 nécessite une validation", "Needs acknowledgment": "Necessite une validation", "Family / personal": "Famille / personnel", "Religious observance": "observance religieuse", "Medical (surgery)": "Médical (chirurgie)", "In 2 days": "Dans 2 jours", "Tomorrow": "Demain", "Acknowledge": "Reconnaître", "View": "Voir", "Showing 6 of 12 · 6 more declarations through end of month": "Affichage de 6 sur 12 · 6 déclarations supplémentaires d'ici la fin du mois", "Future absence detail": "Détails des absences futures", "Adding an absence for a school sports trip, field trip, or club outing? Use the Group events screen instead…": "Vous ajoutez une absence pour une sortie sportive, une sortie scolaire ou une activité parascolaire ? Utilisez plutôt l'écran des événements de groupe…", "Source of declaration": "Auteur de la déclaration", "Parent or guardian": "Parent ou tuteur", "Called in, emailed, or delivered a paper note · they don't use the parent portal": "Ils ont appelé, envoyé un courriel ou remis un mot sur papier ; ils n'utilisent pas le portail parents.", "Authorized adult on file": "Adulte autorisé au dossier", "Foster parent, group home staff, social worker · for students in care": "Famille d'accueil, personnel de centre d'hébergement, intervenant social · pour les élèves pris en charge", "Search by name or student ID (e.g., 100482)": "Recherche par nom ou numéro d'étudiant (par exemple, 100482)", "Start typing to find a student. The clerk's school scope filters results.": "Commencez à saisir du texte pour trouver un élève. Le filtre de recherche du responsable s'applique aux résultats.", "Date(s)": "Date(s)", "Single day": "Une seule journée", "Date range": "Période couverte", "From": "Depuis", "To": "À", "Periods affected": "Périodes affectées", "All periods": "Toutes les périodes", "Specific periods": "Périodes spécifiques", "For partial-day absences, select only the affected periods.": "Pour les absences partielles, sélectionnez uniquement les périodes concernées.", "Reason category": "Type de motif", "Medical appointment": "Rendez-vous médical", "Illness": "Maladie", "Bereavement": "Deuil", "School-sanctioned event": "Événement autorisé par l'école", "Transportation / weather": "Transports / météo", "Other": "Autre", "Counts toward §2.1 grade impact": "Compte pour §2.1 Impact sur les notes", "Notes / parent's stated reason": "Remarques / motif invoqué par les parents", "Supporting evidence (optional)": "Preuves à l'appui (facultatif)", "PDF, PNG, JPG, HEIC · max 10MB. Visible to clerks and parent.": "PDF, PNG, JPG, HEIC · 10 Mo maximum. Visible par les employés et les parents.", "I confirm the parent or guardian is aware of this entry.": "Je confirme que le parent ou le tuteur a pris connaissance de cette saisie.", "This action is logged to the audit trail.": "Cette action est consignée dans le journal d'audit.", "All fields logged to audit per §16": "Tous les champs enregistrés à des fins d'audit conformément à l'article 16", "Cancel": "Annuler", "Create future absence": "Créer une absence future", "Group Events": "Événements de groupe", "School-sanctioned absences for groups of students — sports trips, field trips, club outings, performances (§5.4). Pre-justified · excluded from §2.1 grade impact · informational notification to parents.": "Absences autorisées par l'école pour des groupes d'élèves — voyages sportifs, sorties éducatives, activités parascolaires, spectacles (§5.4). Préjustifiées · exclues de l'impact sur les notes (§2.1) · notification d'information aux parents.", "New group event": "Nouvel événement de groupe", "upcoming events": "événements à venir", "students affected (total)": "élèves concernés (total)", "events this month": "événements ce mois-ci", "Past 30 days": "30 derniers jours", "Sports": "Sportif", "Academic": "Académique", "Arts": "Arts", "Event": "Événement", "Lead": "Responsable", "Periods": "Règles", "Status": "Statut", "Upcoming": "Prochain", "Showing 4 of 4 upcoming · 6 past events archived": "Affichage de 4 événements à venir sur 4 · 6 événements passés archivés", "View past events": "Consultez les événements passés", "Group event detail": "Détails de l'événement de groupe", "Add students": "Ajouter des élèves", "Edit details": "Modifier les détails", "Re-notify parents": "Renvoyer l'avis aux parents", "Cancel event": "Annulation de l'événement", "This creates a school-sanctioned absence for multiple students at once. All selected students will be pre-justified for the selected periods on the selected date(s).": "Cela crée une absence autorisée par l'établissement pour plusieurs élèves simultanément. Tous les élèves concernés seront préalablement justifiés pour les périodes et dates sélectionnées.", "Event name": "Nom de l'événement", "Event type": "Type d'événement", "Sports — game / tournament": "Sports — jeu / tournoi", "Academic — field trip / competition": "Académique — sortie scolaire / compétition", "Arts — performance / showcase": "Arts — spectacle / présentation", "Club — outing / activity": "Club — sortie / activité", "Lead staff member": "Membre du personnel responsable", "Dates": "Dates", "Weekend / no instructional periods": "Week-end / périodes sans cours", "For weekend trips, choose 'Weekend' — no per-period attendance records will be created.": "Pour les excursions de fin de semaine, choisissez « Week-end » — aucun relevé de présence par période ne sera créé.", "Description": "Description", "Use existing group (optional)": "Utiliser un groupe existant (facultatif)", "Search by name or student ID to add students individually, or select a group above.": "Recherchez par nom ou par numéro d'étudiant pour ajouter des étudiants individuellement, ou sélectionnez un groupe ci-dessus.", "Send informational notification to parents of selected students": "Envoyer une notification d'information aux parents des élèves sélectionnés", "Parents receive a note that their child will be absent for a school activity — they don't need to take any action.": "Les parents reçoivent un mot les informant que leur enfant sera absent pour une activité scolaire ; ils n’ont aucune démarche à effectuer.", "Category school-sanctioned-event · excluded from §2.1 grade impact": "Événement scolaire autorisé (catégorie : exclu du champ d’application de l’article 2.1 concernant l’impact sur les notes)", "All fields + selected student list logged to audit per §16": "Tous les champs + la liste des étudiants sélectionnés ont été enregistrés pour vérification conformément à l'article 16.", "Create group event": "Créer un événement de groupe", "Read-only roster sourced from Aspen. Filter by grade or class, search by name or student ID, and open a profile to review Aspen data and YTD attendance.": "Liste en lecture seule synchronisée avec Aspen. Filtrez par niveau ou classe, recherchez par nom ou ID d'élève, et accédez au profil pour voir les détails Aspen et le cumul des présences de l'année.", "Read-only · sourced from Aspen": "Lecture seule · provenant d'Aspen", "Student demographics, parent/guardian contacts, and enrolment are maintained in Aspen and synced nightly. To correct a record, edit in Aspen — the change appears here within 24 hours.": "Les données démographiques des élèves, les coordonnées des parents/tuteurs et les inscriptions sont conservées dans Aspen et synchronisées chaque nuit. Pour corriger une fiche, modifiez-la dans Aspen ; la modification apparaîtra ici sous 24 heures.", "total students": "nombre total d'étudiants", "present today": "présent aujourd'hui", "late or absent": "en retard ou absent", "with active issues": "Incidents en cours", "Search name or student ID…": "Rechercher un nom ou un numéro d'étudiant…", "All grades": "Tous les niveaux", "Grade 7": "7e année", "Grade 8": "8e année", "Grade 9": "9e année", "Grade 10": "10e année", "Grade 11": "11e année", "Grade 12": "12e année", "All classes": "Tous les cours", "Any status": "Tous les statuts", "Present": "Présent", "Late or absent": "En retard ou absent", "Active issues": "Incidents en cours", "Future absence today": "Absence future aujourd'hui", "Grade": "Niveau", "Homeroom": "Salle de classe", "YTD attendance": "présence cumulée depuis le début de l'année", "Student profile": "Profil étudiant", "Aspen-sourced.": "Données issues d'Aspen", "Active records": "Enregistrements actifs", "Student info": "Renseignements sur l'élève", "Parents": "Parents", "Full name": "Nom et prénom", "Student ID": "Carte d'étudiant", "Date of birth": "Date de naissance", "Enrolment": "Inscription", "Preferred language": "Langue préférée", "Address": "Adresse", "Subject": "Sujet", "Stage": "Phase", "Month": "Mois", "All subjects": "Tous les sujets", "Math": "Mathématiques", "Science": "Science", "English": "Anglais", "History": "Histoire", "French": "Français", "PE": "EPS (Éducation physique)", "All stages": "Toutes les phases", "Justified": "Justifié", "Unjustified": "Injustifié", "Awaiting reply": "En attente de réponse", "All months": "Tous les mois", "No records match this filter.": "Aucun enregistrement ne correspond à ce filtre.", "Math approaching grade threshold · 5 abs / 4 late this term": "Niveau de mathématiques proche du seuil de passage · 5 absents / 4 en retard ce trimestre", "View details ↗": "Afficher les détails ↗", "Grade-impact summary · [student] · Term 2": "Résumé de l'impact sur la note · [élève] · Trimestre 2", "Approaching threshold": "Approche du seuil", "Within threshold": "Dans les limites", "X absences · X late this term (threshold: X abs)": "X absences · X retards ce trimestre (seuil : X abs)", "§2.1 — Justified medical absences are excluded from grade-impact counts.": "§2.1 — Les absences médicales justifiées sont exclues du calcul de l’impact sur la note.", "School schedule organized by class. See homeroom assignment, today's attendance-submission status per period, enrolment count, and YTD attendance rate.": "Emploi du temps scolaire organisé par classe. Consultez l'affectation des classes, le statut des devoirs rendus pour chaque période, le nombre d'élèves inscrits et le taux de présence cumulé depuis le début de l'année.", "Class assignments, schedules, and enrolment come from Aspen. Today's submission status and YTD rates are computed from ClassTrack attendance records.": "Les affectations de cours, les horaires et les inscriptions proviennent d'Aspen. L'état des soumissions d'aujourd'hui et les taux cumulés depuis le début de l'année sont calculés à partir des données de présence de __.", "Homeroom teacher": "professeur principal", "Today · P2": "Aujourd'hui · P2", "Awaiting": "En attente", "Overdue · reminded": "En retard · rappel", "Partial · 1 unmarked": "Partiel · 1 non marqué", "Overdue": "En retard", "Class info": "Informations sur le cours", "Class roster": "Liste des élèves", "Linked groups & events": "Groupes et événements liés", "Class code": "Code du cours", "Room": "Local", "Schedule": "Horaire", "Term": "Trimestre", "Send submission reminder": "Rappeler de soumettre les présences", "Open in roster": "Afficher dans le registre", "School staff directory. See assigned classes per period, today's attendance submission status, and the 30-day on-time submission rate. Aspen-sourced — read-only.": "Annuaire du personnel scolaire. Consultez les cours assignées par période, l'état des présences du jour et le taux de soumission à temps sur 30 jours. Données Aspen — lecture seule.", "Staff records, class assignments, and schedules are maintained in Aspen. Submission status and on-time rate are computed from ClassTrack activity.": "Les dossiers du personnel, les affectations de cours et les emplois du temps sont gérés dans Aspen. Le statut des soumissions et le taux de respect des délais sont calculés à partir de l'activité de ClassTrack.", "teachers": "enseignants", "on-time P2 today": "P2 à l'heure aujourd'hui", "reminded today": "rappelé aujourd'hui", "overdue · need action": "En retard · Nécessite une intervention", "Search teacher name…": "Rechercher le nom de l'enseignant…", "Supply": "Fournir", "Overdue P2": "P2 en retard", "Reminded": "Rappelé", "Teacher": "Professeur", "Role": "Rôle", "Today's classes": "Cours d'aujourd'hui", "On-time rate · 30d": "Taux de ponctualité · 30j", "Partial": "Partiel", "Due in 15 min": "À venir dans 15 minutes", "22 of 23 marked": "22 sur 23 marqués", "No reminder sent": "Aucun rappel envoyé", "[time] AM · early": "[heure] AM · tôt", "Teacher details": "Détails de l'enseignant", "Teacher info": "Informations sur l'enseignant", "Weekly schedule": "Programme hebdomadaire", "Staff ID": "Identifiant du personnel", "Email": "E-mail", "Extension": "Extension", "Hired": "Embauché", "Period 1": "Période 1", "Period 2": "Période 2", "Period 3": "Période 3", "Period 4": "Période 4", "Mon": "Lun", "Tue": "Mar", "Wed": "Mer", "Thu": "Jeu", "Fri": "Ven", "Prep": "Préparation", "X% on-time": "X % à l'heure", "X of 30 periods · X reminder needed": "X sur 30 périodes · X rappel nécessaire", "View homeroom": "Voir la salle de classe", "Email teacher": "Envoyer un courriel à l'enseignant", "Persistent collections of students — reused by Group events, future messaging (Phase 4), and reports. Three sources: Aspen-synced (homerooms, classes), CSV uploads (staff rosters), and manually maintained (ad-hoc groups).": "Ensembles permanents d'élèves — réutilisés pour les événements de groupe, les futures messageries (phase 4) et les rapports. Alimentés par trois sources : synchronisation Aspen (titularisations, classes), téléversements CSV (effectifs du personnel) et gestion manuelle (groupes ponctuels).", "Sync from Aspen": "Synchronisation depuis Aspen", "Upload CSV": "Importer un fichier CSV", "New group": "Nouveau groupe", "active groups": "groupes actifs", "from Aspen (auto-synced)": "depuis Aspen (synchronisation automatique)", "from CSV uploads": "à partir d'importations CSV", "manually maintained": "entretien manuel", "Aspen": "Aspen", "CSV": "CSV", "Manual": "Manuel", "Sport": "Sport", "Cohort": "Cohorte", "Club": "Club", "Custom": "Personnalisé", "Group": "Groupe", "Type": "Type", "Source": "Source", "Members": "Membres", "Last updated": "Dernière mise à jour", "Details": "Détails", "Used by": "Utilisé par", "Events": "Événements", "Aspen-synced group · read-only.": "Groupe synchronisé avec Aspen · lecture seule.", "Membership is controlled by Aspen. To add or remove students, update enrolment in Aspen — changes sync nightly.": "Les adhésions sont gérées par Aspen. Pour ajouter ou supprimer des étudiants, mettez à jour les inscriptions dans Aspen ; les modifications sont synchronisées chaque nuit.", "CSV-imported snapshot.": "Aperçu importé par CSV", "Membership reflects the last import. Re-import a new CSV to update.": "La liste des membres reflète la dernière importation. Importez un nouveau fichier CSV pour la mettre à jour.", "Manually maintained.": "Maintenu manuellement", "Add or remove students directly in ClassTrack.": "Ajoutez ou supprimez des élèves directement dans __", "Created": "Créé", "Read-only (Aspen)": "Lecture seule (Aspen)", "Edit via CSV re-import": "Modifier via réimportation CSV", "Showing 6 of 24 · scroll for more": "Affichage de 6 sur 24 · Défilez pour en voir plus", "Use in new group event": "À utiliser lors d'un nouvel événement de groupe", "Archive group": "Groupe d'archives", "Re-import CSV": "Réimporter le fichier CSV", "Add students manually": "Ajouter les élèves manuellement", "Sync now (force refresh)": "Synchroniser maintenant (forcer l'actualisation)", "Open enrolment in Aspen": "Ouvrir les inscriptions dans Aspen", "View Aspen field mapping": "Afficher le mappage d'Aspen", "Open in Aspen": "Ouvert dans Aspen", "Daily Attendance": "Présence quotidienne", "Week-to-date rates by class, with a per-day breakdown. Switch to Print view for a one-page summary ready for the principal or board.": "Taux de présence cumulés de la semaine par cours, avec un détail journalier. Passez en mode impression pour obtenir un résumé d'une page, prêt à être remis à la direction ou au conseil.", "Drill-down": "Vue détaillée", "Print view": "Mode impression", "Export PDF": "Exporter au format PDF", "Export CSV": "Exporter au format CSV", "Custom range…": "Plage personnalisée", "P1": "P1", "P2": "P2", "P3": "P3", "P4": "P4", "Class 9B · week detail": "Classe 9B · Détails de la semaine", "Week rate": "Taux de la semaine", "Absences": "Absences", "Late marks": "Mentions de retard", "Awaiting parent": "En attente d'un parent", "Family commitment": "Engagement familial", "Transportation": "Transport", "Daily attendance · weekly summary": "Présence quotidienne · résumé hebdomadaire", "Week attendance": "Présence hebdomadaire", "Student-days present": "Journées étudiantes présentes", "By grade": "Par niveau", "By reason category": "Par catégorie de motif", "Classes needing attention": "Cours nécessitant une attention particulière", "Top absent students this week": "Les élèves les plus absents cette semaine", "Week %": "Semaine %", "Open issues": "Questions ouvertes", "Recommended action": "Action recommandée", "Days absent": "Jours d'absence", "Notes": "Notes", "Prepared by · Attendance Clerk": "Préparé par le responsable des présences", "Reviewed by · Principal": "Examiné par le directeur", "Signature · Date": "Signature · Date", "submitted": "soumis", "approved": "approuvé", "refreshed": "actualisé", "submitted on time": "soumis à temps", "submitted late": "soumis en retard", "submitted attendance": "présence soumise", "submitted Period 1 attendance": "présence de la Période 1 soumise", "refreshed class roster · no changes": "liste de classe actualisée · aucun changement", "refreshed class roster": "liste de classe actualisée", "no changes": "aucun changement", "justification · medical": "justification · médical", "justification · illness": "justification · maladie", "justification · family": "justification · famille", "justification · transportation": "justification · transport", "reminder sent": "rappel envoyé", "reminder needed": "rappel requis", "no action taken": "aucune action prise", "approved justification": "justification approuvée", "status reverted to Absent": "statut rétabli à Absent", "timer running": "minuterie en cours", "no teacher check-in": "aucun enregistrement enseignant", "attendance · 24 P · 1 L · 1 A": "présence · 24 P · 1 R · 1 A", "attendance · 26 P": "présence · 26 P", "attendance · 25 P · 1 A": "présence · 25 P · 1 A", " · no changes": " · aucun changement", "Aspen sync": "Synchronisation Aspen", "AM": "h", "PM": "h", "attendance": "présence", "roster": "liste de classe", "class roster": "liste de classe", "late · reminder sent at 10:50": "en retard · rappel envoyé à 10 h 50", "School average is 6.8 min before due.": "Moyenne de l'école : 6,8 min avant l'échéance.", "Case context": "Contexte du dossier", "Conversation": "Conversation", "counts toward §2.1": "compte pour §2.1", "excluded from §2.1": "exclu de §2.1", "counts toward": "compte pour", "excluded from": "exclu de", "attached": "joint", "Timeline": "Chronologie", "Contact": "Contact", "Guardian": "Tuteur", "Relationship": "Lien de parenté", "Phone": "Téléphone", "No notes.": "Aucune note.", "No notes yet.": "Aucune note pour l'instant.", "No parent reply yet.": "Aucune réponse du parent.", "No records.": "Aucun dossier.", "No data.": "Aucune donnée.", "No attachment": "Aucune pièce jointe", "No timeline events.": "Aucun événement.", "All day": "Toute la journée", "Full day": "Journée complète", "Morning": "Matin", "Afternoon": "Après-midi", "Approved": "Approuvé", "Rejected": "Rejeté", "Excused": "Motivé", "Reject": "Rejeter", "Send reminder": "Envoyer un rappel", "View full record": "Voir le dossier complet", "Open in students": "Ouvrir dans Étudiants", "Mark resolved": "Marquer résolu", "View record": "Voir le dossier", "View history": "Voir l'historique", "Flag": "Signaler", "Disputed": "Contesté", "Under review": "En cours d'examen", "Filed": "Déposé", "Clerk assigned": "Commis assigné", "Decision rendered": "Décision rendue", "Dispute filed by parent": "Contestation déposée par le parent", "Clerk note": "Note du commis", "Save note": "Enregistrer la note", "Save": "Enregistrer", "No grade impact": "Aucun impact sur la note", "Grade impact": "Impact sur la note", "Illness / Sick": "Maladie / Malade", "Supporting document": "Document justificatif", "Created by": "Créé par", "Secondary guardian": "Tuteur secondaire", "Primary guardian": "Tuteur principal", "No contact on file.": "Aucun contact au dossier.", "No description.": "Aucune description.", "No members.": "Aucun membre.", "No members yet.": "Aucun membre pour l'instant.", "No records for this student.": "Aucun dossier pour cet élève.", "No active records.": "Aucun dossier actif.", "Per-subject breakdown": "Résumé par matière", "Threshold exceeded": "Seuil dépassé", "approaching threshold": "proche du seuil", "No linked groups.": "Aucun groupe lié.", "No linked events.": "Aucun événement lié.", "Record closed": "Dossier fermé", "on-time": "à temps", "needed": "requis", "before due": "avant l'échéance", "Dispute details": "Détails de la contestation", "Parent's reason": "Motif du parent", "Clerk review": "Révision du commis", "Resolution": "Résolution", "Details & description": "Détails et description", "No description provided.": "Aucune description fournie.", "Submitted on time": "Soumis à temps", "Submitted late": "Soumis en retard", "Not yet submitted": "Pas encore soumis", "Group description": "Description du groupe", "Organized by": "Organisé par", "Absence declared": "Absence déclarée", "Pre-justified": "Pré-justifiée", "all present": "tous présents", "avg across term": "moy. du trimestre", "lowest in school": "le plus bas de l'école", "Yesterday": "Hier", "Last week": "La semaine dernière", "Edit": "Modifier", "Delete": "Supprimer", "Close": "Fermer", "Confirm": "Confirmer", "Done": "Terminé", "Review": "Réviser", "Resolved": "Résolu", "Name": "Nom", "Week": "Semaine", "Reason": "Motif", "Mon · May 4": "Lun · 4 mai", "Tue · May 5": "Mar · 5 mai", "Wed · May 6": "Mer · 6 mai", "Thu · May 7": "Jeu · 7 mai", "Thu · May 7 · today": "Jeu · 7 mai · aujourd'hui", "Today · 10:38 AM": "Aujourd'hui · 10 h 38", "Yesterday · 15:24 PM": "Hier · 15 h 24", "Yesterday · 12:46 PM": "Hier · 12 h 46", "Today · 8:32 AM": "Aujourd'hui · 8 h 32", "Today · 8:55 AM": "Aujourd'hui · 8 h 55", "Today · 11:02 AM": "Aujourd'hui · 11 h 02", "full day": "journée complète", "full-day": "journée complète", "absent": "absent", "justified": "justifié", "unjustified": "non motivé", "pending": "en attente", "overdue": "en retard", "late": "en retard", "signed in": "connecté", "present": "présent", "Record": "Dossier", "Justification": "Justification", "Contacts": "Contacts", "Record history": "Historique du dossier", "record": "dossier", "Jan": "janv.", "Feb": "fév.", "Apr": "avr.", "Jun": "juin", "Jul": "juil.", "Aug": "août", "Sep": "sep.", "Oct": "oct.", "Nov": "nov.", "Dec": "déc.", "notification sent": "notification envoyée", "Parent notified": "Parent notifié", "parent notified": "parent notifié", "Clerk reviewed": "Commis a révisé", "clerk reviewed": "commis a révisé", "Decision made": "Décision prise", "Dispute filed": "Contestation déposée", "dispute filed": "contestation déposée", "Dispute resolved": "Contestation résolue", "dispute resolved": "contestation résolue", "Attendance marked": "Présence marquée", "Record created": "Dossier créé", "Record updated": "Dossier mis à jour", "Parent replied": "Parent a répondu", "parent replied": "parent a répondu", "Reply approved": "Réponse approuvée", "reply approved": "réponse approuvée", "Reply rejected": "Réponse rejetée", "Justified by clerk": "Justifié par le commis", "Clerk override": "Annulation par le commis", "No reply": "Aucune réponse", "no reply": "aucune réponse", "today": "aujourd'hui", "yesterday": "hier", "tomorrow": "demain", "Absent · full day": "Absent · journée complète", "Absent · P1": "Absent · P1", "Absent · P2": "Absent · P2", "Absent · P3": "Absent · P3", "Absent · P4": "Absent · P4", "Late · P1": "En retard · P1", "Late · P2": "En retard · P2", "Late · P3": "En retard · P3", "Late · P4": "En retard · P4", "Absent · all periods": "Absent · toutes les périodes", "absent · full day": "absent · journée complète", "Wednesday": "Mercredi", "Monday": "Lundi", "Tuesday": "Mardi", "Thursday": "Jeudi", "Friday": "Vendredi", "Saturday": "Samedi", "Sunday": "Dimanche", "January": "Janvier", "February": "Février", "March": "Mars", "April": "Avril", "June": "Juin", "July": "Juillet", "August": "Août", "September": "Septembre", "October": "Octobre", "November": "Novembre", "December": "Décembre"};
+  var FR_KEYS=Object.keys(FR).sort(function(a,b){return b.length-a.length;});
+
+  function patFR(t){
+    // Full date: "Wednesday, May 6, 2026" → "Mercredi 6 mai 2026"
+    var FD={Monday:'Lundi',Tuesday:'Mardi',Wednesday:'Mercredi',Thursday:'Jeudi',Friday:'Vendredi',Saturday:'Samedi',Sunday:'Dimanche'};
+    var FM={January:'janvier',February:'février',March:'mars',April:'avril',May:'mai',June:'juin',July:'juillet',August:'août',September:'septembre',October:'octobre',November:'novembre',December:'décembre'};
+    t=t.replace(/\\b(Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday), (January|February|March|April|May|June|July|August|September|October|November|December) (\\d{1,2}), (\\d{4})\\b/g,
+      function(_,d,m,day,yr){return (FD[d]||d)+' '+day+' '+(FM[m]||m)+' '+yr;});
+    // Month Day · H:MM AM pattern: "May 8 · 11:14 AM" → "8 mai · 11 h 14"
+    var FM2={Jan:'jan',Feb:'fév',Mar:'mars',Apr:'avr',May:'mai',Jun:'juin',Jul:'juil',Aug:'août',Sep:'sep',Oct:'oct',Nov:'nov',Dec:'déc'};
+    t=t.replace(/\\b(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) (\\d{1,2}) · (\\d{1,2}):(\\d{2}) (AM|PM)/g,
+      function(_,m,d,h,min){return d+' '+(FM2[m]||m)+' · '+h+' h '+min;});
+    // "May 8 · 11:14" without AM/PM
+    t=t.replace(/\\b(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) (\\d{1,2}) · (\\d{1,2}):(\\d{2})\\b/g,
+      function(_,m,d,h,min){return d+' '+(FM2[m]||m)+' · '+h+' h '+min;});
+    // Time format: "10:38 AM" → "10 h 38"
+    t=t.replace(/(\d{1,2}):(\d{2})\s*AM/g,function(_,h,m){return h+' h '+m;});
+    t=t.replace(/(\d{1,2}):(\d{2})\s*PM/g,function(_,h,m){return h+' h '+m;});
+    // Numeric patterns
+    t=t.replace(/(\d+) abs · (\d+) late\b/g,function(_,a,b){return a+' abs · '+b+' retard';});
+    t=t.replace(/(\d+) disputes?/g,function(_,n){return n+(n==='1'?' contestation':' contestations');});
+    t=t.replace(/(\d+) repl(?:y|ies)/g,function(_,n){return n+(n==='1'?' réponse':' réponses');});
+    t=t.replace(/(\d+) awaiting parent/g,function(_,n){return n+' en attente du parent';});
+    t=t.replace(/(\d+) students above (\d+)%/g,function(_,n,p){return n+' élèves au-dessus de '+p+' %';});
+    t=t.replace(/(\d+) of (\d+) on time/g,function(_,a,b){return a+' sur '+b+' à temps';});
+    t=t.replace(/(\d+) of (\d+) periods? · (\d+) reminder/g,function(_,a,b,c){return a+' sur '+b+' périodes · '+c+' rappel';});
+    t=t.replace(/(\d+) late submissions?/g,function(_,n){return n+(n==='1'?' soumission tardive':' soumissions tardives');});
+    t=t.replace(/avg ([\d.]+) min before due/g,function(_,n){return 'moy. '+n+' min avant l\'échéance';});
+    t=t.replace(/\b(\d+) students\b/g,function(_,n){return n+' élèves';});
+    t=t.replace(/\+ (\d+) more/g,function(_,n){return '+ '+n+' de plus';});
+    t=t.replace(/\b(\d+) open\b/g,function(_,n){return n+(n==='1'?' ouvert':' ouverts');});
+    // Date patterns
+    var D={Mon:'Lun',Tue:'Mar',Wed:'Mer',Thu:'Jeu',Fri:'Ven',Sat:'Sam',Sun:'Dim'};
+    var M={Jan:'jan',Feb:'fév',Mar:'mars',Apr:'avr',May:'mai',Jun:'juin',Jul:'juil',Aug:'août',Sep:'sep',Oct:'oct',Nov:'nov',Dec:'déc'};
+    t=t.replace(/\b(Mon|Tue|Wed|Thu|Fri|Sat|Sun) · (Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) (\d{1,2})(?: · today)?\b/g,
+      function(m,d,mn,day,tod){return (D[d]||d)+' · '+day+' '+(M[mn]||mn)+(tod?' · aujourd\'hui':'');});
+    return t;
+  }
+
+  // Apply ALL possible replacements (not just first match)
+  function trStr(text){
+    var s=text.trim();
+    if(!s||s.length<2||!/[a-zA-Z]/.test(s)) return text;
+    // Exact match
+    if(FR[s]) return text.replace(s,FR[s]);
+    // Pattern match
+    var p=patFR(s);
+    if(p!==s) return text.replace(s,p);
+    // Multiple substring replacements (all keys, longest first)
+    var result=text;
+    var changed=false;
+    for(var i=0;i<FR_KEYS.length;i++){
+      var k=FR_KEYS[i];
+      if(k.length>=4&&result.indexOf(k)!==-1){
+        result=result.split(k).join(FR[k]);
+        changed=true;
+      }
+    }
+    if(changed) return result;
+    return text;
+  }
+
+  function trNodes(root){
+    if(!root||getLang()!=='fr') return;
+    var walker=document.createTreeWalker(root,NodeFilter.SHOW_TEXT,{
+      acceptNode:function(n){
+        var p=n.parentNode;
+        if(!p) return NodeFilter.FILTER_REJECT;
+        var tag=p.tagName&&p.tagName.toUpperCase();
+        if(tag==='SCRIPT'||tag==='STYLE'||tag==='NOSCRIPT') return NodeFilter.FILTER_REJECT;
+        // Skip if immediate parent already has data-en (applyLang handles those)
+        if(p.hasAttribute&&p.hasAttribute('data-en')) return NodeFilter.FILTER_REJECT;
+        return NodeFilter.FILTER_ACCEPT;
+      }
+    },false);
+    var nodes=[],n;
+    while((n=walker.nextNode())) nodes.push(n);
+    nodes.forEach(function(node){
+      var o=node.textContent,t=trStr(o);
+      if(t!==o) node.textContent=t;
+    });
+  }
+
+  function getLang(){return new URLSearchParams(window.location.search).get('lang')==='fr'?'fr':'en';}
+  function setLang(lang){
+    var url=new URL(window.location.href);
+    if(lang==='fr') url.searchParams.set('lang','fr'); else url.searchParams.delete('lang');
+    window.location.href=url.toString();
+  }
+  function setLangUrl(href,lang){
+    if(!href||href.startsWith('http')||href.startsWith('#')||href.startsWith('javascript:')) return href;
+    var base=href.split('?')[0].split('#')[0];
+    var hash=href.indexOf('#')>=0?href.substring(href.indexOf('#')):'';
+    if(!base.endsWith('.html')) return href;
+    return base+(lang==='fr'?'?lang=fr':'')+hash;
+  }
+  function applyLang(root){
+    root=root||document;
+    var lang=getLang();
+    document.documentElement.lang=lang;
+    document.documentElement.setAttribute('data-lang',lang);
+    root.querySelectorAll('[data-en]').forEach(function(el){
+      el.textContent=el.getAttribute('data-'+lang)||el.getAttribute('data-en');
+    });
+    root.querySelectorAll('[data-placeholder-en]').forEach(function(el){
+      el.setAttribute('placeholder',el.getAttribute('data-placeholder-'+lang)||el.getAttribute('data-placeholder-en'));
+    });
+    root.querySelectorAll('a[href]').forEach(function(a){
+      var orig=a.getAttribute('data-orig-href')||a.getAttribute('href');
+      a.setAttribute('data-orig-href',orig);
+      a.setAttribute('href',setLangUrl(orig,lang));
+    });
+    root.querySelectorAll('[data-lang-btn]').forEach(function(b){
+      b.setAttribute('aria-pressed',String(b.getAttribute('data-lang-btn')===lang));
+    });
+    if(lang==='fr'&&root!==document) trNodes(root);
+  }
+
+  function trDrawer(){
+    if(getLang()!=='fr') return;
+    // Target all possible drawer containers across all clerk screens
+    var selectors=[
+      '#drawer-body','#drawer-fixed','#drawer-hero','#drawer-tabs',
+      '#drawer-actions','#drawer-content','#drawerContent','#drawer'
+    ];
+    selectors.forEach(function(sel){
+      var el=document.querySelector(sel);
+      if(el){applyLang(el);trNodes(el);}
+    });
+    document.querySelectorAll(
+      '.drawer,.drawer__b,.drawer-section,.tab-panel,.dtab-panel,' +
+      '.rec-drawer-card,.conv,.conv__bubble,.audit,.tl,.timeline,' +
+      '.info-list,.context-list,.drawer-tabs,.drawer__h'
+    ).forEach(function(el){applyLang(el);trNodes(el);});
+  }
+
+  window.__ct_i18n={getLang:getLang,setLang:setLang,applyLang:applyLang,trDrawer:trDrawer};
+
+  document.addEventListener('DOMContentLoaded',function(){
+    applyLang();
+    // Hook into named drawer functions
+    ['renderRecord','openDrawer','selectStudent','openStudent','renderStudent',
+     'renderGroup','openGroup','showDetail'].forEach(function(fn){
+      if(typeof window[fn]==='function'){
+        var o=window[fn];
+        window[fn]=function(){
+          o.apply(this,arguments);
+          setTimeout(trDrawer,50);
+        };
+      }
+    });
+    // Hook into any row/card click that opens a drawer
+    document.addEventListener('click',function(e){
+      var trigger=e.target.closest(
+        'tr[data-key],tr[tabindex="0"],.rec-card,.rec-card2,.record-row,' +
+        '.roster-mini__item,.simple-list__item[onclick]'
+      );
+      if(trigger) setTimeout(trDrawer,100);
+    },true);
+    // Also poll for drawer content changes (fallback)
+    if(getLang()==='fr'){
+      setInterval(function(){
+        var d=document.querySelector('.drawer.is-on,.rec-drawer-card:not([style*="display: none"])');
+        if(d) trNodes(d);
+      },500);
+    }
+  });
+})();
+</script>
+</head>
+
+<body>
+<a href="#main" class="skip-link"><span data-en="Skip to main content" data-fr="Passer au contenu principal">Skip to main content</span></a>
+
+<div class="wf-banner" role="region" aria-label="Wireframe context">
+  <div class="wf-banner__left">
+    <i class="fa-solid fa-pencil-ruler" aria-hidden="true"></i>
+    <strong><span data-en="Wireframe — V4 Future Absences" data-fr="Maquette — V4 Absences futures">Wireframe — V4 Future Absences</span></strong>
+    <span>·  Master-detail · WCAG 2.2 AA</span>
+  </div>
+  <div class="wf-banner__right">
+    <a href="design-rationale.md"><span data-en="Rationale" data-fr="Justification">Rationale</span></a>
+    <a href="dashboard.html"><span data-en="Back to dashboard" data-fr="Retour au tableau de bord">Back to dashboard</span></a>
+  </div>
+</div>
+
+<div class="app">
+
+  <aside class="sidebar" aria-label="Primary navigation">
+    <div class="sidebar__logo">
+      <div class="sidebar__logo-mark" aria-hidden="true">CT</div>
+      <div>
+        <div class="sidebar__logo-text"><span data-en="Class" data-fr="Cours">Class</span>Track</div>
+        <div class="sidebar__logo-sub">EC Catholic · Sainte-Croix</div>
+      </div>
+    </div>
+    <nav class="sidebar__section" aria-label="Today">
+      <div class="sidebar__section-label"><span data-en="Today" data-fr="Aujourd'hui">Today</span></div>
+      <a href="dashboard.html" class="nav-item">
+        <span class="nav-icon" aria-hidden="true"><i class="fa-solid fa-gauge-high"></i></span>
+        <span data-en="Dashboard" data-fr="Tableau de bord">Dashboard</span>
+        <span class="nav-badge" aria-label="9 items needing attention">9</span>
+      </a>
+      <a href="Todays_records_v6.html" class="nav-item">
+        <span class="nav-icon" aria-hidden="true"><i class="fa-solid fa-table-list"></i></span>
+        <span data-en="Today's records" data-fr="Registres du jour">Today's records</span>
+      </a>
+    </nav>
+    <nav class="sidebar__section" aria-label="Justifications">
+      <div class="sidebar__section-label"><span data-en="Justifications" data-fr="Justifications">Justifications</span></div>
+      <a href="pending-parent-replies.html" class="nav-item">
+        <span class="nav-icon" aria-hidden="true"><i class="fa-solid fa-envelope-open-text"></i></span>
+        <span data-en="Pending replies" data-fr="En attente de la réponse des parents">Pending replies</span>
+        <span class="nav-badge nav-badge--neutral" aria-label="3 awaiting your approval">3</span>
+      </a>
+      <a href="disputes.html" class="nav-item">
+        <span class="nav-icon" aria-hidden="true"><i class="fa-solid fa-triangle-exclamation"></i></span>
+        <span data-en="Disputes" data-fr="Contestation">Disputes</span>
+        <span class="nav-badge" aria-label="3 open disputes">3</span>
+      </a>
+    </nav>
+    <nav class="sidebar__section" aria-label="Workflows">
+      <div class="sidebar__section-label"><span data-en="Workflows" data-fr="Flux de travail">Workflows</span></div>
+      <a href="future-absences.html" class="nav-item is-active" aria-current="page">
+        <span class="nav-icon" aria-hidden="true"><i class="fa-solid fa-calendar-days"></i></span>
+        <span data-en="Future absences" data-fr="Absences futures">Future absences</span>
+        <span class="nav-badge nav-badge--neutral" aria-label="12 upcoming">12</span>
+      </a>
+      <a href="group-events.html" class="nav-item">
+        <span class="nav-icon" aria-hidden="true"><i class="fa-solid fa-bus"></i></span>
+        <span data-en="Group events" data-fr="Évenements de groupe">Group events</span>
+      </a>
+    </nav>
+    <nav class="sidebar__section" aria-label="Directory">
+      <div class="sidebar__section-label"><span data-en="Directory" data-fr="Annuaire">Directory</span></div>
+      <a href="students.html" class="nav-item">
+        <span class="nav-icon" aria-hidden="true"><i class="fa-solid fa-user-graduate"></i></span>
+        <span data-en="Students" data-fr="Étudiants">Students</span>
+        <span class="nav-badge nav-badge--neutral" aria-label="412 students">412</span>
+      </a>
+      <a href="classes.html" class="nav-item">
+        <span class="nav-icon" aria-hidden="true"><i class="fa-solid fa-chalkboard"></i></span>
+        <span data-en="Classes" data-fr="Cours">Classes</span>
+        <span class="nav-badge nav-badge--neutral" aria-label="18 classes">18</span>
+      </a>
+      <a href="teachers.html" class="nav-item">
+        <span class="nav-icon" aria-hidden="true"><i class="fa-solid fa-chalkboard-user"></i></span>
+        <span data-en="Teachers" data-fr="Enseignants">Teachers</span>
+        <span class="nav-badge nav-badge--neutral" aria-label="32 teachers">32</span>
+      </a>
+      <a href="groups.html" class="nav-item">
+        <span class="nav-icon" aria-hidden="true"><i class="fa-solid fa-people-group"></i></span>
+        <span data-en="Groups" data-fr="Groupes">Groups</span>
+        <span class="nav-badge nav-badge--neutral" aria-label="24 active groups">24</span>
+      </a>
+    </nav>
+
+    <nav class="sidebar__section" aria-label="Reports">
+      <div class="sidebar__section-label"><span data-en="Reports" data-fr="Rapports">Reports</span></div>
+      <a href="daily-attendance.html" class="nav-item">
+        <span class="nav-icon" aria-hidden="true"><i class="fa-solid fa-chart-column"></i></span>
+        <span data-en="Daily attendance" data-fr="Présence quotidienne">Daily attendance</span>
+      </a>
+      <a href="#" class="nav-item">
+        <span class="nav-icon" aria-hidden="true"><i class="fa-solid fa-clock-rotate-left"></i></span>
+        <span data-en="Audit log" data-fr="Journal d'audit">Audit log</span>
+      </a>
+    </nav>
+    <div class="sidebar__user" aria-label="Signed in user">
+      <div class="avatar" aria-hidden="true">MT</div>
+      <div>
+        <div class="sidebar__user-name">Marguerite T.</div>
+        <div class="sidebar__user-role"><span data-en="Attendance Clerk" data-fr="Responsable des présences">Attendance Clerk</span></div>
+      </div>
+    </div>
+  </aside>
+
+  <div class="main">
+    <header class="topbar" role="banner">
+      <div class="topbar__crumbs">
+        <a href="dashboard.html"><span data-en="Today" data-fr="Aujourd'hui">Today</span></a><span aria-hidden="true">›</span>
+        <span><span data-en="Workflows" data-fr="Flux de travail">Workflows</span></span><span aria-hidden="true">›</span>
+        <strong><span data-en="Future absences" data-fr="Absences futures">Future absences</span></strong>
+      </div>
+      <div class="topbar__period" role="status" aria-live="polite">
+        <span class="dot" aria-hidden="true"></span>
+        <span data-en="Period 2" data-fr="Période 2">Period 2</span> · 10:35 – 11:50
+      </div>
+      <div class="topbar__actions">
+        <div class="lang-toggle" role="group" aria-label="Language">
+          <button type="button" aria-pressed="true" data-lang-btn="en" onclick="window.__ct_i18n.setLang('en')">EN</button>
+          <button type="button" aria-pressed="false" data-lang-btn="fr" onclick="window.__ct_i18n.setLang('fr')">FR</button>
+        </div>
+        <button class="icon-btn" type="button" aria-label="Notifications · 4 unread">
+          <i class="fa-solid fa-bell" aria-hidden="true"></i>
+          <span class="icon-btn__count" aria-hidden="true">4</span>
+        </button>
+        <button class="icon-btn" type="button" aria-label="Help">
+          <i class="fa-solid fa-circle-question" aria-hidden="true"></i>
+        </button>
+        <span class="user-chip" aria-label="Signed in as Marguerite Tremblay, Attendance Clerk">
+          <span class="avatar" aria-hidden="true">MT</span>
+          <span>Marguerite T.</span>
+        </span>
+      </div>
+    </header>
+
+    <main id="main" class="content" tabindex="-1">
+
+      <div class="page-header">
+        <div>
+          <h1><span data-en="Future absences" data-fr="Absences futures">Future absences</span></h1>
+          <div class="page-header__sub"><span data-en="All upcoming absences in one place — parent-declared via the portal (§5.3), clerk-entered on behalf, and multi-student school events from the Group events screen (§5.4). All pre-justified · informational only on the day · cancel if circumstances change." data-fr="Toutes les absences futures regroupées au même endroit — déclarées par les parents via le portail (§5.3), saisies par le secrétariat au nom du parent, et événements scolaires multi-élèves créés depuis l'écran des événements de groupe (§5.4). Toutes pré-justifiées · à titre informatif le jour J · modifiables en cas de changement de situation.">All upcoming absences in one place — parent-declared via the portal (§5.3), clerk-entered on behalf, and multi-student school events from the Group events screen (§5.4). All pre-justified · informational only on the day · cancel if circumstances change.</span></div>
+        </div>
+        <div class="page-header__actions">
+          <button class="btn btn--secondary" type="button"><i class="fa-solid fa-calendar" aria-hidden="true"></i> <span data-en="Calendar view" data-fr="Vue du calendrier">Calendar view</span></button>
+          <button class="btn btn--primary" type="button" id="open-add-absence"><i class="fa-solid fa-plus" aria-hidden="true"></i> <span data-en="Add future absence" data-fr="Ajouter une absence future">Add future absence</span></button>
+        </div>
+      </div>
+
+      <section class="summary" aria-label="Future absences summary">
+        <div class="summary__stat summary__stat--warn"><span class="v">1</span> <span class="l"><span data-en="today (informational)" data-fr="aujourd'hui (informationnel)">today (informational)</span></span></div>
+        <div class="summary__stat summary__stat--info"><span class="v">3</span> <span class="l"><span data-en="this week" data-fr="cette semaine">this week</span></span></div>
+        <div class="summary__stat summary__stat--brand"><span class="v">12</span> <span class="l"><span data-en="next 14 days" data-fr="les 14 prochains jours">next 14 days</span></span></div>
+        <div class="summary__stat"><span class="v">24</span> <span class="l"><span data-en="declared this month" data-fr="déclaré ce mois-ci">declared this month</span></span></div>
+      </section>
+
+      <!-- Filter bar -->
+      <div class="filter-bar" role="toolbar" aria-label="Filter future absences">
+        <span class="filter-bar__group-label"><span data-en="When" data-fr="Quand">When</span></span>
+        <button class="chip-btn" type="button" aria-pressed="true"><span data-en="All upcoming" data-fr="À venir">All upcoming</span> <span class="chip-num">12</span></button>
+        <button class="chip-btn" type="button" aria-pressed="false"><span data-en="Today" data-fr="Aujourd'hui">Today</span> <span class="chip-num">1</span></button>
+        <button class="chip-btn" type="button" aria-pressed="false"><span data-en="This week" data-fr="Cette semaine">This week</span> <span class="chip-num">3</span></button>
+        <button class="chip-btn" type="button" aria-pressed="false"><span data-en="Multi-day" data-fr="Plusieurs jours">Multi-day</span> <span class="chip-num">4</span></button>
+        <span class="filter-bar__sep" aria-hidden="true"></span>
+        <span class="filter-bar__group-label"><span data-en="Reason" data-fr="Motif">Reason</span></span>
+        <button class="chip-btn" type="button" aria-pressed="false"><i class="fa-solid fa-stethoscope" aria-hidden="true"></i> <span data-en="Medical" data-fr="Médical">Medical</span> <span class="chip-num">6</span></button>
+        <button class="chip-btn" type="button" aria-pressed="false"><i class="fa-solid fa-house-chimney" aria-hidden="true"></i> <span data-en="Family" data-fr="Famille">Family</span> <span class="chip-num">3</span></button>
+        <button class="chip-btn" type="button" aria-pressed="false"><i class="fa-solid fa-place-of-worship" aria-hidden="true"></i> <span data-en="Religious" data-fr="Religieux">Religious</span> <span class="chip-num">2</span></button>
+        <button class="chip-btn" type="button" aria-pressed="false"><i class="fa-solid fa-music" aria-hidden="true"></i> <span data-en="School event" data-fr="événement scolaire">School event</span> <span class="chip-num">1</span></button>
+      </div>
+
+      <!-- PANEL AREA: list + drawer -->
+      <div class="panel-area" id="panel-area">
+
+        <div class="panel-list">
+          <div class="table-card">
+            <div class="table-card__h">
+              <div><strong style="color:var(--c-ink);">7 records</strong> <span data-en="· sorted by date (soonest first)" data-fr="· triés par date (plus proche en premier)">· sorted by date (soonest first)</span> &nbsp;·&nbsp; <span style="color:var(--c-warning); font-weight:700; font-size:12px;"><i class="fa-solid fa-circle-exclamation" aria-hidden="true"></i> <span data-en="1 needs acknowledgment" data-fr="1 nécessite une validation">1 needs acknowledgment</span></span></div>
+              <div style="display:flex; gap:6px;">
+                <button class="btn btn--ghost btn--sm" type="button"><i class="fa-solid fa-arrow-down-wide-short" aria-hidden="true"></i> <span data-en="Sort" data-fr="Trier">Sort</span></button>
+                <button class="btn btn--ghost btn--sm" type="button" aria-label="Refresh"><i class="fa-solid fa-rotate" aria-hidden="true"></i></button>
+              </div>
+            </div>
+            <div class="table-wrap">
+              <table class="list" aria-label="Upcoming future absences">
+                <thead>
+                  <tr>
+                    <th class="col-student" scope="col"><span data-en="Student" data-fr="Étudiant">Student</span></th>
+                    <th class="col-dates" scope="col"><span data-en="Dates" data-fr="Dates">Dates</span></th>
+                    <th class="col-periods" scope="col"><span data-en="Periods" data-fr="Règles">Periods</span></th>
+                    <th class="col-reason" scope="col"><span data-en="Reason" data-fr="Motif">Reason</span></th>
+                    <th class="col-declared" scope="col"><span data-en="Declared by" data-fr="Déclaré par">Declared by</span></th>
+                    <th class="col-count" scope="col"><span data-en="Countdown" data-fr="Compte à rebours">Countdown</span></th>
+                    <th class="col-actions" scope="col"><span class="sr-only"><span data-en="Action" data-fr="Action">Action</span></span></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr tabindex="0" data-key="jade" class="needs-ack">
+                    <td>
+                      <div class="student-cell">
+                        <span class="avatar" aria-hidden="true">JM</span>
+                        <div>
+                          <div class="student-cell__name">Jade Martin</div>
+                          <div class="student-cell__meta">Gr 8A · Mr. Dupuis</div>
+                          <div style="margin-top:4px;"><span class="needs-ack-badge"><i class="fa-solid fa-circle-exclamation" aria-hidden="true"></i> <span data-en="Needs acknowledgment" data-fr="Necessite une validation">Needs acknowledgment</span></span></div>
+                        </div>
+                      </div>
+                    </td>
+                    <td><div class="dates-cell"><div class="dates-cell__main"><span data-en="Fri May 9" data-fr="Ven 9 mai">Fri May 9</span></div><div class="dates-cell__sub"><span data-en="In 2 days" data-fr="Dans 2 jours">In 2 days</span></div></div></td>
+                    <td><span class="status status--period"><i class="fa-solid fa-clock" aria-hidden="true"></i> <span data-en="All periods" data-fr="Toutes les périodes">All periods</span></span></td>
+                    <td><span class="reason-tag reason-tag--medical"><i class="fa-solid fa-stethoscope" aria-hidden="true"></i> <span data-en="Medical" data-fr="Médical">Medical</span></span></td>
+                    <td>
+                      <span style="font-size:var(--fs-xs); color:var(--c-ink);">Nadia Martin (parent)</span>
+                      <div style="font-size:11px;color:var(--c-ink-subtle);"><span data-en="via portal · 42 min ago" data-fr="via le portail · il y a 42 min">via portal · 42 min ago</span></div>
+                    </td>
+                    <td><span class="countdown countdown--soon"><i class="fa-regular fa-clock" aria-hidden="true"></i> <span data-en="In 2 days" data-fr="Dans 2 jours">In 2 days</span></span></td>
+                    <td class="col-actions">
+                      <button class="btn btn--primary btn--sm" type="button" onclick="event.stopPropagation()"><span data-en="Acknowledge" data-fr="Reconnaître">Acknowledge</span></button>
+                    </td>
+                  </tr>
+
+                  <tr tabindex="0" data-key="marcus">
+                    <td><div class="student-cell"><span class="avatar" aria-hidden="true">MC</span><div><div class="student-cell__name">Marcus Chen</div><div class="student-cell__meta">Gr 9A <span data-en="· Mr. Cardenas" data-fr="· M. Cardenas">· Mr. Cardenas</span></div></div></div></td>
+                    <td><div class="dates-cell"><div class="dates-cell__main"><span data-en="Thu May 7" data-fr="Jeu 7 mai">Thu May 7</span></div><div class="dates-cell__sub"><span data-en="Today" data-fr="Aujourd'hui">Today</span></div></div></td>
+                    <td><span class="status status--period"><i class="fa-solid fa-clock" aria-hidden="true"></i> <span data-en="All periods" data-fr="Toutes les périodes">All periods</span></span></td>
+                    <td><span class="reason-tag reason-tag--medical"><i class="fa-solid fa-stethoscope" aria-hidden="true"></i> <span data-en="Medical" data-fr="Médical">Medical</span></span></td>
+                    <td><span style="font-size:var(--fs-xs); color:var(--c-ink);">Wei Chen (parent)</span><div style="font-size:11px;color:var(--c-ink-subtle);"><span data-en="via portal · 6:45 AM today" data-fr="via le portail · aujourd'hui 6 h 45">via portal · 6:45 AM today</span></div></td>
+                    <td><span class="countdown countdown--today"><i class="fa-solid fa-clock" aria-hidden="true"></i> <span data-en="Today" data-fr="Aujourd'hui">Today</span></span></td>
+                    <td class="col-actions"><button class="btn btn--ghost btn--sm" type="button"><span data-en="View" data-fr="Voir">View</span></button></td>
+                  </tr>
+                  <tr tabindex="0" data-key="lucas">
+                    <td><div class="student-cell"><span class="avatar" aria-hidden="true">LT</span><div><div class="student-cell__name">Lucas Tremblay</div><div class="student-cell__meta">Gr 7B <span data-en="· Ms. Aubin" data-fr="· Mme Aubin">· Ms. Aubin</span></div></div></div></td>
+                    <td><div class="dates-cell"><div class="dates-cell__main"><span data-en="Fri May 8" data-fr="Ven 8 mai">Fri May 8</span></div><div class="dates-cell__sub"><span data-en="Tomorrow" data-fr="Demain">Tomorrow</span></div></div></td>
+                    <td><span class="status status--period"><i class="fa-solid fa-clock" aria-hidden="true"></i> <span data-en="All periods" data-fr="Toutes les périodes">All periods</span></span></td>
+                    <td><span class="reason-tag reason-tag--family"><i class="fa-solid fa-house-chimney" aria-hidden="true"></i> <span data-en="Family / personal" data-fr="Famille / personnel">Family / personal</span></span></td>
+                    <td><span style="font-size:var(--fs-xs); color:var(--c-ink);">Sylvie Tremblay (parent)</span><div style="font-size:11px;color:var(--c-ink-subtle);"><span data-en="via portal · yesterday 8:14 PM" data-fr="via le portail · hier 20 h 14">via portal · yesterday 8:14 PM</span></div></td>
+                    <td><span class="countdown countdown--tomorrow"><i class="fa-regular fa-clock" aria-hidden="true"></i> <span data-en="Tomorrow" data-fr="Demain">Tomorrow</span></span></td>
+                    <td class="col-actions"><button class="btn btn--ghost btn--sm" type="button"><span data-en="View" data-fr="Voir">View</span></button></td>
+                  </tr>
+                  <tr tabindex="0" data-key="sophie">
+                    <td><div class="student-cell"><span class="avatar" aria-hidden="true">SB</span><div><div class="student-cell__name">Sophie Bouchard</div><div class="student-cell__meta">Gr 11A <span data-en="· Mr. Bélanger" data-fr="· M. Bélanger">· Mr. Bélanger</span></div></div></div></td>
+                    <td><div class="dates-cell"><div class="dates-cell__main"><span data-en="Sat May 9 – Sun May 10" data-fr="Sam 9 – Dim 10 mai">Sat May 9 – Sun May 10</span></div><div class="dates-cell__sub"><span data-en="In 2 days · weekend" data-fr="Dans 2 jours · fin de semaine">In 2 days · weekend</span><span class="dates-cell__multi">2 DAYS</span></div></div></td>
+                    <td><span class="status status--period"><i class="fa-solid fa-clock" aria-hidden="true"></i> <span data-en="N/A · weekend" data-fr="S.O. · fin de semaine">N/A · weekend</span></span></td>
+                    <td><span class="reason-tag reason-tag--school"><i class="fa-solid fa-music" aria-hidden="true"></i> <span data-en="School event" data-fr="événement scolaire">School event</span></span></td>
+                    <td><span style="font-size:var(--fs-xs); color:var(--c-ink);">Ms. Lemieux (band director)</span><div style="font-size:11px;color:var(--c-ink-subtle);"><span data-en="on behalf · 4 days ago" data-fr="au nom de · il y a 4 jours">on behalf · 4 days ago</span></div></td>
+                    <td><span class="countdown countdown--soon"><span data-en="In 2 days" data-fr="Dans 2 jours">In 2 days</span></span></td>
+                    <td class="col-actions"><button class="btn btn--ghost btn--sm" type="button"><span data-en="View" data-fr="Voir">View</span></button></td>
+                  </tr>
+                  <tr tabindex="0" data-key="diego">
+                    <td><div class="student-cell"><span class="avatar" aria-hidden="true">DR</span><div><div class="student-cell__name">Diego Ramirez</div><div class="student-cell__meta">Gr 7B <span data-en="· Ms. Aubin" data-fr="· Mme Aubin">· Ms. Aubin</span></div></div></div></td>
+                    <td><div class="dates-cell"><div class="dates-cell__main"><span data-en="Mon May 12" data-fr="Lun 12 mai">Mon May 12</span></div><div class="dates-cell__sub"><span data-en="In 5 days" data-fr="Dans 5 jours">In 5 days</span></div></div></td>
+                    <td><span class="status status--period"><i class="fa-solid fa-clock" aria-hidden="true"></i> <span data-en="P1, P2 only" data-fr="P1, P2 seulement">P1, P2 only</span></span></td>
+                    <td><span class="reason-tag reason-tag--medical"><i class="fa-solid fa-stethoscope" aria-hidden="true"></i> <span data-en="Medical" data-fr="Médical">Medical</span></span></td>
+                    <td><span style="font-size:var(--fs-xs); color:var(--c-ink);">Sofia Ramirez (parent)</span><div style="font-size:11px;color:var(--c-ink-subtle);"><span data-en="via portal · 9:42 AM today" data-fr="via le portail · aujourd'hui 9 h 42">via portal · 9:42 AM today</span></div></td>
+                    <td><span class="countdown countdown--soon"><span data-en="In 5 days" data-fr="Dans 5 jours">In 5 days</span></span></td>
+                    <td class="col-actions"><button class="btn btn--ghost btn--sm" type="button"><span data-en="View" data-fr="Voir">View</span></button></td>
+                  </tr>
+                  <tr tabindex="0" data-key="mei">
+                    <td><div class="student-cell"><span class="avatar" aria-hidden="true">ML</span><div><div class="student-cell__name">Mei Lin</div><div class="student-cell__meta">Gr 8B <span data-en="· Ms. Tremblay" data-fr="· Mme Tremblay">· Ms. Tremblay</span></div></div></div></td>
+                    <td><div class="dates-cell"><div class="dates-cell__main"><span data-en="Mon May 12 – Tue May 13" data-fr="Lun 12 – Mar 13 mai">Mon May 12 – Tue May 13</span></div><div class="dates-cell__sub"><span data-en="In 5–6 days" data-fr="Dans 5–6 jours">In 5–6 days</span><span class="dates-cell__multi">2 DAYS</span></div></div></td>
+                    <td><span class="status status--period"><i class="fa-solid fa-clock" aria-hidden="true"></i> <span data-en="All periods" data-fr="Toutes les périodes">All periods</span></span></td>
+                    <td><span class="reason-tag reason-tag--medical"><i class="fa-solid fa-stethoscope" aria-hidden="true"></i> <span data-en="Medical (surgery)" data-fr="Médical (chirurgie)">Medical (surgery)</span></span></td>
+                    <td><span style="font-size:var(--fs-xs); color:var(--c-ink);">Hua Lin (parent)</span><div style="font-size:11px;color:var(--c-ink-subtle);"><span data-en="via portal · today 7:14 AM" data-fr="via le portail · aujourd'hui 7 h 14">via portal · today 7:14 AM</span></div></td>
+                    <td><span class="countdown countdown--soon"><span data-en="In 5 days" data-fr="Dans 5 jours">In 5 days</span></span></td>
+                    <td class="col-actions"><button class="btn btn--ghost btn--sm" type="button"><span data-en="View" data-fr="Voir">View</span></button></td>
+                  </tr>
+                  <tr tabindex="0" data-key="hana">
+                    <td><div class="student-cell"><span class="avatar" aria-hidden="true">HP</span><div><div class="student-cell__name">Hana Park</div><div class="student-cell__meta">Gr 10C <span data-en="· Ms. Lemieux" data-fr="· Mme Lemieux">· Ms. Lemieux</span></div></div></div></td>
+                    <td><div class="dates-cell"><div class="dates-cell__main"><span data-en="Thu May 15" data-fr="Jeu 15 mai">Thu May 15</span></div><div class="dates-cell__sub"><span data-en="In 8 days" data-fr="Dans 8 jours">In 8 days</span></div></div></td>
+                    <td><span class="status status--period"><i class="fa-solid fa-clock" aria-hidden="true"></i> <span data-en="All periods" data-fr="Toutes les périodes">All periods</span></span></td>
+                    <td><span class="reason-tag reason-tag--religious"><i class="fa-solid fa-place-of-worship" aria-hidden="true"></i> <span data-en="Religious observance" data-fr="observance religieuse">Religious observance</span></span></td>
+                    <td><span style="font-size:var(--fs-xs); color:var(--c-ink);">Min-Jun Park (parent)</span><div style="font-size:11px;color:var(--c-ink-subtle);"><span data-en="via portal · last week" data-fr="via le portail · la semaine dernière">via portal · last week</span></div></td>
+                    <td><span class="countdown countdown--later"><span data-en="In 8 days" data-fr="Dans 8 jours">In 8 days</span></span></td>
+                    <td class="col-actions"><button class="btn btn--ghost btn--sm" type="button"><span data-en="View" data-fr="Voir">View</span></button></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="table-card__h" style="border-top:1px solid var(--c-border-2); border-bottom:0;">
+              <div><span data-en="Showing" data-fr="Affichage">Showing</span> <strong>6 of 12</strong> <span data-en="· 6 more declarations through end of month" data-fr="· 6 déclarations supplémentaires ce mois-ci">· 6 more declarations through end of month</span></div>
+              <button class="btn btn--ghost btn--sm" type="button"><span data-en="Load more" data-fr="Charger plus">Load more</span></button>
+            </div>
+          </div>
+        </div><!-- /.panel-list -->
+
+        <!-- DRAWER -->
+        <aside class="drawer" id="drawer" role="region" aria-labelledby="drawer-h" hidden>
+          <div class="drawer__h">
+            <h2 id="drawer-h"><span data-en="Future absence detail" data-fr="Détails des absences futures">Future absence detail</span></h2>
+            <button class="icon-btn" type="button" id="drawer-close" aria-label="Close drawer"><i class="fa-solid fa-xmark" aria-hidden="true"></i></button>
+          </div>
+          <div class="drawer__b" id="drawer-body"></div>
+          <div class="drawer__actions" id="drawer-actions"></div>
+        </aside>
+
+      </div><!-- /.panel-area -->
+
+    </main>
+  </div>
+</div>
+
+
+<!-- ADD FUTURE ABSENCE MODAL -->
+<dialog class="modal" id="add-absence-modal" aria-labelledby="add-modal-title">
+  <header class="modal__h">
+    <h2 id="add-modal-title"><i class="fa-solid fa-plus" aria-hidden="true"></i> <span data-en="Add future absence" data-fr="Ajouter une absence future">Add future absence</span></h2>
+    <button class="icon-btn" type="button" id="add-modal-close" aria-label="Close dialog"><i class="fa-solid fa-xmark" aria-hidden="true"></i></button>
+  </header>
+
+  <form class="modal__b" id="add-absence-form" novalidate>
+
+    <!-- Redirect hint for group events -->
+    <div role="region" aria-label="Group events guidance" style="display:flex; align-items:flex-start; gap:var(--s-2); padding: var(--s-3); margin-bottom: var(--s-4); background: var(--c-brand-tint); border: 1px solid #6E94BF; border-radius: var(--r-md); font-size: var(--fs-xs); color: var(--c-brand-ink);">
+      <i class="fa-solid fa-circle-info" aria-hidden="true" style="margin-top:2px; font-size:14px;"></i>
+      <div>
+        <strong>Adding an absence for a school sports trip, field trip, or club outing?</strong>
+        Use the <a href="#" style="color:var(--c-brand-ink); text-decoration:underline; font-weight:700;"><span data-en="Group events screen" data-fr="écran des événements de groupe">Group events screen</span></a> instead — it lets you pick multiple students at once and applies the school-sanctioned-event category automatically. This form is for individual-student absences.
+      </div>
+    </div>
+
+    <!-- Source of declaration -->
+    <fieldset class="form-field" style="border:0; padding:0;">
+      <legend class="form-field__label"><span data-en="Source of declaration" data-fr="Auteur de la déclaration">Source of declaration</span> <span class="req" aria-hidden="true">*</span></legend>
+      <div class="radio-group">
+        <label class="radio-card">
+          <input type="radio" name="source" value="parent" checked>
+          <span class="radio-card__main">
+            <span class="radio-card__label"><span data-en="Parent or guardian" data-fr="Parent ou tuteur">Parent or guardian</span></span>
+            <span class="radio-card__hint"><span data-en="Called in, emailed, or delivered a paper note · they don't use the parent portal" data-fr="Ils ont appelé, envoyé un courriel ou remis un mot sur papier ; ils n'utilisent pas le portail parents.">Called in, emailed, or delivered a paper note · they don't use the parent portal</span></span>
+          </span>
+        </label>
+        <label class="radio-card">
+          <input type="radio" name="source" value="authorized-adult">
+          <span class="radio-card__main">
+            <span class="radio-card__label"><span data-en="Authorized adult on file" data-fr="Adulte autorisé au dossier">Authorized adult on file</span></span>
+            <span class="radio-card__hint"><span data-en="Foster parent, group home staff, social worker · for students in care" data-fr="Famille d'accueil, personnel de centre d'hébergement, intervenant social · pour les élèves pris en charge">Foster parent, group home staff, social worker · for students in care</span></span>
+          </span>
+        </label>
+      </div>
+    </fieldset>
+
+    <!-- Student -->
+    <div class="form-field">
+      <label class="form-field__label" for="add-student"><span data-en="Student" data-fr="Étudiant">Student</span> <span class="req" aria-hidden="true">*</span></label>
+      <input type="search" id="add-student" placeholder="Search by name or student ID (e.g., 100482)" data-placeholder-en="Search by name or student ID (e.g., 100482)" data-placeholder-fr="Recherche par nom ou numéro d'étudiant (par exemple, 100482)" autocomplete="off">
+      <span class="form-field__hint"><span data-en="Start typing to find a student. The clerk's school scope filters results." data-fr="Commencez à saisir du texte pour trouver un élève. Le filtre de recherche du responsable s'applique aux résultats.">Start typing to find a student. The clerk's school scope filters results.</span></span>
+    </div>
+
+    <!-- Dates -->
+    <fieldset class="form-field" style="border:0; padding:0;">
+      <legend class="form-field__label"><span data-en="Date(s)" data-fr="Date(s)">Date(s)</span> <span class="req" aria-hidden="true">*</span></legend>
+      <div class="radio-group radio-group--inline" style="margin-bottom: var(--s-2);">
+        <label class="check-pill"><input type="radio" name="date-mode" value="single" checked> <span data-en="Single day" data-fr="Une seule journée">Single day</span></label>
+        <label class="check-pill"><input type="radio" name="date-mode" value="range"> <span data-en="Date range" data-fr="Période couverte">Date range</span></label>
+      </div>
+      <div class="form-field__row">
+        <div>
+          <label class="form-field__hint" for="add-date-from" style="margin-top:0; margin-bottom:4px;"><span data-en="From" data-fr="Depuis">From</span></label>
+          <input type="date" id="add-date-from" value="2026-05-12">
+        </div>
+        <div>
+          <label class="form-field__hint" for="add-date-to" style="margin-top:0; margin-bottom:4px;"><span data-en="To (range only)" data-fr="Jusqu'au (plage uniquement)">To (range only)</span></label>
+          <input type="date" id="add-date-to" value="2026-05-13" disabled>
+        </div>
+      </div>
+    </fieldset>
+
+    <!-- Periods affected -->
+    <fieldset class="form-field" style="border:0; padding:0;">
+      <legend class="form-field__label"><span data-en="Periods affected" data-fr="Périodes affectées">Periods affected</span></legend>
+      <div class="radio-group radio-group--inline" style="margin-bottom: var(--s-2);">
+        <label class="check-pill"><input type="radio" name="periods" value="all" checked> <span data-en="All periods" data-fr="Toutes les périodes">All periods</span></label>
+        <label class="check-pill"><input type="radio" name="periods" value="specific"> <span data-en="Specific periods" data-fr="Périodes spécifiques">Specific periods</span></label>
+      </div>
+      <div class="check-group" id="period-checks" aria-hidden="true" style="opacity:0.45;">
+        <label class="check-pill"><input type="checkbox" name="p" value="P1"> P1 · 8:30–9:45</label>
+        <label class="check-pill"><input type="checkbox" name="p" value="P2"> P2 · 10:35–11:50</label>
+        <label class="check-pill"><input type="checkbox" name="p" value="P3"> P3 · 1:05–2:20</label>
+        <label class="check-pill"><input type="checkbox" name="p" value="P4"> P4 · 2:25–3:40</label>
+      </div>
+      <span class="form-field__hint">"<span data-en="All periods" data-fr="Toutes les périodes">All periods</span>" = full school day. Switch to "<span data-en="Specific periods" data-fr="Périodes spécifiques">Specific periods</span>" for partial-day absences (e.g., morning medical appointment).</span>
+    </fieldset>
+
+    <!-- Reason category -->
+    <div class="form-field">
+      <label class="form-field__label" for="add-reason-cat"><span data-en="Reason category" data-fr="Type de motif">Reason category</span> <span class="req" aria-hidden="true">*</span></label>
+      <select id="add-reason-cat">
+        <option value="medical-appointment"><span data-en="Medical appointment" data-fr="Rendez-vous médical">Medical appointment</span></option>
+        <option value="illness"><span data-en="Illness" data-fr="Maladie">Illness</span></option>
+        <option value="bereavement"><span data-en="Bereavement" data-fr="Deuil">Bereavement</span></option>
+        <option value="religious-observance"><span data-en="Religious observance" data-fr="observance religieuse">Religious observance</span></option>
+        <option value="school-sanctioned-event"><span data-en="School-sanctioned event" data-fr="Événement autorisé par l'école">School-sanctioned event</span></option>
+        <option value="transportation"><span data-en="Transportation / weather" data-fr="Transports / météo">Transportation / weather</span></option>
+        <option value="family-personal"><span data-en="Family / personal" data-fr="Famille / personnel">Family / personal</span></option>
+        <option value="other"><span data-en="Other" data-fr="Autre">Other</span></option>
+      </select>
+      <div class="cat-indicator" id="cat-indicator">
+        <i class="fa-solid fa-square-poll-vertical" aria-hidden="true"></i>
+        <span id="cat-indicator-text"><span data-en="Counts toward §2.1 grade impact" data-fr="Compte pour §2.1 Impact sur les notes">Counts toward §2.1 grade impact</span></span>
+      </div>
+    </div>
+
+    <!-- Notes -->
+    <div class="form-field">
+      <label class="form-field__label" for="add-notes"><span data-en="Notes / parent's stated reason" data-fr="Remarques / motif invoqué par les parents">Notes / parent's stated reason</span></label>
+      <textarea id="add-notes" placeholder="Optional · verbatim what the parent told you · stored in the record and visible to parent in their portal" rows="3"></textarea>
+    </div>
+
+    <!-- Attachment -->
+    <div class="form-field">
+      <label class="form-field__label" for="add-attachment"><span data-en="Supporting evidence (optional)" data-fr="Preuves à l'appui (facultatif)">Supporting evidence (optional)</span></label>
+      <label class="file-input" for="add-attachment">
+        <i class="fa-solid fa-paperclip" aria-hidden="true"></i>
+        <span>Attach a doctor's note or other supporting document · or drag a file here</span>
+      </label>
+      <input type="file" id="add-attachment" style="display:none;" accept=".pdf,.png,.jpg,.jpeg,.heic">
+      <span class="form-field__hint"><span data-en="PDF, PNG, JPG, HEIC · max 10MB. Visible to clerks and parent." data-fr="PDF, PNG, JPG, HEIC · 10 Mo maximum. Visible par les employés et les parents.">PDF, PNG, JPG, HEIC · max 10MB. Visible to clerks and parent.</span></span>
+    </div>
+
+    <!-- Acknowledgment -->
+    <div class="form-field">
+      <label class="toggle-card">
+        <input type="checkbox" id="add-ack" required>
+        <span class="toggle-card__main">
+          <span data-en="I confirm the parent or guardian is aware of this entry." data-fr="Je confirme que le parent ou le tuteur a pris connaissance de cette saisie.">I confirm the parent or guardian is aware of this entry.</span>
+          <span class="toggle-card__hint"><span data-en="The audit trail will record me as the entry author." data-fr="Le journal d'audit m'enregistrera comme auteur.">The audit trail will record me as the entry author.</span></span>
+        </span>
+      </label>
+    </div>
+
+  </form>
+
+  <footer class="modal__f">
+    <span style="font-size: 11px; color: var(--c-ink-subtle);"><i class="fa-solid fa-shield-halved" aria-hidden="true"></i> <span data-en="All fields logged to audit per §16" data-fr="Tous les champs enregistrés à des fins d'audit conformément à l'article 16">All fields logged to audit per §16</span></span>
+    <div class="modal__f-actions">
+      <button class="btn btn--secondary" type="button" id="add-modal-cancel"><span data-en="Cancel" data-fr="Annuler">Cancel</span></button>
+      <button class="btn btn--primary" type="button" id="add-modal-submit"><i class="fa-solid fa-plus" aria-hidden="true"></i> <span data-en="Create future absence" data-fr="Créer une absence future">Create future absence</span></button>
+    </div>
+  </footer>
+</dialog>
+
+<div class="sr-only" aria-live="polite" id="aria-live"></div>
+
+<script>
+  const RECORDS = {
+    jade: {
+      initials:'JM', name:'Jade Martin', meta:'Grade 8A · Mr. Dupuis · École Sainte-Croix',
+      id:'ID 100814 · Aspen ASP-7902',
+      heroChip:{cls:'active-today', icon:'fa-circle-exclamation', label:'Pending acknowledgment · submitted 42 min ago'},
+      acknowledged: false,
+      context:{
+        recordType:{cls:'medical', icon:'fa-stethoscope', label:'Future absence · single day'},
+        dates:'Friday, May 9, 2026',
+        periods:'All periods (P1–P4)',
+        reasonCategory:{label:'Medical appointment', counts:true},
+        declaredBy:'Nadia Martin (parent) · via parent portal',
+        declaredWhen:'Today · 5:15 PM (42 min ago)',
+      },
+      decl:{
+        source:'PORTAL',
+        when:'Today · 5:15 PM (42 min ago)',
+        author:'Nadia Martin (parent)', initials:'NM',
+        quote:'"Jade has a follow-up appointment with her cardiologist on Friday morning. We expect to be back for the afternoon but to be safe I\'ve declared the full day. I can provide a doctor\'s note on request."',
+      },
+      affected:[
+        { date:'Friday, May 9', periods:[
+          {p:'P1',t:'8:30–9:45',affected:true},
+          {p:'P2',t:'10:35–11:50',affected:true},
+          {p:'P3',t:'1:05–2:20',affected:true},
+          {p:'P4',t:'2:25–3:40',affected:true},
+        ]},
+      ],
+      audit:[
+        {when:'Today · 5:15 PM', who:'Nadia Martin (parent)', text:'Declared future absence via parent portal · reason: <strong>Medical appointment</strong>.'},
+        {when:'Today · 5:15 PM', who:'System',                text:'State 19 (Pre-declared · Pending acknowledgment) — visible to clerk only until acknowledged.'},
+        {when:'Now',             who:'You',                   text:'<strong>Acknowledgment required.</strong> Review the declaration and acknowledge to make it active across all portals.'},
+      ],
+      actions:[
+        { kind:'primary',   icon:'fa-circle-check', label:'Acknowledge' },
+        { kind:'secondary', icon:'fa-circle-xmark', label:'Cancel declaration' },
+      ],
+    },
+
+    marcus: {
+      initials:'MC', name:'Marcus Chen', meta:'Grade 9A · Mr. Cardenas · École Sainte-Croix',
+      id:'ID 100245 · Aspen ASP-7884',
+      heroChip:{cls:'active-today', icon:'fa-clock', label:'Active today · auto-justified · informational only'},
+      context:{
+        recordType:{cls:'medical', icon:'fa-stethoscope', label:'Future absence · single day'},
+        dates:'Thursday, May 7, 2026 (today)',
+        periods:'All periods (P1–P4)',
+        reasonCategory:{label:'Medical appointment', counts:true},
+        declaredBy:'Wei Chen (parent) · via parent portal',
+        declaredWhen:'Today · 6:45 AM (before bell)',
+      },
+      decl:{
+        source:'PORTAL',
+        when:'Today · 6:45 AM',
+        author:'Wei Chen (parent)', initials:'WC',
+        quote:'"Marcus has a specialist appointment in Montreal today. I declared this in the morning before the school bell — he won\'t be in for any period."',
+      },
+      affected:[
+        { date:'Thursday, May 7 — Today', periods:[
+          {p:'P1',t:'8:30–9:45',affected:true},
+          {p:'P2',t:'10:35–11:50',affected:true},
+          {p:'P3',t:'1:05–2:20',affected:true},
+          {p:'P4',t:'2:25–3:40',affected:true},
+        ]},
+      ],
+      audit:[
+        {when:'Today · 6:45 AM',  who:'Wei Chen (parent)', text:'Declared future absence via parent portal · reason: <strong>Medical appointment</strong> · category counts toward §2.1.'},
+        {when:'Today · 6:45 AM',  who:'System',             text:'Pre-justified absence created for May 7 P1–P4 · category <code>medical-appointment</code>.'},
+        {when:'Today · 8:30 AM',  who:'System',             text:'Period 1 bell · Marcus auto-marked Absent · justified · no parent notification fired (parent already initiated).'},
+        {when:'Now',              who:'System',             text:'Currently active · cycle already closed.'},
+      ],
+      actions:[
+        { kind:'secondary', icon:'fa-circle-xmark', label:'Cancel declaration' },
+        { kind:'more', items:[
+          { icon:'fa-pen', label:'Edit category or note' },
+        ]},
+      ],
+    },
+
+    lucas: {
+      initials:'LT', name:'Lucas Tremblay', meta:'Grade 7B · Ms. Aubin · École Sainte-Croix',
+      id:'ID 100712 · Aspen ASP-7541',
+      heroChip:{cls:'future', icon:'fa-calendar-days', label:'Future absence · tomorrow'},
+      context:{
+        recordType:{cls:'family', icon:'fa-house-chimney', label:'Future absence · single day'},
+        dates:'Friday, May 8, 2026 (tomorrow)',
+        periods:'All periods (P1–P4)',
+        reasonCategory:{label:'Family / personal', counts:true},
+        declaredBy:'Sylvie Tremblay (parent) · via parent portal',
+        declaredWhen:'Yesterday · 8:14 PM',
+      },
+      decl:{
+        source:'PORTAL',
+        when:'Yesterday · 8:14 PM',
+        author:'Sylvie Tremblay (parent)', initials:'ST',
+        quote:'"Lucas has a family commitment Friday — out of province with his grandparents. Back at school Monday."',
+      },
+      affected:[
+        { date:'Friday, May 8 — Tomorrow', periods:[
+          {p:'P1',t:'8:30–9:45',affected:true},
+          {p:'P2',t:'10:35–11:50',affected:true},
+          {p:'P3',t:'1:05–2:20',affected:true},
+          {p:'P4',t:'2:25–3:40',affected:true},
+        ]},
+      ],
+      audit:[
+        {when:'Yesterday · 8:14 PM', who:'Sylvie Tremblay (parent)', text:'Declared future absence via parent portal · reason: <strong>Family / personal</strong> · category counts toward §2.1.'},
+        {when:'Yesterday · 8:14 PM', who:'System',                    text:'Pre-justified absence created for May 8 P1–P4.'},
+        {when:'May 8 · 6:00 AM',     who:'System',                    text:'Will auto-mark Absent · justified on the day · no parent notification will fire.'},
+        {when:'Now',                 who:'You',                       text:'No action needed unless plans change.'},
+      ],
+      actions:[
+        { kind:'secondary', icon:'fa-circle-xmark', label:'Cancel declaration' },
+        { kind:'more', items:[
+          { icon:'fa-pen', label:'Edit category or note' },
+        ]},
+      ],
+    },
+
+    sophie: {
+      initials:'SB', name:'Sophie Bouchard', meta:'Grade 11A · Mr. Bélanger · École Sainte-Croix',
+      id:'ID 100928 · Aspen ASP-7820',
+      heroChip:{cls:'future', icon:'fa-music', label:'Future absence · band trip · weekend'},
+      context:{
+        recordType:{cls:'school', icon:'fa-music', label:'Future absence · multi-day (school event)'},
+        dates:'Saturday, May 9 – Sunday, May 10 (weekend trip)',
+        periods:'N/A (weekend — no instructional periods)',
+        reasonCategory:{label:'School-sanctioned event', counts:false},
+        declaredBy:'Ms. Lemieux (band director) · on behalf of parent',
+        declaredWhen:'4 days ago · Sunday May 3, 5:42 PM',
+      },
+      decl:{
+        source:'GROUP-EVENT',
+        when:'Sunday May 3 · 5:42 PM',
+        author:'Ms. Lemieux (band director) · entered by Marguerite T. on behalf', initials:'ML',
+        quote:'"Sophie is travelling with the school band to the Montréal Conservatory weekend showcase. Bus departs Friday 4pm, returns Sunday evening. Parental consent on file. Trip is school-sanctioned — does not count toward §2.1 attendance grade impact."',
+      },
+      groupEvent:{
+        name:'Montréal Conservatory band weekend showcase',
+        date:'May 9 – May 10, 2026',
+        leader:'Ms. Lemieux (band director)',
+        studentCount:14,
+        href:'#'
+      },
+      affected:[
+        { date:'Saturday May 9 / Sunday May 10 (weekend — informational only)', periods:[
+          {p:'Sat',t:'(no classes)',affected:true},
+          {p:'Sun',t:'(no classes)',affected:true},
+        ]},
+      ],
+      audit:[
+        {when:'Sunday May 3 · 5:42 PM', who:'Ms. Lemieux',               text:'Declared future absence on behalf · authorization: band program parent consent (signed Apr 14).'},
+        {when:'Sunday May 3 · 5:42 PM', who:'System',                    text:'Pre-justified · category <code>school-sanctioned-event</code> · excluded from §2.1 grade impact (per Q9).'},
+        {when:'Sunday May 3 · 6:01 PM', who:'System',                    text:'Informational notification sent to parent.'},
+        {when:'Now',                    who:'You',                       text:'No action needed.'},
+      ],
+      actions:[
+        { kind:'secondary', icon:'fa-circle-xmark', label:'Cancel declaration' },
+        { kind:'more', items:[
+          { icon:'fa-pen', label:'Edit details' },
+        ]},
+      ],
+    },
+
+    diego: {
+      initials:'DR', name:'Diego Ramirez', meta:'Grade 7B · Ms. Aubin · École Sainte-Croix',
+      id:'ID 100455 · Aspen ASP-7104',
+      heroChip:{cls:'future', icon:'fa-calendar-days', label:'Future absence · partial day · in 5 days'},
+      context:{
+        recordType:{cls:'medical', icon:'fa-stethoscope', label:'Future absence · partial day'},
+        dates:'Monday, May 12, 2026',
+        periods:'Periods 1 and 2 only (morning · 8:30–11:50)',
+        reasonCategory:{label:'Medical appointment', counts:true},
+        declaredBy:'Sofia Ramirez (parent) · via parent portal',
+        declaredWhen:'Today · 9:42 AM',
+      },
+      decl:{
+        source:'PORTAL',
+        when:'Today · 9:42 AM',
+        author:'Sofia Ramirez (parent)', initials:'SR',
+        quote:'"Diego has a dental check-up Monday morning. He\'ll be back at school for the afternoon — please mark him absent for P1 and P2 only."',
+      },
+      affected:[
+        { date:'Monday, May 12', periods:[
+          {p:'P1',t:'8:30–9:45',affected:true},
+          {p:'P2',t:'10:35–11:50',affected:true},
+          {p:'P3',t:'1:05–2:20',affected:false},
+          {p:'P4',t:'2:25–3:40',affected:false},
+        ]},
+      ],
+      audit:[
+        {when:'Today · 9:42 AM', who:'Sofia Ramirez (parent)', text:'Declared future absence via parent portal · reason: <strong>Medical appointment</strong>.'},
+        {when:'Today · 9:42 AM', who:'System',                  text:'Pre-justified absence created for May 12 P1, P2.'},
+        {when:'May 12 · 6:00 AM',who:'System',                  text:'Will auto-mark Absent · justified for P1 and P2 only. P3 and P4 will follow normal teacher workflow.'},
+        {when:'Now',             who:'You',                     text:'No action needed.'},
+      ],
+      actions:[
+        { kind:'secondary', icon:'fa-circle-xmark', label:'Cancel declaration' },
+        { kind:'more', items:[
+          { icon:'fa-pen', label:'Edit periods or note' },
+        ]},
+      ],
+    },
+
+    mei: {
+      initials:'ML', name:'Mei Lin', meta:'Grade 8B · Ms. Tremblay · École Sainte-Croix',
+      id:'ID 100778 · Aspen ASP-7515',
+      heroChip:{cls:'future', icon:'fa-calendar-days', label:'Future absence · 2 days · in 5 days'},
+      context:{
+        recordType:{cls:'medical', icon:'fa-stethoscope', label:'Future absence · multi-day'},
+        dates:'Monday, May 12 – Tuesday, May 13',
+        periods:'All periods (both days)',
+        reasonCategory:{label:'Medical (surgery)', counts:true},
+        declaredBy:'Hua Lin (parent) · via parent portal',
+        declaredWhen:'Today · 7:14 AM',
+      },
+      decl:{
+        source:'PORTAL',
+        when:'Today · 7:14 AM',
+        author:'Hua Lin (parent)', initials:'HL',
+        quote:'"Mei is scheduled for a minor dental surgery Monday morning and her doctor recommended a day of rest after. Please mark her absent both days. I\'ve attached a copy of the doctor\'s note for your records."',
+        attachment:{name:'mei-dental-surgery-note.pdf', size:'186 KB'},
+      },
+      affected:[
+        { date:'Monday, May 12', periods:[
+          {p:'P1',t:'8:30–9:45',affected:true},
+          {p:'P2',t:'10:35–11:50',affected:true},
+          {p:'P3',t:'1:05–2:20',affected:true},
+          {p:'P4',t:'2:25–3:40',affected:true},
+        ]},
+        { date:'Tuesday, May 13', periods:[
+          {p:'P1',t:'8:30–9:45',affected:true},
+          {p:'P2',t:'10:35–11:50',affected:true},
+          {p:'P3',t:'1:05–2:20',affected:true},
+          {p:'P4',t:'2:25–3:40',affected:true},
+        ]},
+      ],
+      audit:[
+        {when:'Today · 7:14 AM',  who:'Hua Lin (parent)', text:'Declared future absence May 12–13 (medical) via parent portal · doctor\'s note attached.'},
+        {when:'Today · 7:14 AM',  who:'System',           text:'Pre-justified absence created for May 12 + May 13 (P1–P4 both days).'},
+        {when:'May 12 · 6:00 AM', who:'System',           text:'Will auto-mark Absent · justified for all periods.'},
+        {when:'May 13 · 6:00 AM', who:'System',           text:'Will auto-mark Absent · justified for all periods.'},
+        {when:'Now',              who:'You',              text:'No action needed.'},
+      ],
+      actions:[
+        { kind:'secondary', icon:'fa-circle-xmark', label:'Cancel declaration' },
+        { kind:'more', items:[
+          { icon:'fa-pen', label:'Edit category or note' },
+        ]},
+      ],
+    },
+
+    hana: {
+      initials:'HP', name:'Hana Park', meta:'Grade 10C · Ms. Lemieux · École Sainte-Croix',
+      id:'ID 100632 · Aspen ASP-7340',
+      heroChip:{cls:'future', icon:'fa-calendar-days', label:'Future absence · religious · in 8 days'},
+      context:{
+        recordType:{cls:'religious', icon:'fa-place-of-worship', label:'Future absence · single day'},
+        dates:'Thursday, May 15, 2026',
+        periods:'All periods (P1–P4)',
+        reasonCategory:{label:'Religious observance', counts:false},
+        declaredBy:'Min-Jun Park (parent) · via parent portal',
+        declaredWhen:'Last week · Friday May 2, 11:08 AM',
+      },
+      decl:{
+        source:'PORTAL',
+        when:'Friday May 2 · 11:08 AM (a week ago)',
+        author:'Min-Jun Park (parent)', initials:'MP',
+        quote:'"Hana will observe a religious holiday on May 15. She will not attend any classes that day."',
+      },
+      affected:[
+        { date:'Thursday, May 15', periods:[
+          {p:'P1',t:'8:30–9:45',affected:true},
+          {p:'P2',t:'10:35–11:50',affected:true},
+          {p:'P3',t:'1:05–2:20',affected:true},
+          {p:'P4',t:'2:25–3:40',affected:true},
+        ]},
+      ],
+      audit:[
+        {when:'Friday May 2 · 11:08 AM', who:'Min-Jun Park (parent)', text:'Declared future absence May 15 (religious observance) via parent portal.'},
+        {when:'Friday May 2 · 11:08 AM', who:'System',                 text:'Pre-justified · category <code>religious-observance</code> · excluded from §2.1 grade impact.'},
+        {when:'May 15 · 6:00 AM',         who:'System',                 text:'Will auto-mark Absent · justified for all periods.'},
+        {when:'Now',                      who:'You',                    text:'No action needed.'},
+      ],
+      actions:[
+        { kind:'secondary', icon:'fa-circle-xmark', label:'Cancel declaration' },
+        { kind:'more', items:[
+          { icon:'fa-pen', label:'Edit category or note' },
+        ]},
+      ],
+    },
+  };
+
+  function renderRecord(key) {
+    const r = RECORDS[key]; if (!r) return;
+    const heroChip = `<span class="status status--${r.heroChip.cls}"><i class="fa-solid ${r.heroChip.icon}" aria-hidden="true"></i> ${r.heroChip.label}</span>`;
+
+    // Affected periods preview — one row per affected date
+    const dayStripsHTML = r.affected.map(d => {
+      const cells = d.periods.map(p => `
+        <div class="day-strip__cell ${p.affected ? 'day-strip__cell--affected' : ''}">
+          <div class="day-strip__lbl">${p.p}</div>
+          <div class="day-strip__time">${p.t}</div>
+          <span class="day-strip__chip ${p.affected ? '' : 'day-strip__chip--present'}">${p.affected ? 'Absent' : 'Present'}</span>
+        </div>
+      `).join('');
+      return `<div class="day-strip-row"><div class="day-strip-row__label">${d.date}</div><div class="day-strip">${cells}</div></div>`;
+    }).join('');
+
+    // Audit
+    const auditHTML = r.audit.map(a => `<li><div class="audit__when">${a.when}</div><div><span class="audit__who">${a.who}</span> · ${a.text}</div></li>`).join('');
+
+    // Declaration: source pill, optional attachment
+    let sourceLabel, sourceIcon;
+    if (r.decl.source === 'PORTAL')          { sourceLabel = 'Via parent portal';            sourceIcon = 'fa-mobile-screen-button'; }
+    else if (r.decl.source === 'GROUP-EVENT'){ sourceLabel = 'From Group events';            sourceIcon = 'fa-people-group'; }
+    else                                      { sourceLabel = 'Declared on behalf';           sourceIcon = 'fa-user-tie'; }
+    const attachmentHTML = r.decl.attachment
+      ? `<div style="margin-top: var(--s-3);"><span class="reason-tag" style="background:#fff; color:var(--c-ink-muted); border-color:var(--c-border);"><i class="fa-solid fa-paperclip" aria-hidden="true"></i> ${r.decl.attachment.name}<span style="color:var(--c-ink-subtle); font-weight:500;">${r.decl.attachment.size}</span></span></div>`
+      : '';
+
+    // Reason category meta
+    const catCountsHTML = r.context.reasonCategory.counts
+      ? `<span class="reason-tag" style="background:var(--c-warning-tint); color:var(--c-warning); border:1px solid var(--c-warning-bord);"><i class="fa-solid fa-square-poll-vertical" aria-hidden="true"></i> Counts toward §2.1</span>`
+      : `<span class="reason-tag" style="background:var(--c-success-tint); color:var(--c-success); border:1px solid #4F9A6C;"><i class="fa-solid fa-shield-halved" aria-hidden="true"></i> Excluded from §2.1</span>`;
+
+    document.getElementById('drawer-body').innerHTML = `
+      <div class="drawer__hero">
+        <div class="drawer__avatar" aria-hidden="true">${r.initials}</div>
+        <div>
+          <div class="drawer__name">${r.name}</div>
+          <div class="drawer__meta">${r.meta}</div>
+          <div class="drawer__id">${r.id}</div>
+        </div>
+      </div>
+      <div style="margin-bottom: var(--s-3);">${heroChip}</div>
+
+      <div class="drawer-section">
+        <h3><i class="fa-solid fa-clipboard-list" aria-hidden="true"></i> <span data-en="Case context" data-fr="Contexte du dossier">Case context</span></h3>
+        <dl class="context-list">
+          <dt><span data-en="Record type" data-fr="Type d'enregistrement">Record type</span></dt>
+          <dd><span class="reason-tag reason-tag--${r.context.recordType.cls}" style="font-size:11px;"><i class="fa-solid ${r.context.recordType.icon}" aria-hidden="true"></i> ${r.context.recordType.label}</span></dd>
+          <dt><span data-en="Date(s)" data-fr="Date(s)">Date(s)</span></dt>
+          <dd>${r.context.dates}</dd>
+          <dt><span data-en="Periods" data-fr="Règles">Periods</span></dt>
+          <dd>${r.context.periods}</dd>
+          <dt><span data-en="Reason" data-fr="Motif">Reason</span></dt>
+          <dd><strong>${r.context.reasonCategory.label}</strong> ${catCountsHTML}</dd>
+          <dt>Declared by</dt>
+          <dd>${r.context.declaredBy}</dd>
+          <dt>Declared</dt>
+          <dd>${r.context.declaredWhen}</dd>
+        </dl>
+      </div>
+
+      <div class="drawer-section">
+        <h3><i class="fa-solid fa-comment-dots" aria-hidden="true"></i> Declaration <span class="declaration__source" style="margin-left:6px;"><i class="fa-solid ${sourceIcon}" aria-hidden="true"></i> ${sourceLabel}</span></h3>
+        <div class="declaration">
+          <div class="declaration__avatar" aria-hidden="true">${r.decl.initials}</div>
+          <div class="declaration__bubble">
+            <div class="declaration__h"><span>${r.decl.author}</span><span class="declaration__when">${r.decl.when}</span></div>
+            <div class="declaration__quote">${r.decl.quote}</div>
+            ${attachmentHTML}
+          </div>
+        </div>
+      </div>
+
+      ${r.groupEvent ? `
+      <div class="drawer-section">
+        <h3><i class="fa-solid fa-people-group" aria-hidden="true"></i> Part of group event</h3>
+        <a href="${r.groupEvent.href}" style="display:block; padding:var(--s-3); border:1px solid #7E68DC; background:#EEEAFE; border-radius:var(--r-md); color:#3F22A6; text-decoration:none;">
+          <div style="font-weight:700; font-size:var(--fs-sm); color:#3F22A6; display:flex; align-items:center; gap:6px;">
+            <i class="fa-solid fa-music" aria-hidden="true"></i> ${r.groupEvent.name}
+          </div>
+          <div style="font-size:11px; color:#3F22A6; opacity:0.85; margin-top:4px;">
+            ${r.groupEvent.date} · led by ${r.groupEvent.leader} · <strong>${r.groupEvent.studentCount} students</strong> in this event
+          </div>
+          <div style="font-size:11px; color:var(--c-brand-ink); margin-top:6px; font-weight:600;">
+            Open group event roster →
+          </div>
+        </a>
+      </div>
+      ` : ''}
+
+      <div class="drawer-section">
+        <h3><i class="fa-solid fa-calendar-week" aria-hidden="true"></i> Affected periods preview</h3>
+        <div class="day-strips">${dayStripsHTML}</div>
+      </div>
+
+      <details class="drawer-section" open>
+        <summary>
+          <h3><i class="fa-solid fa-clock-rotate-left" aria-hidden="true"></i> <span data-en="Audit trail" data-fr="Piste d'audit">Audit trail</span></h3>
+          <i class="fa-solid fa-chevron-down collapsible-chevron" aria-hidden="true"></i>
+        </summary>
+        <ol class="audit">${auditHTML}</ol>
+      </details>
+    `;
+
+    // Render drawer actions — primary / secondary and 'more' overflow
+    document.getElementById('drawer-actions').innerHTML = r.actions.map(a => {
+      if (a.kind === 'more') {
+        const items = a.items.map(item =>
+          `<button class="more-menu__item" type="button"><i class="fa-solid ${item.icon}" aria-hidden="true"></i> ${item.label}</button>`
+        ).join('');
+        return `<div class="more-menu">
+          <button class="btn btn--secondary more-menu__btn" type="button"
+            aria-haspopup="true" aria-expanded="false" aria-label="More actions"
+            style="padding:8px 10px; min-width:36px;">
+            <i class="fa-solid fa-ellipsis" aria-hidden="true"></i>
+          </button>
+          <div class="more-menu__dropdown" role="menu">
+            <span class="more-menu__label">More actions</span>
+            ${items}
+          </div>
+        </div>`;
+      }
+      return `<button class="btn btn--${a.kind}" type="button"><i class="fa-solid ${a.icon}" aria-hidden="true"></i> ${a.label}</button>`;
+    }).join('');
+
+    // Wire overflow toggle
+    document.querySelectorAll('#drawer-actions .more-menu__btn').forEach(btn => {
+      btn.addEventListener('click', e => {
+        e.stopPropagation();
+        const dd = btn.nextElementSibling;
+        const open = dd.classList.toggle('is-open');
+        btn.setAttribute('aria-expanded', String(open));
+      });
+    });
+  }
+
+  // Close all more-menu dropdowns when clicking outside
+  document.addEventListener('click', e => {
+    if (!e.target.closest('.more-menu')) {
+      document.querySelectorAll('.more-menu__dropdown.is-open').forEach(dd => {
+        dd.classList.remove('is-open');
+        const btn = dd.previousElementSibling;
+        if (btn) btn.setAttribute('aria-expanded', 'false');
+      });
+    }
+  });
+
+  // Lang toggle
+  document.querySelectorAll('.lang-toggle button').forEach(b => {
+    b.addEventListener('click', () => {
+      document.querySelectorAll('.lang-toggle button').forEach(x => x.setAttribute('aria-pressed', 'false'));
+      b.setAttribute('aria-pressed', 'true');
+    });
+  });
+
+  // Filter chips — demo toggle
+  document.querySelectorAll('.chip-btn').forEach(c => {
+    c.addEventListener('click', () => {
+      const pressed = c.getAttribute('aria-pressed') === 'true';
+      c.setAttribute('aria-pressed', String(!pressed));
+    });
+  });
+
+  // Drawer (grid sibling)
+  const drawer = document.getElementById('drawer');
+  const closeBtn = document.getElementById('drawer-close');
+  const panelArea = document.getElementById('panel-area');
+  const live = document.getElementById('aria-live');
+  function openDrawer(name) {
+    drawer.hidden = false;
+    panelArea.classList.add('has-drawer');
+    closeBtn.focus();
+    live.textContent = 'Opened future absence detail for ' + name;
+  }
+  function closeDrawer() {
+    drawer.hidden = true;
+    panelArea.classList.remove('has-drawer');
+  }
+  document.querySelectorAll('table.list tbody tr').forEach(row => {
+    row.addEventListener('click', e => {
+      if (e.target.closest('button') || e.target.closest('a')) return;
+      document.querySelectorAll('table.list tbody tr').forEach(r => r.classList.remove('is-selected'));
+      row.classList.add('is-selected');
+      const key = row.getAttribute('data-key');
+      const r = RECORDS[key];
+      if (r) { renderRecord(key); openDrawer(r.name); }
+    });
+    row.addEventListener('keydown', e => {
+      if (e.key === 'Enter') {
+        document.querySelectorAll('table.list tbody tr').forEach(r => r.classList.remove('is-selected'));
+        row.classList.add('is-selected');
+        const key = row.getAttribute('data-key');
+        const r = RECORDS[key];
+        if (r) { renderRecord(key); openDrawer(r.name); }
+      }
+    });
+  });
+  closeBtn.addEventListener('click', closeDrawer);
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' && !drawer.hidden) closeDrawer(); });
+
+  // ── Add future absence modal ───────────────────────────────
+  const addModal = document.getElementById('add-absence-modal');
+  const openAdd  = document.getElementById('open-add-absence');
+  const closeAdd = document.getElementById('add-modal-close');
+  const cancelAdd= document.getElementById('add-modal-cancel');
+  const submitAdd= document.getElementById('add-modal-submit');
+
+  openAdd.addEventListener('click', () => {
+    if (typeof addModal.showModal === 'function') addModal.showModal();
+    else addModal.setAttribute('open', '');
+    live.textContent = 'Add future absence dialog opened';
+  });
+  function closeAddModal() {
+    if (typeof addModal.close === 'function') addModal.close();
+    else addModal.removeAttribute('open');
+  }
+  closeAdd.addEventListener('click', closeAddModal);
+  cancelAdd.addEventListener('click', closeAddModal);
+  addModal.addEventListener('click', e => {
+    // Click outside the dialog content (on the backdrop) closes it
+    const rect = addModal.getBoundingClientRect();
+    const inside = e.clientX >= rect.left && e.clientX <= rect.right && e.clientY >= rect.top && e.clientY <= rect.bottom;
+    if (!inside) closeAddModal();
+  });
+  submitAdd.addEventListener('click', () => {
+    live.textContent = 'Future absence created. Audit logged.';
+    closeAddModal();
+  });
+
+  // Date-mode toggle (Single day vs Date range)
+  document.querySelectorAll('input[name="date-mode"]').forEach(r => {
+    r.addEventListener('change', () => {
+      const isRange = document.querySelector('input[name="date-mode"]:checked').value === 'range';
+      document.getElementById('add-date-to').disabled = !isRange;
+    });
+  });
+
+  // Periods toggle (All vs Specific)
+  document.querySelectorAll('input[name="periods"]').forEach(r => {
+    r.addEventListener('change', () => {
+      const specific = document.querySelector('input[name="periods"]:checked').value === 'specific';
+      const checks = document.getElementById('period-checks');
+      checks.setAttribute('aria-hidden', String(!specific));
+      checks.style.opacity = specific ? '1' : '0.45';
+      checks.querySelectorAll('input').forEach(c => c.disabled = !specific);
+    });
+  });
+  // Initialise as disabled
+  document.querySelectorAll('#period-checks input').forEach(c => c.disabled = true);
+
+  // Category §2.1 indicator updates
+  const CAT_META = {
+    'medical-appointment':     { counts: true,  label: 'Counts toward §2.1 grade impact (varies by board policy)' },
+    'illness':                 { counts: true,  label: 'Counts toward §2.1 grade impact' },
+    'bereavement':             { counts: false, label: 'Excluded from §2.1 grade impact (compassionate)' },
+    'religious-observance':    { counts: false, label: 'Excluded from §2.1 grade impact (Charter / board policy)' },
+    'school-sanctioned-event': { counts: false, label: 'Excluded from §2.1 grade impact (school-sanctioned)' },
+    'transportation':          { counts: false, label: 'Excluded from §2.1 grade impact (outside parent control)' },
+    'family-personal':         { counts: true,  label: 'Counts toward §2.1 grade impact' },
+    'other':                   { counts: true,  label: 'Counts by default · requires free-text reason' },
+  };
+  const catSelect = document.getElementById('add-reason-cat');
+  const catInd = document.getElementById('cat-indicator');
+  const catText = document.getElementById('cat-indicator-text');
+  function updateCatIndicator() {
+    const meta = CAT_META[catSelect.value];
+    catText.textContent = meta.label;
+    catInd.classList.toggle('cat-indicator--excluded', !meta.counts);
+    catInd.querySelector('i').className = meta.counts ? 'fa-solid fa-square-poll-vertical' : 'fa-solid fa-shield-halved';
+  }
+  catSelect.addEventListener('change', updateCatIndicator);
+  updateCatIndicator();
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && addModal.hasAttribute('open')) closeAddModal();
+  });
+
+</script>
+
+</body>
+</html>

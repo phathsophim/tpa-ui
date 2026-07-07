@@ -1,0 +1,1063 @@
+<!DOCTYPE html>
+<html lang="en-CA" data-lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ClassTrack — Board Admin · Absence Trends</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+  :root{
+    --c-bg:#F0F2F7;--c-surface:#FFFFFF;--c-surface-2:#F8FAFC;--c-surface-alt:#EEF2F7;
+    --c-sidebar:#0F2546;--c-sidebar-2:#0A1B36;--c-sidebar-hover:rgba(255,255,255,0.08);--c-sidebar-active:#1B5DAF;
+    --c-border:#D6DBE2;--c-border-2:#E5E8EE;--c-border-strong:#A6ADBB;
+    --c-ink:#0F2546;--c-ink-muted:#475467;--c-ink-subtle:#5C6470;
+    --c-brand:#1B5DAF;--c-brand-ink:#0E2E55;--c-brand-tint:#E8F0FA;
+    --c-success:#1F7A3F;--c-success-tint:#E6F4EC;--c-success-bord:#4F9A6C;
+    --c-warning:#9A4708;--c-warning-tint:#FCF1DD;--c-warning-bord:#B97F38;
+    --c-danger:#B42318;--c-danger-tint:#FCE9E7;--c-danger-bord:#B0625A;
+    --c-info:#0E5C8A;--c-info-tint:#E0EFF7;
+    --c-neutral-tint:#EEF1F5;--c-purple-tint:#EEEAFE;--c-purple:#3F22A6;
+    --ff:"Segoe UI",system-ui,-apple-system,sans-serif;
+    --shadow-sm:0 1px 3px rgba(15,37,70,0.06);--shadow-md:0 4px 12px rgba(15,37,70,0.08);
+  }
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+  html,body{height:100%;}
+  body{font-family:var(--ff);background:var(--c-bg);color:var(--c-ink);font-size:14px;line-height:1.55;-webkit-font-smoothing:antialiased;}
+  a{color:var(--c-brand);text-decoration:none;}a:hover{text-decoration:underline;}
+  button{font-family:inherit;cursor:pointer;}
+
+  /* ── WF Banner ── */
+  .wf-banner{background:#F0EFFE;border-bottom:1px solid #C8C0F0;color:#3F22A6;font-size:12px;padding:6px 16px;display:flex;align-items:center;justify-content:space-between;gap:16px;}
+  .wf-banner__left{display:flex;align-items:center;gap:8px;}
+  .wf-banner__right{display:flex;align-items:center;gap:12px;}
+  .wf-banner a{color:#3F22A6;}
+
+  /* ── App layout ── */
+  .app{display:grid;grid-template-columns:240px 1fr;min-height:calc(100vh - 32px);}
+
+  /* ── Sidebar ── */
+  .sidebar{background:linear-gradient(180deg,var(--c-sidebar) 0%,var(--c-sidebar-2) 100%);color:rgba(255,255,255,0.85);display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow-y:auto;}
+  .sidebar__logo{padding:24px 16px 16px;border-bottom:1px solid rgba(255,255,255,0.08);display:flex;align-items:center;gap:12px;}
+  .sidebar__logo-mark{width:36px;height:36px;background:var(--c-sidebar-active);border-radius:10px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:16px;}
+  .sidebar__logo-text{color:#fff;font-size:16px;font-weight:700;}
+  .sidebar__logo-sub{color:rgba(255,255,255,0.6);font-size:11px;margin-top:2px;}
+  .sidebar__role-badge{margin:8px 16px 0;background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.2);border-radius:999px;padding:3px 10px;font-size:10px;font-weight:700;color:rgba(255,255,255,0.9);letter-spacing:0.06em;text-transform:uppercase;text-align:center;}
+  .sidebar__section{padding:16px 12px 4px;}
+  .sidebar__section-label{text-transform:uppercase;font-size:10px;font-weight:700;letter-spacing:0.12em;color:rgba(255,255,255,0.45);padding:0 12px;margin-bottom:4px;}
+  .nav-item{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:6px;color:rgba(255,255,255,0.78);font-size:13px;font-weight:500;min-height:36px;text-decoration:none;}
+  .nav-item:hover{background:var(--c-sidebar-hover);color:#fff;text-decoration:none;}
+  .nav-item.is-active{background:var(--c-sidebar-active);color:#fff;font-weight:600;}
+  .nav-item .nav-icon{width:20px;text-align:center;font-size:14px;}
+  .nav-item .nav-badge{margin-left:auto;background:var(--c-danger);color:#fff;font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px;}
+  .nav-item .nav-badge--neutral{background:rgba(255,255,255,0.18);color:#fff;}
+  .nav-item .nav-badge--warn{background:#7A3500;color:#fff;}
+  .sidebar__user{margin-top:auto;padding:12px 16px;border-top:1px solid rgba(255,255,255,0.08);display:flex;align-items:center;gap:12px;}
+  .avatar{width:36px;height:36px;border-radius:999px;background:var(--c-brand-tint);color:var(--c-brand-ink);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;flex-shrink:0;}
+  .sidebar__user-name{color:#fff;font-size:13px;font-weight:600;}
+  .sidebar__user-role{color:rgba(255,255,255,0.6);font-size:11px;}
+
+  /* ── Topbar ── */
+  .main{display:flex;flex-direction:column;min-width:0;}
+  .topbar{background:var(--c-surface);border-bottom:1px solid var(--c-border);display:flex;align-items:center;gap:16px;padding:0 24px;position:sticky;top:0;z-index:50;min-height:64px;}
+  .topbar__left{display:flex;flex-direction:column;gap:2px;}
+  .topbar__title{font-size:15px;font-weight:700;color:var(--c-ink);}
+  .topbar__breadcrumb{font-size:12px;color:var(--c-ink-subtle);}
+  .topbar__breadcrumb span{color:var(--c-ink-muted);}
+  .topbar__scope{background:var(--c-purple-tint);color:var(--c-purple);border:1px solid #C8C0F0;padding:6px 12px;border-radius:6px;font-size:12px;font-weight:600;display:inline-flex;align-items:center;gap:8px;margin-left:auto;}
+  .topbar__actions{display:flex;align-items:center;gap:8px;}
+  .icon-btn{width:36px;height:36px;border-radius:6px;background:transparent;border:none;color:var(--c-ink-muted);display:inline-flex;align-items:center;justify-content:center;position:relative;font-size:14px;cursor:pointer;}
+  .icon-btn:hover{background:var(--c-surface-alt);}
+  .icon-btn__count{position:absolute;top:2px;right:2px;background:var(--c-danger);color:#fff;font-size:10px;font-weight:700;min-width:18px;height:18px;border-radius:999px;display:flex;align-items:center;justify-content:center;padding:0 4px;border:2px solid var(--c-surface);}
+  .lang-toggle{display:inline-flex;border:1px solid var(--c-border-strong);border-radius:6px;overflow:hidden;}
+  .lang-toggle button{background:var(--c-surface);border:0;padding:6px 12px;font-size:12px;font-weight:700;color:var(--c-ink-muted);min-height:32px;}
+  .lang-toggle button[aria-pressed="true"]{background:var(--c-brand);color:#fff;}
+  .user-chip{display:inline-flex;align-items:center;gap:8px;padding:4px 10px 4px 4px;border:1px solid var(--c-border);border-radius:999px;font-size:12px;color:var(--c-ink-muted);min-height:36px;}
+
+  /* ── Page Header ── */
+  .page-header{background:var(--c-surface);border-bottom:1px solid var(--c-border);padding:18px 24px;display:flex;align-items:center;justify-content:space-between;gap:24px;flex-wrap:wrap;}
+  .page-header__title{font-size:20px;font-weight:800;color:var(--c-ink);line-height:1.2;}
+  .page-header__meta{font-size:12px;color:var(--c-ink-subtle);margin-top:4px;display:flex;align-items:center;gap:8px;}
+  .live-dot{width:7px;height:7px;background:var(--c-success);border-radius:50%;display:inline-block;flex-shrink:0;animation:pulse-dot 2.4s ease-in-out infinite;}
+  @keyframes pulse-dot{0%,100%{opacity:1;transform:scale(1);}50%{opacity:0.45;transform:scale(0.85);}}
+  .page-header__controls{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+  .term-selector{display:flex;align-items:center;gap:7px;background:var(--c-surface-2);border:1px solid var(--c-border);border-radius:8px;padding:5px 10px 5px 12px;}
+  .term-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--c-ink-muted);white-space:nowrap;}
+  .term-select{font-size:13px;font-weight:700;padding:0 4px;border:0;background:transparent;color:var(--c-ink);cursor:pointer;outline:none;min-width:140px;}
+  .last-updated{font-size:12px;color:var(--c-ink-subtle);display:flex;align-items:center;gap:5px;white-space:nowrap;padding:6px 10px;background:var(--c-surface-2);border:1px solid var(--c-border);border-radius:8px;}
+
+  /* ── Tabs ── */
+  .report-tabs{background:var(--c-surface);border-bottom:1px solid var(--c-border);padding:0 24px;display:flex;gap:0;position:sticky;top:64px;z-index:40;}
+  .report-tab{font-size:13px;font-weight:500;padding:11px 16px;color:var(--c-ink-muted);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;user-select:none;display:flex;align-items:center;gap:7px;}
+  .report-tab:hover{color:var(--c-ink);}
+  .report-tab.is-active{color:var(--c-brand);border-bottom-color:var(--c-brand);font-weight:600;}
+  .tab-count{background:var(--c-neutral-tint);color:var(--c-ink-muted);padding:1px 7px;border-radius:999px;font-size:11px;font-weight:700;}
+  .report-tab.is-active .tab-count{background:var(--c-brand-tint);color:var(--c-brand);}
+  .tab-panel{display:none;}
+  .tab-panel.is-active{display:block;}
+
+  /* ── Content body ── */
+  .report-body{padding:24px;display:flex;flex-direction:column;gap:16px;}
+
+  /* ── KPI Cards ── */
+  .kpi-row{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;}
+  .kpi-card{background:var(--c-surface);border:1px solid var(--c-border);border-radius:10px;padding:16px;position:relative;overflow:hidden;}
+  .kpi-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;}
+  .kpi-card--ok::before{background:var(--c-success);}
+  .kpi-card--warn::before{background:var(--c-warning);}
+  .kpi-card--alert::before{background:var(--c-danger);}
+  .kpi-card--neutral::before{background:var(--c-brand);}
+  .kpi-card--info::before{background:var(--c-info);}
+  .kpi-card__label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--c-ink-muted);margin-bottom:6px;}
+  .kpi-card__value{font-size:28px;font-weight:800;font-variant-numeric:tabular-nums;line-height:1.1;}
+  .kpi-card__value--ok{color:var(--c-success);}
+  .kpi-card__value--warn{color:var(--c-warning);}
+  .kpi-card__value--alert{color:var(--c-danger);}
+  .kpi-card__value--neutral{color:var(--c-ink);}
+  .kpi-card__value--info{color:var(--c-info);}
+  .kpi-card__sub{font-size:11px;color:var(--c-ink-subtle);margin-top:4px;}
+  .kpi-card__trend{margin-top:10px;display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:700;padding:3px 8px;border-radius:999px;}
+  .kpi-card__trend--up{background:var(--c-success-tint);color:var(--c-success);}
+  .kpi-card__trend--down{background:var(--c-danger-tint);color:var(--c-danger);}
+  .kpi-card__trend--flat{background:var(--c-neutral-tint);color:var(--c-ink-muted);}
+
+  /* ── Chart card ── */
+  .chart-card{background:var(--c-surface);border:1px solid var(--c-border);border-radius:12px;overflow:hidden;}
+  .chart-card__header{padding:14px 18px 12px;border-bottom:1px solid var(--c-border-2);display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;}
+  .chart-card__title{font-size:13px;font-weight:700;color:var(--c-ink);}
+  .chart-card__sub{font-size:12px;color:var(--c-ink-subtle);margin-top:1px;}
+  .chart-card__controls{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+  .chart-body{padding:16px 18px 8px;}
+  .chart-legend{padding:4px 18px 14px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;}
+  .legend-item{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--c-ink-muted);}
+  .legend-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+  .legend-line{width:20px;height:2px;border-radius:2px;flex-shrink:0;}
+  .chart-target-label{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--c-danger);font-weight:600;margin-left:auto;}
+
+  /* ── Toggle group ── */
+  .toggle-group{display:flex;border:1px solid var(--c-border-strong);border-radius:6px;overflow:hidden;}
+  .toggle-btn{background:var(--c-surface);border:0;border-right:1px solid var(--c-border);padding:0 12px;font-size:12px;font-weight:600;color:var(--c-ink-muted);height:32px;cursor:pointer;white-space:nowrap;transition:background 0.1s;}
+  .toggle-btn:last-child{border-right:0;}
+  .toggle-btn:hover{background:var(--c-surface-alt);}
+  .toggle-btn.is-active{background:var(--c-brand-tint);color:var(--c-brand);}
+  .toggle-btn.is-active-school-1{background:#E6F4EC;color:#1F7A3F;}
+  .toggle-btn.is-active-school-2{background:#E0EFF7;color:#0E5C8A;}
+  .toggle-btn.is-active-school-3{background:var(--c-warning-tint);color:var(--c-warning);}
+  .toggle-btn.is-active-school-4{background:var(--c-purple-tint);color:var(--c-purple);}
+
+  /* ── Section header ── */
+  .section-header{display:flex;align-items:center;justify-content:space-between;gap:12px;}
+  .section-title{font-size:14px;font-weight:700;color:var(--c-ink);}
+  .section-meta{font-size:12px;color:var(--c-ink-subtle);}
+
+  /* ── Table card ── */
+  .table-card{background:var(--c-surface);border:1px solid var(--c-border);border-radius:12px;overflow:hidden;}
+  .table-card__h{padding:12px 18px;border-bottom:1px solid var(--c-border-2);display:flex;align-items:center;justify-content:space-between;gap:12px;}
+  .table-card__title{font-size:13px;font-weight:700;color:var(--c-ink);}
+  .table-card__sub{font-size:12px;color:var(--c-ink-subtle);margin-top:1px;}
+  .data-table{width:100%;border-collapse:collapse;}
+  .data-table th{background:var(--c-surface-2);padding:9px 16px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--c-ink-muted);border-bottom:2px solid var(--c-border);text-align:left;white-space:nowrap;}
+  .data-table th.sortable{cursor:pointer;user-select:none;transition:background 0.1s,color 0.1s;}
+  .data-table th.sortable:hover{color:var(--c-brand);background:#EBF2FB;}
+  .sort-ico{margin-left:4px;opacity:0.35;font-size:10px;}
+  .data-table th.sorted .sort-ico{opacity:1;color:var(--c-brand);}
+  .data-table td{padding:12px 16px;font-size:13px;border-bottom:1px solid var(--c-border-2);color:var(--c-ink);}
+  .data-table tr:last-child td{border-bottom:0;}
+  .data-table tbody tr:hover td{background:var(--c-surface-2);}
+  .data-table tr.row--warn td{background:#FFFAF5;}
+  .data-table tr.row--alert td{background:#FFF5F4;}
+  .table-footer{padding:10px 18px;background:var(--c-surface-2);border-top:1px solid var(--c-border-2);display:flex;align-items:center;justify-content:space-between;font-size:12px;color:var(--c-ink-subtle);}
+
+  /* ── School cell with color swatch ── */
+  .school-swatch{display:inline-block;width:10px;height:10px;border-radius:2px;flex-shrink:0;margin-right:6px;vertical-align:middle;}
+
+  /* ── Rate bar ── */
+  .rate-bar{display:flex;align-items:center;gap:8px;min-width:140px;}
+  .rate-track{flex:1;height:5px;background:var(--c-surface-alt);border-radius:999px;overflow:hidden;}
+  .rate-fill{height:100%;border-radius:999px;}
+  .rate-fill--ok{background:var(--c-success);}
+  .rate-fill--warn{background:var(--c-warning);}
+  .rate-fill--alert{background:var(--c-danger);}
+  .rate-pct{font-size:13px;font-weight:700;font-variant-numeric:tabular-nums;min-width:44px;text-align:right;}
+  .rate-pct--ok{color:var(--c-success);}
+  .rate-pct--warn{color:var(--c-warning);}
+  .rate-pct--alert{color:var(--c-danger);}
+
+  /* ── Trend ── */
+  .trend{font-size:12px;font-weight:600;display:inline-flex;align-items:center;gap:4px;white-space:nowrap;}
+  .trend--up{color:var(--c-success);}
+  .trend--down{color:var(--c-danger);}
+  .trend--stable{color:var(--c-ink-subtle);}
+
+  /* ── Chips ── */
+  .chip{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:999px;font-size:11px;font-weight:700;border:1px solid transparent;}
+  .chip--ok{background:var(--c-success-tint);color:var(--c-success);border-color:var(--c-success-bord);}
+  .chip--warn{background:var(--c-warning-tint);color:var(--c-warning);border-color:var(--c-warning-bord);}
+  .chip--alert{background:var(--c-danger-tint);color:var(--c-danger);border-color:var(--c-danger-bord);}
+  .chip--neutral{background:var(--c-neutral-tint);color:var(--c-ink-muted);border-color:var(--c-border-strong);}
+  .chip--secondary{background:var(--c-purple-tint);color:var(--c-purple);border-color:#7E68DC;}
+
+  /* ── Week mini badge ── */
+  .week-badge{font-size:11px;font-variant-numeric:tabular-nums;font-weight:600;}
+  .week-badge--low{color:var(--c-danger);}
+  .week-badge--ok{color:var(--c-ink-muted);}
+
+  /* ── History tab ── */
+  .history-body{padding:24px;display:flex;flex-direction:column;gap:8px;}
+  .history-intro{font-size:12px;color:var(--c-ink-subtle);margin-bottom:4px;padding:10px 14px;background:var(--c-surface-2);border:1px solid var(--c-border-2);border-radius:8px;display:flex;align-items:center;gap:8px;}
+  .history-row{display:flex;align-items:center;gap:16px;padding:12px 16px;background:var(--c-surface);border:1px solid var(--c-border);border-radius:8px;font-size:13px;transition:background 0.1s;}
+  .history-row:hover{background:var(--c-surface-2);}
+  .history-row__name{font-weight:600;color:var(--c-ink);flex:1;}
+  .history-row__meta{color:var(--c-ink-subtle);font-size:12px;min-width:180px;}
+  .history-row__user{color:var(--c-ink-subtle);font-size:12px;min-width:140px;}
+
+  /* ── Buttons ── */
+  .btn{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:6px;font-size:13px;font-weight:600;border:1px solid transparent;min-height:34px;cursor:pointer;text-decoration:none;transition:background 0.1s;}
+  .btn--primary{background:var(--c-brand);color:#fff;border-color:var(--c-brand);}
+  .btn--primary:hover{background:var(--c-brand-ink);}
+  .btn--secondary{background:var(--c-surface);color:var(--c-ink);border-color:var(--c-border-strong);}
+  .btn--secondary:hover{background:var(--c-surface-alt);}
+  .btn--ghost{background:transparent;color:var(--c-brand);border:0;}
+  .btn--ghost:hover{background:var(--c-brand-tint);}
+  .btn--sm{padding:4px 10px;min-height:28px;font-size:12px;}
+
+  /* ── Modals ── */
+  .modal-backdrop{position:fixed;inset:0;background:rgba(15,37,70,0.48);z-index:100;display:flex;align-items:center;justify-content:center;padding:16px;}
+  .modal-backdrop.is-hidden{display:none;}
+  .modal{background:var(--c-surface);border-radius:14px;box-shadow:0 8px 28px rgba(15,37,70,0.18);width:100%;max-width:480px;display:flex;flex-direction:column;}
+  .modal__h{padding:16px 24px;border-bottom:1px solid var(--c-border-2);display:flex;align-items:flex-start;justify-content:space-between;gap:12px;}
+  .modal__title{font-size:15px;font-weight:700;color:var(--c-ink);}
+  .modal__sub{font-size:12px;color:var(--c-ink-subtle);margin-top:2px;}
+  .modal__close{width:32px;height:32px;border:none;background:transparent;border-radius:6px;display:flex;align-items:center;justify-content:center;color:var(--c-ink-muted);cursor:pointer;font-size:14px;flex-shrink:0;}
+  .modal__close:hover{background:var(--c-surface-alt);}
+  .modal__b{padding:20px 24px;display:flex;flex-direction:column;gap:16px;}
+  .modal__f{padding:12px 24px;border-top:1px solid var(--c-border-2);display:flex;justify-content:flex-end;gap:8px;}
+  .modal-field{display:flex;flex-direction:column;gap:6px;}
+  .modal-label{font-size:12px;font-weight:600;color:var(--c-ink-muted);}
+  .modal-select{padding:8px 12px;border:1px solid var(--c-border-strong);border-radius:6px;font-size:13px;background:var(--c-surface);color:var(--c-ink);width:100%;outline:none;}
+  .modal-select:focus{border-color:var(--c-brand);}
+  .format-toggle{display:flex;gap:8px;}
+  .format-btn{flex:1;padding:10px 12px;border:1.5px solid var(--c-border);border-radius:8px;background:var(--c-surface);cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px;font-size:12px;color:var(--c-ink-muted);font-weight:600;}
+  .format-btn:hover,.format-btn.is-selected{border-color:var(--c-brand);color:var(--c-brand);}
+  .format-btn.is-selected{background:var(--c-brand-tint);}
+  .format-btn i{font-size:20px;}
+  .modal-summary{background:var(--c-surface-2);border:1px solid var(--c-border-2);border-radius:8px;padding:12px 14px;font-size:12px;color:var(--c-ink-muted);display:flex;flex-direction:column;gap:4px;}
+  .modal-summary__row{display:flex;justify-content:space-between;}
+  .modal-summary__val{font-weight:600;color:var(--c-ink);}
+  .modal-date-row{display:flex;align-items:center;gap:8px;}
+  .modal--preview{max-width:940px;max-height:92vh;}
+  .modal--preview .modal__b{overflow-y:auto;flex:1;}
+  .preview-meta{display:flex;gap:20px;font-size:12px;color:var(--c-ink-muted);padding:6px 0 0;flex-wrap:wrap;}
+  .preview-meta span{display:flex;align-items:center;gap:5px;}
+  .preview-meta strong{color:var(--c-ink);}
+  /* Preview (document-style) table */
+  .preview-table{width:100%;border-collapse:collapse;font-size:12px;}
+  .preview-table thead th{padding:8px 10px;text-align:left;font-size:11px;font-weight:700;color:#fff;background:#1a1a1a;text-transform:uppercase;letter-spacing:0.05em;border-right:1px solid rgba(255,255,255,0.2);}
+  .preview-table tbody tr{border-bottom:1px solid #eee;}
+  .preview-table tbody tr:nth-child(even){background:#f8f8f8;}
+  .preview-table td{padding:8px 10px;border-right:1px solid #e0e0e0;}
+  /* KPI for preview */
+  .pkpi-grid{display:grid;gap:10px;margin-bottom:16px;}
+  .pkpi-grid--4{grid-template-columns:repeat(4,1fr);}
+  .pkpi-card{background:var(--c-surface-2);border:1px solid var(--c-border-2);border-radius:8px;padding:12px 14px;}
+  .pkpi-label{font-size:10px;font-weight:700;color:var(--c-ink-muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px;}
+  .pkpi-value{font-size:22px;font-weight:800;color:var(--c-ink);line-height:1.1;}
+  .pkpi-sub{font-size:11px;color:var(--c-ink-subtle);margin-top:2px;}
+  .preview-status{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:999px;font-size:11px;font-weight:700;border:1px solid transparent;}
+  .preview-status--ok{background:var(--c-success-tint);color:var(--c-success);border-color:var(--c-success-bord);}
+  .preview-status--warn{background:var(--c-warning-tint);color:var(--c-warning);border-color:var(--c-warning-bord);}
+  .preview-status--alert{background:var(--c-danger-tint);color:var(--c-danger);border-color:var(--c-danger-bord);}
+</style>
+</head>
+<body>
+
+<div class="wf-banner">
+  <div class="wf-banner__left">
+    <i class="fa-solid fa-pencil-ruler"></i>
+    <strong>Wireframe — Admin Portal V2 · Absence Trends (Redesigned v2)</strong>
+    <span>· EC Catholic · Board Admin</span>
+  </div>
+  <div class="wf-banner__right">
+    <a href="attendance-summary-v3.html">Attendance Summary</a>
+    <a href="dashboard.html">Dashboard</a>
+  </div>
+</div>
+
+<div class="app">
+
+  <!-- ── Sidebar ── -->
+  <aside class="sidebar">
+    <div class="sidebar__logo">
+      <div class="sidebar__logo-mark">CT</div>
+      <div>
+        <div class="sidebar__logo-text">ClassTrack</div>
+        <div class="sidebar__logo-sub">EC Catholic · Board</div>
+      </div>
+    </div>
+    <div class="sidebar__role-badge">Board Administrator</div><nav class="sidebar__section"><div class="sidebar__section-label">Overview</div><a href="dashboard.html" class="nav-item"><span class="nav-icon"><i class="fa-solid fa-gauge-high"></i></span>Dashboard</a></nav><nav class="sidebar__section"><div class="sidebar__section-label">Management</div><a href="schools.html" class="nav-item"><span class="nav-icon"><i class="fa-solid fa-school"></i></span>Schools<span class="nav-badge nav-badge--neutral">8</span></a><a href="users.html" class="nav-item"><span class="nav-icon"><i class="fa-solid fa-users-gear"></i></span>Users<span class="nav-badge nav-badge--neutral">247</span></a><a href="registered-contacts.html" class="nav-item"><span class="nav-icon"><i class="fa-solid fa-id-badge"></i></span>Registered Contacts<span class="nav-badge nav-badge--neutral">14</span></a></nav><nav class="sidebar__section"><div class="sidebar__section-label">Reports</div><a href="attendance-summary-v3.html" class="nav-item"><span class="nav-icon"><i class="fa-solid fa-chart-bar"></i></span>Attendance Summary</a><a href="absence-trends-v2.html" class="nav-item is-active" aria-current="page"><span class="nav-icon"><i class="fa-solid fa-chart-line"></i></span>Absence Trends</a><a href="chronic-absenteeism-v2.html" class="nav-item"><span class="nav-icon"><i class="fa-solid fa-user-clock"></i></span>Chronic Absenteeism</a><a href="unjustified-absences-v2.html" class="nav-item"><span class="nav-icon"><i class="fa-solid fa-circle-exclamation"></i></span>Unjustified Absences</a><a href="submission-compliance-v2.html" class="nav-item"><span class="nav-icon"><i class="fa-solid fa-clipboard-check"></i></span>Submission Compliance</a><a href="open-disputes-v2.html" class="nav-item"><span class="nav-icon"><i class="fa-solid fa-scale-balanced"></i></span>Open Disputes</a><a href="grade-threshold-v2.html" class="nav-item"><span class="nav-icon"><i class="fa-solid fa-graduation-cap"></i></span>Grade Threshold</a></nav><nav class="sidebar__section"><div class="sidebar__section-label">System</div><a href="aspen.html" class="nav-item"><span class="nav-icon"><i class="fa-solid fa-arrows-rotate"></i></span>Aspen Sync<span class="nav-badge nav-badge--warn">1</span></a><a href="configuration.html" class="nav-item"><span class="nav-icon"><i class="fa-solid fa-calendar-days"></i></span>Calendar &amp; Periods</a><a href="notifications.html" class="nav-item"><span class="nav-icon"><i class="fa-solid fa-bell-slash"></i></span>Notifications</a></nav><div class="sidebar__user">
+      <div class="avatar">MA</div>
+      <div>
+        <div class="sidebar__user-name">M. Archambault</div>
+        <div class="sidebar__user-role">Board Administrator</div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ── Main ── -->
+  <div class="main">
+
+    <!-- Topbar -->
+    <header class="topbar">
+      <div class="topbar__left">
+        <div class="topbar__title">Absence Trends</div>
+        <div class="topbar__breadcrumb">Reports <span>· Absence Trends</span></div>
+      </div>
+      <div class="topbar__scope"><i class="fa-solid fa-building-columns"></i> EC Catholic · All Schools</div>
+      <div class="topbar__actions">
+        <div class="lang-toggle">
+          <button aria-pressed="true">EN</button>
+          <button aria-pressed="false">FR</button>
+        </div>
+        <button class="icon-btn"><i class="fa-solid fa-bell"></i><span class="icon-btn__count">3</span></button>
+        <span class="user-chip">
+          <span class="avatar" style="width:28px;height:28px;font-size:11px;">MA</span>
+          M. Archambault · Board Admin
+        </span>
+      </div>
+    </header>
+
+    <!-- ── Page Header ── -->
+    <div class="page-header">
+      <div>
+        <div class="page-header__title">Absence Trends</div>
+        <div class="page-header__meta">
+          <span class="live-dot"></span>
+          Live data &nbsp;·&nbsp; EC Catholic &nbsp;·&nbsp; 4 schools
+          <span style="color:var(--c-border-strong);">·</span>
+          <span>Last synced Jun 24, 2026 · 8:45 AM</span>
+        </div>
+      </div>
+      <div class="page-header__controls">
+        <div class="term-selector">
+          <span class="term-label">Term</span>
+          <select class="term-select">
+            <option selected>Term 1 · 2025–26</option>
+            <option>Term 2 · 2024–25</option>
+            <option>Full Year · 2024–25</option>
+          </select>
+        </div>
+        <div class="last-updated">
+          <i class="fa-solid fa-clock-rotate-left" style="color:var(--c-ink-muted);"></i>
+          Sep 2, 2025 – Jun 24, 2026
+        </div>
+        <button class="btn btn--secondary btn--sm" onclick="openExportModal()">
+          <i class="fa-solid fa-file-export"></i> Export Report
+        </button>
+      </div>
+    </div>
+
+    <!-- ── Tabs ── -->
+    <div class="report-tabs" role="tablist">
+      <div class="report-tab is-active" id="tab-report" role="tab" onclick="switchTab('report')">
+        <i class="fa-solid fa-chart-line" style="font-size:12px;opacity:0.7;"></i>
+        Live Data
+      </div>
+      <div class="report-tab" id="tab-history" role="tab" onclick="switchTab('history')">
+        <i class="fa-solid fa-clock-rotate-left" style="font-size:12px;opacity:0.7;"></i>
+        Reports History
+        <span class="tab-count" id="history-count">4</span>
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════════
+         LIVE DATA TAB
+    ════════════════════════════════════ -->
+    <div class="tab-panel is-active" id="panel-report">
+      <div class="report-body">
+
+        <!-- KPI row -->
+        <div class="kpi-row">
+          <div class="kpi-card kpi-card--ok">
+            <div class="kpi-card__label">Avg. Attendance Rate</div>
+            <div class="kpi-card__value kpi-card__value--ok">93.1%</div>
+            <div class="kpi-card__sub">Board-wide · current term</div>
+            <div class="kpi-card__trend kpi-card__trend--down"><i class="fa-solid fa-arrow-down"></i> −0.4 pp vs last week</div>
+          </div>
+          <div class="kpi-card kpi-card--warn">
+            <div class="kpi-card__label">Avg. Absence Rate</div>
+            <div class="kpi-card__value kpi-card__value--warn">6.9%</div>
+            <div class="kpi-card__sub">of all scheduled periods</div>
+            <div class="kpi-card__trend kpi-card__trend--down"><i class="fa-solid fa-arrow-up"></i> +0.4 pp vs last week</div>
+          </div>
+          <div class="kpi-card kpi-card--alert">
+            <div class="kpi-card__label">Total Absences</div>
+            <div class="kpi-card__value kpi-card__value--neutral">1,842</div>
+            <div class="kpi-card__sub">recorded this term</div>
+            <div class="kpi-card__trend kpi-card__trend--flat"><i class="fa-solid fa-minus"></i> Across all 4 schools</div>
+          </div>
+          <div class="kpi-card kpi-card--neutral">
+            <div class="kpi-card__label">Worst Week</div>
+            <div class="kpi-card__value kpi-card__value--neutral" style="font-size:20px;padding-top:2px;">Dec 15</div>
+            <div class="kpi-card__sub">Board avg 91.2% · seasonal low</div>
+            <div class="kpi-card__trend kpi-card__trend--flat"><i class="fa-solid fa-snowflake"></i> Pre-holiday dip</div>
+          </div>
+          <div class="kpi-card kpi-card--info">
+            <div class="kpi-card__label">Declining Schools</div>
+            <div class="kpi-card__value kpi-card__value--info">2</div>
+            <div class="kpi-card__sub">of 4 schools trending down</div>
+            <div class="kpi-card__trend kpi-card__trend--down"><i class="fa-solid fa-arrow-trend-down"></i> vs prior 4 weeks</div>
+          </div>
+        </div>
+
+        <!-- Chart card -->
+        <div class="chart-card">
+          <div class="chart-card__header">
+            <div>
+              <div class="chart-card__title">Weekly Attendance Rate</div>
+              <div class="chart-card__sub">Sep 2025 – Jun 2026 · Target ≥ 90%</div>
+            </div>
+            <div class="chart-card__controls">
+              <div class="toggle-group" id="view-toggles">
+                <button class="toggle-btn is-active" data-view="board" onclick="setChartView('board')">Board Average</button>
+                <button class="toggle-btn" data-view="compare" onclick="setChartView('compare')">Compare Schools</button>
+              </div>
+            </div>
+          </div>
+          <div class="chart-body">
+            <div id="chart-svg-container"></div>
+          </div>
+          <div class="chart-legend" id="chart-legend">
+            <!-- Populated by JS -->
+          </div>
+        </div>
+
+        <!-- School breakdown -->
+        <div class="table-card">
+          <div class="table-card__h">
+            <div>
+              <div class="table-card__title">School breakdown</div>
+              <div class="table-card__sub">Current term · click column headers to sort</div>
+            </div>
+          </div>
+          <table class="data-table" id="breakdown-table">
+            <thead>
+              <tr>
+                <th class="sortable" data-col="name" onclick="sortBreakdown('name')">School <i class="fa-solid fa-sort sort-ico"></i></th>
+                <th>Type</th>
+                <th class="sortable sorted" data-col="rate" onclick="sortBreakdown('rate')">Avg. Rate <i class="fa-solid fa-sort-down sort-ico"></i></th>
+                <th class="sortable" data-col="trend" onclick="sortBreakdown('trend')">WoW Trend <i class="fa-solid fa-sort sort-ico"></i></th>
+                <th class="sortable" data-col="absences" onclick="sortBreakdown('absences')">Total Absences <i class="fa-solid fa-sort sort-ico"></i></th>
+                <th class="sortable" data-col="low" onclick="sortBreakdown('low')">Lowest Week <i class="fa-solid fa-sort sort-ico"></i></th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="breakdown-tbody">
+              <!-- Populated by JS -->
+            </tbody>
+          </table>
+          <div class="table-footer">
+            <span>4 schools · board-wide avg <strong>93.1%</strong> · Target ≥ 90%</span>
+            <button class="btn btn--ghost btn--sm" onclick="openExportModal()"><i class="fa-solid fa-file-export"></i> Export Report</button>
+          </div>
+        </div>
+
+      </div>
+    </div><!-- /panel-report -->
+
+
+    <!-- ════════════════════════════════════
+         REPORTS HISTORY TAB
+    ════════════════════════════════════ -->
+    <div class="tab-panel" id="panel-history">
+      <div class="history-body" id="history-list">
+        <div class="history-intro">
+          <i class="fa-solid fa-circle-info" style="color:var(--c-brand);"></i>
+          Previously generated reports — click <strong>View</strong> to open the report preview, or <i class="fa-solid fa-download" style="font-size:11px;"></i> to download.
+        </div>
+        <div class="history-row">
+          <i class="fa-solid fa-file-pdf" style="color:var(--c-danger);font-size:16px;flex-shrink:0;"></i>
+          <div class="history-row__name">Absence Trends · All Schools · Sep 2, 2025 – Jun 19, 2026</div>
+          <div class="history-row__meta"><i class="fa-regular fa-calendar"></i> Jun 19, 2026 · 9:00 AM</div>
+          <div class="history-row__user"><i class="fa-regular fa-user"></i> M. Archambault</div>
+          <div style="display:flex;gap:6px;flex-shrink:0;">
+            <button class="btn btn--secondary btn--sm" onclick="openReportRow(0)"><i class="fa-solid fa-eye"></i> View</button>
+            <button class="btn btn--ghost btn--sm"><i class="fa-solid fa-download"></i></button>
+          </div>
+        </div>
+        <div class="history-row">
+          <i class="fa-solid fa-file-pdf" style="color:var(--c-danger);font-size:16px;flex-shrink:0;"></i>
+          <div class="history-row__name">Absence Trends · École Saint-Michel · Sep 2, 2025 – Jun 5, 2026</div>
+          <div class="history-row__meta"><i class="fa-regular fa-calendar"></i> Jun 5, 2026 · 9:00 AM</div>
+          <div class="history-row__user"><i class="fa-regular fa-user"></i> M. Archambault</div>
+          <div style="display:flex;gap:6px;flex-shrink:0;">
+            <button class="btn btn--secondary btn--sm" onclick="openReportRow(1)"><i class="fa-solid fa-eye"></i> View</button>
+            <button class="btn btn--ghost btn--sm"><i class="fa-solid fa-download"></i></button>
+          </div>
+        </div>
+        <div class="history-row">
+          <i class="fa-solid fa-file-csv" style="color:var(--c-success);font-size:16px;flex-shrink:0;"></i>
+          <div class="history-row__name">Absence Trends · All Schools · Sep 2, 2025 – May 1, 2026</div>
+          <div class="history-row__meta"><i class="fa-regular fa-calendar"></i> May 1, 2026 · 9:00 AM</div>
+          <div class="history-row__user"><i class="fa-regular fa-user"></i> M. Archambault</div>
+          <div style="display:flex;gap:6px;flex-shrink:0;">
+            <button class="btn btn--secondary btn--sm" onclick="openReportRow(2)"><i class="fa-solid fa-eye"></i> View</button>
+            <button class="btn btn--ghost btn--sm"><i class="fa-solid fa-download"></i></button>
+          </div>
+        </div>
+        <div class="history-row">
+          <i class="fa-solid fa-file-pdf" style="color:var(--c-danger);font-size:16px;flex-shrink:0;"></i>
+          <div class="history-row__name">Absence Trends · All Schools · Sep 2, 2025 – Jan 15, 2026</div>
+          <div class="history-row__meta"><i class="fa-regular fa-calendar"></i> Jan 15, 2026 · 9:00 AM</div>
+          <div class="history-row__user"><i class="fa-regular fa-user"></i> M. Archambault</div>
+          <div style="display:flex;gap:6px;flex-shrink:0;">
+            <button class="btn btn--secondary btn--sm" onclick="openReportRow(3)"><i class="fa-solid fa-eye"></i> View</button>
+            <button class="btn btn--ghost btn--sm"><i class="fa-solid fa-download"></i></button>
+          </div>
+        </div>
+      </div>
+    </div><!-- /panel-history -->
+
+  </div><!-- /main -->
+</div><!-- /app -->
+
+
+<!-- ══════════════════════════════════
+     EXPORT MODAL
+══════════════════════════════════ -->
+<div class="modal-backdrop is-hidden" id="export-modal" onclick="handleBackdropClick(event,'export-modal')">
+  <div class="modal" role="dialog" aria-modal="true">
+    <div class="modal__h">
+      <div>
+        <div class="modal__title"><i class="fa-solid fa-file-export" style="color:var(--c-brand);margin-right:6px;"></i>Export Report</div>
+        <div class="modal__sub">Exports the currently filtered view as a downloadable file.</div>
+      </div>
+      <button class="modal__close" onclick="closeExportModal()"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="modal__b">
+      <div class="modal-field">
+        <label class="modal-label">Format</label>
+        <div class="format-toggle">
+          <button class="format-btn is-selected" id="fmt-pdf" onclick="selectFormat('pdf')"><i class="fa-solid fa-file-pdf"></i>PDF</button>
+          <button class="format-btn" id="fmt-csv" onclick="selectFormat('csv')"><i class="fa-solid fa-file-csv"></i>CSV</button>
+        </div>
+      </div>
+      <div class="modal-field">
+        <label class="modal-label" for="exp-school">School / Scope</label>
+        <select class="modal-select" id="exp-school">
+          <option value="all">All Schools (Board-wide)</option>
+          <option value="Notre-Dame">École Notre-Dame</option>
+          <option value="Sainte-Croix">École Sainte-Croix</option>
+          <option value="Saint-Michel">École Saint-Michel</option>
+          <option value="Saint-Luc">École Saint-Luc</option>
+        </select>
+      </div>
+      <div class="modal-field">
+        <label class="modal-label" for="exp-term">Term</label>
+        <select class="modal-select" id="exp-term">
+          <option selected>Term 1 · 2025–26</option>
+          <option>Term 2 · 2024–25</option>
+          <option>Full Year · 2024–25</option>
+        </select>
+      </div>
+      <div class="modal-field">
+        <label class="modal-label">Date Range</label>
+        <div class="modal-date-row">
+          <input type="date" class="modal-select" id="exp-from" value="2025-09-02" style="flex:1;">
+          <span style="font-size:12px;color:var(--c-ink-muted);flex-shrink:0;">to</span>
+          <input type="date" class="modal-select" id="exp-to" value="2026-06-24" style="flex:1;">
+        </div>
+      </div>
+      <div class="modal-summary">
+        <div class="modal-summary__row"><span>Report type</span><span class="modal-summary__val">Absence Trends</span></div>
+        <div class="modal-summary__row"><span>Exported by</span><span class="modal-summary__val">M. Archambault</span></div>
+        <div class="modal-summary__row"><span>Date</span><span class="modal-summary__val">June 24, 2026</span></div>
+      </div>
+    </div>
+    <div class="modal__f">
+      <button class="btn btn--secondary" onclick="closeExportModal()">Cancel</button>
+      <button class="btn btn--primary" onclick="generateReport()"><i class="fa-solid fa-file-arrow-down"></i> Generate &amp; Download</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════
+     PREVIEW MODAL (report view)
+══════════════════════════════════ -->
+<div class="modal-backdrop is-hidden" id="preview-modal" onclick="handleBackdropClick(event,'preview-modal')">
+  <div class="modal modal--preview" role="dialog" aria-modal="true">
+    <div class="modal__h">
+      <div>
+        <div class="modal__title"><i class="fa-solid fa-chart-line" style="color:var(--c-brand);margin-right:6px;"></i>Absence Trends Report</div>
+        <div class="preview-meta" id="preview-meta-bar"></div>
+      </div>
+      <button class="modal__close" onclick="hidePreview()"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="modal__b">
+      <div id="preview-content" style="display:flex;flex-direction:column;gap:16px;"></div>
+    </div>
+    <div class="modal__f" style="justify-content:space-between;">
+      <div style="display:flex;gap:8px;">
+        <button class="btn btn--ghost btn--sm"><i class="fa-solid fa-file-pdf"></i> PDF</button>
+        <button class="btn btn--ghost btn--sm"><i class="fa-solid fa-file-csv"></i> CSV</button>
+      </div>
+      <button class="btn btn--secondary" onclick="hidePreview()">Close</button>
+    </div>
+  </div>
+</div>
+
+
+<script>
+/* ═══════════════════════════════════════════
+   DATA
+═══════════════════════════════════════════ */
+var absenceTrendsData = {
+  'all':{
+    label:'All Schools (Board-wide)',
+    kpis:{attendanceRate:'93.1',absenceRate:'6.9',trend:'-0.4',totalAbsences:1842,schoolsBelow95:2},
+    weeklyData:[
+      {week:'Sep 8',rate:96.2},{week:'Sep 15',rate:95.8},{week:'Sep 22',rate:95.1},{week:'Sep 29',rate:94.7},
+      {week:'Oct 6',rate:94.9},{week:'Oct 14',rate:94.2},{week:'Oct 20',rate:93.8},{week:'Oct 27',rate:94.1},
+      {week:'Nov 3',rate:93.5},{week:'Nov 10',rate:92.9},{week:'Nov 17',rate:93.2},{week:'Nov 24',rate:92.4},
+      {week:'Dec 1',rate:92.8},{week:'Dec 8',rate:91.9},{week:'Dec 15',rate:91.2},
+      {week:'Jan 5',rate:93.4},{week:'Jan 12',rate:93.1},{week:'Jan 19',rate:92.7},{week:'Jan 26',rate:92.3},
+      {week:'Feb 2',rate:92.8},{week:'Feb 9',rate:93.1},{week:'Feb 23',rate:93.4},
+      {week:'Mar 2',rate:93.6},{week:'Mar 9',rate:93.2},{week:'Mar 16',rate:93.0},{week:'Mar 23',rate:92.6},
+      {week:'Apr 6',rate:93.8},{week:'Apr 13',rate:93.5},{week:'Apr 20',rate:93.1},{week:'Apr 27',rate:92.9},
+      {week:'May 4',rate:93.3},{week:'May 11',rate:93.0},{week:'May 18',rate:92.7},{week:'May 25',rate:92.4},
+      {week:'Jun 1',rate:93.1},{week:'Jun 8',rate:92.8},{week:'Jun 15',rate:92.5},{week:'Jun 22',rate:93.1}
+    ],
+    schoolBreakdown:[
+      {school:'École Notre-Dame',rate:'94.2',trend:'+0.1',absences:312,enrolled:245},
+      {school:'École Sainte-Croix',rate:'93.8',trend:'-0.2',absences:287,enrolled:198},
+      {school:'École Saint-Michel',rate:'91.7',trend:'-0.8',absences:418,enrolled:176},
+      {school:'École Saint-Luc',rate:'94.5',trend:'+0.3',absences:184,enrolled:134}
+    ]
+  },
+  'Notre-Dame':{
+    label:'École Notre-Dame',
+    kpis:{attendanceRate:'94.2',absenceRate:'5.8',trend:'+0.1',totalAbsences:312},
+    weeklyData:[
+      {week:'Sep 8',rate:97.1},{week:'Sep 15',rate:96.8},{week:'Sep 22',rate:96.3},{week:'Sep 29',rate:95.9},
+      {week:'Oct 6',rate:96.1},{week:'Oct 14',rate:95.5},{week:'Oct 20',rate:95.0},{week:'Oct 27',rate:95.3},
+      {week:'Nov 3',rate:94.8},{week:'Nov 10',rate:94.2},{week:'Nov 17',rate:94.5},{week:'Nov 24',rate:93.7},
+      {week:'Dec 1',rate:94.1},{week:'Dec 8',rate:93.3},{week:'Dec 15',rate:92.6},
+      {week:'Jan 5',rate:94.6},{week:'Jan 12',rate:94.3},{week:'Jan 19',rate:93.9},{week:'Jan 26',rate:93.5},
+      {week:'Feb 2',rate:94.0},{week:'Feb 9',rate:94.3},{week:'Feb 23',rate:94.6},
+      {week:'Mar 2',rate:94.8},{week:'Mar 9',rate:94.4},{week:'Mar 16',rate:94.2},{week:'Mar 23',rate:93.8},
+      {week:'Apr 6',rate:95.0},{week:'Apr 13',rate:94.7},{week:'Apr 20',rate:94.3},{week:'Apr 27',rate:94.1},
+      {week:'May 4',rate:94.5},{week:'May 11',rate:94.2},{week:'May 18',rate:93.9},{week:'May 25',rate:93.6},
+      {week:'Jun 1',rate:94.3},{week:'Jun 8',rate:94.0},{week:'Jun 15',rate:93.7},{week:'Jun 22',rate:94.2}
+    ]
+  },
+  'Sainte-Croix':{
+    label:'École Sainte-Croix',
+    kpis:{attendanceRate:'93.8',absenceRate:'6.2',trend:'-0.2',totalAbsences:287},
+    weeklyData:[
+      {week:'Sep 8',rate:96.4},{week:'Sep 15',rate:96.0},{week:'Sep 22',rate:95.5},{week:'Sep 29',rate:95.1},
+      {week:'Oct 6',rate:95.3},{week:'Oct 14',rate:94.7},{week:'Oct 20',rate:94.2},{week:'Oct 27',rate:94.5},
+      {week:'Nov 3',rate:94.0},{week:'Nov 10',rate:93.4},{week:'Nov 17',rate:93.7},{week:'Nov 24',rate:92.9},
+      {week:'Dec 1',rate:93.3},{week:'Dec 8',rate:92.5},{week:'Dec 15',rate:91.8},
+      {week:'Jan 5',rate:93.8},{week:'Jan 12',rate:93.5},{week:'Jan 19',rate:93.1},{week:'Jan 26',rate:92.7},
+      {week:'Feb 2',rate:93.2},{week:'Feb 9',rate:93.5},{week:'Feb 23',rate:93.8},
+      {week:'Mar 2',rate:94.0},{week:'Mar 9',rate:93.6},{week:'Mar 16',rate:93.4},{week:'Mar 23',rate:93.0},
+      {week:'Apr 6',rate:94.2},{week:'Apr 13',rate:93.9},{week:'Apr 20',rate:93.5},{week:'Apr 27',rate:93.3},
+      {week:'May 4',rate:93.7},{week:'May 11',rate:93.4},{week:'May 18',rate:93.1},{week:'May 25',rate:92.8},
+      {week:'Jun 1',rate:93.5},{week:'Jun 8',rate:93.2},{week:'Jun 15',rate:92.9},{week:'Jun 22',rate:93.8}
+    ]
+  },
+  'Saint-Michel':{
+    label:'École Saint-Michel',
+    kpis:{attendanceRate:'91.7',absenceRate:'8.3',trend:'-0.8',totalAbsences:418},
+    weeklyData:[
+      {week:'Sep 8',rate:95.1},{week:'Sep 15',rate:94.4},{week:'Sep 22',rate:93.9},{week:'Sep 29',rate:93.2},
+      {week:'Oct 6',rate:93.4},{week:'Oct 14',rate:92.8},{week:'Oct 20',rate:92.1},{week:'Oct 27',rate:92.5},
+      {week:'Nov 3',rate:92.0},{week:'Nov 10',rate:91.4},{week:'Nov 17',rate:91.7},{week:'Nov 24',rate:90.9},
+      {week:'Dec 1',rate:91.3},{week:'Dec 8',rate:90.5},{week:'Dec 15',rate:89.7},
+      {week:'Jan 5',rate:91.9},{week:'Jan 12',rate:91.6},{week:'Jan 19',rate:91.2},{week:'Jan 26',rate:90.8},
+      {week:'Feb 2',rate:91.3},{week:'Feb 9',rate:91.6},{week:'Feb 23',rate:91.9},
+      {week:'Mar 2',rate:92.1},{week:'Mar 9',rate:91.7},{week:'Mar 16',rate:91.5},{week:'Mar 23',rate:91.1},
+      {week:'Apr 6',rate:92.3},{week:'Apr 13',rate:92.0},{week:'Apr 20',rate:91.6},{week:'Apr 27',rate:91.4},
+      {week:'May 4',rate:91.8},{week:'May 11',rate:91.5},{week:'May 18',rate:91.2},{week:'May 25',rate:90.9},
+      {week:'Jun 1',rate:91.5},{week:'Jun 8',rate:91.2},{week:'Jun 15',rate:90.8},{week:'Jun 22',rate:91.7}
+    ]
+  },
+  'Saint-Luc':{
+    label:'École Saint-Luc',
+    kpis:{attendanceRate:'94.5',absenceRate:'5.5',trend:'+0.3',totalAbsences:184},
+    weeklyData:[
+      {week:'Sep 8',rate:97.3},{week:'Sep 15',rate:97.0},{week:'Sep 22',rate:96.5},{week:'Sep 29',rate:96.1},
+      {week:'Oct 6',rate:96.3},{week:'Oct 14',rate:95.7},{week:'Oct 20',rate:95.2},{week:'Oct 27',rate:95.5},
+      {week:'Nov 3',rate:95.0},{week:'Nov 10',rate:94.4},{week:'Nov 17',rate:94.7},{week:'Nov 24',rate:93.9},
+      {week:'Dec 1',rate:94.3},{week:'Dec 8',rate:93.5},{week:'Dec 15',rate:92.8},
+      {week:'Jan 5',rate:94.8},{week:'Jan 12',rate:94.5},{week:'Jan 19',rate:94.1},{week:'Jan 26',rate:93.7},
+      {week:'Feb 2',rate:94.2},{week:'Feb 9',rate:94.5},{week:'Feb 23',rate:94.8},
+      {week:'Mar 2',rate:95.0},{week:'Mar 9',rate:94.6},{week:'Mar 16',rate:94.4},{week:'Mar 23',rate:94.0},
+      {week:'Apr 6',rate:95.2},{week:'Apr 13',rate:94.9},{week:'Apr 20',rate:94.5},{week:'Apr 27',rate:94.3},
+      {week:'May 4',rate:94.7},{week:'May 11',rate:94.4},{week:'May 18',rate:94.1},{week:'May 25',rate:93.8},
+      {week:'Jun 1',rate:94.5},{week:'Jun 8',rate:94.2},{week:'Jun 15',rate:93.9},{week:'Jun 22',rate:94.5}
+    ]
+  }
+};
+
+/* ═══════════════════════════════════════════
+   CHART
+═══════════════════════════════════════════ */
+var CHART_W = 900, CHART_H = 224;
+var ML = 44, MR = 48, MT = 14, MB = 38;
+var cW = CHART_W - ML - MR;
+var cH = CHART_H - MT - MB;
+var Y_MIN = 87, Y_MAX = 99;
+
+var SCHOOL_COLORS = {
+  'Notre-Dame':  '#1F7A3F',
+  'Sainte-Croix':'#0E5C8A',
+  'Saint-Michel':'#9A4708',
+  'Saint-Luc':   '#3F22A6'
+};
+var SCHOOL_NAMES = {
+  'Notre-Dame':  'Notre-Dame',
+  'Sainte-Croix':'Sainte-Croix',
+  'Saint-Michel':'Saint-Michel',
+  'Saint-Luc':   'Saint-Luc'
+};
+
+var currentView = 'board';
+
+function yPos(v) { return MT + (1 - (v - Y_MIN) / (Y_MAX - Y_MIN)) * cH; }
+function xPos(i, total) { return ML + (i / (total - 1)) * cW; }
+
+function buildLinePath(data) {
+  return data.map(function(d, i){
+    return (i===0?'M':'L') + xPos(i,data.length).toFixed(1) + ',' + yPos(d.rate).toFixed(1);
+  }).join('');
+}
+
+function renderChart(view) {
+  currentView = view;
+  var refData = absenceTrendsData['all'].weeklyData;
+  var svg = '<svg viewBox="0 0 ' + CHART_W + ' ' + CHART_H + '" width="100%" style="display:block;" aria-label="Absence trends line chart">';
+
+  /* ── Grid & Y-axis ── */
+  [88,90,92,94,96,98].forEach(function(v){
+    var y = yPos(v).toFixed(1);
+    var isTarget = (v === 90);
+    svg += '<line x1="' + ML + '" y1="' + y + '" x2="' + (CHART_W - MR) + '" y2="' + y + '"';
+    if (isTarget) {
+      svg += ' stroke="#B42318" stroke-width="1.5" stroke-dasharray="5,4" opacity="0.65"';
+    } else {
+      svg += ' stroke="#D6DBE2" stroke-width="1" opacity="0.8"';
+    }
+    svg += '/>';
+    svg += '<text x="' + (ML - 6) + '" y="' + (parseFloat(y) + 4) + '" text-anchor="end" font-size="10" fill="#5C6470" font-family="Segoe UI,system-ui,sans-serif">' + v + '%</text>';
+    if (isTarget) {
+      svg += '<text x="' + (CHART_W - MR + 5) + '" y="' + (parseFloat(y) + 4) + '" font-size="9" fill="#B42318" font-weight="700" font-family="Segoe UI,system-ui,sans-serif">Target</text>';
+    }
+  });
+
+  /* ── Month separator lines (subtle) ── */
+  var monthMarkers = [0, 4, 8, 12, 15, 19, 22, 26, 30, 34]; /* approx week indices for month starts */
+  monthMarkers.forEach(function(i){
+    if (i > 0 && i < refData.length) {
+      var x = xPos(i, refData.length).toFixed(1);
+      svg += '<line x1="' + x + '" y1="' + MT + '" x2="' + x + '" y2="' + (MT+cH) + '" stroke="#EEF1F5" stroke-width="1"/>';
+    }
+  });
+
+  /* ── X-axis labels ── */
+  refData.forEach(function(d, i){
+    if (i % 4 === 0 || i === refData.length - 1) {
+      var x = xPos(i, refData.length).toFixed(1);
+      svg += '<text x="' + x + '" y="' + (CHART_H - 6) + '" text-anchor="middle" font-size="9" fill="#5C6470" font-family="Segoe UI,system-ui,sans-serif">' + d.week + '</text>';
+    }
+  });
+
+  if (view === 'board') {
+    /* Single board-average line with area fill */
+    var data = absenceTrendsData['all'].weeklyData;
+    var linePath = buildLinePath(data);
+    var areaClose = 'L' + xPos(data.length-1,data.length).toFixed(1) + ',' + (MT+cH) + ' L' + ML + ',' + (MT+cH) + ' Z';
+    svg += '<path d="' + linePath + areaClose + '" fill="rgba(27,93,175,0.07)"/>';
+    /* Colour segments: blue above 90, red below */
+    svg += '<path d="' + linePath + '" fill="none" stroke="#1B5DAF" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>';
+    /* Dot on worst week (index 14 = Dec 15) */
+    var wi = 14;
+    svg += '<circle cx="' + xPos(wi,data.length).toFixed(1) + '" cy="' + yPos(data[wi].rate).toFixed(1) + '" r="4" fill="#1B5DAF" stroke="#fff" stroke-width="1.5"/>';
+    svg += '<text x="' + xPos(wi,data.length).toFixed(1) + '" y="' + (yPos(data[wi].rate) - 8).toFixed(1) + '" text-anchor="middle" font-size="9" fill="#1B5DAF" font-weight="600" font-family="Segoe UI,system-ui,sans-serif">91.2%</text>';
+
+  } else {
+    /* Compare all 4 school lines */
+    var schools = ['Notre-Dame','Sainte-Croix','Saint-Michel','Saint-Luc'];
+    schools.forEach(function(key){
+      var data = absenceTrendsData[key] ? absenceTrendsData[key].weeklyData : [];
+      if (!data.length) return;
+      var col = SCHOOL_COLORS[key];
+      var linePath = buildLinePath(data);
+      svg += '<path d="' + linePath + '" fill="none" stroke="' + col + '" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" opacity="0.9"/>';
+      /* End label dot */
+      var lastI = data.length - 1;
+      var lx = xPos(lastI, data.length);
+      var ly = yPos(data[lastI].rate);
+      svg += '<circle cx="' + lx.toFixed(1) + '" cy="' + ly.toFixed(1) + '" r="4" fill="' + col + '" stroke="#fff" stroke-width="1.5"/>';
+      svg += '<text x="' + (lx + 8).toFixed(1) + '" y="' + (ly + 4).toFixed(1) + '" font-size="9" fill="' + col + '" font-weight="700" font-family="Segoe UI,system-ui,sans-serif">' + SCHOOL_NAMES[key] + '</text>';
+    });
+  }
+
+  svg += '</svg>';
+  document.getElementById('chart-svg-container').innerHTML = svg;
+
+  /* Update legend */
+  var legend = document.getElementById('chart-legend');
+  if (view === 'board') {
+    legend.innerHTML =
+      '<div class="legend-item"><div class="legend-line" style="background:#1B5DAF;"></div> Board average</div>' +
+      '<div class="legend-item" style="margin-left:8px;"><div class="legend-line" style="background:#B42318;border-top:1.5px dashed #B42318;height:0;"></div></div>' +
+      '<div class="legend-item"><span style="font-size:11px;color:#B42318;font-weight:700;">— 90% minimum target</span></div>' +
+      '<div class="chart-target-label"><i class="fa-solid fa-circle" style="font-size:7px;color:#1B5DAF;"></i> Worst week: Dec 15 · 91.2%</div>';
+  } else {
+    var l = '';
+    ['Notre-Dame','Sainte-Croix','Saint-Michel','Saint-Luc'].forEach(function(k){
+      l += '<div class="legend-item"><div class="legend-dot" style="background:' + SCHOOL_COLORS[k] + ';"></div>' + k + '</div>';
+    });
+    l += '<div class="chart-target-label"><span style="color:#B42318;font-weight:700;font-size:11px;">— 90% target</span></div>';
+    legend.innerHTML = l;
+  }
+}
+
+function setChartView(view) {
+  document.querySelectorAll('#view-toggles .toggle-btn').forEach(function(b){
+    b.classList.toggle('is-active', b.dataset.view === view);
+  });
+  renderChart(view);
+}
+
+/* ═══════════════════════════════════════════
+   BREAKDOWN TABLE
+═══════════════════════════════════════════ */
+var breakdownData = [
+  {key:'Notre-Dame',  name:'École Notre-Dame',  type:'elementary', rate:94.2, trend:+0.1, absences:312, enrolled:245, low:92.6},
+  {key:'Sainte-Croix',name:'École Sainte-Croix',type:'elementary', rate:93.8, trend:-0.2, absences:287, enrolled:198, low:91.8},
+  {key:'Saint-Luc',   name:'École Saint-Luc',   type:'elementary', rate:94.5, trend:+0.3, absences:184, enrolled:134, low:92.8},
+  {key:'Saint-Michel',name:'École Saint-Michel', type:'secondary',  rate:91.7, trend:-0.8, absences:418, enrolled:176, low:89.7}
+];
+var bSortCol = 'rate', bSortDir = 'desc';
+
+function sortBreakdown(col) {
+  if (bSortCol === col) { bSortDir = bSortDir === 'asc' ? 'desc' : 'asc'; }
+  else { bSortCol = col; bSortDir = col === 'name' ? 'asc' : 'desc'; }
+  document.querySelectorAll('#breakdown-table th').forEach(function(th){
+    th.classList.remove('sorted');
+    var ico = th.querySelector('.sort-ico');
+    if (ico) ico.className = 'fa-solid fa-sort sort-ico';
+  });
+  document.querySelectorAll('#breakdown-table th[data-col="' + col + '"]').forEach(function(th){
+    th.classList.add('sorted');
+    var ico = th.querySelector('.sort-ico');
+    if (ico) ico.className = (bSortDir === 'asc' ? 'fa-solid fa-sort-up' : 'fa-solid fa-sort-down') + ' sort-ico';
+  });
+  breakdownData.sort(function(a,b){
+    var av = col === 'name' ? a.name : col === 'trend' ? a.trend : col === 'absences' ? a.absences : col === 'low' ? a.low : a.rate;
+    var bv = col === 'name' ? b.name : col === 'trend' ? b.trend : col === 'absences' ? b.absences : col === 'low' ? b.low : b.rate;
+    if (typeof av === 'string') return bSortDir === 'asc' ? av.localeCompare(bv) : bv.localeCompare(av);
+    return bSortDir === 'asc' ? av - bv : bv - av;
+  });
+  renderBreakdown();
+}
+
+function renderBreakdown() {
+  var tbody = document.getElementById('breakdown-tbody');
+  var html = '';
+  breakdownData.forEach(function(s){
+    var rateCls = s.rate >= 93 ? 'ok' : s.rate >= 90 ? 'warn' : 'alert';
+    var rowCls = s.rate < 90 ? 'row--alert' : s.rate < 93 ? 'row--warn' : '';
+    var typeCls = s.type === 'secondary' ? 'chip--secondary' : 'chip--neutral';
+    var typeLabel = s.type === 'secondary' ? 'Secondary' : 'Elementary';
+    var trendHtml = s.trend > 0
+      ? '<span class="trend trend--up"><i class="fa-solid fa-arrow-trend-up"></i> +' + s.trend.toFixed(1) + ' pp</span>'
+      : s.trend < 0
+        ? '<span class="trend trend--down"><i class="fa-solid fa-arrow-trend-down"></i> ' + s.trend.toFixed(1) + ' pp</span>'
+        : '<span class="trend trend--stable"><i class="fa-solid fa-minus"></i> Stable</span>';
+    var statusChip = s.rate >= 93 ? '<span class="chip chip--ok"><i class="fa-solid fa-circle-check"></i> On track</span>'
+      : s.rate >= 90 ? '<span class="chip chip--warn"><i class="fa-solid fa-triangle-exclamation"></i> Watch</span>'
+      : '<span class="chip chip--alert"><i class="fa-solid fa-circle-exclamation"></i> At risk</span>';
+    var lowCls = s.low < 90 ? 'week-badge--low' : 'week-badge--ok';
+    var swatchColor = SCHOOL_COLORS[s.key] || '#888';
+
+    html += '<tr class="' + rowCls + '">';
+    html += '<td><span class="school-swatch" style="background:' + swatchColor + ';"></span><strong>' + s.name + '</strong></td>';
+    html += '<td><span class="chip ' + typeCls + '">' + typeLabel + '</span></td>';
+    html += '<td><div style="display:flex;align-items:center;gap:8px;min-width:140px;"><div style="flex:1;height:5px;background:var(--c-surface-alt);border-radius:999px;overflow:hidden;"><div style="width:' + s.rate + '%;height:100%;border-radius:999px;background:var(--c-' + rateCls + ');"></div></div><span style="font-size:13px;font-weight:700;min-width:44px;text-align:right;color:var(--c-' + rateCls + ');">' + s.rate.toFixed(1) + '%</span></div></td>';
+    html += '<td>' + trendHtml + '</td>';
+    html += '<td>' + s.absences.toLocaleString() + ' <span style="font-size:11px;color:var(--c-ink-subtle);">of ' + s.enrolled + ' enrolled</span></td>';
+    html += '<td><span class="' + lowCls + '">' + s.low.toFixed(1) + '%</span>' + (s.low < 90 ? ' <span style="font-size:10px;color:var(--c-danger);font-weight:700;">↓ Below target</span>' : '') + '</td>';
+    html += '<td>' + statusChip + '</td>';
+    html += '</tr>';
+  });
+  tbody.innerHTML = html;
+}
+
+/* ═══════════════════════════════════════════
+   TAB SWITCHING
+═══════════════════════════════════════════ */
+function switchTab(name) {
+  ['report','history'].forEach(function(n){
+    document.getElementById('tab-' + n).classList.toggle('is-active', n === name);
+    document.getElementById('panel-' + n).classList.toggle('is-active', n === name);
+  });
+}
+
+/* ═══════════════════════════════════════════
+   EXPORT MODAL
+═══════════════════════════════════════════ */
+var _selectedFormat = 'pdf';
+function selectFormat(fmt) {
+  _selectedFormat = fmt;
+  document.getElementById('fmt-pdf').classList.toggle('is-selected', fmt === 'pdf');
+  document.getElementById('fmt-csv').classList.toggle('is-selected', fmt === 'csv');
+}
+function openExportModal() { document.getElementById('export-modal').classList.remove('is-hidden'); document.body.style.overflow='hidden'; }
+function closeExportModal() { document.getElementById('export-modal').classList.add('is-hidden'); document.body.style.overflow=''; }
+function handleBackdropClick(e, id) { if (e.target===document.getElementById(id)) document.getElementById(id).classList.add('is-hidden'); }
+document.addEventListener('keydown', function(e){ if(e.key==='Escape'){ closeExportModal(); hidePreview(); } });
+
+/* ═══════════════════════════════════════════
+   GENERATE REPORT → HISTORY
+═══════════════════════════════════════════ */
+var _rows = [
+  {date:'Jun 19, 2026', schoolKey:'all',          dateFrom:'Sep 2, 2025',  dateTo:'Jun 19, 2026'},
+  {date:'Jun 5, 2026',  schoolKey:'Saint-Michel',  dateFrom:'Sep 2, 2025',  dateTo:'Jun 5, 2026'},
+  {date:'May 1, 2026',  schoolKey:'all',           dateFrom:'Sep 2, 2025',  dateTo:'May 1, 2026'},
+  {date:'Jan 15, 2026', schoolKey:'all',           dateFrom:'Sep 2, 2025',  dateTo:'Jan 15, 2026'}
+];
+
+function generateReport() {
+  var school = document.getElementById('exp-school').value;
+  var from   = document.getElementById('exp-from').value;
+  var to     = document.getElementById('exp-to').value;
+  var fmt    = _selectedFormat;
+
+  var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  var today  = new Date();
+  var displayDate = months[today.getMonth()] + ' ' + today.getDate() + ', ' + today.getFullYear();
+  function fmtDate(iso){ if(!iso)return ''; var p=iso.split('-'); return months[parseInt(p[1],10)-1]+' '+parseInt(p[2],10)+', '+p[0]; }
+
+  var df = fmtDate(from), dt = fmtDate(to);
+  var newIdx = _rows.length;
+  _rows.push({date:displayDate, schoolKey:school, dateFrom:df, dateTo:dt});
+
+  var d = absenceTrendsData[school] || absenceTrendsData['all'];
+  var label = d.label || 'All Schools';
+  var fmtIcon = fmt === 'csv'
+    ? '<i class="fa-solid fa-file-csv" style="color:var(--c-success);font-size:16px;flex-shrink:0;"></i>'
+    : '<i class="fa-solid fa-file-pdf" style="color:var(--c-danger);font-size:16px;flex-shrink:0;"></i>';
+  var descLabel = 'Absence Trends · ' + label + ' · ' + df + ' – ' + dt;
+  var newRow = '<div class="history-row" style="background:#EEF5FF;">' + fmtIcon +
+    '<div class="history-row__name">' + descLabel +
+    ' <span style="background:var(--c-brand);color:#fff;font-size:10px;padding:1px 6px;border-radius:999px;font-weight:700;margin-left:4px;">New</span></div>' +
+    '<div class="history-row__meta"><i class="fa-regular fa-calendar"></i> ' + displayDate + '</div>' +
+    '<div class="history-row__user"><i class="fa-regular fa-user"></i> M. Archambault</div>' +
+    '<div style="display:flex;gap:6px;flex-shrink:0;">' +
+      '<button class="btn btn--secondary btn--sm" onclick="openReportRow(' + newIdx + ')"><i class="fa-solid fa-eye"></i> View</button>' +
+      '<button class="btn btn--ghost btn--sm"><i class="fa-solid fa-download"></i></button>' +
+    '</div></div>';
+
+  var intro = document.querySelector('.history-intro');
+  if (intro) intro.insertAdjacentHTML('afterend', newRow);
+
+  var cntEl = document.getElementById('history-count');
+  cntEl.textContent = parseInt(cntEl.textContent) + 1;
+
+  closeExportModal();
+  switchTab('history');
+}
+
+/* ═══════════════════════════════════════════
+   PREVIEW MODAL (document-style report)
+═══════════════════════════════════════════ */
+function openReportRow(idx) {
+  var r = _rows[idx];
+  if (!r) return;
+  showPreview(r.schoolKey, r.date, r.dateFrom, r.dateTo);
+}
+
+function showPreview(scopeKey, dateGenerated, dateFrom, dateTo) {
+  var d = absenceTrendsData[scopeKey] || absenceTrendsData['all'];
+  var metaBar = document.getElementById('preview-meta-bar');
+  var rangeStr = (dateFrom && dateTo) ? dateFrom + ' – ' + dateTo : 'Full term';
+  metaBar.innerHTML =
+    '<span><i class="fa-solid fa-building-columns"></i> <strong>' + (d.label||'All Schools') + '</strong></span>' +
+    '<span><i class="fa-regular fa-calendar"></i> <strong>' + rangeStr + '</strong></span>' +
+    '<span><i class="fa-solid fa-clock"></i> Generated <strong>' + (dateGenerated||'Jun 24, 2026') + '</strong></span>';
+
+  var c = '';
+  var trendPos = parseFloat(d.kpis.trend) >= 0;
+  var trendColor = trendPos ? 'var(--c-success)' : 'var(--c-danger)';
+  var trendIcon = trendPos ? 'fa-arrow-trend-up' : 'fa-arrow-trend-down';
+
+  /* KPI summary */
+  c += '<div class="pkpi-grid pkpi-grid--4">';
+  c += '<div class="pkpi-card"><div class="pkpi-label">Attendance Rate</div><div class="pkpi-value">' + d.kpis.attendanceRate + '%</div><div class="pkpi-sub">average for scope</div></div>';
+  c += '<div class="pkpi-card"><div class="pkpi-label">Absence Rate</div><div class="pkpi-value" style="color:var(--c-danger);">' + d.kpis.absenceRate + '%</div><div class="pkpi-sub">of all scheduled periods</div></div>';
+  c += '<div class="pkpi-card"><div class="pkpi-label">WoW Trend</div><div class="pkpi-value" style="color:' + trendColor + ';font-size:20px;padding-top:2px;"><i class="fa-solid ' + trendIcon + '"></i> ' + d.kpis.trend + '%</div><div class="pkpi-sub">vs. previous week</div></div>';
+  c += '<div class="pkpi-card"><div class="pkpi-label">Total Absences</div><div class="pkpi-value">' + d.kpis.totalAbsences.toLocaleString() + '</div><div class="pkpi-sub">recorded in period</div></div>';
+  c += '</div>';
+
+  /* Weekly data table */
+  c += '<div style="font-size:12px;font-weight:700;color:#111;border-bottom:2px solid #111;padding-bottom:4px;margin-bottom:0;">Weekly Attendance Rate</div>';
+  c += '<div style="border:1px solid #ccc;border-top:none;border-radius:0 0 6px 6px;overflow:hidden;margin-bottom:16px;"><table class="preview-table"><thead><tr>';
+  c += '<th>Week of</th><th style="text-align:right;">Rate (%)</th><th style="text-align:right;">vs. 90% Target</th><th>Status</th>';
+  c += '</tr></thead><tbody>';
+  d.weeklyData.forEach(function(w){
+    var diff = (w.rate - 90).toFixed(1);
+    var diffStr = diff >= 0 ? '+' + diff : String(diff);
+    var st = w.rate >= 95 ? 'On Target' : w.rate >= 90 ? 'Below Target' : 'At Risk';
+    var sc = w.rate >= 95 ? 'preview-status--ok' : w.rate >= 90 ? 'preview-status--warn' : 'preview-status--alert';
+    c += '<tr><td>' + w.week + '</td>';
+    c += '<td style="text-align:right;font-weight:600;">' + w.rate.toFixed(1) + '%</td>';
+    c += '<td style="text-align:right;color:' + (diff >= 0 ? 'var(--c-success)' : 'var(--c-danger)') + ';font-weight:600;">' + diffStr + '%</td>';
+    c += '<td><span class="preview-status ' + sc + '">' + st + '</span></td></tr>';
+  });
+  c += '</tbody></table></div>';
+
+  /* School breakdown (all-schools only) */
+  if (scopeKey === 'all' && d.schoolBreakdown) {
+    c += '<div style="font-size:12px;font-weight:700;color:#111;border-bottom:2px solid #111;padding-bottom:4px;margin-bottom:0;">School Breakdown</div>';
+    c += '<div style="font-size:11px;color:#555;padding:4px 0 6px;">Average attendance rate over the selected period.</div>';
+    c += '<div style="border:1px solid #ccc;border-radius:0 0 6px 6px;overflow:hidden;"><table class="preview-table"><thead><tr>';
+    c += '<th>School</th><th style="text-align:right;">Avg. Rate</th><th style="text-align:right;">WoW Trend</th><th style="text-align:right;">Absences</th><th style="text-align:right;">Enrolled</th><th>Status</th>';
+    c += '</tr></thead><tbody>';
+    d.schoolBreakdown.forEach(function(sb){
+      var sbRate = parseFloat(sb.rate);
+      var sbSt = sbRate >= 95 ? 'On Target' : sbRate >= 90 ? 'Below Target' : 'At Risk';
+      var sbSc = sbRate >= 95 ? 'preview-status--ok' : sbRate >= 90 ? 'preview-status--warn' : 'preview-status--alert';
+      var sbTc = parseFloat(sb.trend) >= 0 ? 'var(--c-success)' : 'var(--c-danger)';
+      c += '<tr>';
+      c += '<td style="font-weight:600;">' + sb.school + '</td>';
+      c += '<td style="text-align:right;font-weight:700;">' + sb.rate + '%</td>';
+      c += '<td style="text-align:right;color:' + sbTc + ';font-weight:600;">' + sb.trend + '%</td>';
+      c += '<td style="text-align:right;">' + sb.absences + '</td>';
+      c += '<td style="text-align:right;">' + sb.enrolled + '</td>';
+      c += '<td><span class="preview-status ' + sbSc + '">' + sbSt + '</span></td>';
+      c += '</tr>';
+    });
+    c += '</tbody></table></div>';
+  }
+
+  document.getElementById('preview-content').innerHTML = c;
+  document.getElementById('preview-modal').classList.remove('is-hidden');
+  document.body.style.overflow = 'hidden';
+}
+
+function hidePreview() {
+  document.getElementById('preview-modal').classList.add('is-hidden');
+  document.body.style.overflow = '';
+}
+
+/* ═══════════════════════════════════════════
+   INIT
+═══════════════════════════════════════════ */
+renderChart('board');
+breakdownData.sort(function(a,b){ return b.rate - a.rate; });
+renderBreakdown();
+</script>
+</body>
+</html>

@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ClassTrack — Disputes</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <style>
+    :root {
+      --c-bg:#F4F6FA; --c-surface:#FFFFFF; --c-surface-2:#F8FAFC; --c-surface-alt:#EEF2F7;
+      --c-sidebar:#0F2546; --c-sidebar-2:#0A1B36; --c-sidebar-hover:rgba(255,255,255,0.08); --c-sidebar-active:#2E7DD1;
+      --c-border:#D6DBE2; --c-border-2:#E5E8EE; --c-border-strong:#A6ADBB;
+      --c-ink:#0F2546; --c-ink-muted:#475467; --c-ink-subtle:#5C6470;
+      --c-brand:#2E7DD1; --c-brand-ink:#1A5FA8; --c-brand-tint:#EBF4FF;
+      --c-success:#1F7A3F; --c-success-tint:#E6F4EC;
+      --c-warning:#9A4708; --c-warning-tint:#FCF1DD; --c-warning-bord:#B97F38;
+      --c-danger:#B42318;  --c-danger-tint:#FCE9E7;
+      --c-info:#0E5C8A;    --c-info-tint:#E0EFF7;
+      --c-purple:#4338CA; --c-purple-tint:#F3F4FF; --c-purple-bord:#9CA8E8;
+      --c-neutral-tint:#EEF1F5;
+      --s-1:4px; --s-2:8px; --s-3:12px; --s-4:16px; --s-5:24px; --s-6:32px;
+      --r-sm:4px; --r-md:6px; --r-lg:10px; --r-xl:14px; --r-pill:999px;
+      --ff:"Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+      --fs-xs:12px; --fs-sm:13px; --fs-md:14px; --fs-lg:16px; --fs-xl:20px; --fs-2xl:24px;
+      --shadow-md: 0 4px 12px rgba(15,37,70,0.08);
+      --shadow-lg: 0 8px 28px rgba(15,37,70,0.12);
+    }
+    *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+    body { font-family:var(--ff); background:var(--c-bg); color:var(--c-ink); display:flex; min-height:100vh; font-size:var(--fs-md); line-height:1.55; }
+
+    .sidebar { width:240px; min-height:100vh; background:linear-gradient(180deg,var(--c-sidebar) 0%, var(--c-sidebar-2) 100%); color:rgba(255,255,255,0.85); display:flex; flex-direction:column; flex-shrink:0; position:fixed; top:0; left:0; bottom:0; z-index:100; }
+    .sidebar-logo { padding:var(--s-5) var(--s-4) var(--s-4); border-bottom:1px solid rgba(255,255,255,0.08); }
+    .logo-mark { display:flex; align-items:center; gap:var(--s-3); }
+    .logo-icon { width:36px; height:36px; background:var(--c-sidebar-active); border-radius:var(--r-lg); display:flex; align-items:center; justify-content:center; font-weight:800; font-size:var(--fs-lg); color:#fff; }
+    .logo-text { color:#fff; font-size:16px; font-weight:700; }
+    .logo-sub { color:rgba(255,255,255,0.6); font-size:11px; margin-top:2px; }
+    .sidebar-nav { flex:1; overflow-y:auto; }
+    .sidebar-section { padding:var(--s-4) var(--s-3) var(--s-1); }
+    .sidebar-section-label { text-transform:uppercase; font-size:10px; font-weight:700; letter-spacing:.12em; color:rgba(255,255,255,0.55); padding:0 var(--s-3); margin-bottom:var(--s-1); }
+    .nav-item { display:flex; align-items:center; gap:var(--s-3); padding:10px var(--s-3); border-radius:var(--r-md); color:rgba(255,255,255,0.78); font-size:var(--fs-sm); font-weight:500; min-height:36px; text-decoration:none; }
+    .nav-item:hover { background:var(--c-sidebar-hover); color:#fff; }
+    .nav-item.active { background:var(--c-sidebar-active); color:#fff; font-weight:600; }
+    .nav-item .nav-icon { width:20px; text-align:center; font-size:14px; }
+    .nav-badge { margin-left:auto; background:var(--c-danger); color:#fff; font-size:11px; font-weight:700; padding:2px 8px; border-radius:var(--r-pill); min-width:22px; text-align:center; }
+    .sidebar-footer { margin-top:auto; padding:var(--s-3) var(--s-4); border-top:1px solid rgba(255,255,255,0.08); }
+    .user-info { display:flex; align-items:center; gap:var(--s-3); }
+    .user-avatar { width:36px; height:36px; border-radius:var(--r-pill); background:var(--c-brand-tint); color:var(--c-brand-ink); display:flex; align-items:center; justify-content:center; font-weight:700; font-size:var(--fs-sm); }
+    .user-name { color:#fff; font-size:var(--fs-sm); font-weight:600; }
+    .user-role { color:rgba(255,255,255,0.6); font-size:11px; }
+
+    .main { margin-left:240px; flex:1; display:flex; flex-direction:column; min-height:100vh; }
+    .topbar { background:var(--c-surface); border-bottom:1px solid var(--c-border); padding:var(--s-3) var(--s-5); min-height:64px; display:flex; align-items:center; gap:var(--s-4); position:sticky; top:0; z-index:50; }
+    .topbar h1 { font-size:var(--fs-xl); font-weight:700; color:var(--c-ink); }
+    .topbar p { font-size:var(--fs-xs); color:var(--c-ink-muted); margin-top:1px; }
+    .topbar-right { margin-left:auto; display:flex; align-items:center; gap:var(--s-2); }
+    .term-badge { display:flex; align-items:center; gap:var(--s-2); padding:6px var(--s-3); border:1px solid var(--c-border-strong); border-radius:var(--r-md); background:var(--c-surface); font-size:var(--fs-xs); font-weight:600; color:var(--c-ink-muted); min-height:36px; }
+    .term-badge i { color:var(--c-ink-subtle); font-size:12px; }
+    .icon-btn { width:36px; height:36px; border-radius:var(--r-md); border:1px solid transparent; background:transparent; color:var(--c-ink-muted); display:inline-flex; align-items:center; justify-content:center; cursor:pointer; font-size:var(--fs-md); position:relative; }
+    .icon-btn:hover { background:var(--c-surface-alt); color:var(--c-ink); }
+    .notif-dot { position:absolute; top:6px; right:6px; width:8px; height:8px; border-radius:50%; background:var(--c-danger); border:2px solid var(--c-surface); }
+
+    .content { padding:var(--s-5); flex:1; display:flex; flex-direction:column; gap:var(--s-4); }
+    .page-header { display:flex; align-items:flex-end; justify-content:space-between; gap:var(--s-4); flex-wrap:wrap; }
+    .page-header h2 { font-size:var(--fs-2xl); font-weight:700; letter-spacing:-.01em; }
+    .page-header p { color:var(--c-ink-muted); font-size:var(--fs-md); margin-top:4px; max-width:62ch; }
+
+    /* Ownership banner */
+    .ownership-banner { background:var(--c-purple-tint); border:1px solid var(--c-purple-bord); color:var(--c-purple); padding:var(--s-3) var(--s-4); border-radius:var(--r-lg); display:flex; align-items:flex-start; gap:var(--s-3); font-size:var(--fs-sm); }
+    .ownership-banner i { font-size:16px; margin-top:2px; }
+    .ownership-banner strong { font-weight:700; }
+    .ownership-banner__sub { font-size:var(--fs-xs); opacity:0.9; margin-top:3px; }
+
+    /* Filter chips */
+    .chip-strip { display:flex; align-items:center; gap:var(--s-2); flex-wrap:wrap; }
+    .chip-btn { background:var(--c-surface); border:1px solid var(--c-border); color:var(--c-ink-muted); padding:6px 12px; border-radius:var(--r-pill); font-size:var(--fs-xs); font-weight:600; min-height:28px; display:inline-flex; align-items:center; gap:6px; font-family:inherit; cursor:pointer; }
+    .chip-btn[aria-pressed="true"] { background:var(--c-brand-ink); color:#fff; border-color:var(--c-brand-ink); }
+    .chip-btn .chip-num { background:rgba(0,0,0,0.08); color:inherit; padding:1px 7px; border-radius:var(--r-pill); font-size:11px; }
+    .chip-btn[aria-pressed="true"] .chip-num { background:rgba(255,255,255,0.2); }
+
+    /* Card + Table */
+    .card { background:var(--c-surface); border:1px solid var(--c-border); border-radius:var(--r-lg); overflow:hidden; }
+    .card__h { padding:var(--s-4); border-bottom:1px solid var(--c-border-2); display:flex; align-items:center; justify-content:space-between; gap:var(--s-3); flex-wrap:wrap; }
+    .card__title { font-size:var(--fs-lg); font-weight:700; color:var(--c-ink); display:flex; align-items:center; gap:var(--s-2); }
+    .card__title-count { background:var(--c-neutral-tint); color:var(--c-ink-muted); padding:2px 10px; border-radius:var(--r-pill); font-size:var(--fs-xs); font-weight:700; }
+    .card__sub { font-size:var(--fs-xs); color:var(--c-ink-subtle); }
+
+    table.tbl { width:100%; border-collapse:collapse; font-size:var(--fs-sm); }
+    table.tbl thead th { padding:var(--s-3) var(--s-4); text-align:left; background:var(--c-surface-2); border-bottom:1px solid var(--c-border-2); font-size:11px; font-weight:700; color:var(--c-ink-muted); text-transform:uppercase; letter-spacing:.06em; }
+    table.tbl tbody td { padding:var(--s-3) var(--s-4); border-bottom:1px solid var(--c-border-2); vertical-align:middle; }
+    table.tbl tbody tr { cursor:pointer; transition:background .12s; }
+    table.tbl tbody tr:hover { background:var(--c-surface-2); }
+    table.tbl tbody tr:last-child td { border-bottom:0; }
+
+    .stu-cell { display:flex; align-items:center; gap:var(--s-3); }
+    .stu-avatar { width:34px; height:34px; border-radius:var(--r-pill); display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700; color:#fff; flex-shrink:0; }
+    .stu-name { font-weight:600; color:var(--c-ink); font-size:var(--fs-sm); }
+    .stu-id { font-size:11px; color:var(--c-ink-subtle); margin-top:1px; }
+
+    /* Dispute state chips */
+    .status { display:inline-flex; align-items:center; gap:4px; padding:2px 10px; border-radius:var(--r-pill); font-size:11px; font-weight:700; border:1px solid transparent; white-space:nowrap; }
+    .status i { font-size:9px; }
+    .status--noshow   { background:var(--c-danger-tint);  color:var(--c-danger);  border-color:#B0625A; }
+    .status--late     { background:var(--c-warning-tint); color:var(--c-warning); border-color:var(--c-warning-bord); }
+    .status--open     { background:#EEF0FF; color:#4338CA; border-color:#A5B4FC; }
+    .status--review   { background:var(--c-warning-tint); color:var(--c-warning); border-color:var(--c-warning-bord); }
+    .status--resolved { background:var(--c-success-tint); color:var(--c-success); border-color:#4F9A6C; }
+
+    .chev { color:var(--c-border-strong); font-size:12px; }
+
+    /* Master-detail panel area — table column + inline drawer column */
+    .panel-area { display:grid; grid-template-columns:1fr; gap:var(--s-4); align-items:stretch; }
+    .panel-area.has-drawer { grid-template-columns:1fr minmax(380px, 460px); }
+    @media (max-width: 1100px) { .panel-area.has-drawer { grid-template-columns:1fr; } }
+
+    /* Inline drawer card (sits next to table, same height) */
+    .drawer { background:var(--c-surface); border:1px solid var(--c-border); border-radius:var(--r-lg); box-shadow:var(--shadow-md); display:flex; flex-direction:column; min-height:0; overflow:hidden; max-height:calc(100vh - 200px); position:sticky; top:88px; }
+    .drawer[hidden] { display:none; }
+    .drawer__h { padding:var(--s-4); border-bottom:1px solid var(--c-border-2); display:flex; align-items:center; justify-content:space-between; gap:var(--s-3); background:var(--c-surface-2); }
+    .drawer__title { font-size:var(--fs-lg); font-weight:700; color:var(--c-ink); display:flex; align-items:center; gap:var(--s-2); }
+    .drawer__close { background:transparent; border:none; color:var(--c-ink-muted); font-size:var(--fs-md); cursor:pointer; padding:6px 10px; border-radius:var(--r-md); }
+    .drawer__close:hover { background:var(--c-surface-alt); color:var(--c-ink); }
+    .drawer__b { padding:var(--s-4); flex:1; overflow-y:auto; min-height:0; }
+
+    /* Row highlight when drawer is open on that row */
+    table.tbl tbody tr.is-selected { background:var(--c-brand-tint) !important; box-shadow:inset 3px 0 0 var(--c-brand); }
+
+    .drawer-hero { display:flex; gap:var(--s-3); align-items:center; padding-bottom:var(--s-4); border-bottom:1px solid var(--c-border-2); margin-bottom:var(--s-4); }
+    .dh-avatar { width:48px; height:48px; border-radius:var(--r-pill); display:flex; align-items:center; justify-content:center; font-size:18px; font-weight:700; color:#fff; flex-shrink:0; }
+    .dh-name { font-size:var(--fs-lg); font-weight:700; color:var(--c-ink); }
+    .dh-meta { font-size:var(--fs-xs); color:var(--c-ink-muted); margin-top:3px; display:flex; gap:var(--s-3); flex-wrap:wrap; }
+    .dh-meta span { display:inline-flex; align-items:center; gap:5px; }
+    .dh-meta i { color:var(--c-ink-subtle); font-size:10px; }
+
+    .drawer-section { margin-bottom:var(--s-4); }
+    .drawer-section h3 { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--c-ink-muted); margin-bottom:var(--s-2); display:flex; align-items:center; gap:6px; }
+    .drawer-section h3 i { color:var(--c-ink-subtle); }
+
+    .quote-block { background:var(--c-surface-2); border:1px solid var(--c-border); border-radius:var(--r-md); padding:var(--s-3) var(--s-4); }
+    .quote-meta { font-size:var(--fs-xs); color:var(--c-ink-subtle); margin-bottom:6px; }
+    .quote-meta strong { color:var(--c-ink); font-weight:600; }
+    .quote-body { font-size:var(--fs-sm); color:var(--c-ink); line-height:1.5; }
+
+    .timeline-row { display:grid; grid-template-columns:28px 1fr; gap:var(--s-3); padding:6px 0; position:relative; }
+    .timeline-row:not(:last-child)::before { content:''; position:absolute; left:13px; top:28px; bottom:-4px; width:2px; background:var(--c-border-2); }
+    .tl-dot { width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:11px; flex-shrink:0; position:relative; z-index:1; }
+    .tl-amber { background:var(--c-warning-tint); color:var(--c-warning); border:2px solid var(--c-warning-bord); }
+    .tl-purple { background:var(--c-purple-tint); color:var(--c-purple); border:2px solid var(--c-purple-bord); }
+    .tl-blue { background:var(--c-brand-tint); color:var(--c-brand-ink); border:2px solid #6E94BF; }
+    .tl-green { background:var(--c-success-tint); color:var(--c-success); border:2px solid #4F9A6C; }
+    .tl-event { font-size:var(--fs-sm); font-weight:600; color:var(--c-ink); }
+    .tl-detail { font-size:11.5px; color:var(--c-ink-subtle); margin-top:2px; }
+    .tl-time { font-size:10.5px; color:var(--c-ink-subtle); margin-top:3px; }
+
+    .note-form { background:var(--c-surface-2); border:1px solid var(--c-border); border-radius:var(--r-md); padding:var(--s-3); }
+    .note-form textarea { width:100%; border:1px solid var(--c-border); background:var(--c-surface); border-radius:var(--r-md); padding:var(--s-3); font-size:var(--fs-sm); font-family:inherit; min-height:80px; resize:vertical; outline:none; }
+    .note-form textarea:focus { border-color:var(--c-brand); }
+    .note-foot { display:flex; justify-content:space-between; align-items:center; margin-top:var(--s-2); gap:var(--s-3); }
+    .note-foot small { font-size:11px; color:var(--c-ink-subtle); }
+
+    .btn { display:inline-flex; align-items:center; justify-content:center; gap:6px; padding:8px 14px; border-radius:var(--r-md); font-size:var(--fs-sm); font-weight:600; border:1px solid transparent; min-height:36px; text-decoration:none; font-family:inherit; cursor:pointer; }
+    .btn--primary { background:var(--c-brand); color:#fff; border-color:var(--c-brand); }
+    .btn--primary:hover { background:var(--c-brand-ink); border-color:var(--c-brand-ink); }
+    .btn--secondary { background:var(--c-surface); color:var(--c-ink); border-color:var(--c-border-strong); }
+    .btn--secondary:hover { background:var(--c-surface-alt); }
+
+    .toast { position:fixed; bottom:24px; right:24px; background:var(--c-surface); border:1px solid var(--c-border); border-left:4px solid var(--c-success); box-shadow:var(--shadow-lg); padding:var(--s-3) var(--s-4); border-radius:var(--r-md); font-size:var(--fs-sm); opacity:0; transform:translateY(20px); transition:all .25s; pointer-events:none; z-index:999; }
+    .toast.show { opacity:1; transform:translateY(0); }
+  </style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-mark">
+      <div class="logo-icon">CT</div>
+      <div><div class="logo-text">ClassTrack</div><div class="logo-sub" data-en="Teacher Portal" data-fr="Portail enseignant">Teacher Portal</div></div>
+    </div>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="sidebar-section">
+      <div class="sidebar-section-label" data-en="Overview" data-fr="Vue d'ensemble">Overview</div>
+      <a class="nav-item" href="teacher-dashboard.html"><span class="nav-icon"><i class="fa-solid fa-gauge-high"></i></span> <span data-en="Dashboard" data-fr="Tableau de bord">Dashboard</span></a>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-section-label" data-en="Teaching" data-fr="Enseignement">Teaching</div>
+      <a class="nav-item" href="teacher-attendance.html"><span class="nav-icon"><i class="fa-solid fa-clipboard-check"></i></span> <span data-en="Mark Attendance" data-fr="Saisir les présences">Mark Attendance</span><span class="nav-badge">1</span></a>
+      <a class="nav-item" href="teacher-schedule-axon file.html"><span class="nav-icon"><i class="fa-solid fa-calendar-week"></i></span> <span data-en="My Classes" data-fr="Mes classes">My Classes</span></a>
+      <a class="nav-item" href="teacher-history.html"><span class="nav-icon"><i class="fa-solid fa-calendar-days"></i></span> <span data-en="Attendance History" data-fr="Historique des présences">Attendance History</span></a>
+      <a class="nav-item active" href="teacher-disputes.html"><span class="nav-icon"><i class="fa-solid fa-scale-balanced"></i></span> <span data-en="Disputes" data-fr="Contestations">Disputes</span><span class="nav-badge" style="background:#4338CA">2</span></a>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-section-label" data-en="System" data-fr="Système">System</div>
+      <a class="nav-item" onclick="showToast(T('settings_soon'))"><span class="nav-icon"><i class="fa-solid fa-gear"></i></span> <span data-en="Settings" data-fr="Paramètres">Settings</span></a>
+    </div>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="user-info">
+      <div class="user-avatar">ST</div>
+      <div><div class="user-name" data-en="Ms. S. Tremblay" data-fr="Mme S. Tremblay">Ms. S. Tremblay</div><div class="user-role" data-en="Science Dept · Grade 7A" data-fr="Dépt. Sciences · 7e A">Science Dept · Grade 7A</div></div>
+    </div>
+  </div>
+</aside>
+
+<div class="main">
+  <div class="topbar">
+    <div>
+      <h1 data-en="Disputes" data-fr="Contestations">Disputes</h1>
+      <p data-en="Attendance records being reviewed in your classes" data-fr="Dossiers en examen dans vos classes">Attendance records being reviewed in your classes</p>
+    </div>
+    <div class="topbar-right">
+      <div class="term-badge"><i class="fa-solid fa-calendar-alt"></i> <span data-en="Term 2 — 2025/26" data-fr="Étape 2 — 2025/26">Term 2 — 2025/26</span> <i class="fa-solid fa-chevron-down"></i></div>
+      <div class="icon-btn" title="Notifications"><i class="fa-solid fa-bell"></i><span class="notif-dot"></span></div>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <div class="page-header">
+      <div>
+        <h2 data-en="Disputes" data-fr="Contestations">Disputes</h2>
+        <p data-en="Click any row to review the dispute and add a contextual note. Resolution is owned by the Attendance Clerk." data-fr="Cliquez sur une ligne pour examiner la contestation et ajouter une note. La résolution est gérée par la surveillante.">Click any row to review the dispute and add a contextual note. Resolution is owned by the Attendance Clerk.</p>
+      </div>
+      <div class="chip-strip" role="tablist">
+        <button class="chip-btn" aria-pressed="true"  onclick="setFilter('all',this)"><span data-en="All" data-fr="Toutes">All</span> <span class="chip-num" id="cAll">3</span></button>
+        <button class="chip-btn" aria-pressed="false" onclick="setFilter('new',this)"><span data-en="New" data-fr="Nouvelles">New</span> <span class="chip-num" id="cNew">1</span></button>
+        <button class="chip-btn" aria-pressed="false" onclick="setFilter('review',this)"><span data-en="Under review" data-fr="En examen">Under review</span> <span class="chip-num" id="cRev">1</span></button>
+        <button class="chip-btn" aria-pressed="false" onclick="setFilter('resolved',this)"><span data-en="Resolved" data-fr="Résolues">Resolved</span> <span class="chip-num" id="cRes">1</span></button>
+      </div>
+    </div>
+
+    <div class="ownership-banner">
+      <i class="fa-solid fa-scale-balanced"></i>
+      <div>
+        <strong data-en="Dispute resolution is owned by the Attendance Clerk." data-fr="La résolution est gérée par la surveillante.">Dispute resolution is owned by the Attendance Clerk.</strong>
+        <div class="ownership-banner__sub" data-en="You can add contextual notes that help the clerk decide. While a dispute is open, the student's attendance status displays as Disputed." data-fr="Vous pouvez ajouter des notes contextuelles pour aider la surveillante. Pendant qu'une contestation est ouverte, le statut affiche Contesté.">You can add contextual notes that help the clerk decide. While a dispute is open, the student's attendance status displays as Disputed.</div>
+      </div>
+    </div>
+
+    <div class="panel-area" id="panelArea">
+      <div class="card">
+        <div class="card__h">
+          <div class="card__title"><span data-en="All disputes" data-fr="Toutes les contestations">All disputes</span> <span class="card__title-count" id="dispCount">3</span></div>
+          <span class="card__sub" data-en="Sorted by filing date — newest first" data-fr="Trié par date — plus récent en premier">Sorted by filing date — newest first</span>
+        </div>
+        <table class="tbl" id="dispTable">
+          <thead>
+            <tr>
+              <th data-en="Student" data-fr="Élève">Student</th>
+              <th data-en="Class · Period" data-fr="Classe · Période">Class · Period</th>
+              <th data-en="Disputed record" data-fr="Statut contesté">Disputed record</th>
+              <th data-en="Submitted" data-fr="Soumise">Submitted</th>
+              <th data-en="Dispute status" data-fr="État de la contestation">Dispute status</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="dispBody"></tbody>
+        </table>
+      </div>
+
+      <!-- Inline drawer — appears as a second column when open, same height as the table -->
+      <aside class="drawer" id="dispDrawer" role="region" aria-labelledby="drawerTitle" hidden>
+        <div class="drawer__h">
+          <div id="drawerTitle" class="drawer__title" data-en="Dispute detail" data-fr="Détail de la contestation">Dispute detail</div>
+          <button class="drawer__close" onclick="closeDrawer()" aria-label="Close"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div class="drawer__b" id="drawerBody"></div>
+      </aside>
+    </div>
+
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  const AVATAR_COLORS = ['#2E7DD1','#6366F1','#10B981','#F59E0B','#EF4444','#8B5CF6','#EC4899','#0891B2'];
+
+  const STRINGS = {
+    en: {
+      class_7a:'Grade 7A · Science', period_1:'Period 1', period_3:'Period 3',
+      d_aaliyah_name:'Aaliyah Carter', d_chloe_name:'Chloe Nguyen', d_luca_name:'Luca Esposito',
+      origin_absent_unjust:'Absent — unjustified', origin_late_unjust:'Late — unjustified',
+      filed_mar18:'Mar 18', filed_mar14:'Mar 14', filed_feb28:'Feb 28',
+      filed_mar18_long:'Mar 21, 9:42 AM', filed_mar14_long:'Mar 17, 8:14 AM', filed_feb28_long:'Feb 28, 2:30 PM',
+      state_new:'Open', state_review:'In review', state_resolved:'Resolved',
+      chip_absent:'Absent', chip_late:'Late',
+      sec_parent:'Parent\'s reason for dispute',
+      parent_name_a:'Marcus Carter (Parent)', parent_name_c:'Linh Nguyen (Parent)', parent_name_l:'Antonio Esposito (Parent)',
+      parent_reason_a:'Aaliyah was at school that day — she came to the office sick after first period and was sent home, so she was technically present at the start. The note from the office should have made it clear.',
+      parent_reason_c:'Chloe was on time. The bus arrived early; she signed in at 8:25 AM but the teacher marked her late.',
+      parent_reason_l:'Luca was at a school-sanctioned debate competition. Approved by Mr. Patel in advance. Records should not show this as unjustified.',
+      sec_clerk:'Clerk progress',
+      clerk_name:'M. Lacroix (Attendance Clerk)',
+      clerk_a:'Reviewing — requested documentation from front-office. Will respond by Mar 23.',
+      clerk_c:'Checked sign-in log — confirmed Chloe arrived 8:25. Adjusting record to Present.',
+      clerk_l:'Verified with Mr. Patel — pre-justification was filed but not pushed in time. Record updated to Group event.',
+      sec_timeline:'Timeline',
+      tl_filed:'Dispute filed by parent', tl_filed_d:'Parent submitted reason via the parent portal.',
+      tl_status_change:'Status changed to Disputed', tl_status_change_d:'System updated the student\'s record. Original status hidden pending review.',
+      tl_clerk_began:'Clerk began review', tl_clerk_began_d:'M. Lacroix opened the case and requested supporting docs.',
+      tl_resolved:'Resolution applied', tl_resolved_d:'M. Lacroix accepted the parent\'s reason; record updated.',
+      sec_note:'Your contextual note',
+      note_hint:'Visible to the clerk and recorded in the audit log — not sent to the parent.',
+      note_placeholder:'Add what you observed (e.g. "I confirm Aaliyah looked unwell during morning roll call…")',
+      save_note:'Save note', saved:'✓ Note saved · added to dispute audit log',
+      hint_select:'Click a row to view dispute details.',
+      settings_soon:'Settings coming soon',
+      day_after_filing:'1 day after filing',
+      days_after_filing:'3 days after filing',
+      drawer_title_fallback:'Dispute detail',
+    },
+    fr: {
+      class_7a:'7e A · Sciences', period_1:'Période 1', period_3:'Période 3',
+      d_aaliyah_name:'Aaliyah Carter', d_chloe_name:'Chloé Nguyen', d_luca_name:'Luca Esposito',
+      origin_absent_unjust:'Absence — non motivée', origin_late_unjust:'Retard — non motivé',
+      filed_mar18:'18 mars', filed_mar14:'14 mars', filed_feb28:'28 févr.',
+      filed_mar18_long:'21 mars, 9 h 42', filed_mar14_long:'17 mars, 8 h 14', filed_feb28_long:'28 févr., 14 h 30',
+      state_new:'Ouverte', state_review:'En cours', state_resolved:'Résolue',
+      chip_absent:'Absent', chip_late:'Retard',
+      sec_parent:'Motif de contestation du parent',
+      parent_name_a:'Marcus Carter (Parent)', parent_name_c:'Linh Nguyen (Parent)', parent_name_l:'Antonio Esposito (Parent)',
+      parent_reason_a:'Aaliyah était à l\'école ce jour-là — elle est venue au bureau malade après la première période et a été renvoyée chez elle. La note du bureau aurait dû clarifier cela.',
+      parent_reason_c:'Chloé était à l\'heure. L\'autobus est arrivé tôt; elle s\'est inscrite à 8 h 25 mais l\'enseignant l\'a marquée en retard.',
+      parent_reason_l:'Luca participait à un concours de débat scolaire. Approuvé par M. Patel à l\'avance. Le dossier ne devrait pas montrer cela comme non motivé.',
+      sec_clerk:'Progrès de la surveillante',
+      clerk_name:'M. Lacroix (Surveillante)',
+      clerk_a:'Examen en cours — documents demandés à la réception. Réponse d\'ici le 23 mars.',
+      clerk_c:'Journal d\'inscription vérifié — Chloé est arrivée à 8 h 25. Dossier ajusté à Présente.',
+      clerk_l:'Vérifié avec M. Patel — la pré-motivation a été déposée mais pas poussée à temps. Dossier mis à jour.',
+      sec_timeline:'Chronologie',
+      tl_filed:'Contestation déposée par le parent', tl_filed_d:'Le parent a soumis le motif via le portail parent.',
+      tl_status_change:'Statut changé à Contesté', tl_status_change_d:'Le système a mis à jour le dossier.',
+      tl_clerk_began:'La surveillante a commencé l\'examen', tl_clerk_began_d:'M. Lacroix a ouvert le cas.',
+      tl_resolved:'Résolution appliquée', tl_resolved_d:'M. Lacroix a accepté le motif du parent.',
+      sec_note:'Votre note contextuelle',
+      note_hint:'Visible par la surveillante et enregistrée dans le journal — non envoyée au parent.',
+      note_placeholder:'Ajoutez ce que vous avez observé (p. ex. « Je confirme qu\'Aaliyah avait l\'air mal en point durant l\'appel… »)',
+      save_note:'Enregistrer', saved:'✓ Note enregistrée · ajoutée au journal',
+      hint_select:'Cliquez sur une ligne pour voir les détails.',
+      settings_soon:'Paramètres — bientôt disponibles',
+      day_after_filing:'1 jour après le dépôt',
+      days_after_filing:'3 jours après le dépôt',
+      drawer_title_fallback:'Détail de la contestation',
+    }
+  };
+  function T(k){ var lang=(window.__ct_i18n&&window.__ct_i18n.getLang())||'en'; return (STRINGS[lang]&&STRINGS[lang][k])||STRINGS.en[k]||k; }
+
+  const DISPUTES = [
+    { id:'d1', studentId:'ST-1041', nameKey:'d_aaliyah_name', classKey:'class_7a', periodKey:'period_1', state:'new',      filedKey:'filed_mar18', filedLongKey:'filed_mar18_long', originKey:'origin_absent_unjust',
+      parentNameKey:'parent_name_a', parentReasonKey:'parent_reason_a', clerkKey:'clerk_a' },
+    { id:'d2', studentId:'ST-1055', nameKey:'d_chloe_name',   classKey:'class_7a', periodKey:'period_3', state:'review',   filedKey:'filed_mar14', filedLongKey:'filed_mar14_long', originKey:'origin_late_unjust',
+      parentNameKey:'parent_name_c', parentReasonKey:'parent_reason_c', clerkKey:'clerk_c' },
+    { id:'d3', studentId:'ST-1109', nameKey:'d_luca_name',    classKey:'class_7a', periodKey:'period_3', state:'resolved', filedKey:'filed_feb28', filedLongKey:'filed_feb28_long', originKey:'origin_absent_unjust',
+      parentNameKey:'parent_name_l', parentReasonKey:'parent_reason_l', clerkKey:'clerk_l' },
+  ];
+
+  const TEACHER_NOTES = {};
+  let currentFilter = 'all';
+  let selectedDispute = null;
+
+  function initials(n){ return n.split(' ').map(function(w){return w[0];}).join('').slice(0,2).toUpperCase(); }
+  function avatarColor(n){ let h=0; for(let c of n) h=(h*31+c.charCodeAt(0))&0xFFFFFF; return AVATAR_COLORS[Math.abs(h)%AVATAR_COLORS.length]; }
+
+  function setFilter(f, el) {
+    currentFilter = f;
+    document.querySelectorAll('.chip-btn').forEach(function(b){ b.setAttribute('aria-pressed','false'); });
+    if (el) el.setAttribute('aria-pressed','true');
+    renderTable();
+  }
+
+  function originChip(originKey) {
+    var isLate = originKey.indexOf('late') !== -1;
+    var cls   = isLate ? 'status--late'  : 'status--noshow';
+    var icon  = isLate ? 'fa-door-open'  : 'fa-circle-xmark';
+    var label = isLate ? T('chip_late')  : T('chip_absent');
+    return '<span class="status ' + cls + '"><i class="fa-solid ' + icon + '" aria-hidden="true"></i> ' + label + '</span>';
+  }
+
+  function renderTable() {
+    var filtered = DISPUTES.filter(function(d){
+      if (currentFilter === 'all') return true;
+      if (currentFilter === 'new') return d.state === 'new';
+      if (currentFilter === 'review') return d.state === 'review';
+      if (currentFilter === 'resolved') return d.state === 'resolved';
+      return true;
+    });
+    document.getElementById('cAll').textContent = DISPUTES.length;
+    document.getElementById('cNew').textContent = DISPUTES.filter(function(d){return d.state==='new';}).length;
+    document.getElementById('cRev').textContent = DISPUTES.filter(function(d){return d.state==='review';}).length;
+    document.getElementById('cRes').textContent = DISPUTES.filter(function(d){return d.state==='resolved';}).length;
+    document.getElementById('dispCount').textContent = filtered.length;
+    var stateMap = {
+      'new':      { cls:'status--open',     labelKey:'state_new',      icon:'fa-regular fa-circle-dot' },
+      'review':   { cls:'status--review',   labelKey:'state_review',   icon:'fa-circle' },
+      'resolved': { cls:'status--resolved', labelKey:'state_resolved', icon:'fa-circle-check' },
+    };
+    document.getElementById('dispBody').innerHTML = filtered.map(function(d){
+      var nm = T(d.nameKey);
+      var sd = stateMap[d.state];
+      var sel = d.id === selectedDispute ? ' class="is-selected"' : '';
+      return '<tr' + sel + ' onclick="openDispute(\'' + d.id + '\')">' +
+        '<td><div class="stu-cell"><div class="stu-avatar" style="background:' + avatarColor(nm) + '">' + initials(nm) + '</div><div><div class="stu-name">' + nm + '</div><div class="stu-id">' + d.studentId + '</div></div></div></td>' +
+        '<td><div style="font-size:13px">' + T(d.classKey) + '</div><div style="font-size:11.5px;color:var(--c-ink-subtle);margin-top:2px">' + T(d.periodKey) + '</div></td>' +
+        '<td>' + originChip(d.originKey) + '</td>' +
+        '<td><span style="font-size:12.5px;color:var(--c-ink-muted)">' + T(d.filedKey) + '</span></td>' +
+        '<td><span class="status ' + sd.cls + '"><i class="fa-solid ' + sd.icon + '"></i> ' + T(sd.labelKey) + '</span></td>' +
+        '<td style="text-align:right"><i class="fa-solid fa-chevron-right chev"></i></td>' +
+      '</tr>';
+    }).join('');
+  }
+
+  // ── Drawer (inline, same height as table) ───────────────────────
+  function openDispute(id) {
+    selectedDispute = id;
+    document.getElementById('dispDrawer').hidden = false;
+    document.getElementById('panelArea').classList.add('has-drawer');
+    renderDrawer();
+    renderTable(); // refresh row highlight
+  }
+  function closeDrawer() {
+    document.getElementById('dispDrawer').hidden = true;
+    document.getElementById('panelArea').classList.remove('has-drawer');
+    selectedDispute = null;
+    renderTable();
+  }
+  function renderDrawer() {
+    if (!selectedDispute) return;
+    var d = DISPUTES.find(function(x){ return x.id === selectedDispute; });
+    if (!d) return;
+    var nm = T(d.nameKey);
+    var notes = TEACHER_NOTES[d.id] || [];
+    var notesHtml = notes.map(function(n){
+      return '<div class="quote-block" style="margin-top:10px"><div class="quote-meta"><strong>Ms. S. Tremblay (Teacher)</strong> · ' + n.time + '</div><div class="quote-body">' + n.text.replace(/</g,'&lt;') + '</div></div>';
+    }).join('');
+
+    var timeline = [
+      { icon:'fa-flag', cls:'tl-amber', evt:T('tl_filed'), det:T('tl_filed_d'), time:T(d.filedLongKey) },
+      { icon:'fa-scale-balanced', cls:'tl-purple', evt:T('tl_status_change'), det:T('tl_status_change_d'), time:T(d.filedLongKey) + ' · system' },
+    ];
+    if (d.state === 'review' || d.state === 'resolved') {
+      timeline.push({ icon:'fa-magnifying-glass', cls:'tl-blue', evt:T('tl_clerk_began'), det:T('tl_clerk_began_d'), time:T('day_after_filing') });
+    }
+    if (d.state === 'resolved') {
+      timeline.push({ icon:'fa-check', cls:'tl-green', evt:T('tl_resolved'), det:T('tl_resolved_d'), time:T('days_after_filing') });
+    }
+    var timelineHtml = timeline.map(function(t){
+      return '<div class="timeline-row"><div class="tl-dot ' + t.cls + '"><i class="fa-solid ' + t.icon + '"></i></div><div><div class="tl-event">' + t.evt + '</div><div class="tl-detail">' + t.det + '</div><div class="tl-time">' + t.time + '</div></div></div>';
+    }).join('');
+
+    var noteFormDisabled = d.state === 'resolved';
+    document.getElementById('drawerTitle').innerHTML = '<i class="fa-solid fa-scale-balanced" style="color:var(--c-purple)"></i> ' + nm;
+    document.getElementById('drawerBody').innerHTML =
+      '<div class="drawer-hero">' +
+        '<div class="dh-avatar" style="background:' + avatarColor(nm) + '">' + initials(nm) + '</div>' +
+        '<div style="flex:1">' +
+          '<div class="dh-name">' + nm + '</div>' +
+          '<div class="dh-meta">' +
+            '<span><i class="fa-solid fa-id-card"></i> ' + d.studentId + '</span>' +
+            '<span><i class="fa-solid fa-door-open"></i> ' + T(d.classKey) + '</span>' +
+            '<span><i class="fa-solid fa-clock"></i> ' + T(d.periodKey) + '</span>' +
+          '</div>' +
+        '</div>' +
+      '</div>' +
+
+      '<div class="drawer-section">' +
+        '<h3><i class="fa-solid fa-comment-dots"></i> ' + T('sec_parent') + '</h3>' +
+        '<div class="quote-block">' +
+          '<div class="quote-meta"><strong>' + T(d.parentNameKey) + '</strong></div>' +
+          '<div class="quote-body">' + T(d.parentReasonKey) + '</div>' +
+        '</div>' +
+      '</div>' +
+
+      '<div class="drawer-section">' +
+        '<h3><i class="fa-solid fa-user-shield"></i> ' + T('sec_clerk') + '</h3>' +
+        '<div class="quote-block">' +
+          '<div class="quote-meta"><strong>' + T('clerk_name') + '</strong></div>' +
+          '<div class="quote-body">' + T(d.clerkKey) + '</div>' +
+        '</div>' +
+      '</div>' +
+
+      '<div class="drawer-section">' +
+        '<h3><i class="fa-solid fa-timeline"></i> ' + T('sec_timeline') + '</h3>' +
+        timelineHtml +
+      '</div>' +
+
+      '<div class="drawer-section">' +
+        '<h3><i class="fa-solid fa-pen-to-square"></i> ' + T('sec_note') + '</h3>' +
+        notesHtml +
+        '<div class="note-form" style="margin-top:' + (notes.length ? '10px' : '0') + '">' +
+          '<textarea id="disputeNote" placeholder="' + T('note_placeholder') + '" ' + (noteFormDisabled ? 'disabled' : '') + '></textarea>' +
+          '<div class="note-foot">' +
+            '<small>' + T('note_hint') + '</small>' +
+            '<button class="btn btn--primary" onclick="saveNote()" ' + (noteFormDisabled ? 'disabled' : '') + '><i class="fa-solid fa-floppy-disk"></i> ' + T('save_note') + '</button>' +
+          '</div>' +
+        '</div>' +
+      '</div>';
+  }
+
+  function saveNote() {
+    var ta = document.getElementById('disputeNote');
+    if (!ta || !ta.value.trim()) return;
+    var now = new Date();
+    var t = now.toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' });
+    (TEACHER_NOTES[selectedDispute] = TEACHER_NOTES[selectedDispute] || []).push({ text:ta.value.trim(), time:'today · ' + t });
+    showToast(T('saved'));
+    renderDrawer();
+  }
+
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg; t.classList.add('show');
+    setTimeout(function(){ t.classList.remove('show'); }, 2500);
+  }
+
+  document.addEventListener('keydown', function(e){ if (e.key === 'Escape') closeDrawer(); });
+
+  function ctRerender() { renderTable(); if (selectedDispute) renderDrawer(); }
+  window.__ct_page_rerender = ctRerender;
+
+  renderTable();
+</script>
+
+<!-- Prototype cross-portal switcher -->
+<div id="proto-switcher" style="position:fixed;bottom:16px;right:16px;z-index:9999;background:rgba(15,37,70,.95);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.1);padding:5px;border-radius:999px;box-shadow:0 8px 24px rgba(0,0,0,.25);font-family:'Segoe UI',system-ui,sans-serif;display:flex;gap:2px;align-items:center;"><span style="color:rgba(255,255,255,.4);font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:0 6px 0 10px;">Prototype</span><a href="index.html" style="display:inline-flex;align-items:center;gap:4px;padding:6px 12px;border-radius:999px;font-size:12px;font-weight:600;text-decoration:none;letter-spacing:.02em;transition:all .15s;background:transparent;color:#CBD5E0;">Index</a><a href="admin-dashboard.html" style="display:inline-flex;align-items:center;gap:4px;padding:6px 12px;border-radius:999px;font-size:12px;font-weight:600;text-decoration:none;letter-spacing:.02em;transition:all .15s;background:transparent;color:#CBD5E0;">Admin</a><a href="teacher-dashboard.html" style="display:inline-flex;align-items:center;gap:4px;padding:6px 12px;border-radius:999px;font-size:12px;font-weight:600;text-decoration:none;letter-spacing:.02em;transition:all .15s;background:#2E7DD1;color:#fff;">Teacher</a><a href="parent-app.html" style="display:inline-flex;align-items:center;gap:4px;padding:6px 12px;border-radius:999px;font-size:12px;font-weight:600;text-decoration:none;letter-spacing:.02em;transition:all .15s;background:transparent;color:#CBD5E0;">Parent</a><span style="color:rgba(255,255,255,.2);padding:0 4px;">|</span><a href="#" class="lang-btn" data-lang="en" onclick="event.preventDefault();window.__ct_i18n.setLang('en');" style="display:inline-flex;align-items:center;gap:4px;padding:6px 10px;border-radius:999px;font-size:11px;font-weight:700;text-decoration:none;letter-spacing:.04em;background:#2E7DD1;color:#fff;">EN</a><a href="#" class="lang-btn" data-lang="fr" onclick="event.preventDefault();window.__ct_i18n.setLang('fr');" style="display:inline-flex;align-items:center;gap:4px;padding:6px 10px;border-radius:999px;font-size:11px;font-weight:700;text-decoration:none;letter-spacing:.04em;background:transparent;color:#CBD5E0;">FR</a></div>
+
+<script id="i18n-core">
+(function(){
+  function getLang(){ var p=new URLSearchParams(window.location.search); return p.get('lang')==='fr'?'fr':'en'; }
+  function setLangUrl(href, lang){ if(!href||href.startsWith('http')||href.startsWith('#')||href.startsWith('javascript:'))return href; var base=href.split('?')[0].split('#')[0]; var hash=href.indexOf('#')>=0?href.substring(href.indexOf('#')):''; if(!base.endsWith('.html'))return href; return base+(lang==='fr'?'?lang=fr':'')+hash; }
+  function applyLang(){
+    var lang = getLang();
+    document.documentElement.lang = lang;
+    document.body && (document.body.dataset.lang = lang);
+    document.querySelectorAll('[data-en]').forEach(function(el){ var val=el.getAttribute('data-'+lang); if(val!==null){ if(el.hasAttribute('data-html')) el.innerHTML=val; else el.textContent=val; } });
+    document.querySelectorAll('[data-placeholder-en]').forEach(function(el){ var val=el.getAttribute('data-placeholder-'+lang); if(val!==null) el.setAttribute('placeholder',val); });
+    document.querySelectorAll('[data-title-en]').forEach(function(el){ var val=el.getAttribute('data-title-'+lang); if(val!==null) el.setAttribute('title',val); });
+    document.querySelectorAll('a[href]').forEach(function(a){ a.setAttribute('href',setLangUrl(a.getAttribute('href'),lang)); });
+    document.querySelectorAll('.lang-btn').forEach(function(btn){ var on=btn.getAttribute('data-lang')===lang; btn.style.background=on?'#2E7DD1':'transparent'; btn.style.color=on?'#fff':'#CBD5E0'; });
+    if(typeof window.__ct_page_rerender==='function') window.__ct_page_rerender();
+  }
+  function setLang(lang){ var p=new URLSearchParams(window.location.search); if(lang==='fr')p.set('lang','fr'); else p.delete('lang'); var qs=p.toString(); var newUrl=window.location.pathname+(qs?'?'+qs:'')+window.location.hash; window.history.replaceState({}, '', newUrl); applyLang(); }
+  window.__ct_i18n = { getLang:getLang, applyLang:applyLang, setLang:setLang };
+  if(document.readyState==='loading'){ document.addEventListener('DOMContentLoaded', applyLang); } else { applyLang(); }
+})();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,934 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ClassTrack — Board Admin · Reports · Grade Threshold</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+:root{
+  --c-bg:#F0F2F7;--c-surface:#FFFFFF;--c-surface-2:#F8FAFC;--c-surface-alt:#EEF2F7;
+  --c-sidebar:#0F2546;--c-sidebar-2:#0A1B36;--c-sidebar-hover:rgba(255,255,255,0.08);--c-sidebar-active:#1B5DAF;
+  --c-border:#D6DBE2;--c-border-2:#E5E8EE;--c-border-strong:#A6ADBB;
+  --c-ink:#0F2546;--c-ink-muted:#475467;--c-ink-subtle:#5C6470;
+  --c-brand:#1B5DAF;--c-brand-ink:#0E2E55;--c-brand-tint:#E8F0FA;
+  --c-success:#1F7A3F;--c-success-tint:#E6F4EC;
+  --c-warning:#9A4708;--c-warning-tint:#FCF1DD;--c-warning-bord:#B97F38;
+  --c-danger:#B42318;--c-danger-tint:#FCE9E7;
+  --c-info:#0E5C8A;--c-info-tint:#E0EFF7;
+  --c-purple:#3F22A6;--c-purple-tint:#EEEAFE;
+  --c-neutral-tint:#EEF1F5;
+  --c-focus:#FFB400;
+  --ff:"Segoe UI",system-ui,-apple-system,sans-serif;
+  --shadow-sm:0 1px 3px rgba(15,37,70,0.06);--shadow-md:0 4px 12px rgba(15,37,70,0.08);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;}
+body{font-family:var(--ff);background:var(--c-bg);color:var(--c-ink);font-size:14px;line-height:1.55;-webkit-font-smoothing:antialiased;}
+a{color:var(--c-brand);text-decoration:none;}a:hover{text-decoration:underline;}
+button{font-family:inherit;cursor:pointer;}
+
+/* Banner */
+.wf-banner{background:#F0EFFE;border-bottom:1px solid #C8C0F0;color:#3F22A6;font-size:12px;padding:6px 16px;display:flex;align-items:center;justify-content:space-between;gap:16px;}
+.wf-banner__left{display:flex;align-items:center;gap:8px;}
+.wf-banner__right{display:flex;align-items:center;gap:12px;}
+.wf-banner a{color:#3F22A6;}
+
+/* Layout */
+.app{display:grid;grid-template-columns:240px 1fr;min-height:calc(100vh - 32px);}
+
+/* Sidebar */
+.sidebar{background:linear-gradient(180deg,var(--c-sidebar) 0%,var(--c-sidebar-2) 100%);color:rgba(255,255,255,0.85);display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow-y:auto;}
+.sidebar__logo{padding:24px 16px 16px;border-bottom:1px solid rgba(255,255,255,0.08);display:flex;align-items:center;gap:12px;}
+.sidebar__logo-mark{width:36px;height:36px;background:var(--c-sidebar-active);border-radius:10px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:16px;}
+.sidebar__logo-text{color:#fff;font-size:16px;font-weight:700;}
+.sidebar__logo-sub{color:rgba(255,255,255,0.6);font-size:11px;margin-top:2px;}
+.sidebar__role-badge{margin:8px 16px 0;background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.2);border-radius:999px;padding:3px 10px;font-size:10px;font-weight:700;color:rgba(255,255,255,0.9);letter-spacing:0.06em;text-transform:uppercase;text-align:center;}
+.sidebar__section{padding:16px 12px 4px;}
+.sidebar__section-label{text-transform:uppercase;font-size:10px;font-weight:700;letter-spacing:0.12em;color:rgba(255,255,255,0.45);padding:0 12px;margin-bottom:4px;}
+.nav-item{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:6px;color:rgba(255,255,255,0.78);font-size:13px;font-weight:500;min-height:36px;text-decoration:none;}
+.nav-item:hover{background:var(--c-sidebar-hover);color:#fff;text-decoration:none;}
+.nav-item.is-active{background:var(--c-sidebar-active);color:#fff;font-weight:600;}
+.nav-item .nav-icon{width:20px;text-align:center;font-size:14px;}
+.nav-item .nav-badge{margin-left:auto;background:var(--c-danger);color:#fff;font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px;}
+.nav-item .nav-badge--warn{background:#7A3500;color:#fff;}
+.sidebar__user{margin-top:auto;padding:12px 16px;border-top:1px solid rgba(255,255,255,0.08);display:flex;align-items:center;gap:12px;}
+.avatar{width:36px;height:36px;border-radius:999px;background:var(--c-brand-tint);color:var(--c-brand-ink);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;flex-shrink:0;}
+.sidebar__user-name{color:#fff;font-size:13px;font-weight:600;}
+.sidebar__user-role{color:rgba(255,255,255,0.6);font-size:11px;}
+
+/* Main */
+.main{display:flex;flex-direction:column;min-width:0;}
+
+/* Topbar */
+.topbar{background:var(--c-surface);border-bottom:1px solid var(--c-border);display:flex;align-items:center;gap:16px;padding:0 24px;position:sticky;top:0;z-index:50;min-height:64px;}
+.topbar__left{display:flex;flex-direction:column;gap:2px;}
+.topbar__title{font-size:15px;font-weight:700;color:var(--c-ink);}
+.topbar__breadcrumb{font-size:12px;color:var(--c-ink-subtle);}
+.topbar__breadcrumb span{color:var(--c-ink-muted);}
+.topbar__scope{background:var(--c-purple-tint);color:var(--c-purple);border:1px solid #C8C0F0;padding:6px 12px;border-radius:6px;font-size:12px;font-weight:600;display:inline-flex;align-items:center;gap:8px;margin-left:auto;}
+.topbar__actions{display:flex;align-items:center;gap:8px;}
+.icon-btn{width:36px;height:36px;border-radius:6px;background:transparent;border:none;color:var(--c-ink-muted);display:inline-flex;align-items:center;justify-content:center;position:relative;font-size:14px;cursor:pointer;}
+.icon-btn:hover{background:var(--c-surface-alt);}
+.icon-btn__count{position:absolute;top:2px;right:2px;background:var(--c-danger);color:#fff;font-size:10px;font-weight:700;min-width:18px;height:18px;border-radius:999px;display:flex;align-items:center;justify-content:center;padding:0 4px;border:2px solid var(--c-surface);}
+.lang-toggle{display:inline-flex;border:1px solid var(--c-border-strong);border-radius:6px;overflow:hidden;}
+.lang-toggle button{background:var(--c-surface);border:0;padding:6px 12px;font-size:12px;font-weight:700;color:var(--c-ink-muted);min-height:32px;}
+.lang-toggle button[aria-pressed="true"]{background:var(--c-brand);color:#fff;}
+.user-chip{display:inline-flex;align-items:center;gap:8px;padding:4px 10px 4px 4px;border:1px solid var(--c-border);border-radius:999px;font-size:12px;color:var(--c-ink-muted);min-height:36px;}
+
+/* Page Header */
+.page-header{background:var(--c-surface);border-bottom:1px solid var(--c-border);padding:14px 24px;display:flex;align-items:center;justify-content:space-between;gap:16px;}
+.page-header__left{display:flex;align-items:center;gap:12px;}
+.live-dot{width:10px;height:10px;border-radius:50%;background:#22C55E;box-shadow:0 0 0 0 rgba(34,197,94,0.4);animation:pulse-dot 2s infinite;}
+@keyframes pulse-dot{0%{box-shadow:0 0 0 0 rgba(34,197,94,0.4);}70%{box-shadow:0 0 0 7px rgba(34,197,94,0);}100%{box-shadow:0 0 0 0 rgba(34,197,94,0);}}
+.page-header__title{font-size:16px;font-weight:700;color:var(--c-ink);}
+.page-header__meta{font-size:12px;color:var(--c-ink-subtle);display:flex;align-items:center;gap:10px;}
+.page-header__meta-sep{color:var(--c-border-strong);}
+.page-header__actions{display:flex;align-items:center;gap:8px;}
+
+/* Attention Bar */
+.attention-bar{padding:10px 24px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+.attention-bar--warning{background:var(--c-warning-tint);border-bottom:1px solid var(--c-warning-bord);}
+.attn-icon{width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;}
+.attn-icon--warning{background:var(--c-warning);color:#fff;}
+.attn-text{font-size:13px;font-weight:600;color:var(--c-warning);flex:1;}
+.attn-chips{display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
+.attn-chip{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:999px;font-size:11px;font-weight:700;cursor:pointer;border:1.5px solid transparent;transition:opacity .15s;}
+.attn-chip:hover{opacity:.82;}
+.attn-chip.is-selected{outline:2px solid var(--c-focus);outline-offset:1px;}
+.school-dot{display:inline-block;width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+
+/* KPI Row */
+.kpi-row{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;padding:16px 24px 0;}
+.kpi-card{background:var(--c-surface);border:1px solid var(--c-border-2);border-radius:10px;padding:14px 16px;position:relative;overflow:hidden;}
+.kpi-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;}
+.kpi-card--danger::before{background:var(--c-danger);}
+.kpi-card--warning::before{background:#D97706;}
+.kpi-card--success::before{background:var(--c-success);}
+.kpi-card--neutral::before{background:var(--c-border-strong);}
+.kpi-card--info::before{background:var(--c-info);}
+.kpi-card__label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--c-ink-muted);margin-bottom:6px;}
+.kpi-card__value{font-size:26px;font-weight:800;line-height:1.1;}
+.kpi-card__sub{font-size:11px;color:var(--c-ink-subtle);margin-top:3px;}
+.kpi-card__trend{display:inline-flex;align-items:center;gap:3px;font-size:10px;font-weight:700;padding:2px 7px;border-radius:999px;margin-top:6px;}
+.kpi-card__trend--up-bad{background:var(--c-danger-tint);color:var(--c-danger);}
+.kpi-card__trend--down-bad{background:var(--c-danger-tint);color:var(--c-danger);}
+.kpi-card__trend--down-good{background:var(--c-success-tint);color:var(--c-success);}
+.kpi-card__trend--neutral{background:var(--c-neutral-tint);color:var(--c-ink-muted);}
+
+/* Tabs */
+.report-tabs{background:var(--c-surface);border-bottom:1px solid var(--c-border);padding:0 24px;display:flex;gap:0;margin-top:16px;}
+.report-tab{font-size:13px;font-weight:500;padding:10px 16px;color:var(--c-ink-muted);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;user-select:none;}
+.report-tab:hover{color:var(--c-ink);}
+.report-tab.is-active{color:var(--c-brand);border-bottom-color:var(--c-brand);}
+.tab-panel{display:none;}
+.tab-panel.is-active{display:block;}
+
+/* Controls */
+.controls-row{padding:16px 24px 0;display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.search-wrap{position:relative;flex:0 0 220px;}
+.search-wrap i{position:absolute;left:9px;top:50%;transform:translateY(-50%);color:var(--c-ink-subtle);font-size:12px;pointer-events:none;}
+.search-input{width:100%;padding:7px 10px 7px 30px;border:1px solid var(--c-border-strong);border-radius:6px;font-size:12px;background:var(--c-surface);color:var(--c-ink);height:32px;}
+.search-input:focus{outline:2px solid var(--c-brand);outline-offset:-1px;}
+.filter-select{font-size:12px;padding:5px 10px;border:1px solid var(--c-border-strong);border-radius:6px;background:var(--c-surface);color:var(--c-ink);height:32px;cursor:pointer;}
+.controls-sep{flex:1;}
+.toggle-group{display:inline-flex;border:1px solid var(--c-border-strong);border-radius:6px;overflow:hidden;}
+.toggle-btn{background:var(--c-surface);border:0;border-right:1px solid var(--c-border-strong);padding:5px 12px;font-size:12px;font-weight:600;color:var(--c-ink-muted);cursor:pointer;white-space:nowrap;}
+.toggle-btn:last-child{border-right:0;}
+.toggle-btn:hover{background:var(--c-surface-alt);}
+.toggle-btn.is-active{background:var(--c-brand);color:#fff;}
+.toggle-btn .tgl-count{font-size:11px;font-weight:700;margin-left:4px;opacity:.8;}
+
+/* Table */
+.table-wrap{padding:12px 24px 24px;overflow-x:auto;}
+.portal-table{width:100%;border-collapse:collapse;font-size:12px;}
+.portal-table thead th{padding:9px 10px;text-align:left;font-size:11px;font-weight:700;color:var(--c-ink-muted);text-transform:uppercase;letter-spacing:0.05em;border-bottom:2px solid var(--c-border);background:var(--c-surface-2);white-space:nowrap;cursor:pointer;user-select:none;}
+.portal-table thead th:hover{color:var(--c-ink);}
+.portal-table thead th.sort-asc::after{content:' ↑';opacity:.7;}
+.portal-table thead th.sort-desc::after{content:' ↓';opacity:.7;}
+.portal-table thead th.no-sort{cursor:default;}
+.portal-table tbody tr{border-bottom:1px solid var(--c-border-2);}
+.portal-table tbody tr:hover{background:var(--c-surface-2);}
+.portal-table td{padding:10px 10px;vertical-align:middle;}
+
+/* Rate bar */
+.rate-bar-wrap{display:flex;align-items:center;gap:8px;}
+.rate-bar-track{flex:1;height:6px;background:var(--c-border-2);border-radius:3px;position:relative;min-width:60px;}
+.rate-bar-fill{height:100%;border-radius:3px;}
+.rate-bar-fill--exceeds{background:var(--c-danger);}
+.rate-bar-fill--atrisk{background:#D97706;}
+.rate-bar-marker{position:absolute;top:-3px;width:2px;height:12px;background:rgba(15,37,70,0.5);border-radius:1px;}
+.rate-bar-val{font-size:11px;font-weight:700;min-width:38px;text-align:right;}
+.rate-bar-val--exceeds{color:var(--c-danger);}
+.rate-bar-val--atrisk{color:#D97706;}
+
+/* Status pills */
+.status{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:999px;font-size:11px;font-weight:700;border:1px solid transparent;}
+.status--alert{background:var(--c-danger-tint);color:var(--c-danger);border-color:#B0625A;}
+.status--warn{background:var(--c-warning-tint);color:var(--c-warning);border-color:var(--c-warning-bord);}
+.status--ok{background:var(--c-success-tint);color:var(--c-success);border-color:#4F9A6C;}
+.status--neutral{background:var(--c-neutral-tint);color:var(--c-ink-muted);border-color:var(--c-border-strong);}
+
+/* Student cell */
+.cell-student__name{font-weight:600;color:var(--c-ink);}
+.cell-student__id{font-size:10px;color:var(--c-ink-subtle);}
+
+/* Grouped table rows */
+.student-parent-row{cursor:pointer;}
+.student-parent-row:hover td{filter:brightness(0.97);}
+.student-parent-row--exceeds td{background:#FEF7F7;}
+.student-parent-row--atrisk td{background:#FFFCF5;}
+.subject-sub-row td{background:var(--c-surface);border-bottom:1px solid var(--c-border-2);}
+.subject-sub-row:last-of-type td{border-bottom:2px solid var(--c-border);}
+.subject-count-badge{display:inline-flex;align-items:center;gap:3px;padding:1px 7px;border-radius:999px;font-size:10px;font-weight:700;background:#FEF3C7;color:#92400E;margin-left:6px;vertical-align:middle;}
+.chevron-icon{display:inline-flex;width:16px;height:16px;align-items:center;justify-content:center;color:var(--c-ink-subtle);transition:transform .2s;font-size:9px;flex-shrink:0;}
+
+/* Empty state */
+.empty-state{padding:40px;text-align:center;color:var(--c-ink-subtle);}
+.empty-state i{font-size:28px;margin-bottom:10px;opacity:.4;}
+
+/* History */
+.history-body{padding:24px;display:flex;flex-direction:column;gap:8px;}
+.history-row{display:flex;align-items:center;gap:16px;padding:12px 16px;background:var(--c-surface);border:1px solid var(--c-border);border-radius:8px;font-size:13px;}
+.history-row:hover{background:var(--c-surface-2);}
+.history-row__name{font-weight:600;color:var(--c-ink);flex:1;}
+.history-row__meta{color:var(--c-ink-subtle);font-size:12px;min-width:180px;}
+.history-row__user{color:var(--c-ink-subtle);font-size:12px;min-width:140px;}
+
+/* Buttons */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:6px;font-size:13px;font-weight:600;border:1px solid transparent;min-height:34px;cursor:pointer;text-decoration:none;}
+.btn--primary{background:var(--c-brand);color:#fff;border-color:var(--c-brand);}
+.btn--primary:hover{background:var(--c-brand-ink);}
+.btn--secondary{background:var(--c-surface);color:var(--c-ink);border-color:var(--c-border-strong);}
+.btn--secondary:hover{background:var(--c-surface-alt);}
+.btn--sm{padding:4px 10px;min-height:28px;font-size:12px;}
+
+/* Modals */
+.modal-backdrop{position:fixed;inset:0;background:rgba(15,37,70,0.48);z-index:100;display:flex;align-items:center;justify-content:center;padding:16px;}
+.modal-backdrop.is-hidden{display:none;}
+.modal{background:var(--c-surface);border-radius:14px;box-shadow:0 8px 28px rgba(15,37,70,0.18);width:100%;max-width:480px;display:flex;flex-direction:column;}
+.modal__h{padding:16px 24px;border-bottom:1px solid var(--c-border-2);display:flex;align-items:center;justify-content:space-between;}
+.modal__title{font-size:15px;font-weight:700;color:var(--c-ink);}
+.modal__close{width:32px;height:32px;border:none;background:transparent;border-radius:6px;display:flex;align-items:center;justify-content:center;color:var(--c-ink-muted);cursor:pointer;font-size:14px;}
+.modal__close:hover{background:var(--c-surface-alt);}
+.modal__b{padding:20px 24px;display:flex;flex-direction:column;gap:16px;}
+.modal__f{padding:12px 24px;border-top:1px solid var(--c-border-2);display:flex;justify-content:flex-end;gap:8px;}
+.modal-field{display:flex;flex-direction:column;gap:6px;}
+.modal-label{font-size:12px;font-weight:600;color:var(--c-ink-muted);}
+.modal-select{padding:8px 12px;border:1px solid var(--c-border-strong);border-radius:6px;font-size:13px;background:var(--c-surface);color:var(--c-ink);width:100%;}
+.modal-summary{background:var(--c-surface-2);border:1px solid var(--c-border-2);border-radius:8px;padding:12px 14px;font-size:12px;color:var(--c-ink-muted);display:flex;flex-direction:column;gap:4px;}
+.modal-summary__row{display:flex;justify-content:space-between;}
+.modal-summary__val{font-weight:600;color:var(--c-ink);}
+.format-options{display:flex;gap:8px;}
+.format-option{flex:1;border:2px solid var(--c-border);border-radius:8px;padding:10px 12px;cursor:pointer;text-align:center;background:var(--c-surface);transition:border-color .15s,background .15s;}
+.format-option:hover{border-color:var(--c-brand);}
+.format-option.is-selected{border-color:var(--c-brand);background:var(--c-brand-tint);}
+.format-option__icon{font-size:18px;margin-bottom:4px;}
+.format-option__label{font-size:12px;font-weight:700;color:var(--c-ink);}
+.format-option__sub{font-size:10px;color:var(--c-ink-subtle);}
+
+/* Preview Modal */
+.modal--preview{max-width:980px;max-height:92vh;}
+.modal--preview .modal__b{overflow-y:auto;flex:1;}
+.preview-meta{display:flex;gap:24px;font-size:12px;color:var(--c-ink-muted);padding:12px 0 0;flex-wrap:wrap;}
+.preview-meta span{display:flex;align-items:center;gap:5px;}
+.preview-meta strong{color:var(--c-ink);}
+
+/* Preview doc-style */
+.data-table{width:100%;border-collapse:collapse;font-size:12px;}
+.data-table thead th{padding:8px 10px;text-align:left;font-size:11px;font-weight:700;color:#fff;background:#1a1a1a;text-transform:uppercase;letter-spacing:0.05em;border-right:1px solid rgba(255,255,255,0.2);}
+.data-table tbody tr{border-bottom:1px solid #eee;}
+.data-table tbody tr:nth-child(even){background:#f8f8f8;}
+.data-table td{padding:8px 10px;border-right:1px solid #e0e0e0;}
+.preview-kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px;}
+.preview-kpi{background:var(--c-surface-2);border:1px solid var(--c-border-2);border-radius:8px;padding:12px 14px;}
+.preview-kpi__label{font-size:10px;font-weight:700;color:var(--c-ink-muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px;}
+.preview-kpi__value{font-size:22px;font-weight:800;color:var(--c-ink);line-height:1.1;}
+.preview-kpi__sub{font-size:11px;color:var(--c-ink-subtle);margin-top:2px;}
+</style>
+</head>
+<body>
+
+<div class="wf-banner">
+  <div class="wf-banner__left"><i class="fa-solid fa-triangle-exclamation"></i><strong>Wireframe / Prototype</strong> — Not for distribution. Data is fictitious.</div>
+  <div class="wf-banner__right"><a href="#">Feedback</a><a href="#">Docs</a></div>
+</div>
+
+<div class="app">
+  <!-- ===== SIDEBAR ===== -->
+  <nav class="sidebar">
+    <div class="sidebar__logo">
+      <div class="sidebar__logo-mark">CT</div>
+      <div><div class="sidebar__logo-text">ClassTrack</div><div class="sidebar__logo-sub">Board Admin Console</div></div>
+    </div>
+    <div class="sidebar__role-badge">Board Administrator</div><nav class="sidebar__section"><div class="sidebar__section-label">Overview</div><a href="dashboard.html" class="nav-item"><span class="nav-icon"><i class="fa-solid fa-gauge-high"></i></span>Dashboard</a></nav><nav class="sidebar__section"><div class="sidebar__section-label">Management</div><a href="schools.html" class="nav-item"><span class="nav-icon"><i class="fa-solid fa-school"></i></span>Schools<span class="nav-badge nav-badge--neutral">8</span></a><a href="users.html" class="nav-item"><span class="nav-icon"><i class="fa-solid fa-users-gear"></i></span>Users<span class="nav-badge nav-badge--neutral">247</span></a><a href="registered-contacts.html" class="nav-item"><span class="nav-icon"><i class="fa-solid fa-id-badge"></i></span>Registered Contacts<span class="nav-badge nav-badge--neutral">14</span></a></nav><nav class="sidebar__section"><div class="sidebar__section-label">Reports</div><a href="attendance-summary-v3.html" class="nav-item"><span class="nav-icon"><i class="fa-solid fa-chart-bar"></i></span>Attendance Summary</a><a href="absence-trends-v2.html" class="nav-item"><span class="nav-icon"><i class="fa-solid fa-chart-line"></i></span>Absence Trends</a><a href="chronic-absenteeism-v2.html" class="nav-item"><span class="nav-icon"><i class="fa-solid fa-user-clock"></i></span>Chronic Absenteeism</a><a href="unjustified-absences-v2.html" class="nav-item"><span class="nav-icon"><i class="fa-solid fa-circle-exclamation"></i></span>Unjustified Absences</a><a href="submission-compliance-v2.html" class="nav-item"><span class="nav-icon"><i class="fa-solid fa-clipboard-check"></i></span>Submission Compliance</a><a href="open-disputes-v2.html" class="nav-item"><span class="nav-icon"><i class="fa-solid fa-scale-balanced"></i></span>Open Disputes</a><a href="grade-threshold-v2.html" class="nav-item is-active" aria-current="page"><span class="nav-icon"><i class="fa-solid fa-graduation-cap"></i></span>Grade Threshold</a></nav><nav class="sidebar__section"><div class="sidebar__section-label">System</div><a href="aspen.html" class="nav-item"><span class="nav-icon"><i class="fa-solid fa-arrows-rotate"></i></span>Aspen Sync<span class="nav-badge nav-badge--warn">1</span></a><a href="configuration.html" class="nav-item"><span class="nav-icon"><i class="fa-solid fa-calendar-days"></i></span>Calendar &amp; Periods</a><a href="notifications.html" class="nav-item"><span class="nav-icon"><i class="fa-solid fa-bell-slash"></i></span>Notifications</a></nav><div class="sidebar__user">
+      <div class="avatar">MA</div>
+      <div><div class="sidebar__user-name">M. Archambault</div><div class="sidebar__user-role">Board Administrator</div></div>
+    </div>
+  </nav>
+
+  <!-- ===== MAIN ===== -->
+  <main class="main">
+    <!-- Topbar -->
+    <div class="topbar">
+      <div class="topbar__left">
+        <div class="topbar__title">Grade Threshold</div>
+        <div class="topbar__breadcrumb">Reports &rsaquo; <span>Grade Threshold</span></div>
+      </div>
+      <div class="topbar__scope"><i class="fa-solid fa-building-columns"></i> Board-wide &mdash; All Schools</div>
+      <div class="topbar__actions">
+        <div class="lang-toggle"><button aria-pressed="true">EN</button><button aria-pressed="false">FR</button></div>
+        <button class="icon-btn"><i class="fa-solid fa-bell"></i><span class="icon-btn__count">3</span></button>
+        <div class="user-chip"><div class="avatar" style="width:28px;height:28px;font-size:11px;">MA</div>M. Archambault</div>
+      </div>
+    </div>
+
+    <!-- Page Header -->
+    <div class="page-header">
+      <div class="page-header__left">
+        <div class="live-dot"></div>
+        <div class="page-header__title">Grade Threshold</div>
+        <div class="page-header__meta">
+          <span>Term 1 &middot; 2025&ndash;26 &middot; Grades 7&ndash;12</span>
+          <span class="page-header__meta-sep">|</span>
+          <span><i class="fa-solid fa-rotate" style="font-size:10px;"></i> Synced Jun 26, 2026 &middot; 9:00 AM</span>
+        </div>
+      </div>
+      <div class="page-header__actions">
+        <button class="btn btn--secondary btn--sm" onclick="switchTab('history')"><i class="fa-solid fa-clock-rotate-left"></i> History (4)</button>
+        <button class="btn btn--primary btn--sm" onclick="openExportModal()"><i class="fa-solid fa-file-export"></i> Export Report</button>
+      </div>
+    </div>
+
+    <!-- Attention Bar -->
+    <div class="attention-bar attention-bar--warning">
+      <div class="attn-icon attn-icon--warning"><i class="fa-solid fa-graduation-cap"></i></div>
+      <div class="attn-text">7 students exceed their absence threshold &mdash; &Eacute;cole Notre-Dame has the highest count (4 students). 23 more students are approaching the limit.</div>
+      <div class="attn-chips">
+        <span class="attn-chip" style="background:#E6F4EC;color:#1F7A3F;border-color:#4F9A6C;" onclick="filterBySchool('Notre-Dame')">
+          <span class="school-dot" style="background:#1F7A3F;"></span>Notre-Dame <strong>4 exc.</strong>
+        </span>
+        <span class="attn-chip" style="background:#E0EFF7;color:#0E5C8A;border-color:#5B9EC7;" onclick="filterBySchool('Sainte-Croix')">
+          <span class="school-dot" style="background:#0E5C8A;"></span>Sainte-Croix <strong>2 exc.</strong>
+        </span>
+        <span class="attn-chip" style="background:#FCF1DD;color:#9A4708;border-color:#B97F38;" onclick="filterBySchool('Saint-Michel')">
+          <span class="school-dot" style="background:#9A4708;"></span>Saint-Michel <strong>1 exc.</strong>
+        </span>
+        <span class="attn-chip" style="background:#EEEAFE;color:#3F22A6;border-color:#8B72D4;" onclick="filterBySchool('Saint-Luc')">
+          <span class="school-dot" style="background:#3F22A6;"></span>Saint-Luc <strong>0 exc.</strong>
+        </span>
+      </div>
+    </div>
+
+    <!-- KPI Row -->
+    <div class="kpi-row">
+      <div class="kpi-card kpi-card--neutral">
+        <div class="kpi-card__label">Total Enrolled (Gr 7–12)</div>
+        <div class="kpi-card__value" style="color:var(--c-ink);">315</div>
+        <div class="kpi-card__sub">board-wide</div>
+        <div class="kpi-card__trend kpi-card__trend--neutral"><i class="fa-solid fa-minus"></i> No change</div>
+      </div>
+      <div class="kpi-card kpi-card--danger">
+        <div class="kpi-card__label">Exceeding Threshold</div>
+        <div class="kpi-card__value" style="color:var(--c-danger);">7</div>
+        <div class="kpi-card__sub">students over absence limit</div>
+        <div class="kpi-card__trend kpi-card__trend--up-bad"><i class="fa-solid fa-arrow-up"></i> +2 vs last term</div>
+      </div>
+      <div class="kpi-card kpi-card--warning">
+        <div class="kpi-card__label">At-Risk Warning</div>
+        <div class="kpi-card__value" style="color:#D97706;">23</div>
+        <div class="kpi-card__sub">approaching threshold</div>
+        <div class="kpi-card__trend kpi-card__trend--up-bad"><i class="fa-solid fa-arrow-up"></i> +3 vs last term</div>
+      </div>
+      <div class="kpi-card kpi-card--success">
+        <div class="kpi-card__label">Within Limit</div>
+        <div class="kpi-card__value" style="color:var(--c-success);">285</div>
+        <div class="kpi-card__sub">no action required</div>
+        <div class="kpi-card__trend kpi-card__trend--down-bad"><i class="fa-solid fa-arrow-down"></i> &minus;5 vs last term</div>
+      </div>
+      <div class="kpi-card kpi-card--info">
+        <div class="kpi-card__label">Board Flagged Rate</div>
+        <div class="kpi-card__value" style="color:var(--c-info);">9.5<span style="font-size:14px;font-weight:600;">%</span></div>
+        <div class="kpi-card__sub">of enrolled students flagged</div>
+        <div class="kpi-card__trend kpi-card__trend--up-bad"><i class="fa-solid fa-arrow-up"></i> +1.6pp vs last term</div>
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="report-tabs">
+      <div class="report-tab is-active" id="tab-live" onclick="switchTab('live')">Live Data</div>
+      <div class="report-tab" id="tab-history" onclick="switchTab('history')">History (4)</div>
+    </div>
+
+    <!-- ===== LIVE DATA PANEL ===== -->
+    <div class="tab-panel is-active" id="panel-live">
+      <div class="controls-row">
+        <div class="search-wrap">
+          <i class="fa-solid fa-magnifying-glass"></i>
+          <input class="search-input" type="text" id="search-input" placeholder="Search student or subject…" oninput="applyFilters()">
+        </div>
+        <select class="filter-select" id="filter-school" onchange="applyFilters()">
+          <option value="all">All Schools</option>
+          <option value="Notre-Dame">&#201;cole Notre-Dame</option>
+          <option value="Sainte-Croix">&#201;cole Sainte-Croix</option>
+          <option value="Saint-Michel">&#201;cole Saint-Michel</option>
+          <option value="Saint-Luc">&#201;cole Saint-Luc</option>
+        </select>
+        <select class="filter-select" id="filter-grade" onchange="applyFilters()">
+          <option value="all">All Grades (7&ndash;12)</option>
+          <option value="7">Grade 7</option>
+          <option value="8">Grade 8</option>
+          <option value="9">Grade 9</option>
+          <option value="10">Grade 10</option>
+          <option value="11">Grade 11</option>
+          <option value="12">Grade 12</option>
+        </select>
+        <div class="controls-sep"></div>
+        <div class="toggle-group">
+          <button class="toggle-btn is-active" data-filter="all" onclick="setStatusFilter('all',this)">All <span class="tgl-count">30</span></button>
+          <button class="toggle-btn" data-filter="exceeding" onclick="setStatusFilter('exceeding',this)"><i class="fa-solid fa-circle-exclamation" style="font-size:10px;color:var(--c-danger);"></i> Exceeding <span class="tgl-count">7</span></button>
+          <button class="toggle-btn" data-filter="atrisk" onclick="setStatusFilter('atrisk',this)"><i class="fa-solid fa-triangle-exclamation" style="font-size:10px;color:#D97706;"></i> At-Risk <span class="tgl-count">23</span></button>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table class="portal-table" id="grade-table">
+          <thead>
+            <tr>
+              <th onclick="sortBy('student')">Student</th>
+              <th class="no-sort">School</th>
+              <th onclick="sortBy('gradeNum')">Grade</th>
+              <th onclick="sortBy('abs')" style="text-align:center;">Absences</th>
+              <th onclick="sortBy('rate')" id="th-rate" class="sort-desc">Abs. Rate</th>
+              <th class="no-sort">Status</th>
+            </tr>
+          </thead>
+          <tbody id="grade-tbody"></tbody>
+        </table>
+        <div class="empty-state" id="empty-state" style="display:none;">
+          <div><i class="fa-solid fa-filter-circle-xmark"></i></div>
+          <div style="font-weight:600;margin-top:4px;">No records match your filters</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== HISTORY PANEL ===== -->
+    <div class="tab-panel" id="panel-history">
+      <div class="history-body" id="history-tbody"></div>
+    </div>
+
+  </main>
+</div>
+
+<!-- ===== EXPORT MODAL ===== -->
+<div class="modal-backdrop is-hidden" id="export-modal" onclick="handleBackdropClick(event,'export-modal')">
+  <div class="modal">
+    <div class="modal__h">
+      <div class="modal__title">Export Report &mdash; Grade Threshold</div>
+      <button class="modal__close" onclick="closeExportModal()"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="modal__b">
+      <div class="modal-field">
+        <div class="modal-label">SCHOOL SCOPE</div>
+        <select class="modal-select" id="exp-school">
+          <option value="all">All Schools (Board-wide)</option>
+          <option value="Notre-Dame">&#201;cole Notre-Dame</option>
+          <option value="Sainte-Croix">&#201;cole Sainte-Croix</option>
+          <option value="Saint-Michel">&#201;cole Saint-Michel</option>
+          <option value="Saint-Luc">&#201;cole Saint-Luc</option>
+        </select>
+      </div>
+      <div class="modal-field">
+        <div class="modal-label">TERM</div>
+        <select class="modal-select" id="exp-term">
+          <option>Term 1 &middot; 2025&ndash;26</option>
+          <option>Term 2 &middot; 2024&ndash;25</option>
+        </select>
+      </div>
+      <div class="modal-field">
+        <div class="modal-label">FORMAT</div>
+        <div class="format-options">
+          <div class="format-option is-selected" onclick="selectFormat(this)">
+            <div class="format-option__icon"><i class="fa-solid fa-file-pdf" style="color:#E53E3E;"></i></div>
+            <div class="format-option__label">PDF</div>
+            <div class="format-option__sub">Printable report</div>
+          </div>
+          <div class="format-option" onclick="selectFormat(this)">
+            <div class="format-option__icon"><i class="fa-solid fa-file-csv" style="color:#38A169;"></i></div>
+            <div class="format-option__label">CSV</div>
+            <div class="format-option__sub">For spreadsheet analysis</div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-summary">
+        <div class="modal-summary__row"><span>Report</span><span class="modal-summary__val">Grade Threshold</span></div>
+        <div class="modal-summary__row"><span>Scope</span><span class="modal-summary__val">Board-wide</span></div>
+        <div class="modal-summary__row"><span>Grades</span><span class="modal-summary__val">7&ndash;12</span></div>
+        <div class="modal-summary__row"><span>Flagged students</span><span class="modal-summary__val">30 records</span></div>
+      </div>
+    </div>
+    <div class="modal__f">
+      <button class="btn btn--secondary" onclick="closeExportModal()">Cancel</button>
+      <button class="btn btn--primary" onclick="generateReport()"><i class="fa-solid fa-file-export"></i> Export</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== PREVIEW MODAL ===== -->
+<div class="modal-backdrop is-hidden" id="preview-modal" onclick="handleBackdropClick(event,'preview-modal')">
+  <div class="modal modal--preview">
+    <div class="modal__h">
+      <div class="modal__title">Grade Threshold Report</div>
+      <button class="modal__close" onclick="hidePreview()"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="modal__b">
+      <div id="preview-meta-bar" class="preview-meta"></div>
+      <div id="preview-content" style="margin-top:16px;"></div>
+    </div>
+    <div class="modal__f">
+      <button class="btn btn--secondary" onclick="hidePreview()">Close</button>
+      <button class="btn btn--primary"><i class="fa-solid fa-download"></i> Download PDF</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* =====================================================================
+   DATA
+   ===================================================================== */
+var SCHOOL_META = {
+  'Notre-Dame': {full:'École Notre-Dame', color:'#1F7A3F', total:89},
+  'Sainte-Croix': {full:'École Sainte-Croix', color:'#0E5C8A', total:76},
+  'Saint-Michel': {full:'École Saint-Michel', color:'#9A4708', total:68},
+  'Saint-Luc': {full:'École Saint-Luc', color:'#3F22A6', total:82}
+};
+
+/* Flat subject-level rows — each row is one student+subject combination */
+var _allRows = [
+  /* Notre-Dame — exceeding */
+  {school:'Notre-Dame',student:'Lena Bergeron',id:'STD-2294',grade:'Gr 11',gradeNum:11,subject:'Mathematics',scheduled:149,abs:18,rate:12.1,threshold:12,status:'exceeding'},
+  {school:'Notre-Dame',student:'Julien Poirier',id:'STD-2051',grade:'Gr 12',gradeNum:12,subject:'History',scheduled:124,abs:15,rate:12.1,threshold:12,status:'exceeding'},
+  {school:'Notre-Dame',student:'Aisha Ndiaye',id:'STD-3340',grade:'Gr 9',gradeNum:9,subject:'Mathematics',scheduled:117,abs:12,rate:10.3,threshold:10,status:'exceeding'},
+  {school:'Notre-Dame',student:'Ryan Beaumont',id:'STD-1144',grade:'Gr 10',gradeNum:10,subject:'Physical Education',scheduled:132,abs:16,rate:12.1,threshold:12,status:'exceeding'},
+  /* Notre-Dame — at-risk */
+  {school:'Notre-Dame',student:'Lena Bergeron',id:'STD-2294',grade:'Gr 11',gradeNum:11,subject:'French Language Arts',scheduled:149,abs:14,rate:9.4,threshold:12,status:'atrisk'},
+  {school:'Notre-Dame',student:'Marcus Okonkwo',id:'STD-1882',grade:'Gr 10',gradeNum:10,subject:'Mathematics',scheduled:132,abs:12,rate:9.1,threshold:12,status:'atrisk'},
+  {school:'Notre-Dame',student:'Julien Poirier',id:'STD-2051',grade:'Gr 12',gradeNum:12,subject:'English Language Arts',scheduled:124,abs:11,rate:8.9,threshold:12,status:'atrisk'},
+  {school:'Notre-Dame',student:'Aisha Ndiaye',id:'STD-3340',grade:'Gr 9',gradeNum:9,subject:'Science',scheduled:117,abs:10,rate:8.5,threshold:10,status:'atrisk'},
+  {school:'Notre-Dame',student:'Marcus Okonkwo',id:'STD-1882',grade:'Gr 10',gradeNum:10,subject:'Geography',scheduled:121,abs:10,rate:8.3,threshold:12,status:'atrisk'},
+  {school:'Notre-Dame',student:'Chloe Tremblay',id:'STD-2778',grade:'Gr 11',gradeNum:11,subject:'English',scheduled:149,abs:12,rate:8.1,threshold:12,status:'atrisk'},
+  {school:'Notre-Dame',student:'Sara El-Amin',id:'STD-4021',grade:'Gr 9',gradeNum:9,subject:'English Language Arts',scheduled:117,abs:10,rate:8.5,threshold:10,status:'atrisk'},
+  {school:'Notre-Dame',student:'Victor Lebrun',id:'STD-3655',grade:'Gr 12',gradeNum:12,subject:'Chemistry',scheduled:124,abs:10,rate:8.1,threshold:12,status:'atrisk'},
+  {school:'Notre-Dame',student:'Mei-Lin Xu',id:'STD-2900',grade:'Gr 11',gradeNum:11,subject:'Visual Arts',scheduled:132,abs:11,rate:8.3,threshold:12,status:'atrisk'},
+  /* Sainte-Croix — exceeding */
+  {school:'Sainte-Croix',student:'Omar Hassane',id:'STD-1560',grade:'Gr 10',gradeNum:10,subject:'Mathematics',scheduled:132,abs:16,rate:12.1,threshold:12,status:'exceeding'},
+  {school:'Sainte-Croix',student:'Camille Dubois',id:'STD-2413',grade:'Gr 11',gradeNum:11,subject:'English Language Arts',scheduled:149,abs:18,rate:12.1,threshold:12,status:'exceeding'},
+  /* Sainte-Croix — at-risk */
+  {school:'Sainte-Croix',student:'Omar Hassane',id:'STD-1560',grade:'Gr 10',gradeNum:10,subject:'Science',scheduled:132,abs:12,rate:9.1,threshold:12,status:'atrisk'},
+  {school:'Sainte-Croix',student:'Camille Dubois',id:'STD-2413',grade:'Gr 11',gradeNum:11,subject:'History',scheduled:132,abs:12,rate:9.1,threshold:12,status:'atrisk'},
+  {school:'Sainte-Croix',student:'Priya Natarajan',id:'STD-3107',grade:'Gr 9',gradeNum:9,subject:'Mathematics',scheduled:117,abs:10,rate:8.5,threshold:10,status:'atrisk'},
+  {school:'Sainte-Croix',student:'Priya Natarajan',id:'STD-3107',grade:'Gr 9',gradeNum:9,subject:'Science',scheduled:117,abs:10,rate:8.5,threshold:10,status:'atrisk'},
+  {school:'Sainte-Croix',student:'Elise Carrier',id:'STD-3881',grade:'Gr 9',gradeNum:9,subject:'French Language Arts',scheduled:117,abs:10,rate:8.5,threshold:10,status:'atrisk'},
+  {school:'Sainte-Croix',student:'Leo Santos',id:'STD-2204',grade:'Gr 12',gradeNum:12,subject:'Mathematics',scheduled:124,abs:10,rate:8.1,threshold:12,status:'atrisk'},
+  {school:'Sainte-Croix',student:'Noah Martin',id:'STD-2890',grade:'Gr 10',gradeNum:10,subject:'History',scheduled:121,abs:10,rate:8.3,threshold:12,status:'atrisk'},
+  /* Saint-Michel — exceeding */
+  {school:'Saint-Michel',student:'Fatou Diallo',id:'STD-1723',grade:'Gr 11',gradeNum:11,subject:'Science',scheduled:149,abs:18,rate:12.1,threshold:12,status:'exceeding'},
+  /* Saint-Michel — at-risk */
+  {school:'Saint-Michel',student:'Thomas Villeneuve',id:'STD-0891',grade:'Gr 12',gradeNum:12,subject:'History',scheduled:124,abs:12,rate:9.7,threshold:12,status:'atrisk'},
+  {school:'Saint-Michel',student:'Fatou Diallo',id:'STD-1723',grade:'Gr 11',gradeNum:11,subject:'Mathematics',scheduled:149,abs:14,rate:9.4,threshold:12,status:'atrisk'},
+  {school:'Saint-Michel',student:'Thomas Villeneuve',id:'STD-0891',grade:'Gr 12',gradeNum:12,subject:'Mathematics',scheduled:124,abs:11,rate:8.9,threshold:12,status:'atrisk'},
+  {school:'Saint-Michel',student:'Isabelle Morin',id:'STD-2566',grade:'Gr 10',gradeNum:10,subject:'French Language Arts',scheduled:132,abs:11,rate:8.3,threshold:12,status:'atrisk'},
+  /* Saint-Luc — at-risk only */
+  {school:'Saint-Luc',student:'Anais Cote-Leblanc',id:'STD-4412',grade:'Gr 8',gradeNum:8,subject:'Mathematics',scheduled:110,abs:9,rate:8.2,threshold:10,status:'atrisk'},
+  {school:'Saint-Luc',student:'Dmitri Kowalski',id:'STD-3894',grade:'Gr 7',gradeNum:7,subject:'Mathematics',scheduled:105,abs:9,rate:8.6,threshold:10,status:'atrisk'},
+  {school:'Saint-Luc',student:'Anais Cote-Leblanc',id:'STD-4412',grade:'Gr 8',gradeNum:8,subject:'French Language Arts',scheduled:110,abs:9,rate:8.2,threshold:10,status:'atrisk'}
+];
+
+/* =====================================================================
+   STATE
+   ===================================================================== */
+var _statusFilter = 'all';
+var _sortCol = 'rate';
+var _sortDir = -1;
+var _expanded = {}; /* studentId -> bool, undefined = expanded */
+
+/* =====================================================================
+   FILTER + RENDER (grouped by student)
+   ===================================================================== */
+function applyFilters(){
+  var q = document.getElementById('search-input').value.trim().toLowerCase();
+  var school = document.getElementById('filter-school').value;
+  var grade = document.getElementById('filter-grade').value;
+
+  /* Build student groups */
+  var groups = {}, groupOrder = [];
+  _allRows.forEach(function(d){
+    if(school !== 'all' && d.school !== school) return;
+    if(grade !== 'all' && d.gradeNum !== parseInt(grade)) return;
+    if(!groups[d.id]){
+      groups[d.id] = {student:d.student, id:d.id, grade:d.grade, gradeNum:d.gradeNum,
+        school:d.school, subjects:[], worstRate:0, threshold:d.threshold, totalAbs:0, status:'atrisk'};
+      groupOrder.push(d.id);
+    }
+    groups[d.id].subjects.push(d);
+    groups[d.id].totalAbs += d.abs;
+    if(d.rate > groups[d.id].worstRate){ groups[d.id].worstRate = d.rate; groups[d.id].threshold = d.threshold; }
+    if(d.status === 'exceeding') groups[d.id].status = 'exceeding';
+  });
+
+  /* Status filter at group level */
+  groupOrder = groupOrder.filter(function(id){
+    if(_statusFilter === 'exceeding') return groups[id].status === 'exceeding';
+    if(_statusFilter === 'atrisk')    return groups[id].status === 'atrisk';
+    return true;
+  });
+
+  /* Search — match name OR any subject */
+  if(q){
+    groupOrder = groupOrder.filter(function(id){
+      var g = groups[id];
+      if((g.student+' '+g.id).toLowerCase().indexOf(q) !== -1) return true;
+      for(var i=0; i<g.subjects.length; i++){
+        if(g.subjects[i].subject.toLowerCase().indexOf(q) !== -1) return true;
+      }
+      return false;
+    });
+  }
+
+  /* Sort groups */
+  groupOrder.sort(function(a,b){
+    var ga = groups[a], gb = groups[b], av, bv;
+    if(_sortCol === 'rate')     { av = ga.worstRate; bv = gb.worstRate; }
+    else if(_sortCol === 'abs') { av = ga.totalAbs;  bv = gb.totalAbs; }
+    else if(_sortCol === 'student')  { av = ga.student;  bv = gb.student; }
+    else if(_sortCol === 'gradeNum') { av = ga.gradeNum; bv = gb.gradeNum; }
+    else { av = ga.worstRate; bv = gb.worstRate; }
+    if(typeof av === 'string') return av.localeCompare(bv) * _sortDir;
+    return (av - bv) * _sortDir;
+  });
+
+  renderRows(groupOrder, groups);
+}
+
+function makeRateBar(rate, threshold){
+  var isExc = rate >= threshold;
+  var bg  = isExc ? 'var(--c-danger)'  : 'var(--c-warning)';
+  var fg  = '#fff';
+  return '<span style="display:inline-block;padding:3px 8px;border-radius:6px;background:'+bg+';color:'+fg+';font-size:12px;font-weight:700;letter-spacing:0.02em;">'+rate.toFixed(1)+'%</span>' +
+    '<span style="margin-left:6px;font-size:11px;color:var(--c-ink-subtle);">/ '+threshold+'%</span>';
+}
+
+function renderRows(groupOrder, groups){
+  var tbody = document.getElementById('grade-tbody');
+  var empty = document.getElementById('empty-state');
+  if(!groupOrder.length){ tbody.innerHTML = ''; empty.style.display = ''; return; }
+  empty.style.display = 'none';
+
+  var html = '';
+  groupOrder.forEach(function(id){
+    var g = groups[id];
+    var sm = SCHOOL_META[g.school];
+    var isExceeding = g.status === 'exceeding';
+    var isExpanded = _expanded[id] !== false;
+    var subs = g.subjects.slice().sort(function(a,b){ return b.rate - a.rate; });
+
+    var subBadge = g.subjects.length > 1
+      ? '<span class="subject-count-badge"><i class="fa-solid fa-layer-group" style="font-size:8px;"></i> '+g.subjects.length+' subjects</span>'
+      : '';
+
+    var parentBg = isExceeding ? 'student-parent-row--exceeds' : 'student-parent-row--atrisk';
+    var chevRot = isExpanded ? '' : 'transform:rotate(-90deg);';
+    var statusBadge = isExceeding
+      ? '<span class="status status--alert"><i class="fa-solid fa-circle-exclamation" style="font-size:9px;"></i> Exceeds</span>'
+      : '<span class="status status--warn"><i class="fa-solid fa-triangle-exclamation" style="font-size:9px;"></i> At-Risk</span>';
+
+    /* Parent row */
+    html += '<tr class="student-parent-row '+parentBg+'" onclick="toggleStudent(\''+id+'\');">';
+    html += '<td><div style="display:flex;align-items:center;gap:8px;">';
+    html += '<span class="chevron-icon" id="chev-'+id+'" style="'+chevRot+'"><i class="fa-solid fa-chevron-down"></i></span>';
+    html += '<div><div class="cell-student__name">'+g.student+subBadge+'</div>';
+    html += '<div class="cell-student__id">'+g.id+' &middot; '+g.grade+'</div></div></div></td>';
+    html += '<td style="white-space:nowrap;"><span class="school-dot" style="background:'+sm.color+';"></span><span style="font-size:12px;font-weight:600;">'+g.school+'</span></td>';
+    html += '<td style="font-size:12px;">'+g.grade+'</td>';
+    html += '<td style="text-align:center;font-size:12px;color:var(--c-ink-muted);" title="Total across all flagged subjects">'+g.totalAbs+'</td>';
+    html += '<td style="min-width:180px;">'+makeRateBar(g.worstRate, g.threshold)+'</td>';
+    html += '<td>'+statusBadge+'</td></tr>';
+
+    /* Subject sub-rows */
+    subs.forEach(function(sub){
+      var subExc = sub.status === 'exceeding';
+      var subStatus = subExc
+        ? '<span class="status status--alert" style="font-size:10px;">Exceeds</span>'
+        : '<span class="status status--warn" style="font-size:10px;">At-Risk</span>';
+      html += '<tr class="subject-sub-row" data-parent="'+id+'" style="'+(isExpanded ? '' : 'display:none;')+'">';
+      html += '<td style="padding-left:36px;"><span style="color:var(--c-ink-subtle);margin-right:5px;">&#x2514;</span>';
+      html += '<span style="font-size:12px;color:var(--c-ink-muted);">'+sub.subject+'</span></td>';
+      html += '<td></td><td></td>';
+      html += '<td style="text-align:center;font-size:12px;font-weight:600;color:var(--c-ink-muted);">'+sub.abs+'</td>';
+      html += '<td style="min-width:180px;">'+makeRateBar(sub.rate, sub.threshold)+'</td>';
+      html += '<td>'+subStatus+'</td></tr>';
+    });
+  });
+  tbody.innerHTML = html;
+}
+
+/* =====================================================================
+   EXPAND / COLLAPSE
+   ===================================================================== */
+function toggleStudent(id){
+  _expanded[id] = (_expanded[id] === false) ? true : false;
+  var exp = _expanded[id] !== false;
+  document.querySelectorAll('[data-parent="'+id+'"]').forEach(function(r){ r.style.display = exp ? '' : 'none'; });
+  var chev = document.getElementById('chev-'+id);
+  if(chev) chev.style.transform = exp ? '' : 'rotate(-90deg)';
+}
+
+/* =====================================================================
+   SORTING
+   ===================================================================== */
+var _colMap = ['student','','gradeNum','abs','rate',''];
+function sortBy(col){
+  if(_sortCol === col){ _sortDir *= -1; }
+  else { _sortCol = col; _sortDir = (col==='rate'||col==='abs') ? -1 : 1; }
+  document.querySelectorAll('.portal-table thead th').forEach(function(th,i){
+    th.classList.remove('sort-asc','sort-desc');
+    if(_colMap[i] === _sortCol) th.classList.add(_sortDir===1?'sort-asc':'sort-desc');
+  });
+  applyFilters();
+}
+
+/* =====================================================================
+   STATUS FILTER
+   ===================================================================== */
+function setStatusFilter(val, btn){
+  _statusFilter = val;
+  document.querySelectorAll('.toggle-btn').forEach(function(b){ b.classList.remove('is-active'); });
+  btn.classList.add('is-active');
+  applyFilters();
+}
+
+/* =====================================================================
+   SCHOOL FILTER (from attention chips)
+   ===================================================================== */
+function filterBySchool(school){
+  document.getElementById('filter-school').value = school;
+  _statusFilter = 'all';
+  document.querySelectorAll('.toggle-btn').forEach(function(b){ b.classList.remove('is-active'); });
+  document.querySelector('.toggle-btn[data-filter="all"]').classList.add('is-active');
+  applyFilters();
+  switchTab('live');
+}
+
+/* =====================================================================
+   TABS
+   ===================================================================== */
+function switchTab(tab){
+  document.getElementById('tab-live').classList.toggle('is-active', tab==='live');
+  document.getElementById('tab-history').classList.toggle('is-active', tab==='history');
+  document.getElementById('panel-live').classList.toggle('is-active', tab==='live');
+  document.getElementById('panel-history').classList.toggle('is-active', tab==='history');
+}
+
+/* =====================================================================
+   EXPORT MODAL
+   ===================================================================== */
+function openExportModal(){ document.getElementById('export-modal').classList.remove('is-hidden'); }
+function closeExportModal(){ document.getElementById('export-modal').classList.add('is-hidden'); }
+function selectFormat(el){
+  document.querySelectorAll('.format-option').forEach(function(f){ f.classList.remove('is-selected'); });
+  el.classList.add('is-selected');
+}
+function handleBackdropClick(e,id){ if(e.target===document.getElementById(id)) document.getElementById(id).classList.add('is-hidden'); }
+document.addEventListener('keydown',function(e){ if(e.key==='Escape'){ closeExportModal(); hidePreview(); } });
+
+/* =====================================================================
+   HISTORY
+   ===================================================================== */
+var _historyRows = [
+  {label:'Grade Threshold &middot; All Schools &middot; Term 1 2025&ndash;26', date:'Jun 19, 2026', schoolKey:'all', term:'Term 1 \xb7 2025–26'},
+  {label:'Grade Threshold &middot; &Eacute;cole Notre-Dame &middot; Term 1 2025&ndash;26', date:'Jun 1, 2026', schoolKey:'Notre-Dame', term:'Term 1 \xb7 2025–26'},
+  {label:'Grade Threshold &middot; All Schools &middot; Term 1 2025&ndash;26', date:'May 1, 2026', schoolKey:'all', term:'Term 1 \xb7 2025–26'},
+  {label:'Grade Threshold &middot; All Schools &middot; Term 2 2024&ndash;25', date:'Jan 15, 2026', schoolKey:'all', term:'Term 2 \xb7 2024–25'}
+];
+
+function renderHistory(){
+  var tbody = document.getElementById('history-tbody');
+  var html = '';
+  for(var i=0; i<_historyRows.length; i++){
+    var r = _historyRows[i];
+    html += '<div class="history-row">';
+    html += '<div class="history-row__name">'+r.label+'</div>';
+    html += '<div class="history-row__meta"><i class="fa-regular fa-calendar"></i> '+r.date+' &middot; 8:00 AM</div>';
+    html += '<div class="history-row__user"><i class="fa-solid fa-user"></i> M. Archambault</div>';
+    html += '<button class="btn btn--secondary btn--sm" onclick="openHistoryRow('+i+')"><i class="fa-solid fa-eye"></i> View</button>';
+    html += '</div>';
+  }
+  tbody.innerHTML = html;
+}
+function openHistoryRow(idx){
+  var r = _historyRows[idx];
+  showPreview(r.schoolKey, r.term, r.date);
+}
+
+/* =====================================================================
+   EXPORT → HISTORY → PREVIEW
+   ===================================================================== */
+function generateReport(){
+  var school = document.getElementById('exp-school').value;
+  var term = document.getElementById('exp-term').value;
+  var now = new Date();
+  var dateGenerated = now.toLocaleDateString('en-CA', {month:'short',day:'numeric',year:'numeric'});
+  var schoolLabel = school==='all' ? 'All Schools' : (SCHOOL_META[school] ? SCHOOL_META[school].full : school);
+
+  _historyRows.unshift({
+    label: 'Grade Threshold &middot; '+schoolLabel+' &middot; '+term,
+    date: dateGenerated,
+    schoolKey: school,
+    term: term
+  });
+  renderHistory();
+  document.getElementById('tab-history').textContent = 'History ('+_historyRows.length+')';
+
+  closeExportModal();
+  showPreview(school, term, dateGenerated);
+}
+
+/* =====================================================================
+   PREVIEW MODAL — preserved doc-style layout
+   ===================================================================== */
+function showPreview(schoolKey, term, dateGenerated){
+  var label = schoolKey==='all' ? 'All Schools (Board-wide)' : (SCHOOL_META[schoolKey] ? SCHOOL_META[schoolKey].full : schoolKey);
+  document.getElementById('preview-meta-bar').innerHTML =
+    '<span><i class="fa-solid fa-building-columns"></i> <strong>'+label+'</strong></span>'+
+    '<span><i class="fa-solid fa-tag"></i> <strong>'+term+'</strong></span>'+
+    '<span><i class="fa-solid fa-clock"></i> Generated <strong>'+dateGenerated+'</strong></span>';
+  document.getElementById('preview-content').innerHTML = renderReportContent(schoolKey);
+  document.getElementById('preview-modal').classList.remove('is-hidden');
+}
+function hidePreview(){ document.getElementById('preview-modal').classList.add('is-hidden'); }
+
+function renderReportContent(scopeKey){
+  var allKeys = ['Notre-Dame','Sainte-Croix','Saint-Michel','Saint-Luc'];
+  var isAll = (!scopeKey || scopeKey==='all');
+  var keysToUse = isAll ? allKeys : [scopeKey];
+  var grandTotal=0, grandExceeding=0, grandNear=0;
+  keysToUse.forEach(function(k){
+    var sm = SCHOOL_META[k];
+    if(!sm) return;
+    grandTotal += sm.total;
+    var rows = _allRows.filter(function(r){ return r.school===k; });
+    /* unique students exceeding */
+    var excIds = {}, nearIds = {};
+    rows.forEach(function(r){
+      if(r.status==='exceeding') excIds[r.id]=true;
+      else if(r.status==='atrisk') nearIds[r.id]=true;
+    });
+    /* remove near if already in exc */
+    Object.keys(excIds).forEach(function(id){ delete nearIds[id]; });
+    grandExceeding += Object.keys(excIds).length;
+    grandNear += Object.keys(nearIds).length;
+  });
+  var grandWithin = grandTotal - grandExceeding - grandNear;
+
+  var content = '<div class="preview-kpi-grid">';
+  content += '<div class="preview-kpi"><div class="preview-kpi__label">Total Enrolled</div><div class="preview-kpi__value">'+grandTotal+'</div><div class="preview-kpi__sub">Grades 7–12</div></div>';
+  content += '<div class="preview-kpi" style="border-left:3px solid var(--c-danger);"><div class="preview-kpi__label" style="color:var(--c-danger);">Exceeding Threshold</div><div class="preview-kpi__value" style="color:var(--c-danger);">'+grandExceeding+'</div><div class="preview-kpi__sub">over absence limit</div></div>';
+  content += '<div class="preview-kpi" style="border-left:3px solid #D97706;"><div class="preview-kpi__label" style="color:#9A4708;">At-Risk Warning</div><div class="preview-kpi__value" style="color:#9A4708;">'+grandNear+'</div><div class="preview-kpi__sub">approaching threshold</div></div>';
+  content += '<div class="preview-kpi" style="border-left:3px solid var(--c-success);"><div class="preview-kpi__label" style="color:var(--c-success);">Within Limit</div><div class="preview-kpi__value" style="color:var(--c-success);">'+grandWithin+'</div><div class="preview-kpi__sub">no action required</div></div>';
+  content += '</div>';
+
+  keysToUse.forEach(function(k){ content += _renderSchoolSection(k); });
+  return content;
+}
+
+function _renderSchoolSection(schoolKey){
+  var sm = SCHOOL_META[schoolKey];
+  if(!sm) return '';
+  var rows = _allRows.filter(function(r){ return r.school===schoolKey; });
+  if(!rows.length) return '';
+
+  /* group by student */
+  var students = {}, studentOrder = [];
+  rows.forEach(function(r){
+    if(!students[r.id]){
+      students[r.id] = {name:r.name||r.student, id:r.id, grade:r.grade, highestRate:0, threshold:r.threshold, status:'atrisk', subjects:[]};
+      studentOrder.push(r.id);
+    }
+    students[r.id].subjects.push(r);
+    if(r.rate > students[r.id].highestRate){
+      students[r.id].highestRate = r.rate;
+      students[r.id].threshold = r.threshold;
+    }
+    if(r.status==='exceeding') students[r.id].status='exceeding';
+  });
+  studentOrder.sort(function(a,b){ return students[b].highestRate - students[a].highestRate; });
+
+  var excIds={}, nearIds={};
+  rows.forEach(function(r){ if(r.status==='exceeding') excIds[r.id]=true; else nearIds[r.id]=true; });
+  Object.keys(excIds).forEach(function(id){ delete nearIds[id]; });
+  var excCount = Object.keys(excIds).length;
+  var nearCount = Object.keys(nearIds).length;
+  var withinCount = sm.total - excCount - nearCount;
+
+  var h = '<div style="margin-bottom:32px;">';
+  h += '<div style="background:#1B5DAF;color:#fff;padding:11px 16px;border-radius:8px 8px 0 0;font-weight:700;font-size:14px;">'+sm.full+'</div>';
+  h += '<div style="display:grid;grid-template-columns:repeat(4,1fr);border:1px solid #D6DBE2;border-top:none;margin-bottom:16px;">';
+  h += '<div style="padding:10px 14px;border-right:1px solid #D6DBE2;"><div style="font-size:10px;font-weight:700;text-transform:uppercase;color:#475467;margin-bottom:3px;">Students Enrolled</div><div style="font-size:22px;font-weight:800;color:#0F2546;">'+sm.total+'</div></div>';
+  h += '<div style="padding:10px 14px;border-right:1px solid #D6DBE2;border-left:3px solid #B42318;'+(excCount>0?'background:#FEF7F7;':'')+'"><div style="font-size:10px;font-weight:700;text-transform:uppercase;color:#B42318;margin-bottom:3px;">Exceeding Threshold</div><div style="font-size:22px;font-weight:800;color:#B42318;">'+excCount+'</div></div>';
+  h += '<div style="padding:10px 14px;border-right:1px solid #D6DBE2;border-left:3px solid #9A4708;'+(nearCount>0?'background:#FFFAF2;':'')+'"><div style="font-size:10px;font-weight:700;text-transform:uppercase;color:#9A4708;margin-bottom:3px;">At-Risk Warning</div><div style="font-size:22px;font-weight:800;color:#9A4708;">'+nearCount+'</div></div>';
+  h += '<div style="padding:10px 14px;"><div style="font-size:10px;font-weight:700;text-transform:uppercase;color:#1F7A3F;margin-bottom:3px;">Within Limit</div><div style="font-size:22px;font-weight:800;color:#1F7A3F;">'+withinCount+'</div></div>';
+  h += '</div>';
+
+  if(!studentOrder.length){
+    h += '<div style="border:1px solid #D6DBE2;border-radius:6px;padding:14px 16px;text-align:center;color:#5C6470;font-size:13px;"><i class="fa-solid fa-circle-check" style="color:#1F7A3F;margin-right:6px;"></i>No students flagged this term.</div>';
+  } else {
+    studentOrder.forEach(function(sid){
+      var stu = students[sid];
+      var exceeded = stu.status==='exceeding';
+      var headerBg = exceeded ? 'background:#FEF0EF;border-left:4px solid #B42318;' : 'background:#FFFAF2;border-left:4px solid #9A4708;';
+      var statusLabel = exceeded ? 'Exceeds Threshold' : 'At-Risk Warning';
+      var statusCls = exceeded ? 'status--alert' : 'status--warn';
+
+      h += '<div style="border:1px solid #D6DBE2;border-radius:8px;overflow:hidden;margin-bottom:12px;">';
+      h += '<div style="padding:10px 14px;display:flex;align-items:center;justify-content:space-between;'+headerBg+'">';
+      h += '<div><div style="font-size:13px;font-weight:700;color:#0F2546;">'+stu.name+'</div><div style="font-size:11px;color:#5C6470;margin-top:2px;">'+stu.id+' \xb7 '+stu.grade+'</div></div>';
+      h += '<span class="status '+statusCls+'">'+statusLabel+'</span>';
+      h += '</div>';
+      h += '<div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;font-size:12px;"><thead><tr style="background:#F8FAFC;">';
+      h += '<th style="padding:7px 12px;text-align:left;font-size:11px;font-weight:700;color:#475467;border-bottom:1px solid #E5E8EE;">Subject</th>';
+      h += '<th style="padding:7px 12px;text-align:center;font-size:11px;font-weight:700;color:#475467;border-bottom:1px solid #E5E8EE;">Scheduled</th>';
+      h += '<th style="padding:7px 12px;text-align:center;font-size:11px;font-weight:700;color:#475467;border-bottom:1px solid #E5E8EE;">Absences</th>';
+      h += '<th style="padding:7px 12px;text-align:center;font-size:11px;font-weight:700;color:#475467;border-bottom:1px solid #E5E8EE;">Rate</th>';
+      h += '<th style="padding:7px 12px;text-align:center;font-size:11px;font-weight:700;color:#475467;border-bottom:1px solid #E5E8EE;">Threshold</th>';
+      h += '<th style="padding:7px 12px;text-align:left;font-size:11px;font-weight:700;color:#475467;border-bottom:1px solid #E5E8EE;">Status</th>';
+      h += '</tr></thead><tbody>';
+      stu.subjects.forEach(function(sub){
+        var subExc = sub.status==='exceeding';
+        var rowBg = subExc ? 'background:#FEF7F7;' : '';
+        var rateColor = subExc ? 'color:#B42318;font-weight:700;' : 'color:#9A4708;font-weight:700;';
+        var subStatus = subExc ? '<span class="status status--alert">Exceeds</span>' : '<span class="status status--warn">At-Risk</span>';
+        h += '<tr style="border-bottom:1px solid #F0F2F5;'+rowBg+'">';
+        h += '<td style="padding:8px 12px;color:#0F2546;font-weight:500;">'+sub.subject+'</td>';
+        h += '<td style="padding:8px 12px;text-align:center;color:#475467;">'+sub.scheduled+'</td>';
+        h += '<td style="padding:8px 12px;text-align:center;">'+sub.abs+'</td>';
+        h += '<td style="padding:8px 12px;text-align:center;'+rateColor+'">'+sub.rate.toFixed(1)+'%</td>';
+        h += '<td style="padding:8px 12px;text-align:center;color:#475467;">'+sub.threshold+'%</td>';
+        h += '<td style="padding:8px 12px;">'+subStatus+'</td>';
+        h += '</tr>';
+      });
+      h += '</tbody></table></div></div>';
+    });
+  }
+  h += '</div>';
+  return h;
+}
+
+/* =====================================================================
+   INIT
+   ===================================================================== */
+document.addEventListener('DOMContentLoaded', function(){
+  applyFilters();
+  renderHistory();
+});
+</script>
+</body>
+</html>

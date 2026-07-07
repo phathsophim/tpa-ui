@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ClassTrack — Class Roster</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: #F0F4F9; color: #1A2B45;
+      display: flex; min-height: 100vh; font-size: 14px;
+    }
+    .sidebar {
+      width: 240px; min-height: 100vh; background: #0F2546;
+      display: flex; flex-direction: column; flex-shrink: 0;
+      position: fixed; top: 0; left: 0; bottom: 0; z-index: 100;
+    }
+    .sidebar-logo { padding: 28px 24px 20px; border-bottom: 1px solid rgba(255,255,255,0.08); }
+    .logo-mark { display: flex; align-items: center; gap: 10px; }
+    .logo-icon {
+      width: 36px; height: 36px; background: #2E7DD1; border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 800; font-size: 16px; color: #fff;
+    }
+    .logo-text { color: #fff; font-size: 17px; font-weight: 700; letter-spacing: -0.3px; }
+    .logo-sub { color: rgba(255,255,255,0.45); font-size: 11px; margin-top: 2px; }
+    .sidebar-nav { flex: 1; overflow-y: auto; padding: 12px 0; }
+    .sidebar-section { padding: 18px 12px 6px; }
+    .sidebar-section-label {
+      text-transform: uppercase; font-size: 10px; font-weight: 600;
+      letter-spacing: 1.2px; color: rgba(255,255,255,0.35); padding: 0 12px; margin-bottom: 6px;
+    }
+    .nav-item {
+      display: flex; align-items: center; gap: 12px; padding: 10px 12px;
+      border-radius: 8px; cursor: pointer; color: rgba(255,255,255,0.6);
+      font-size: 13.5px; font-weight: 500; transition: all 0.15s;
+      text-decoration: none; margin-bottom: 2px;
+    }
+    .nav-item:hover { background: rgba(255,255,255,0.07); color: #fff; }
+    .nav-item.active { background: #2E7DD1; color: #fff; }
+    .nav-item .nav-icon { font-size: 15px; width: 20px; text-align: center; color: inherit; }
+    .nav-badge { margin-left: auto; background: #E53E3E; color: #fff; font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 10px; }
+    .sidebar-footer { margin-top: auto; padding: 16px 12px; border-top: 1px solid rgba(255,255,255,0.08); }
+    .user-info { display: flex; align-items: center; gap: 10px; padding: 8px 12px; border-radius: 8px; cursor: pointer; transition: background 0.15s; }
+    .user-info:hover { background: rgba(255,255,255,0.07); }
+    .user-avatar {
+      width: 32px; height: 32px; border-radius: 50%;
+      background: linear-gradient(135deg, #2E7DD1, #1A5FA8);
+      color: #fff; font-weight: 700; font-size: 13px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .user-name { color: #fff; font-size: 13px; font-weight: 600; }
+    .user-role { color: rgba(255,255,255,0.45); font-size: 11px; }
+
+    .main { margin-left: 240px; flex: 1; display: flex; flex-direction: column; min-height: 100vh; }
+    .topbar {
+      background: #fff; border-bottom: 1px solid #E2E8F0;
+      padding: 0 32px; height: 64px; display: flex; align-items: center; gap: 16px;
+      position: sticky; top: 0; z-index: 90;
+    }
+    .topbar-title { font-size: 18px; font-weight: 700; color: #0F2546; }
+    .topbar-right { margin-left: auto; display: flex; align-items: center; gap: 12px; }
+    .icon-btn {
+      width: 36px; height: 36px; border-radius: 8px; border: 1px solid #E2E8F0;
+      background: #fff; display: flex; align-items: center; justify-content: center;
+      color: #4A5568; cursor: pointer; font-size: 15px; position: relative;
+    }
+    .icon-btn:hover { background: #F7FAFC; }
+    .notif-dot { position: absolute; top: 7px; right: 7px; width: 7px; height: 7px; border-radius: 50%; background: #E53E3E; border: 1.5px solid #fff; }
+    .term-badge {
+      display: flex; align-items: center; gap: 6px; padding: 6px 12px;
+      border: 1px solid #E2E8F0; border-radius: 8px; background: #fff;
+      font-size: 13px; font-weight: 500; color: #1A2B45; cursor: pointer;
+    }
+    .term-badge i { color: #718096; font-size: 12px; }
+    .page-body { padding: 28px 32px; flex: 1; }
+
+    /* Class selector strip */
+    .class-selector { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; }
+    .class-tab {
+      padding: 8px 18px; border-radius: 8px; font-size: 13.5px; font-weight: 500;
+      cursor: pointer; border: 1px solid #E2E8F0; background: #fff; color: #718096;
+      transition: all .15s;
+    }
+    .class-tab:hover { border-color: #2E7DD1; color: #2E7DD1; }
+    .class-tab.active { background: #2E7DD1; color: #fff; border-color: #2E7DD1; }
+    .class-meta { font-size: 12.5px; color: #718096; margin-left: auto; }
+
+    /* Toolbar */
+    .toolbar { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+    .search-box {
+      display: flex; align-items: center; gap: 8px; background: #fff;
+      border: 1px solid #E2E8F0; border-radius: 8px; padding: 8px 12px; flex: 1; max-width: 340px;
+    }
+    .search-box i { color: #A0AEC0; font-size: 13px; }
+    .search-box input { border: none; outline: none; font-size: 13.5px; color: #1A2B45; background: transparent; width: 100%; }
+    .search-box input::placeholder { color: #A0AEC0; }
+    .filter-select {
+      padding: 8px 12px; border: 1px solid #E2E8F0; border-radius: 8px;
+      background: #fff; font-size: 13px; color: #1A2B45; cursor: pointer; outline: none;
+    }
+    .count-label { margin-left: auto; font-size: 13px; color: #718096; }
+
+    /* Summary bar */
+    .summary-bar {
+      display: flex; gap: 16px; padding: 14px 20px; background: #F8FAFC;
+      border: 1px solid #E2E8F0; border-radius: 10px; margin-bottom: 16px;
+    }
+    .sum-item { display: flex; align-items: center; gap: 8px; }
+    .sum-dot { width: 10px; height: 10px; border-radius: 50%; }
+    .sum-label { font-size: 13px; color: #718096; }
+    .sum-val { font-size: 13px; font-weight: 700; color: #1A2B45; }
+
+    /* Table */
+    .card { background: #fff; border-radius: 12px; border: 1px solid #E2E8F0; overflow: hidden; }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    thead th {
+      padding: 12px 16px; text-align: left; font-size: 11.5px; font-weight: 700;
+      letter-spacing: .05em; text-transform: uppercase; color: #718096;
+      background: #F8FAFC; border-bottom: 1px solid #E2E8F0; white-space: nowrap;
+    }
+    tbody tr { border-bottom: 1px solid #F1F5F9; transition: background .12s; cursor: pointer; }
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:hover { background: #F7FAFC; }
+    td { padding: 13px 16px; font-size: 13.5px; color: #2D3748; vertical-align: middle; }
+
+    .student-cell { display: flex; align-items: center; gap: 12px; }
+    .s-avatar {
+      width: 38px; height: 38px; border-radius: 50%; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px; font-weight: 700; color: #fff;
+    }
+    .s-name { font-weight: 600; color: #1A2B45; font-size: 13.5px; }
+    .s-id { font-size: 11.5px; color: #A0AEC0; margin-top: 1px; }
+
+    .status-badge {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 600;
+    }
+    .status-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+    .badge-present { background: #ECFDF5; color: #059669; }
+    .badge-present .status-dot { background: #059669; }
+    .badge-absent { background: #FEF2F2; color: #DC2626; }
+    .badge-absent .status-dot { background: #DC2626; }
+    .badge-late { background: #FFFBEB; color: #D97706; }
+    .badge-late .status-dot { background: #D97706; }
+    .badge-future { background: #EBF4FF; color: #1D4ED8; }
+    .badge-future .status-dot { background: #1D4ED8; }
+    .badge-event { background: #F3F4FF; color: #4338CA; }
+    .badge-event .status-dot { background: #4338CA; }
+    .badge-awaiting { background: #FEF3C7; color: #92400E; }
+    .badge-awaiting .status-dot { background: #D97706; }
+
+    .att-bar-wrap { width: 72px; height: 5px; background: #E2E8F0; border-radius: 99px; overflow: hidden; display: inline-block; }
+    .att-bar-fill { height: 100%; border-radius: 99px; }
+
+    .row-arrow { color: #CBD5E0; font-size: 13px; }
+    tbody tr:hover .row-arrow { color: #2E7DD1; }
+
+    .empty-state { text-align: center; padding: 60px 20px; color: #A0AEC0; }
+    .empty-state i { font-size: 32px; margin-bottom: 12px; display: block; }
+
+    .toast {
+      position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%) translateY(20px);
+      background: #1A2B45; color: #fff; padding: 10px 20px; border-radius: 8px;
+      font-size: 13px; opacity: 0; transition: all .25s; pointer-events: none; z-index: 999;
+    }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  </style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-mark">
+      <div class="logo-icon">CT</div>
+      <div>
+        <div class="logo-text">ClassTrack</div>
+        <div class="logo-sub" data-en="Teacher Portal" data-fr="Portail enseignant">Teacher Portal</div>
+      </div>
+    </div>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="sidebar-section">
+      <div class="sidebar-section-label" data-en="Overview" data-fr="Vue d'ensemble">Overview</div>
+      <a class="nav-item" href="teacher-dashboard.html"><span class="nav-icon"><i class="fa-solid fa-gauge-high"></i></span> <span data-en="Dashboard" data-fr="Tableau de bord">Dashboard</span></a>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-section-label" data-en="Teaching" data-fr="Enseignement">Teaching</div>
+      <a class="nav-item" href="teacher-attendance.html"><span class="nav-icon"><i class="fa-solid fa-clipboard-check"></i></span> <span data-en="Mark Attendance" data-fr="Saisir les présences">Mark Attendance</span><span class="nav-badge">1</span></a>
+      <a class="nav-item active" href="teacher-schedule-axon file.html"><span class="nav-icon"><i class="fa-solid fa-calendar-week"></i></span> <span data-en="My Classes" data-fr="Mes classes">My Classes</span></a>
+      <a class="nav-item" href="teacher-history.html"><span class="nav-icon"><i class="fa-solid fa-calendar-days"></i></span> <span data-en="Attendance History" data-fr="Historique des présences">Attendance History</span></a>
+      <a class="nav-item" href="teacher-disputes.html"><span class="nav-icon"><i class="fa-solid fa-scale-balanced"></i></span> <span data-en="Disputes" data-fr="Contestations">Disputes</span><span class="nav-badge" style="background:#4F46E5">2</span></a>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-section-label" data-en="System" data-fr="Système">System</div>
+      <a class="nav-item" onclick="showToast(T('settings_soon'))"><span class="nav-icon"><i class="fa-solid fa-gear"></i></span> <span data-en="Settings" data-fr="Paramètres">Settings</span></a>
+    </div>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="user-info">
+      <div class="user-avatar">ST</div>
+      <div>
+        <div class="user-name" data-en="Ms. S. Tremblay" data-fr="Mme S. Tremblay">Ms. S. Tremblay</div>
+        <div class="user-role" data-en="Science Dept · Grade 7A" data-fr="Dépt. Sciences · 7e A">Science Dept · Grade 7A</div>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-title" data-en="Class Roster" data-fr="Liste de classe">Class Roster</div>
+    <div class="topbar-right">
+      <div class="term-badge">
+        <i class="fa-solid fa-calendar-alt"></i> <span data-en="Term 2 — 2025/26" data-fr="Étape 2 — 2025/26">Term 2 — 2025/26</span>
+        <i class="fa-solid fa-chevron-down"></i>
+      </div>
+      <div class="icon-btn" data-title-en="Notifications" data-title-fr="Notifications" title="Notifications">
+        <i class="fa-solid fa-bell"></i>
+        <span class="notif-dot"></span>
+      </div>
+    </div>
+  </div>
+
+  <div class="page-body">
+
+    <!-- Class selector -->
+    <div class="class-selector">
+      <button class="class-tab active" onclick="switchClass('7A', this)" data-en="Grade 7A" data-fr="7e A">Grade 7A</button>
+      <button class="class-tab" onclick="switchClass('8B', this)" data-en="Grade 8B" data-fr="8e B">Grade 8B</button>
+      <span class="class-meta" id="classMeta">15 students · Ms. S. Tremblay</span>
+    </div>
+
+    <!-- Today's summary -->
+    <div class="summary-bar" id="summaryBar"></div>
+
+    <!-- Toolbar -->
+    <div class="toolbar">
+      <div class="search-box">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <input type="text" id="searchInput" data-placeholder-en="Search by name or student ID…" data-placeholder-fr="Rechercher par nom ou numéro d'élève…" placeholder="Search by name or student ID…" oninput="filterStudents()" />
+      </div>
+      <select class="filter-select" id="statusFilter" onchange="filterStudents()">
+        <option value="" data-en="All Statuses" data-fr="Tous les statuts">All Statuses</option>
+        <option value="present" data-en="Present" data-fr="Présent">Present</option>
+        <option value="absent" data-en="Absent" data-fr="Absent">Absent</option>
+        <option value="late" data-en="Late" data-fr="En retard">Late</option>
+        <option value="future" data-en="Future absence" data-fr="Absence future">Future absence</option>
+        <option value="event" data-en="Group event" data-fr="Événement scolaire">Group event</option>
+        <option value="awaiting" data-en="Awaiting check-in" data-fr="À accepter en classe">Awaiting check-in</option>
+      </select>
+      <span class="count-label" id="countLabel"></span>
+    </div>
+
+    <!-- Table -->
+    <div class="card">
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th data-en="Student" data-fr="Élève">Student</th>
+              <th data-en="Today's Status" data-fr="Statut d'aujourd'hui">Today's Status</th>
+              <th data-en="Attendance Rate" data-fr="Taux de présence">Attendance Rate</th>
+              <th data-en="Absences (Sem)" data-fr="Absences (étape)">Absences (Sem)</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="rosterBody"></tbody>
+        </table>
+        <div class="empty-state" id="emptyState" style="display:none">
+          <i class="fa-solid fa-user-slash"></i>
+          <p data-en="No students match your filters." data-fr="Aucun élève ne correspond à vos filtres.">No students match your filters.</p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  const AVATAR_COLORS = ['#2E7DD1','#6366F1','#10B981','#F59E0B','#EF4444','#8B5CF6','#EC4899','#0891B2'];
+
+  // 'today' values: present | absent | late | future | event | awaiting
+  //   future     → parent-declared future absence (Scenario 3, pre-justified, locked)
+  //   event      → school-sanctioned group event (Scenario 4, pre-justified, locked)
+  //   awaiting   → Absent earlier, signed in by Clerk, awaiting teacher Check-in (Scenario 1)
+  const ALL_STUDENTS = {
+    '7A': [
+      { id:'ST-1041', name:'Aaliyah Carter',    today:'present',  rate:94, absences:2 },
+      { id:'ST-1082', name:'Ben Okafor',         today:'future',   rate:78, absences:7, reasonEn:'Family — medical appointment', reasonFr:'Famille — rendez-vous médical' },
+      { id:'ST-1055', name:'Chloe Nguyen',       today:'present',  rate:88, absences:4 },
+      { id:'ST-1067', name:'Daniel Ferreira',    today:'event',    rate:96, absences:1, reasonEn:'Soccer tournament — away game', reasonFr:'Tournoi de soccer — à l\'extérieur' },
+      { id:'ST-1074', name:'Emma Kowalski',      today:'awaiting', rate:82, absences:5 },
+      { id:'ST-1079', name:'Finn Bergström',     today:'present',  rate:100,absences:0 },
+      { id:'ST-1083', name:'Grace Osei',         today:'present',  rate:91, absences:3 },
+      { id:'ST-1088', name:'Hassan Al-Amin',     today:'present',  rate:85, absences:5 },
+      { id:'ST-1091', name:'Isabel Martins',     today:'event',    rate:97, absences:1, reasonEn:'Soccer tournament — away game', reasonFr:'Tournoi de soccer — à l\'extérieur' },
+      { id:'ST-1096', name:'Jonas Weber',        today:'present',  rate:89, absences:4 },
+      { id:'ST-1102', name:'Kira Nakamura',      today:'present',  rate:93, absences:2 },
+      { id:'ST-1109', name:'Luca Esposito',      today:'present',  rate:79, absences:7 },
+      { id:'ST-1115', name:'Maya Robinson',      today:'present',  rate:98, absences:1 },
+      { id:'ST-1121', name:'Noah Petersen',      today:'present',  rate:86, absences:5 },
+      { id:'ST-1128', name:'Olivia Thompson',    today:'present',  rate:92, absences:3 },
+    ],
+    '8B': [
+      { id:'ST-1131', name:'Priya Sharma',       today:'present', rate:95, absences:2 },
+      { id:'ST-1135', name:'Quinn Murphy',       today:'present', rate:88, absences:4 },
+      { id:'ST-1142', name:'Rafael Costa',       today:'absent',  rate:71, absences:9 },
+      { id:'ST-1148', name:'Sara Johansson',     today:'present', rate:99, absences:0 },
+      { id:'ST-1153', name:'Thomas Mwangi',      today:'late',    rate:83, absences:5 },
+      { id:'ST-1158', name:'Uma Patel',          today:'present', rate:90, absences:3 },
+      { id:'ST-1163', name:'Viktor Ivanov',      today:'present', rate:87, absences:5 },
+      { id:'ST-1168', name:'Wendy Osei',         today:'present', rate:94, absences:2 },
+      { id:'ST-1172', name:'Xavier Dubois',      today:'present', rate:76, absences:8 },
+      { id:'ST-1177', name:'Yuki Tanaka',        today:'present', rate:97, absences:1 },
+      { id:'ST-1182', name:'Zara Mohammed',      today:'present', rate:91, absences:3 },
+      { id:'ST-1186', name:'Aaron Levi',         today:'present', rate:85, absences:5 },
+      { id:'ST-1190', name:'Bianca Ferreira',    today:'present', rate:89, absences:4 },
+      { id:'ST-1194', name:'Carlos Mendez',      today:'present', rate:93, absences:2 },
+    ]
+  };
+
+  const STRINGS = {
+    en: {
+      present:'Present', absent:'Absent', late:'Late',
+      future:'Future absence', event:'Group event', awaiting:'Awaiting check-in',
+      pre_justified:'Pre-justified',
+      students_one:'student', students_many:'students',
+      teacher_name:'Ms. S. Tremblay',
+      summary_attrate:'Attendance rate today:',
+      pre_just_summary:'pre-justified',
+      settings_soon:'Settings coming soon',
+    },
+    fr: {
+      present:'Présent', absent:'Absent', late:'En retard',
+      future:'Absence future', event:'Événement scolaire', awaiting:'À accepter en classe',
+      pre_justified:'Pré-motivée',
+      students_one:'élève', students_many:'élèves',
+      teacher_name:'Mme S. Tremblay',
+      summary_attrate:'Taux de présence aujourd\'hui :',
+      pre_just_summary:'pré-motivées',
+      settings_soon:'Paramètres — bientôt disponibles',
+    }
+  };
+  function T(k){ var lang=(window.__ct_i18n&&window.__ct_i18n.getLang())||'en'; return (STRINGS[lang]&&STRINGS[lang][k])||STRINGS.en[k]||k; }
+
+  let currentClass = '7A';
+
+  function initials(name) {
+    return name.split(' ').map(function(w){ return w[0]; }).join('').slice(0,2).toUpperCase();
+  }
+  function avatarColor(name) {
+    let h = 0;
+    for (let c of name) h = (h * 31 + c.charCodeAt(0)) & 0xFFFFFF;
+    return AVATAR_COLORS[Math.abs(h) % AVATAR_COLORS.length];
+  }
+
+  function switchClass(cls, el) {
+    currentClass = cls;
+    document.querySelectorAll('.class-tab').forEach(function(t){ t.classList.remove('active'); });
+    el.classList.add('active');
+    document.getElementById('searchInput').value = '';
+    document.getElementById('statusFilter').value = '';
+    filterStudents();
+  }
+
+  function filterStudents() {
+    const q = document.getElementById('searchInput').value.toLowerCase();
+    const sf = document.getElementById('statusFilter').value;
+    const list = ALL_STUDENTS[currentClass].filter(function(s){
+      const matchQ = !q || s.name.toLowerCase().includes(q) || s.id.toLowerCase().includes(q);
+      const matchS = !sf || s.today === sf;
+      return matchQ && matchS;
+    });
+    renderRoster(list);
+  }
+
+  function renderSummary() {
+    const students = ALL_STUDENTS[currentClass];
+    const p = students.filter(function(s){ return s.today === 'present'; }).length;
+    const a = students.filter(function(s){ return s.today === 'absent'; }).length;
+    const l = students.filter(function(s){ return s.today === 'late' || s.today === 'awaiting'; }).length;
+    const preJust = students.filter(function(s){ return s.today === 'future' || s.today === 'event'; }).length;
+    // Pre-justified absences count toward "absent" for the rate calc (they are absences, just excused)
+    const totalAbsent = a + preJust;
+    const presentish = p + l; // present + late count as "in attendance" for the rate
+    let summaryHtml =
+      '<div class="sum-item"><div class="sum-dot" style="background:#059669"></div><span class="sum-label">' + T('present') + '</span><span class="sum-val" style="margin-left:4px">' + p + '</span></div>' +
+      '<div class="sum-item"><div class="sum-dot" style="background:#DC2626"></div><span class="sum-label">' + T('absent') + '</span><span class="sum-val" style="margin-left:4px">' + totalAbsent + '</span></div>' +
+      '<div class="sum-item"><div class="sum-dot" style="background:#D97706"></div><span class="sum-label">' + T('late') + '</span><span class="sum-val" style="margin-left:4px">' + l + '</span></div>';
+    if (preJust > 0) {
+      summaryHtml += '<div class="sum-item"><div class="sum-dot" style="background:#4338CA"></div><span class="sum-label">' + preJust + ' ' + T('pre_just_summary') + '</span></div>';
+    }
+    summaryHtml +=
+      '<div class="sum-item" style="margin-left:auto"><span class="sum-label">' + T('summary_attrate') + '</span><span class="sum-val" style="margin-left:6px;color:#059669">' + Math.round((presentish/students.length)*100) + '%</span></div>';
+    document.getElementById('summaryBar').innerHTML = summaryHtml;
+  }
+
+  function renderRoster(list) {
+    const tbody = document.getElementById('rosterBody');
+    const empty = document.getElementById('emptyState');
+    const studentsLabel = list.length === 1 ? T('students_one') : T('students_many');
+    document.getElementById('countLabel').textContent = list.length + ' ' + studentsLabel;
+    var allStudents = ALL_STUDENTS[currentClass];
+    document.getElementById('classMeta').textContent = allStudents.length + ' ' + T('students_many') + ' · ' + T('teacher_name');
+    if (!list.length) { tbody.innerHTML = ''; empty.style.display = 'block'; return; }
+    empty.style.display = 'none';
+    var lang = (window.__ct_i18n && window.__ct_i18n.getLang()) || 'en';
+    const badgeMap = {
+      present:  '<span class="status-badge badge-present"><span class="status-dot"></span>' + T('present') + '</span>',
+      absent:   '<span class="status-badge badge-absent"><span class="status-dot"></span>' + T('absent') + '</span>',
+      late:     '<span class="status-badge badge-late"><span class="status-dot"></span>' + T('late') + '</span>',
+      future:   '<span class="status-badge badge-future"><span class="status-dot"></span>' + T('future') + ' <i class="fa-solid fa-lock" style="font-size:9px;margin-left:2px;opacity:.7"></i></span>',
+      event:    '<span class="status-badge badge-event"><span class="status-dot"></span>' + T('event') + ' <i class="fa-solid fa-lock" style="font-size:9px;margin-left:2px;opacity:.7"></i></span>',
+      awaiting: '<span class="status-badge badge-awaiting"><span class="status-dot"></span>' + T('awaiting') + '</span>',
+    };
+    const rateColor = function(r){ return r >= 90 ? '#059669' : r >= 80 ? '#D97706' : '#DC2626'; };
+    tbody.innerHTML = list.map(function(s){
+      var statusCell = badgeMap[s.today] || badgeMap.present;
+      // For pre-justified rows (future / event), append the reason as a small caption
+      if ((s.today === 'future' || s.today === 'event') && (s.reasonEn || s.reasonFr)) {
+        var reason = lang === 'fr' ? (s.reasonFr || s.reasonEn) : s.reasonEn;
+        statusCell += '<div style="font-size:11.5px;color:#718096;margin-top:3px;font-style:italic">' + reason + '</div>';
+      }
+      return '<tr onclick="window.location=\'teacher-absence-details.html?id=' + s.id + '\'">' +
+        '<td>' +
+          '<div class="student-cell">' +
+            '<div class="s-avatar" style="background:' + avatarColor(s.name) + '">' + initials(s.name) + '</div>' +
+            '<div><div class="s-name">' + s.name + '</div><div class="s-id">' + s.id + '</div></div>' +
+          '</div>' +
+        '</td>' +
+        '<td>' + statusCell + '</td>' +
+        '<td>' +
+          '<div style="display:flex;align-items:center;gap:8px">' +
+            '<div class="att-bar-wrap"><div class="att-bar-fill" style="width:' + s.rate + '%;background:' + rateColor(s.rate) + '"></div></div>' +
+            '<span style="font-size:12.5px;color:' + rateColor(s.rate) + ';font-weight:600">' + s.rate + '%</span>' +
+          '</div>' +
+        '</td>' +
+        '<td style="font-size:13px;color:' + (s.absences >= 6 ? '#DC2626' : '#4A5568') + ';font-weight:' + (s.absences >= 6 ? '700':'400') + '">' + s.absences + ' ' + (s.absences >= 6 ? '⚠' : '') + '</td>' +
+        '<td><i class="fa-solid fa-chevron-right row-arrow"></i></td>' +
+      '</tr>';
+    }).join('');
+    renderSummary();
+  }
+
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg; t.classList.add('show');
+    setTimeout(function(){ t.classList.remove('show'); }, 2500);
+  }
+
+  function ctRerender(){ filterStudents(); }
+  window.__ct_page_rerender = ctRerender;
+
+  renderSummary();
+  filterStudents();
+</script>
+<!-- Prototype cross-portal switcher -->
+<div id="proto-switcher" style="position:fixed;bottom:16px;right:16px;z-index:9999;background:rgba(15,37,70,.95);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.1);padding:5px;border-radius:999px;box-shadow:0 8px 24px rgba(0,0,0,.25);font-family:'Segoe UI',system-ui,sans-serif;display:flex;gap:2px;align-items:center;"><span style="color:rgba(255,255,255,.4);font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:0 6px 0 10px;">Prototype</span><a href="index.html" style="display:inline-flex;align-items:center;gap:4px;padding:6px 12px;border-radius:999px;font-size:12px;font-weight:600;text-decoration:none;letter-spacing:.02em;transition:all .15s;background:transparent;color:#CBD5E0;">Index</a><a href="admin-dashboard.html" style="display:inline-flex;align-items:center;gap:4px;padding:6px 12px;border-radius:999px;font-size:12px;font-weight:600;text-decoration:none;letter-spacing:.02em;transition:all .15s;background:transparent;color:#CBD5E0;">Admin</a><a href="teacher-dashboard.html" style="display:inline-flex;align-items:center;gap:4px;padding:6px 12px;border-radius:999px;font-size:12px;font-weight:600;text-decoration:none;letter-spacing:.02em;transition:all .15s;background:#2E7DD1;color:#fff;">Teacher</a><a href="parent-app.html" style="display:inline-flex;align-items:center;gap:4px;padding:6px 12px;border-radius:999px;font-size:12px;font-weight:600;text-decoration:none;letter-spacing:.02em;transition:all .15s;background:transparent;color:#CBD5E0;">Parent</a><span style="color:rgba(255,255,255,.2);padding:0 4px;">|</span><a href="#" class="lang-btn" data-lang="en" onclick="event.preventDefault();window.__ct_i18n.setLang('en');" style="display:inline-flex;align-items:center;gap:4px;padding:6px 10px;border-radius:999px;font-size:11px;font-weight:700;text-decoration:none;letter-spacing:.04em;background:#2E7DD1;color:#fff;">EN</a><a href="#" class="lang-btn" data-lang="fr" onclick="event.preventDefault();window.__ct_i18n.setLang('fr');" style="display:inline-flex;align-items:center;gap:4px;padding:6px 10px;border-radius:999px;font-size:11px;font-weight:700;text-decoration:none;letter-spacing:.04em;background:transparent;color:#CBD5E0;">FR</a></div>
+
+<script id="i18n-core">
+(function(){
+  function getLang(){
+    var p = new URLSearchParams(window.location.search);
+    return p.get('lang') === 'fr' ? 'fr' : 'en';
+  }
+  function setLangUrl(href, lang){
+    if(!href || href.startsWith('http') || href.startsWith('#') || href.startsWith('javascript:')) return href;
+    var base = href.split('?')[0].split('#')[0];
+    var hash = href.indexOf('#') >= 0 ? href.substring(href.indexOf('#')) : '';
+    if(!base.endsWith('.html')) return href;
+    return base + (lang === 'fr' ? '?lang=fr' : '') + hash;
+  }
+  function applyLang(){
+    var lang = getLang();
+    document.documentElement.lang = lang;
+    document.body && (document.body.dataset.lang = lang);
+    // Swap text content based on data-en / data-fr
+    document.querySelectorAll('[data-en]').forEach(function(el){
+      var val = el.getAttribute('data-' + lang);
+      if(val !== null){
+        if(el.hasAttribute('data-html')) el.innerHTML = val;
+        else el.textContent = val;
+      }
+    });
+    // Swap placeholders
+    document.querySelectorAll('[data-placeholder-en]').forEach(function(el){
+      var val = el.getAttribute('data-placeholder-' + lang);
+      if(val !== null) el.setAttribute('placeholder', val);
+    });
+    // Swap attributes (title, aria-label)
+    document.querySelectorAll('[data-title-en]').forEach(function(el){
+      var val = el.getAttribute('data-title-' + lang);
+      if(val !== null) el.setAttribute('title', val);
+    });
+    // Update all internal HTML links to carry the lang param
+    document.querySelectorAll('a[href]').forEach(function(a){
+      a.setAttribute('href', setLangUrl(a.getAttribute('href'), lang));
+    });
+    // Update toggle visual state
+    document.querySelectorAll('.lang-btn').forEach(function(btn){
+      var on = btn.getAttribute('data-lang') === lang;
+      btn.style.background = on ? '#2E7DD1' : 'transparent';
+      btn.style.color = on ? '#fff' : '#CBD5E0';
+    });
+    // Page-specific dynamic re-render (tables, lists, etc.)
+    if(typeof window.__ct_page_rerender === 'function') window.__ct_page_rerender();
+  }
+  function setLang(lang){
+    var p = new URLSearchParams(window.location.search);
+    if(lang === 'fr') p.set('lang', 'fr'); else p.delete('lang');
+    var qs = p.toString();
+    var newUrl = window.location.pathname + (qs ? '?' + qs : '') + window.location.hash;
+    window.history.replaceState({}, '', newUrl);
+    applyLang();
+  }
+  window.__ct_i18n = { getLang: getLang, applyLang: applyLang, setLang: setLang };
+  if(document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', applyLang);
+  } else {
+    applyLang();
+  }
+})();
+</script>
+
+</body>
+</html>

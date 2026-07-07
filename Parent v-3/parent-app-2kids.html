@@ -1,0 +1,1951 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ClassTrack — Parent App · 2 Children</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: #0F2546;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 20px;
+    }
+    .stage-label {
+      position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
+      color: rgba(255,255,255,0.35); font-size: 12px; font-weight: 600;
+      letter-spacing: .12em; text-transform: uppercase; white-space: nowrap;
+    }
+
+    /* ── Phone shell ── */
+    .phone {
+      width: 390px; height: 844px; background: #fff; border-radius: 52px;
+      box-shadow: 0 0 0 10px #1a1a1a, 0 0 0 12px #333, 0 40px 80px rgba(0,0,0,0.6);
+      overflow: hidden; position: relative; display: flex; flex-direction: column; flex-shrink: 0;
+    }
+    .phone-notch {
+      position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+      width: 126px; height: 34px; background: #1a1a1a;
+      border-bottom-left-radius: 20px; border-bottom-right-radius: 20px; z-index: 200;
+    }
+
+    /* ── Status bar ── */
+    .status-bar {
+      height: 50px; background: #0F2546; display: flex; align-items: flex-end;
+      justify-content: space-between; padding: 0 28px 8px; flex-shrink: 0; z-index: 100; position: relative;
+      transition: background .25s;
+    }
+    .status-bar.light { background: #fff; }
+    .sb-time { font-size: 13px; font-weight: 700; color: #fff; }
+    .status-bar.light .sb-time { color: #1A2B45; }
+    .sb-icons { display: flex; align-items: center; gap: 5px; color: rgba(255,255,255,0.8); font-size: 11px; }
+    .status-bar.light .sb-icons { color: #4A5568; }
+
+    /* ── Screens ── */
+    .screens { flex: 1; overflow: hidden; position: relative; }
+    .screen {
+      position: absolute; inset: 0; overflow-y: auto; background: #F0F4F9;
+      display: none; flex-direction: column; -webkit-overflow-scrolling: touch; scrollbar-width: none;
+    }
+    .screen::-webkit-scrollbar { display: none; }
+    .screen.active { display: flex; }
+
+    /* ── Bottom nav ── */
+    .bottom-nav {
+      height: 78px; background: #fff; border-top: 1px solid #E2E8F0;
+      display: grid; grid-template-columns: repeat(5, 1fr); flex-shrink: 0; padding-bottom: 16px; z-index: 100;
+    }
+    .bn-item {
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 3px; cursor: pointer; padding: 8px 2px 0; position: relative;
+    }
+    .bn-icon { font-size: 19px; color: #CBD5E0; transition: color .15s; }
+    .bn-label { font-size: 9px; font-weight: 600; color: #CBD5E0; transition: color .15s; text-align: center; }
+    .bn-item.active .bn-icon,
+    .bn-item.active .bn-label { color: #2E7DD1; }
+    .bn-badge {
+      position: absolute; top: 5px; right: calc(50% - 18px);
+      background: #DC2626; color: #fff; font-size: 9px; font-weight: 700;
+      min-width: 16px; height: 16px; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center; padding: 0 3px;
+    }
+
+    /* ══ SHARED COMPONENTS ══ */
+    .screen-topbar {
+      background: #fff; border-bottom: 1px solid #E2E8F0;
+      padding: 14px 16px; display: flex; align-items: center; gap: 10px;
+      flex-shrink: 0; position: sticky; top: 0; z-index: 50;
+    }
+    .st-back { color: #2E7DD1; font-size: 15px; cursor: pointer; padding: 2px 6px 2px 0; }
+    .st-title { font-size: 17px; font-weight: 700; color: #0F2546; flex: 1; }
+    .st-action { font-size: 12.5px; font-weight: 600; color: #2E7DD1; cursor: pointer; white-space: nowrap; }
+
+    .section-hdr { display: flex; align-items: center; justify-content: space-between; padding: 16px 16px 10px; }
+    .section-title { font-size: 14px; font-weight: 700; color: #0F2546; }
+    .section-link { font-size: 12.5px; font-weight: 600; color: #2E7DD1; cursor: pointer; }
+
+    /* Toast */
+    .toast {
+      position: absolute; bottom: 88px; left: 50%; transform: translateX(-50%) translateY(10px);
+      background: #1A2B45; color: #fff; padding: 9px 18px; border-radius: 20px;
+      font-size: 12.5px; opacity: 0; transition: all .25s; pointer-events: none; z-index: 999; white-space: nowrap;
+    }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    /* Bottom sheet overlay */
+    .sheet-backdrop {
+      position: absolute; inset: 0; background: rgba(0,0,0,0.4); z-index: 200; display: none;
+    }
+    .sheet-backdrop.open { display: block; }
+    .bottom-sheet {
+      position: absolute; bottom: 0; left: 0; right: 0; background: #fff;
+      border-radius: 20px 20px 0 0; z-index: 201; display: none;
+      flex-direction: column; max-height: 88%;
+      transition: transform .3s cubic-bezier(.4,0,.2,1);
+    }
+    .bottom-sheet.open { display: flex; }
+    .sheet-handle { width: 36px; height: 4px; background: #E2E8F0; border-radius: 2px; margin: 10px auto 0; flex-shrink: 0; }
+    .sheet-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 12px 16px 10px; border-bottom: 1px solid #F1F5F9; flex-shrink: 0;
+    }
+    .sheet-title { font-size: 15px; font-weight: 700; color: #0F2546; }
+    .sheet-close { color: #A0AEC0; font-size: 16px; cursor: pointer; padding: 4px; }
+    .sheet-body { overflow-y: auto; flex: 1; padding: 16px; }
+    .sheet-footer { padding: 12px 16px; border-top: 1px solid #F1F5F9; flex-shrink: 0; }
+
+    /* ══ SCREEN 1 — DASHBOARD ══ */
+    .dash-header { background: #0F2546; padding: 16px 20px 20px; flex-shrink: 0; }
+    .dash-top-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; }
+    .dash-greeting { color: rgba(255,255,255,0.55); font-size: 12.5px; }
+    .dash-name { color: #fff; font-size: 18px; font-weight: 700; }
+    .dash-avatar { width: 38px; height: 38px; border-radius: 50%; background: #2E7DD1; color: #fff; font-size: 14px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .dash-sub-row { display: flex; align-items: center; justify-content: space-between; margin-top: 10px; }
+    .dash-date-chip { display: inline-flex; align-items: center; gap: 6px; padding: 5px 11px; background: rgba(255,255,255,0.1); border-radius: 20px; color: rgba(255,255,255,0.65); font-size: 12px; }
+
+    /* Child cards on dashboard */
+    .child-cards { display: flex; flex-direction: column; gap: 10px; margin-top: 14px; }
+    .child-card-dash {
+      background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.14);
+      border-radius: 14px; padding: 13px 15px; cursor: pointer; transition: background .15s;
+      display: flex; align-items: center; gap: 12px;
+    }
+    .child-card-dash:hover { background: rgba(255,255,255,0.16); }
+    .cc-ava { width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; color: #fff; flex-shrink: 0; }
+    .cc-info { flex: 1; min-width: 0; }
+    .cc-name { color: #fff; font-size: 14px; font-weight: 700; }
+    .cc-meta { color: rgba(255,255,255,0.5); font-size: 11.5px; margin-top: 2px; }
+    .cc-right { display: flex; flex-direction: column; align-items: flex-end; gap: 5px; }
+    .cc-status-chip { display: inline-flex; align-items: center; gap: 5px; padding: 4px 9px; border-radius: 20px; font-size: 11.5px; font-weight: 600; }
+    .ccs-present { background: rgba(5,150,105,0.25); color: #6EE7B7; }
+    .ccs-late { background: rgba(217,119,6,0.25); color: #FDE68A; }
+    .ccs-absent { background: rgba(220,38,38,0.25); color: #FCA5A5; }
+    .cc-period { font-size: 11px; color: rgba(255,255,255,0.45); text-align: right; }
+    .cc-chevron { color: rgba(255,255,255,0.3); font-size: 11px; }
+
+    /* Urgent banner */
+    .urgent-banner {
+      margin: 12px 16px 0; background: #FFF7ED; border: 1px solid #FED7AA;
+      border-radius: 12px; padding: 12px 14px; display: flex; align-items: flex-start; gap: 10px;
+      cursor: pointer;
+    }
+    .ub-icon { width: 32px; height: 32px; border-radius: 8px; background: #FEF3C7; color: #D97706; display: flex; align-items: center; justify-content: center; font-size: 13px; flex-shrink: 0; }
+    .ub-body { flex: 1; min-width: 0; }
+    .ub-title { font-size: 12.5px; font-weight: 700; color: #92400E; }
+    .ub-sub { font-size: 11.5px; color: #B45309; margin-top: 2px; line-height: 1.4; }
+    .ub-cta { font-size: 11.5px; font-weight: 700; color: #D97706; margin-top: 6px; display: flex; align-items: center; gap: 4px; }
+
+    /* Declare absence button */
+    .declare-btn {
+      margin: 12px 16px 0; background: #2E7DD1; color: #fff; border-radius: 12px;
+      padding: 13px 16px; display: flex; align-items: center; gap: 12px; cursor: pointer; transition: background .15s;
+    }
+    .declare-btn:hover { background: #2569B8; }
+    .db-icon { width: 34px; height: 34px; background: rgba(255,255,255,0.18); border-radius: 9px; display: flex; align-items: center; justify-content: center; font-size: 15px; }
+    .db-text { flex: 1; }
+    .db-title { font-size: 13.5px; font-weight: 700; }
+    .db-sub { font-size: 11.5px; opacity: .75; margin-top: 1px; }
+
+    /* Coming up card */
+    .home-card { background: #fff; border-radius: 14px; border: 1px solid #E2E8F0; margin: 12px 16px 0; overflow: hidden; }
+    .hc-header { display: flex; align-items: center; justify-content: space-between; padding: 12px 14px 10px; border-bottom: 1px solid #F1F5F9; }
+    .hc-title { font-size: 13px; font-weight: 700; color: #0F2546; }
+    .hc-link { font-size: 12px; font-weight: 600; color: #2E7DD1; cursor: pointer; }
+
+    /* Update items (recent updates) */
+    .update-item {
+      display: flex; align-items: flex-start; gap: 11px;
+      padding: 11px 14px; border-bottom: 1px solid #F8FAFC; cursor: pointer;
+      transition: background .12s;
+    }
+    .update-item:last-child { border-bottom: none; }
+    .update-item:hover { background: #F8FAFC; }
+    .ui-icon { width: 34px; height: 34px; border-radius: 9px; display: flex; align-items: center; justify-content: center; font-size: 13px; flex-shrink: 0; }
+    .uii-approve { background: #ECFDF5; color: #059669; }
+    .uii-absent  { background: #FEF2F2; color: #DC2626; }
+    .uii-late    { background: #FFFBEB; color: #D97706; }
+    .uii-event   { background: #EFF6FF; color: #3B82F6; }
+    .uii-info    { background: #EFF6FF; color: #2563EB; }
+    .ui-body { flex: 1; min-width: 0; }
+    .ui-child { font-size: 12px; font-weight: 700; color: #0F2546; margin-bottom: 2px; }
+    .ui-desc { font-size: 12px; color: #4A5568; line-height: 1.4; }
+    .ui-time { font-size: 11px; color: #A0AEC0; margin-top: 3px; }
+    .ui-chevron { color: #CBD5E0; font-size: 11px; margin-top: 3px; flex-shrink: 0; }
+
+    /* Coming up items */
+    .coming-item {
+      display: flex; align-items: center; gap: 11px;
+      padding: 10px 14px; border-bottom: 1px solid #F8FAFC;
+    }
+    .coming-item:last-child { border-bottom: none; }
+    .ci-icon { width: 32px; height: 32px; border-radius: 8px; background: #EFF6FF; color: #3B82F6; display: flex; align-items: center; justify-content: center; font-size: 12px; flex-shrink: 0; }
+    .ci-body { flex: 1; min-width: 0; }
+    .ci-title { font-size: 12.5px; font-weight: 600; color: #1A2B45; }
+    .ci-sub { font-size: 11.5px; color: #718096; margin-top: 1px; }
+    .ci-child-tag { display: inline-flex; align-items: center; gap: 3px; font-size: 10px; font-weight: 700; padding: 1px 6px; border-radius: 4px; margin-bottom: 3px; }
+    .cct-aaliyah { background: #EBF4FF; color: #2E7DD1; }
+    .cct-jaylen  { background: #FFF7ED; color: #D97706; }
+
+    /* ══ SCREEN 2 — ALERTS ══ */
+    .filter-tabs {
+      display: flex; gap: 8px; padding: 10px 16px; background: #fff;
+      border-bottom: 1px solid #F1F5F9; flex-shrink: 0; overflow-x: auto; scrollbar-width: none;
+    }
+    .filter-tabs::-webkit-scrollbar { display: none; }
+    .ftab {
+      padding: 5px 12px; border-radius: 20px; font-size: 12.5px; font-weight: 600;
+      cursor: pointer; white-space: nowrap; transition: all .15s;
+      border: 1px solid #E2E8F0; color: #718096; background: #fff;
+    }
+    .ftab.active { background: #EBF4FF; color: #2E7DD1; border-color: #BFDBFE; }
+    .ftab.ftab-jaylen.active { background: #FFF7ED; color: #D97706; border-color: #FED7AA; }
+
+    .alerts-list { padding: 10px 16px; flex: 1; }
+    .alert-date-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: #A0AEC0; margin: 14px 0 8px; }
+    .alert-date-label:first-child { margin-top: 2px; }
+
+    .alert-item {
+      background: #fff; border-radius: 12px; border: 1px solid #E2E8F0;
+      margin-bottom: 8px; overflow: hidden; cursor: pointer; transition: box-shadow .15s;
+    }
+    .alert-item:hover { box-shadow: 0 2px 10px rgba(0,0,0,0.07); }
+    .alert-item.unread { border-left: 3px solid #2E7DD1; }
+    .ai-body { padding: 12px 13px; display: flex; align-items: flex-start; gap: 10px; }
+    .ai-icon { width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; }
+    .aii-absent  { background: #FEF2F2; color: #DC2626; }
+    .aii-late    { background: #FFFBEB; color: #D97706; }
+    .aii-approve { background: #ECFDF5; color: #059669; }
+    .aii-danger  { background: #FEF2F2; color: #DC2626; }
+    .aii-info    { background: #EFF6FF; color: #2563EB; }
+    .aii-event   { background: #EFF6FF; color: #3B82F6; }
+    .ai-content { flex: 1; min-width: 0; }
+    .ai-child-tag { display: inline-flex; align-items: center; gap: 3px; font-size: 10.5px; font-weight: 700; padding: 2px 7px; border-radius: 5px; margin-bottom: 4px; }
+    .act-aaliyah { background: #EBF4FF; color: #2E7DD1; }
+    .act-jaylen  { background: #FFF7ED; color: #D97706; }
+    .ai-title { font-size: 13px; font-weight: 700; color: #1A2B45; line-height: 1.3; }
+    .ai-sub { font-size: 12px; color: #4A5568; margin-top: 3px; line-height: 1.4; }
+    .ai-footer { display: flex; align-items: center; justify-content: space-between; margin-top: 6px; }
+    .ai-time { font-size: 11px; color: #A0AEC0; }
+    .ai-cta { font-size: 11.5px; font-weight: 700; color: #2E7DD1; cursor: pointer; background: #EBF4FF; padding: 4px 10px; border-radius: 6px; }
+    .ai-dot { width: 8px; height: 8px; border-radius: 50%; background: #2E7DD1; flex-shrink: 0; margin-top: 3px; }
+
+    /* ══ SCREEN 3 — REPORT (Declare Future Absence) ══ */
+    .form-card { background: #fff; border-radius: 14px; border: 1px solid #E2E8F0; margin: 12px 16px; overflow: hidden; }
+    .fc-section { padding: 14px 16px; border-bottom: 1px solid #F1F5F9; }
+    .fc-section:last-child { border-bottom: none; }
+    .fc-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .07em; color: #A0AEC0; margin-bottom: 10px; }
+
+    .child-select-row { display: flex; gap: 8px; }
+    .child-select-btn {
+      flex: 1; display: flex; align-items: center; gap: 9px; padding: 10px 12px;
+      border: 1.5px solid #E2E8F0; border-radius: 10px; cursor: pointer; transition: all .15s; background: #fff;
+    }
+    .child-select-btn.active-aaliyah { border-color: #2E7DD1; background: #EBF4FF; }
+    .child-select-btn.active-jaylen  { border-color: #D97706; background: #FFF7ED; }
+    .csb-ava { width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: #fff; }
+    .csb-name { font-size: 12.5px; font-weight: 700; color: #1A2B45; }
+    .csb-grade { font-size: 11px; color: #718096; }
+    .csb-check { margin-left: auto; font-size: 13px; display: none; }
+    .active-aaliyah .csb-check { display: block; color: #2E7DD1; }
+    .active-jaylen  .csb-check { display: block; color: #D97706; }
+
+    .field-label { font-size: 13px; font-weight: 600; color: #1A2B45; margin-bottom: 8px; display: block; }
+    .field-select {
+      width: 100%; padding: 11px 14px; border: 1.5px solid #E2E8F0; border-radius: 10px;
+      font-size: 13.5px; font-family: inherit; color: #1A2B45; background: #fff; outline: none; appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23718096' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat; background-position: right 14px center; padding-right: 36px; cursor: pointer;
+    }
+    .field-select:focus { border-color: #2E7DD1; }
+    .field-input {
+      width: 100%; padding: 11px 14px; border: 1.5px solid #E2E8F0; border-radius: 10px;
+      font-size: 13.5px; font-family: inherit; color: #1A2B45; outline: none;
+    }
+    .field-input:focus { border-color: #2E7DD1; }
+    .field-textarea {
+      width: 100%; padding: 11px 14px; border: 1.5px solid #E2E8F0; border-radius: 10px;
+      font-size: 13.5px; font-family: inherit; color: #1A2B45; resize: none; outline: none; min-height: 80px; line-height: 1.55;
+    }
+    .field-textarea:focus { border-color: #2E7DD1; }
+    .date-row { display: flex; gap: 8px; }
+    .date-row .field-input { flex: 1; }
+
+    .submit-btn {
+      margin: 4px 16px 20px; background: #2E7DD1; color: #fff; border: none; border-radius: 12px;
+      padding: 15px; font-size: 15px; font-weight: 700; font-family: inherit;
+      width: calc(100% - 32px); cursor: pointer; transition: background .15s;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+    }
+    .submit-btn:hover:not(:disabled) { background: #2569B8; }
+    .submit-btn:disabled { background: #CBD5E0; cursor: not-allowed; }
+    .success-state {
+      display: none; flex-direction: column; align-items: center;
+      justify-content: center; padding: 40px 24px; text-align: center; flex: 1;
+    }
+    .success-circle {
+      width: 76px; height: 76px; border-radius: 50%; background: #ECFDF5;
+      border: 2px solid #A7F3D0; display: flex; align-items: center; justify-content: center;
+      font-size: 32px; color: #059669; margin-bottom: 18px;
+    }
+    .success-title { font-size: 19px; font-weight: 700; color: #0F2546; margin-bottom: 8px; }
+    .success-sub { font-size: 13.5px; color: #718096; line-height: 1.6; }
+    .success-btn {
+      margin-top: 26px; background: #EBF4FF; color: #2E7DD1; border: none;
+      border-radius: 10px; padding: 12px 24px; font-size: 14px; font-weight: 700; font-family: inherit; cursor: pointer;
+    }
+
+    /* ══ SCREEN 4 — ACTIVE RECORDS ══ */
+    .rec-filter-tabs {
+      display: flex; gap: 6px; padding: 10px 16px; background: #fff;
+      border-bottom: 1px solid #F1F5F9; flex-shrink: 0; overflow-x: auto; scrollbar-width: none;
+    }
+    .rec-filter-tabs::-webkit-scrollbar { display: none; }
+    .rftab {
+      display: flex; align-items: center; gap: 5px;
+      padding: 5px 11px; border-radius: 20px; font-size: 12px; font-weight: 600;
+      cursor: pointer; white-space: nowrap; transition: all .15s;
+      border: 1px solid #E2E8F0; color: #718096; background: #fff;
+    }
+    .rftab.active { background: #EBF4FF; color: #2E7DD1; border-color: #BFDBFE; }
+    .rftab.active.rft-urgent { background: #FEF2F2; color: #DC2626; border-color: #FECACA; }
+    .rftab.active.rft-pending { background: #EFF6FF; color: #2563EB; border-color: #BFDBFE; }
+    .rftab.active.rft-disputed { background: #FFF7ED; color: #D97706; border-color: #FED7AA; }
+    .rftab.active.rft-closed { background: #ECFDF5; color: #059669; border-color: #A7F3D0; }
+    .rftab-num { font-size: 10px; font-weight: 700; padding: 1px 5px; border-radius: 8px; background: rgba(0,0,0,0.07); }
+
+    .records-list-wrap { padding: 12px 16px; flex: 1; }
+
+    .rec-card {
+      background: #fff; border-radius: 12px; border: 1px solid #E2E8F0;
+      margin-bottom: 10px; overflow: hidden; cursor: pointer; transition: box-shadow .15s;
+      display: flex; align-items: stretch; gap: 0;
+    }
+    .rec-card:hover { box-shadow: 0 2px 10px rgba(0,0,0,0.08); }
+    .rec-card-accent { width: 4px; flex-shrink: 0; }
+    .rca-absent   { background: #DC2626; }
+    .rca-late     { background: #D97706; }
+    .rca-pending  { background: #2563EB; }
+    .rca-disputed { background: #D97706; }
+    .rca-closed   { background: #059669; }
+    .rec-card-body { padding: 12px 13px; flex: 1; min-width: 0; }
+    .rc-child-tag { display: inline-flex; align-items: center; gap: 3px; font-size: 10.5px; font-weight: 700; padding: 2px 7px; border-radius: 5px; margin-bottom: 6px; }
+    .rc-title { font-size: 13px; font-weight: 600; color: #1A2B45; line-height: 1.4; margin-bottom: 4px; }
+    .rc-sub { font-size: 11.5px; color: #718096; line-height: 1.4; margin-bottom: 6px; }
+    .rc-chips { display: flex; flex-wrap: wrap; gap: 5px; align-items: center; }
+    .rc-pill { display: inline-flex; align-items: center; gap: 4px; font-size: 10.5px; font-weight: 600; border-radius: 20px; padding: 2px 8px; }
+    .rcp-absent    { background: rgba(220,38,38,.1);  color: #DC2626; }
+    .rcp-late      { background: rgba(217,119,6,.1);   color: #D97706; }
+    .rcp-awaiting  { background: rgba(37,99,235,.08);  color: #2563EB; border: 1px solid rgba(37,99,235,.2); }
+    .rcp-pending   { background: rgba(124,58,237,.08); color: #7C3AED; border: 1px solid rgba(124,58,237,.2); }
+    .rcp-justified { background: rgba(5,150,105,.1);   color: #059669; }
+    .rcp-disputed  { background: rgba(217,119,6,.1);   color: #D97706; border: 1px solid rgba(217,119,6,.25); }
+    .rcp-deadline  { font-size: 10.5px; font-weight: 700; color: #DC2626; display: flex; align-items: center; gap: 3px; }
+    .rec-card-arrow { display: flex; align-items: center; padding: 0 12px 0 4px; color: #CBD5E0; font-size: 12px; flex-shrink: 0; }
+
+    /* Info banner inside records list */
+    .info-banner {
+      background: #EFF6FF; border: 1px solid #BFDBFE; border-radius: 12px;
+      padding: 12px 14px; display: flex; align-items: flex-start; gap: 10px; margin-bottom: 10px;
+    }
+    .ib-icon { color: #2563EB; font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+    .ib-body { flex: 1; }
+    .ib-title { font-size: 12.5px; font-weight: 700; color: #1E40AF; margin-bottom: 2px; }
+    .ib-sub { font-size: 11.5px; color: #3B82F6; line-height: 1.4; }
+
+    /* Record detail sheet content */
+    .drawer-hero { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+    .drawer-ava { width: 42px; height: 42px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; color: #fff; flex-shrink: 0; }
+    .drawer-name { font-size: 15px; font-weight: 700; color: #0F2546; }
+    .drawer-meta { font-size: 12px; color: #718096; margin-top: 2px; }
+    .drawer-status-row { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
+    .drawer-section { margin-bottom: 16px; }
+    .drawer-section-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: #A0AEC0; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
+    .dperiods { display: flex; gap: 6px; flex-wrap: wrap; }
+    .dperiod { display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 8px 10px; border-radius: 8px; border: 1px solid #E2E8F0; min-width: 54px; text-align: center; }
+    .dperiod__label { font-size: 11px; font-weight: 700; color: #718096; }
+    .dperiod__sub { font-size: 9.5px; color: #A0AEC0; }
+    .dperiod__pill { font-size: 10px; font-weight: 600; border-radius: 20px; padding: 2px 7px; }
+    .dperiod--present { background: rgba(5,150,105,.06); border-color: rgba(5,150,105,.2); }
+    .dperiod--present .dperiod__pill { background: rgba(5,150,105,.12); color: #059669; }
+    .dperiod--absent  { background: rgba(220,38,38,.06); border-color: rgba(220,38,38,.2); }
+    .dperiod--absent  .dperiod__pill { background: rgba(220,38,38,.12); color: #DC2626; }
+    .dperiod--late    { background: rgba(217,119,6,.06); border-color: rgba(217,119,6,.2); }
+    .dperiod--late    .dperiod__pill { background: rgba(217,119,6,.12); color: #D97706; }
+    .dcontext { font-size: 13px; color: #374151; line-height: 1.6; }
+    .closed-tag { display: flex; align-items: center; gap: 8px; padding: 10px 12px; border-radius: 10px; font-size: 12.5px; font-weight: 600; margin-bottom: 8px; }
+    .ct-justified { background: rgba(5,150,105,.08); border: 1px solid rgba(5,150,105,.2); color: #059669; }
+    .ct-disputed  { background: rgba(217,119,6,.08);  border: 1px solid rgba(217,119,6,.25);  color: #D97706; }
+
+    .dform-field { margin-bottom: 12px; }
+    .dform-field .field-label { font-size: 12.5px; }
+    .dform-hint { font-size: 11px; color: #A0AEC0; margin-top: 3px; }
+
+    /* ══ SCREEN 5 — HISTORY ══ */
+    .child-tabs {
+      display: flex; background: #fff; border-bottom: 1px solid #E2E8F0;
+      flex-shrink: 0; padding: 0 16px;
+    }
+    .child-tab {
+      display: flex; align-items: center; gap: 8px; padding: 12px 14px;
+      cursor: pointer; font-size: 13px; font-weight: 600; color: #A0AEC0;
+      border-bottom: 2px solid transparent; transition: all .15s; white-space: nowrap;
+    }
+    .child-tab.active-aaliyah { color: #2E7DD1; border-color: #2E7DD1; }
+    .child-tab.active-jaylen  { color: #D97706; border-color: #D97706; }
+    .ct-ava { width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 700; color: #fff; }
+
+    /* Stats */
+    .term-summary { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin: 0 16px 12px; }
+    .ts-cell { background: #fff; border-radius: 10px; border: 1px solid #E2E8F0; padding: 10px 6px; text-align: center; }
+    .ts-n { font-size: 18px; font-weight: 800; line-height: 1; }
+    .ts-l { font-size: 9px; font-weight: 600; text-transform: uppercase; letter-spacing: .04em; color: #A0AEC0; margin-top: 3px; }
+    .ts-present .ts-n { color: #059669; } .ts-absent .ts-n { color: #DC2626; }
+    .ts-late .ts-n { color: #D97706; } .ts-rate .ts-n { color: #2E7DD1; font-size: 14px; }
+
+    /* Calendar */
+    .cal-card { background: #fff; border-radius: 14px; border: 1px solid #E2E8F0; margin: 12px 16px 10px; overflow: hidden; }
+    .cal-nav { display: flex; align-items: center; justify-content: space-between; padding: 13px 16px; border-bottom: 1px solid #F1F5F9; }
+    .cal-month { font-size: 14.5px; font-weight: 700; color: #0F2546; }
+    .cal-nav-btns { display: flex; gap: 8px; }
+    .cal-nav-btn { width: 28px; height: 28px; border: 1px solid #E2E8F0; border-radius: 7px; background: #fff; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #718096; font-size: 11px; transition: all .12s; }
+    .cal-nav-btn:hover { background: #F0F4F9; }
+    .cal-grid-wrap { padding: 10px 8px 12px; }
+    .cal-dh-row { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; margin-bottom: 3px; }
+    .cal-dh { text-align: center; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: #A0AEC0; padding: 2px 0; }
+    .cal-days { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; }
+    .cal-day {
+      aspect-ratio: 1; display: flex; align-items: center; justify-content: center;
+      border-radius: 7px; font-size: 11.5px; font-weight: 500; cursor: pointer; transition: all .12s;
+    }
+    .cal-day.empty { visibility: hidden; }
+    .cal-day.weekend { color: #CBD5E0; cursor: default; }
+    .cal-day.today { box-shadow: inset 0 0 0 2px #2E7DD1; font-weight: 700; }
+    .cal-day.present { background: #ECFDF5; color: #065F46; }
+    .cal-day.absent  { background: #FEF2F2; color: #991B1B; }
+    .cal-day.late    { background: #FFFBEB; color: #92400E; }
+    .cal-day.future  { background: #EFF6FF; color: #1D4ED8; }
+    .cal-day.selected { box-shadow: inset 0 0 0 2px #2E7DD1 !important; }
+    .cal-legend { display: flex; gap: 10px; padding: 0 10px 10px; flex-wrap: wrap; }
+    .leg-item { display: flex; align-items: center; gap: 5px; font-size: 10.5px; color: #718096; }
+    .leg-swatch { width: 10px; height: 10px; border-radius: 3px; }
+
+    /* Day detail card */
+    .day-detail { background: #fff; border-radius: 14px; border: 1px solid #E2E8F0; margin: 0 16px 12px; overflow: hidden; display: none; }
+    .day-detail.visible { display: block; }
+    .dd-header { padding: 11px 14px; border-bottom: 1px solid #F1F5F9; display: flex; align-items: center; justify-content: space-between; }
+    .dd-title { font-size: 13px; font-weight: 700; color: #0F2546; }
+    .dd-close { color: #A0AEC0; cursor: pointer; font-size: 13px; padding: 2px; }
+    .dd-periods { padding: 10px 14px; display: flex; flex-wrap: wrap; gap: 6px; }
+
+    /* History records list */
+    .hist-records { padding: 0 16px 20px; }
+    .hist-record-item {
+      background: #fff; border-radius: 10px; border: 1px solid #E2E8F0;
+      padding: 10px 13px; display: flex; align-items: center; gap: 10px;
+      margin-bottom: 7px; cursor: pointer; transition: box-shadow .12s;
+    }
+    .hist-record-item:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+    .hri-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+    .hrid-present { background: #059669; } .hrid-absent { background: #DC2626; } .hrid-late { background: #D97706; } .hrid-future { background: #2563EB; }
+    .hri-date { font-size: 12px; font-weight: 700; color: #1A2B45; min-width: 48px; }
+    .hri-class { font-size: 12px; color: #718096; flex: 1; }
+    .hri-badge { display: inline-flex; align-items: center; gap: 4px; padding: 3px 8px; border-radius: 20px; font-size: 11px; font-weight: 600; }
+    .hrib-present  { background: #ECFDF5; color: #059669; }
+    .hrib-absent   { background: #FEF2F2; color: #DC2626; }
+    .hrib-late     { background: #FFFBEB; color: #D97706; }
+    .hrib-future   { background: #EFF6FF; color: #2563EB; }
+
+    /* ── Day Navigator ── */
+    .day-nav {
+      display: flex; align-items: center; gap: 8px;
+      margin: 12px 16px 0; background: #fff; border-radius: 12px;
+      border: 1px solid #E2E8F0; padding: 10px 12px;
+    }
+    .day-nav-btn {
+      width: 34px; height: 34px; border-radius: 8px; border: 1px solid #E2E8F0;
+      background: #F8FAFC; display: flex; align-items: center; justify-content: center;
+      font-size: 12px; color: #718096; cursor: pointer; transition: all .12s; flex-shrink: 0;
+    }
+    .day-nav-btn:hover:not(:disabled) { background: #EBF4FF; color: #2E7DD1; border-color: #BFDBFE; }
+    .day-nav-btn:disabled { opacity: 0.3; cursor: default; }
+    .day-nav-center { text-align: center; flex: 1; }
+    .day-nav-date { font-size: 14px; font-weight: 700; color: #0F2546; }
+    .day-nav-sub  { font-size: 11px; color: #A0AEC0; margin-top: 2px; }
+
+    /* ── Day Detail Card (always visible) ── */
+    .day-detail-card {
+      margin: 8px 16px 0; background: #fff; border-radius: 12px;
+      border: 1px solid #E2E8F0; overflow: hidden;
+    }
+    .ddc-header {
+      padding: 11px 14px 10px; border-bottom: 1px solid #F8FAFC;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .ddc-title { font-size: 13px; font-weight: 700; color: #0F2546; }
+    .ddc-status { display: flex; align-items: center; gap: 5px; font-size: 11.5px; font-weight: 600; }
+    .ddc-periods {
+      padding: 12px 14px; display: flex; gap: 7px; flex-wrap: wrap;
+    }
+    .ddc-period {
+      flex: 1; min-width: 60px; display: flex; flex-direction: column; align-items: center;
+      gap: 4px; padding: 10px 8px; border-radius: 10px; border: 1px solid #E2E8F0;
+      text-align: center;
+    }
+    .ddc-period__label { font-size: 11px; font-weight: 700; color: #718096; }
+    .ddc-period__sub   { font-size: 9.5px; color: #A0AEC0; }
+    .ddc-period__pill  { font-size: 10px; font-weight: 600; border-radius: 20px; padding: 2px 8px; }
+    .ddc-p-present { background: rgba(5,150,105,.06); border-color: rgba(5,150,105,.25); }
+    .ddc-p-present .ddc-period__pill { background: rgba(5,150,105,.12); color: #059669; }
+    .ddc-p-absent  { background: rgba(220,38,38,.06); border-color: rgba(220,38,38,.25); }
+    .ddc-p-absent  .ddc-period__pill { background: rgba(220,38,38,.12); color: #DC2626; }
+    .ddc-p-late    { background: rgba(217,119,6,.06); border-color: rgba(217,119,6,.25); }
+    .ddc-p-late    .ddc-period__pill { background: rgba(217,119,6,.12); color: #D97706; }
+    .ddc-p-now     { background: rgba(37,99,235,.06); border-color: rgba(37,99,235,.25); }
+    .ddc-p-now     .ddc-period__pill { background: rgba(37,99,235,.12); color: #2563EB; }
+    .ddc-p-upcoming { background: #F8FAFC; border-color: #E2E8F0; }
+    .ddc-p-upcoming .ddc-period__pill { background: #F1F5F9; color: #A0AEC0; }
+    .ddc-empty {
+      padding: 20px 14px; text-align: center; color: #A0AEC0; font-size: 13px;
+    }
+
+    /* ── Calendar toggle ── */
+    .cal-toggle-row { padding: 10px 16px 0; }
+    .cal-toggle-btn {
+      display: flex; align-items: center; gap: 8px; width: 100%;
+      background: #fff; border: 1px solid #E2E8F0; border-radius: 10px;
+      padding: 10px 14px; cursor: pointer; font-size: 12.5px; font-weight: 600;
+      color: #2E7DD1; font-family: inherit; transition: background .12s;
+    }
+    .cal-toggle-btn:hover { background: #EBF4FF; }
+    .cal-collapsible { padding: 8px 16px 0; }
+    .cal-collapsible .cal-card { margin: 0; }
+
+    /* ── Toggle switch ── */
+    .toggle-row { display: flex; align-items: center; justify-content: space-between; }
+    .toggle-info { flex: 1; }
+    .toggle-info-title { font-size: 13px; font-weight: 600; color: #1A2B45; }
+    .toggle-info-sub   { font-size: 11.5px; color: #718096; margin-top: 2px; }
+    .toggle-switch {
+      width: 44px; height: 26px; border-radius: 13px; background: #E2E8F0;
+      cursor: pointer; position: relative; transition: background .2s; flex-shrink: 0;
+    }
+    .toggle-switch[data-on="true"] { background: #2E7DD1; }
+    .toggle-knob {
+      position: absolute; top: 3px; left: 3px; width: 20px; height: 20px;
+      border-radius: 50%; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+      transition: left .2s;
+    }
+    .toggle-switch[data-on="true"] .toggle-knob { left: 21px; }
+
+    /* ── Period chips ── */
+    .period-chips { display: flex; gap: 8px; }
+    .period-chip {
+      flex: 1; padding: 12px 6px; border: 1.5px solid #E2E8F0; border-radius: 10px;
+      text-align: center; font-size: 13px; font-weight: 700; color: #A0AEC0;
+      cursor: pointer; transition: all .15s; background: #fff;
+    }
+    .period-chip.selected { border-color: #2E7DD1; background: #EBF4FF; color: #2E7DD1; }
+  </style>
+</head>
+<body>
+
+<div class="stage-label">ClassTrack · Parent App · 2 Children</div>
+
+<div class="phone" id="phone">
+  <div class="phone-notch"></div>
+
+  <!-- Status bar -->
+  <div class="status-bar" id="statusBar">
+    <span class="sb-time">9:41</span>
+    <div class="sb-icons"><i class="fa-solid fa-signal"></i><i class="fa-solid fa-wifi"></i><i class="fa-solid fa-battery-full"></i></div>
+  </div>
+
+  <div class="screens">
+
+    <!-- ════════════════════════════════
+         SCREEN 1 — HOME / DASHBOARD
+    ════════════════════════════════ -->
+    <div class="screen active" id="screen-dashboard">
+
+      <!-- Dark header -->
+      <div class="dash-header">
+        <div class="dash-top-row">
+          <div>
+            <div class="dash-greeting">Good morning,</div>
+            <div class="dash-name">Marcus Carter 👋</div>
+          </div>
+          <div class="dash-avatar">MC</div>
+        </div>
+        <div class="dash-sub-row">
+          <div class="dash-date-chip"><i class="fa-solid fa-calendar-day"></i> Tue, May 12, 2026</div>
+        </div>
+
+        <!-- Child cards -->
+        <div class="child-cards">
+          <!-- Aaliyah -->
+          <div class="child-card-dash" onclick="navigate('history'); setHistoryChild('aaliyah')">
+            <div class="cc-ava" style="background:#2E7DD1">AC</div>
+            <div class="cc-info">
+              <div class="cc-name">Aaliyah Carter</div>
+              <div class="cc-meta">Grade 7A · Ms. S. Tremblay</div>
+            </div>
+            <div class="cc-right">
+              <span class="cc-status-chip ccs-present"><span style="width:6px;height:6px;border-radius:50%;background:#6EE7B7;display:inline-block"></span> Present</span>
+              <div class="cc-period">Now in P3 — Art</div>
+            </div>
+            <i class="fa-solid fa-chevron-right cc-chevron"></i>
+          </div>
+          <!-- Jaylen -->
+          <div class="child-card-dash" onclick="navigate('history'); setHistoryChild('jaylen')">
+            <div class="cc-ava" style="background:#D97706">JC</div>
+            <div class="cc-info">
+              <div class="cc-name">Jaylen Carter</div>
+              <div class="cc-meta">Grade 4B · Mr. P. Côté</div>
+            </div>
+            <div class="cc-right">
+              <span class="cc-status-chip ccs-late"><span style="width:6px;height:6px;border-radius:50%;background:#FDE68A;display:inline-block"></span> Late</span>
+              <div class="cc-period">Now in P2 — Reading</div>
+            </div>
+            <i class="fa-solid fa-chevron-right cc-chevron"></i>
+          </div>
+        </div>
+      </div>
+
+      <!-- Urgent banner -->
+      <div class="urgent-banner" onclick="navigate('records')">
+        <div class="ub-icon"><i class="fa-solid fa-hourglass-half"></i></div>
+        <div class="ub-body">
+          <div class="ub-title">Jaylen's May 11 absence needs a reason</div>
+          <div class="ub-sub">He was absent in Reading (P2). The school needs your reply within 14 hours.</div>
+          <div class="ub-cta">Open record <i class="fa-solid fa-arrow-right"></i></div>
+        </div>
+      </div>
+
+      <!-- Declare absence CTA -->
+      <div class="declare-btn" onclick="navigate('report')">
+        <div class="db-icon"><i class="fa-solid fa-calendar-plus"></i></div>
+        <div class="db-text">
+          <div class="db-title">Declare an Absence</div>
+          <div class="db-sub">Report a future absence for your child</div>
+        </div>
+        <i class="fa-solid fa-chevron-right" style="opacity:.6;font-size:13px"></i>
+      </div>
+
+      <!-- Recent Updates -->
+      <div class="section-hdr" style="padding-top:18px">
+        <span class="section-title">Recent Updates</span>
+        <span class="section-link" onclick="navigate('alerts')">See all</span>
+      </div>
+
+      <div class="home-card" style="margin-top:0">
+        <!-- Update 1 -->
+        <div class="update-item" onclick="navigate('alerts')">
+          <div class="ui-icon uii-approve"><i class="fa-solid fa-circle-check"></i></div>
+          <div class="ui-body">
+            <div class="ui-child">Aaliyah</div>
+            <div class="ui-desc">Has been marked <strong>Justified</strong> for her May 4 absence — Doctor's note accepted</div>
+            <div class="ui-time">Today, 8:14 AM</div>
+          </div>
+          <i class="fa-solid fa-chevron-right ui-chevron"></i>
+        </div>
+        <!-- Update 2 -->
+        <div class="update-item" onclick="navigate('alerts')">
+          <div class="ui-icon uii-late"><i class="fa-solid fa-clock"></i></div>
+          <div class="ui-body">
+            <div class="ui-child">Jaylen</div>
+            <div class="ui-desc">Has been marked <strong>Late</strong> for P1 (Math) — Arrived 22 min late · 9:02 AM</div>
+            <div class="ui-time">Today, 9:02 AM</div>
+          </div>
+          <i class="fa-solid fa-chevron-right ui-chevron"></i>
+        </div>
+      </div>
+
+      <!-- Coming up -->
+      <div class="section-hdr" style="padding-top:18px">
+        <span class="section-title">Coming Up</span>
+        <span class="section-link" onclick="navigate('future')">See all</span>
+      </div>
+
+      <div class="home-card" style="margin-top:0">
+        <div class="coming-item">
+          <div class="ci-icon"><i class="fa-solid fa-trophy"></i></div>
+          <div class="ci-body">
+            <div class="ci-child-tag cct-aaliyah"><i class="fa-solid fa-circle" style="font-size:5px"></i> Aaliyah</div>
+            <div class="ci-title">Soccer tournament</div>
+            <div class="ci-sub">Thu May 14 · P3–P4 · Pre-justified</div>
+          </div>
+        </div>
+        <div class="coming-item">
+          <div class="ci-icon"><i class="fa-solid fa-calendar-day"></i></div>
+          <div class="ci-body">
+            <div class="ci-child-tag cct-aaliyah"><i class="fa-solid fa-circle" style="font-size:5px"></i> Aaliyah</div>
+            <div class="ci-title">Medical appointment</div>
+            <div class="ci-sub">Fri May 22 · Full day</div>
+          </div>
+        </div>
+      </div>
+
+      <div style="height:14px"></div>
+    </div><!-- /screen-dashboard -->
+
+
+    <!-- ════════════════════════════════
+         SCREEN 2 — ALERTS
+    ════════════════════════════════ -->
+    <div class="screen" id="screen-alerts">
+      <div class="screen-topbar">
+        <div class="st-title">Alerts <span style="font-size:11px;font-weight:600;color:#DC2626;background:#FEF2F2;padding:2px 8px;border-radius:10px;margin-left:6px">3 new</span></div>
+        <span class="st-action" onclick="markAllRead()">Mark all read</span>
+      </div>
+
+      <div class="filter-tabs">
+        <div class="ftab active" onclick="setAlertFilter(this,'all')">All</div>
+        <div class="ftab" onclick="setAlertFilter(this,'aaliyah')">Aaliyah</div>
+        <div class="ftab ftab-jaylen" onclick="setAlertFilter(this,'jaylen')">Jaylen</div>
+        <div class="ftab" onclick="setAlertFilter(this,'absences')">Absences</div>
+        <div class="ftab" onclick="setAlertFilter(this,'decisions')">Decisions</div>
+      </div>
+
+      <div class="alerts-list">
+        <div class="alert-date-label">Today — May 12</div>
+
+        <div class="alert-item unread" data-child="aaliyah" data-type="decisions">
+          <div class="ai-body">
+            <div class="ai-icon aii-approve"><i class="fa-solid fa-circle-check"></i></div>
+            <div class="ai-content">
+              <div class="ai-child-tag act-aaliyah"><i class="fa-solid fa-circle" style="font-size:5px"></i> Aaliyah · Grade 7A</div>
+              <div class="ai-title">Absence justified — May 4</div>
+              <div class="ai-sub">Medical appointment · Doctor's note accepted by the clerk. Record closed — no grade impact.</div>
+              <div class="ai-footer">
+                <span class="ai-time">8:14 AM</span>
+                <span class="ai-cta" onclick="navigate('records');event.stopPropagation()">View record</span>
+              </div>
+            </div>
+            <div class="ai-dot"></div>
+          </div>
+        </div>
+
+        <div class="alert-item unread" data-child="jaylen" data-type="absences">
+          <div class="ai-body">
+            <div class="ai-icon aii-late"><i class="fa-solid fa-clock"></i></div>
+            <div class="ai-content">
+              <div class="ai-child-tag act-jaylen"><i class="fa-solid fa-circle" style="font-size:5px"></i> Jaylen · Grade 4B</div>
+              <div class="ai-title">Late arrival — P1 (Math)</div>
+              <div class="ai-sub">Arrived 22 min late. Signed in at the office at 9:02 AM. A reason is helpful.</div>
+              <div class="ai-footer">
+                <span class="ai-time">9:02 AM</span>
+                <span class="ai-cta" onclick="navigate('records');event.stopPropagation()">Submit reason</span>
+              </div>
+            </div>
+            <div class="ai-dot"></div>
+          </div>
+        </div>
+
+        <div class="alert-date-label">This Week</div>
+
+        <div class="alert-item unread" data-child="jaylen" data-type="absences">
+          <div class="ai-body">
+            <div class="ai-icon aii-absent"><i class="fa-solid fa-triangle-exclamation"></i></div>
+            <div class="ai-content">
+              <div class="ai-child-tag act-jaylen"><i class="fa-solid fa-circle" style="font-size:5px"></i> Jaylen · Grade 4B</div>
+              <div class="ai-title">Marked absent — May 11 · P2 (Reading)</div>
+              <div class="ai-sub">Marked absent by Mr. Côté at 1:45 PM. The school needs a reason within 24 hours.</div>
+              <div class="ai-footer">
+                <span class="ai-time">May 11 · 1:45 PM</span>
+                <span class="ai-cta" onclick="navigate('records');event.stopPropagation()">Submit reason</span>
+              </div>
+            </div>
+            <div class="ai-dot"></div>
+          </div>
+        </div>
+
+        <div class="alert-item" data-child="aaliyah" data-type="decisions">
+          <div class="ai-body">
+            <div class="ai-icon aii-event"><i class="fa-solid fa-trophy"></i></div>
+            <div class="ai-content">
+              <div class="ai-child-tag act-aaliyah"><i class="fa-solid fa-circle" style="font-size:5px"></i> Aaliyah · Grade 7A</div>
+              <div class="ai-title">Soccer tournament — P3 &amp; P4 pre-justified</div>
+              <div class="ai-sub">Thu May 14 · Coach Lévesque pre-justified both periods. No action needed from you.</div>
+              <div class="ai-footer"><span class="ai-time">May 11 · 4:18 PM</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="alert-item" data-child="aaliyah" data-type="absences">
+          <div class="ai-body">
+            <div class="ai-icon aii-absent"><i class="fa-solid fa-triangle-exclamation"></i></div>
+            <div class="ai-content">
+              <div class="ai-child-tag act-aaliyah"><i class="fa-solid fa-circle" style="font-size:5px"></i> Aaliyah · Grade 7A</div>
+              <div class="ai-title">Marked absent — May 4 · Full day</div>
+              <div class="ai-sub">Absent across all periods. School notification sent at 9:07 AM.</div>
+              <div class="ai-footer"><span class="ai-time">May 4 · 9:07 AM</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="alert-date-label">Earlier</div>
+
+        <div class="alert-item" data-child="aaliyah" data-type="absences">
+          <div class="ai-body">
+            <div class="ai-icon aii-late"><i class="fa-solid fa-clock"></i></div>
+            <div class="ai-content">
+              <div class="ai-child-tag act-aaliyah"><i class="fa-solid fa-circle" style="font-size:5px"></i> Aaliyah · Grade 7A</div>
+              <div class="ai-title">Late arrival — Apr 22 · P1 (Math)</div>
+              <div class="ai-sub">Bus delay · 12 min late · Record closed as justified (transportation).</div>
+              <div class="ai-footer"><span class="ai-time">Apr 22 · 8:52 AM</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div style="height:8px"></div>
+      </div>
+    </div><!-- /screen-alerts -->
+
+
+    <!-- ════════════════════════════════
+         SCREEN 3 — REPORT (Declare Future Absence)
+    ════════════════════════════════ -->
+    <div class="screen" id="screen-report">
+      <div class="screen-topbar">
+        <div class="st-title">Declare an Absence</div>
+      </div>
+
+      <div id="reportFormState">
+        <!-- Step 1: Select child -->
+        <div class="form-card">
+          <div class="fc-section">
+            <div class="fc-label">Step 1 — Select Child</div>
+            <div class="child-select-row">
+              <div class="child-select-btn active-aaliyah" id="rcsAaliyah" onclick="reportSelectChild('aaliyah')">
+                <div class="csb-ava" style="background:#2E7DD1">AC</div>
+                <div><div class="csb-name">Aaliyah</div><div class="csb-grade">Grade 7A</div></div>
+                <i class="fa-solid fa-circle-check csb-check"></i>
+              </div>
+              <div class="child-select-btn" id="rcsJaylen" onclick="reportSelectChild('jaylen')">
+                <div class="csb-ava" style="background:#D97706">JC</div>
+                <div><div class="csb-name">Jaylen</div><div class="csb-grade">Grade 4B</div></div>
+                <i class="fa-solid fa-circle-check csb-check"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 2: Date -->
+        <div class="form-card">
+          <div class="fc-section">
+            <div class="fc-label">Step 2 — Select Date</div>
+            <label class="field-label">Date <span style="color:#DC2626">*</span></label>
+            <div class="date-row">
+              <input type="date" class="field-input" id="reportDateFrom" onchange="checkReportForm()" placeholder="Start date" style="flex:1">
+              <input type="date" class="field-input" id="reportDateTo" onchange="checkReportForm()" placeholder="End date (optional)" style="flex:1">
+            </div>
+            <div style="font-size:11px;color:#A0AEC0;margin-top:6px;">Leave end date blank for a single day.</div>
+          </div>
+        </div>
+
+        <!-- Step 3: Duration / Periods -->
+        <div class="form-card">
+          <div class="fc-section">
+            <div class="fc-label">Step 3 — Duration</div>
+            <div class="toggle-row">
+              <div class="toggle-info">
+                <div class="toggle-info-title">All day</div>
+                <div class="toggle-info-sub">Student will miss the entire school day</div>
+              </div>
+              <div class="toggle-switch" id="allDayToggle" data-on="true" onclick="toggleAllDay()">
+                <div class="toggle-knob"></div>
+              </div>
+            </div>
+          </div>
+          <div class="fc-section" id="periodSection" style="display:none">
+            <label class="field-label" style="margin-bottom:10px">Select affected periods</label>
+            <div class="period-chips">
+              <div class="period-chip" id="pc-p1" onclick="togglePeriod('p1')">P1</div>
+              <div class="period-chip" id="pc-p2" onclick="togglePeriod('p2')">P2</div>
+              <div class="period-chip" id="pc-p3" onclick="togglePeriod('p3')">P3</div>
+              <div class="period-chip" id="pc-p4" onclick="togglePeriod('p4')">P4</div>
+            </div>
+            <div style="font-size:11px;color:#A0AEC0;margin-top:8px">Tap the periods the absence will cover.</div>
+          </div>
+        </div>
+
+        <!-- Step 4: Reason -->
+        <div class="form-card">
+          <div class="fc-section">
+            <div class="fc-label">Step 4 — Reason</div>
+            <label class="field-label">Reason type <span style="color:#DC2626">*</span></label>
+            <select class="field-select" id="reportReasonType" onchange="checkReportForm()">
+              <option value="">Select a reason…</option>
+              <option>Medical appointment</option>
+              <option>Illness / Sick</option>
+              <option>Family event</option>
+              <option>Religious observance</option>
+              <option>Travel</option>
+              <option>Bereavement</option>
+              <option>Other</option>
+            </select>
+          </div>
+          <div class="fc-section">
+            <label class="field-label">Note for the school <span style="font-weight:400;color:#718096">(optional)</span></label>
+            <textarea class="field-textarea" id="reportNote" rows="3" placeholder="Any details the school should know…"></textarea>
+          </div>
+        </div>
+
+        <button class="submit-btn" id="reportSubmitBtn" disabled onclick="handleReportSubmit()">
+          <i class="fa-solid fa-calendar-plus"></i> Declare Absence
+        </button>
+        <div style="height:8px"></div>
+      </div>
+
+      <div class="success-state" id="reportSuccessState">
+        <div class="success-circle"><i class="fa-solid fa-check"></i></div>
+        <div class="success-title">Absence Declared</div>
+        <div class="success-sub">The school has been notified. You can view this under Coming Up on the home screen.</div>
+        <button class="success-btn" onclick="resetReportForm()">Back to Home</button>
+      </div>
+    </div><!-- /screen-report -->
+
+
+    <!-- ════════════════════════════════
+         SCREEN 4 — ACTIVE RECORDS
+    ════════════════════════════════ -->
+    <div class="screen" id="screen-records">
+      <div class="screen-topbar">
+        <div class="st-title">Active Records</div>
+      </div>
+
+      <!-- Filter tabs -->
+      <div class="rec-filter-tabs">
+        <div class="rftab active rft-urgent" data-filter="needs-reply" onclick="setRecFilter(this)">
+          <i class="fa-solid fa-triangle-exclamation" style="font-size:10px"></i>
+          Needs reply
+          <span class="rftab-num">2</span>
+        </div>
+        <div class="rftab rft-pending" data-filter="awaiting" onclick="setRecFilter(this)">
+          <i class="fa-solid fa-paper-plane" style="font-size:10px"></i>
+          Awaiting review
+          <span class="rftab-num">1</span>
+        </div>
+        <div class="rftab rft-disputed" data-filter="disputed" onclick="setRecFilter(this)">
+          <i class="fa-solid fa-flag" style="font-size:10px"></i>
+          Disputed
+          <span class="rftab-num">1</span>
+        </div>
+        <div class="rftab rft-closed" data-filter="closed" onclick="setRecFilter(this)">
+          <i class="fa-solid fa-circle-check" style="font-size:10px"></i>
+          Closed
+          <span class="rftab-num">1</span>
+        </div>
+      </div>
+
+      <div class="records-list-wrap">
+
+        <!-- Info banner -->
+        <div class="info-banner" id="recInfoBanner">
+          <i class="fa-solid fa-circle-info ib-icon"></i>
+          <div class="ib-body">
+            <div class="ib-title">2 records need your reply</div>
+            <div class="ib-sub">Records without a reply within 24 hours are automatically closed as unjustified.</div>
+          </div>
+        </div>
+
+        <!-- NEEDS REPLY section -->
+        <div id="rec-section-needs-reply">
+
+          <div class="rec-card" onclick="openRecordSheet('jaylen-absent')">
+            <div class="rec-card-accent rca-absent"></div>
+            <div class="rec-card-body">
+              <div class="rc-child-tag act-jaylen"><i class="fa-solid fa-circle" style="font-size:5px"></i> Jaylen · Grade 4B</div>
+              <div class="rc-title">Marked <strong>Absent</strong> — P2 (Reading) · May 11</div>
+              <div class="rc-sub">Marked by Mr. Côté at 1:45 PM. Awaiting your reply.</div>
+              <div class="rc-chips">
+                <span class="rc-pill rcp-absent"><i class="fa-solid fa-circle-minus"></i> Absent</span>
+                <span class="rc-pill rcp-awaiting">Awaiting reply</span>
+                <span class="rcp-deadline"><i class="fa-regular fa-clock"></i> 14 h left</span>
+              </div>
+            </div>
+            <div class="rec-card-arrow"><i class="fa-solid fa-chevron-right"></i></div>
+          </div>
+
+          <div class="rec-card" onclick="openRecordSheet('jaylen-late')">
+            <div class="rec-card-accent rca-late"></div>
+            <div class="rec-card-body">
+              <div class="rc-child-tag act-jaylen"><i class="fa-solid fa-circle" style="font-size:5px"></i> Jaylen · Grade 4B</div>
+              <div class="rc-title">Marked <strong>Late</strong> — P1 (Math) · May 12</div>
+              <div class="rc-sub">Signed in at the office at 9:02 AM — 22 min late.</div>
+              <div class="rc-chips">
+                <span class="rc-pill rcp-late"><i class="fa-solid fa-clock"></i> Late</span>
+                <span class="rc-pill rcp-awaiting">Awaiting reply</span>
+              </div>
+            </div>
+            <div class="rec-card-arrow"><i class="fa-solid fa-chevron-right"></i></div>
+          </div>
+
+        </div><!-- /needs-reply -->
+
+        <!-- AWAITING REVIEW section -->
+        <div id="rec-section-awaiting" style="display:none">
+
+          <div class="rec-card" onclick="openRecordSheet('aaliyah-pending')">
+            <div class="rec-card-accent rca-pending"></div>
+            <div class="rec-card-body">
+              <div class="rc-child-tag act-aaliyah"><i class="fa-solid fa-circle" style="font-size:5px"></i> Aaliyah · Grade 7A</div>
+              <div class="rc-title">Marked <strong>Absent</strong> — Full day · May 4</div>
+              <div class="rc-sub">You submitted a medical appointment justification on May 5. Clerk reviewing.</div>
+              <div class="rc-chips">
+                <span class="rc-pill rcp-absent"><i class="fa-solid fa-circle-minus"></i> Absent</span>
+                <span class="rc-pill rcp-pending"><i class="fa-solid fa-paper-plane"></i> Pending approval</span>
+              </div>
+            </div>
+            <div class="rec-card-arrow"><i class="fa-solid fa-chevron-right"></i></div>
+          </div>
+
+        </div><!-- /awaiting -->
+
+        <!-- DISPUTED section -->
+        <div id="rec-section-disputed" style="display:none">
+
+          <div class="rec-card" onclick="openRecordSheet('jaylen-disputed')">
+            <div class="rec-card-accent rca-disputed"></div>
+            <div class="rec-card-body">
+              <div class="rc-child-tag act-jaylen"><i class="fa-solid fa-circle" style="font-size:5px"></i> Jaylen · Grade 4B</div>
+              <div class="rc-title">Absent — Full day · May 5 · <strong>Disputed</strong></div>
+              <div class="rc-sub">Closed unjustified after no reply. You filed a dispute on May 12. Clerk is reviewing.</div>
+              <div class="rc-chips">
+                <span class="rc-pill rcp-absent"><i class="fa-solid fa-circle-minus"></i> Absent</span>
+                <span class="rc-pill rcp-disputed"><i class="fa-solid fa-flag"></i> Disputed</span>
+              </div>
+            </div>
+            <div class="rec-card-arrow"><i class="fa-solid fa-chevron-right"></i></div>
+          </div>
+
+        </div><!-- /disputed -->
+
+        <!-- CLOSED section -->
+        <div id="rec-section-closed" style="display:none">
+
+          <div class="rec-card" onclick="openRecordSheet('aaliyah-justified')">
+            <div class="rec-card-accent rca-closed"></div>
+            <div class="rec-card-body">
+              <div class="rc-child-tag act-aaliyah"><i class="fa-solid fa-circle" style="font-size:5px"></i> Aaliyah · Grade 7A</div>
+              <div class="rc-title">Marked <strong>Late</strong> — P1 (Math) · Apr 22</div>
+              <div class="rc-sub">12 min late · Bus delay · Transportation reason accepted. Record closed.</div>
+              <div class="rc-chips">
+                <span class="rc-pill rcp-late"><i class="fa-solid fa-clock"></i> Late</span>
+                <span class="rc-pill rcp-justified"><i class="fa-solid fa-circle-check"></i> Justified</span>
+              </div>
+            </div>
+            <div class="rec-card-arrow"><i class="fa-solid fa-chevron-right"></i></div>
+          </div>
+
+        </div><!-- /closed -->
+
+      </div><!-- /records-list-wrap -->
+    </div><!-- /screen-records -->
+
+
+    <!-- ════════════════════════════════
+         SCREEN 5 — HISTORY
+    ════════════════════════════════ -->
+    <div class="screen" id="screen-history">
+      <div class="screen-topbar">
+        <div class="st-title">Attendance History</div>
+        <span class="st-action" onclick="navigate('report')" style="display:flex;align-items:center;gap:5px"><i class="fa-solid fa-calendar-plus"></i> Declare</span>
+      </div>
+
+      <!-- Child tabs -->
+      <div class="child-tabs">
+        <div class="child-tab active-aaliyah" id="tab-aaliyah" onclick="setHistoryChild('aaliyah')">
+          <div class="ct-ava" style="background:#2E7DD1">AC</div>
+          Aaliyah <span style="font-size:10px;color:#A0AEC0;font-weight:500;margin-left:2px">Gr. 7A</span>
+        </div>
+        <div class="child-tab" id="tab-jaylen" onclick="setHistoryChild('jaylen')">
+          <div class="ct-ava" style="background:#D97706">JC</div>
+          Jaylen <span style="font-size:10px;color:#A0AEC0;font-weight:500;margin-left:2px">Gr. 4B</span>
+        </div>
+      </div>
+
+      <!-- Stats summary -->
+      <div class="term-summary" id="termSummary" style="margin-top:12px"></div>
+
+      <!-- Day navigator — arrows to browse school days -->
+      <div class="day-nav">
+        <button class="day-nav-btn" id="prevDayBtn" onclick="prevDay()"><i class="fa-solid fa-chevron-left"></i></button>
+        <div class="day-nav-center">
+          <div class="day-nav-date" id="dayNavDate">Tue, May 12</div>
+          <div class="day-nav-sub" id="dayNavSub">School year 2025–26</div>
+        </div>
+        <button class="day-nav-btn" id="nextDayBtn" onclick="nextDay()"><i class="fa-solid fa-chevron-right"></i></button>
+      </div>
+
+      <!-- Day detail card (always visible, updates with navigation) -->
+      <div class="day-detail-card" id="dayDetailCard">
+        <!-- filled by JS -->
+      </div>
+
+      <!-- Calendar — collapsed by default -->
+      <div class="cal-toggle-row">
+        <button class="cal-toggle-btn" id="calToggleBtn" onclick="toggleCalendar()">
+          <i class="fa-regular fa-calendar"></i>
+          <span id="calToggleLabel">View May 2026 calendar</span>
+          <i class="fa-solid fa-chevron-down" id="calToggleChevron" style="font-size:10px;margin-left:auto;transition:transform .2s"></i>
+        </button>
+      </div>
+      <div class="cal-collapsible" id="calCollapsible" style="display:none">
+        <div class="cal-card">
+          <div class="cal-nav">
+            <span class="cal-month" id="calTitle">May 2026</span>
+            <div class="cal-nav-btns">
+              <div class="cal-nav-btn" onclick="changeMonth(-1)"><i class="fa-solid fa-chevron-left"></i></div>
+              <div class="cal-nav-btn" onclick="changeMonth(1)"><i class="fa-solid fa-chevron-right"></i></div>
+            </div>
+          </div>
+          <div class="cal-grid-wrap">
+            <div class="cal-dh-row" id="calDhRow"></div>
+            <div class="cal-days" id="calDays"></div>
+          </div>
+          <div class="cal-legend">
+            <div class="leg-item"><div class="leg-swatch" style="background:#ECFDF5;border:1px solid #059669"></div>Present</div>
+            <div class="leg-item"><div class="leg-swatch" style="background:#FEF2F2;border:1px solid #DC2626"></div>Absent</div>
+            <div class="leg-item"><div class="leg-swatch" style="background:#FFFBEB;border:1px solid #D97706"></div>Late</div>
+            <div class="leg-item"><div class="leg-swatch" style="background:#EFF6FF;border:1px solid #2563EB"></div>Pre-declared</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- This year's records -->
+      <div style="padding:14px 16px 6px; display:flex; align-items:center; justify-content:space-between">
+        <div class="section-title" style="font-size:13px;font-weight:700;color:#0F2546">This year's records</div>
+        <span style="font-size:11px;color:#A0AEC0" id="recordCount"></span>
+      </div>
+      <div class="hist-records" id="histRecords"></div>
+
+    </div><!-- /screen-history -->
+
+
+    <!-- ════════════════════════════════
+         SCREEN 6 — FUTURE ABSENCES
+    ════════════════════════════════ -->
+    <div class="screen" id="screen-future">
+      <div class="screen-topbar">
+        <i class="fa-solid fa-chevron-left st-back" onclick="navigate('dashboard')"></i>
+        <div class="st-title">Future Absences</div>
+        <span class="st-action" onclick="navigate('report')">+ Declare</span>
+      </div>
+
+      <div style="padding:12px 16px 4px">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+          <div style="background:#fff;border-radius:10px;border:1px solid #E2E8F0;padding:12px;text-align:center">
+            <div style="font-size:22px;font-weight:800;color:#2E7DD1;line-height:1">3</div>
+            <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.04em;color:#A0AEC0;margin-top:3px">Upcoming</div>
+          </div>
+          <div style="background:#fff;border-radius:10px;border:1px solid #E2E8F0;padding:12px;text-align:center">
+            <div style="font-size:22px;font-weight:800;color:#059669;line-height:1">2</div>
+            <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.04em;color:#A0AEC0;margin-top:3px">You declared</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="home-card" style="margin:12px 16px 0">
+        <div class="hc-header">
+          <div class="hc-title">This week</div>
+        </div>
+        <div class="coming-item">
+          <div class="ci-icon"><i class="fa-solid fa-trophy"></i></div>
+          <div class="ci-body">
+            <div class="ci-child-tag cct-aaliyah"><i class="fa-solid fa-circle" style="font-size:5px"></i> Aaliyah</div>
+            <div class="ci-title">Soccer tournament</div>
+            <div class="ci-sub">Thu May 14 · P3–P4 · Pre-justified by Coach Lévesque</div>
+          </div>
+          <span style="font-size:10.5px;font-weight:700;color:#059669;background:#ECFDF5;padding:3px 8px;border-radius:6px;white-space:nowrap">Pre-justified</span>
+        </div>
+      </div>
+
+      <div class="home-card" style="margin:10px 16px 0">
+        <div class="hc-header">
+          <div class="hc-title">Coming up</div>
+        </div>
+        <div class="coming-item">
+          <div class="ci-icon"><i class="fa-solid fa-calendar-day"></i></div>
+          <div class="ci-body">
+            <div class="ci-child-tag cct-aaliyah"><i class="fa-solid fa-circle" style="font-size:5px"></i> Aaliyah</div>
+            <div class="ci-title">Medical appointment</div>
+            <div class="ci-sub">Fri May 22 · Full day · You declared</div>
+          </div>
+          <span style="font-size:10.5px;font-weight:700;color:#2563EB;background:#EFF6FF;padding:3px 8px;border-radius:6px;white-space:nowrap">Scheduled</span>
+        </div>
+        <div class="coming-item">
+          <div class="ci-icon"><i class="fa-solid fa-plane-departure"></i></div>
+          <div class="ci-body">
+            <div class="ci-child-tag cct-jaylen"><i class="fa-solid fa-circle" style="font-size:5px"></i> Jaylen</div>
+            <div class="ci-title">Family trip</div>
+            <div class="ci-sub">Jun 2–3 · Full days · You declared</div>
+          </div>
+          <span style="font-size:10.5px;font-weight:700;color:#2563EB;background:#EFF6FF;padding:3px 8px;border-radius:6px;white-space:nowrap">Scheduled</span>
+        </div>
+      </div>
+
+      <div style="height:20px"></div>
+    </div><!-- /screen-future -->
+
+  </div><!-- /screens -->
+
+  <!-- Bottom nav — 5 tabs -->
+  <nav class="bottom-nav">
+    <div class="bn-item active" id="nav-dashboard" onclick="navigate('dashboard')">
+      <i class="fa-solid fa-house bn-icon"></i>
+      <span class="bn-label">Home</span>
+    </div>
+    <div class="bn-item" id="nav-alerts" onclick="navigate('alerts')">
+      <i class="fa-solid fa-bell bn-icon"></i>
+      <span class="bn-label">Alerts</span>
+      <span class="bn-badge" id="notifBadge">3</span>
+    </div>
+    <div class="bn-item" id="nav-report" onclick="navigate('report')">
+      <i class="fa-solid fa-calendar-plus bn-icon"></i>
+      <span class="bn-label">Report</span>
+    </div>
+    <div class="bn-item" id="nav-records" onclick="navigate('records')">
+      <i class="fa-solid fa-circle-dot bn-icon"></i>
+      <span class="bn-label">Records</span>
+      <span class="bn-badge" style="background:#DC2626">2</span>
+    </div>
+    <div class="bn-item" id="nav-history" onclick="navigate('history')">
+      <i class="fa-solid fa-calendar-days bn-icon"></i>
+      <span class="bn-label">History</span>
+    </div>
+  </nav>
+
+  <div class="toast" id="toast"></div>
+
+  <!-- Bottom sheet for record detail -->
+  <div class="sheet-backdrop" id="sheetBackdrop" onclick="closeRecordSheet()"></div>
+  <div class="bottom-sheet" id="recordSheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-header">
+      <div class="sheet-title" id="sheetTitle">Record Detail</div>
+      <i class="fa-solid fa-xmark sheet-close" onclick="closeRecordSheet()"></i>
+    </div>
+    <div class="sheet-body" id="sheetBody"></div>
+    <div class="sheet-footer" id="sheetFooter"></div>
+  </div>
+
+</div><!-- /phone -->
+
+<script>
+/* ══ NAVIGATION ══ */
+var SCREENS = ['dashboard','alerts','report','records','history','future'];
+var NAV_SCREENS = ['dashboard','alerts','report','records','history'];
+
+function navigate(name) {
+  SCREENS.forEach(function(s) {
+    document.getElementById('screen-'+s).classList.remove('active');
+  });
+  NAV_SCREENS.forEach(function(s) {
+    var n = document.getElementById('nav-'+s);
+    if (n) n.classList.remove('active');
+  });
+  document.getElementById('screen-'+name).classList.add('active');
+  var nav = document.getElementById('nav-'+name);
+  if (nav) nav.classList.add('active');
+  var el = document.getElementById('screen-'+name);
+  if (el) el.scrollTop = 0;
+  var sb = document.getElementById('statusBar');
+  sb.classList.toggle('light', name !== 'dashboard');
+}
+
+/* ══ ALERTS ══ */
+var unread = 3;
+function markAllRead() {
+  document.querySelectorAll('.alert-item.unread').forEach(function(el){ el.classList.remove('unread'); });
+  document.querySelectorAll('.ai-dot').forEach(function(el){ el.remove(); });
+  unread = 0; updateBadge();
+  // Update header badge text
+  var titleSpan = document.querySelector('#screen-alerts .st-title span');
+  if (titleSpan) titleSpan.style.display = 'none';
+  showToast('All alerts marked as read');
+}
+function updateBadge() {
+  var b = document.getElementById('notifBadge');
+  b.textContent = unread;
+  b.style.display = unread > 0 ? 'flex' : 'none';
+}
+function setAlertFilter(el, filter) {
+  document.querySelectorAll('.ftab').forEach(function(t){ t.classList.remove('active'); });
+  el.classList.add('active');
+  var items = document.querySelectorAll('.alert-item');
+  items.forEach(function(item) {
+    if (filter === 'all') {
+      item.style.display = '';
+    } else if (filter === 'aaliyah') {
+      item.style.display = item.getAttribute('data-child') === 'aaliyah' ? '' : 'none';
+    } else if (filter === 'jaylen') {
+      item.style.display = item.getAttribute('data-child') === 'jaylen' ? '' : 'none';
+    } else if (filter === 'absences') {
+      item.style.display = item.getAttribute('data-type') === 'absences' ? '' : 'none';
+    } else if (filter === 'decisions') {
+      item.style.display = item.getAttribute('data-type') === 'decisions' ? '' : 'none';
+    }
+  });
+  // Hide date labels if all items under them are hidden
+  document.querySelectorAll('.alert-date-label').forEach(function(lbl) {
+    var next = lbl.nextElementSibling;
+    var hasVisible = false;
+    while (next && !next.classList.contains('alert-date-label') && next.tagName !== 'DIV' || (next && next.style && next.style.height)) {
+      if (next.classList && next.classList.contains('alert-item') && next.style.display !== 'none') hasVisible = true;
+      next = next.nextElementSibling;
+    }
+    lbl.style.display = hasVisible ? '' : 'none';
+  });
+}
+
+/* ══ REPORT FORM ══ */
+var reportChild = 'aaliyah';
+var allDayOn = true;
+var selectedPeriods = [];
+
+function reportSelectChild(child) {
+  reportChild = child;
+  document.getElementById('rcsAaliyah').className = 'child-select-btn' + (child === 'aaliyah' ? ' active-aaliyah' : '');
+  document.getElementById('rcsJaylen').className  = 'child-select-btn' + (child === 'jaylen'  ? ' active-jaylen'  : '');
+  checkReportForm();
+}
+function toggleAllDay() {
+  allDayOn = !allDayOn;
+  var tog = document.getElementById('allDayToggle');
+  tog.setAttribute('data-on', allDayOn ? 'true' : 'false');
+  var sec = document.getElementById('periodSection');
+  sec.style.display = allDayOn ? 'none' : 'block';
+  if (allDayOn) { selectedPeriods = []; ['p1','p2','p3','p4'].forEach(function(p){ document.getElementById('pc-'+p).classList.remove('selected'); }); }
+  checkReportForm();
+}
+function togglePeriod(p) {
+  var el = document.getElementById('pc-' + p);
+  var idx = selectedPeriods.indexOf(p);
+  if (idx >= 0) { selectedPeriods.splice(idx, 1); el.classList.remove('selected'); }
+  else          { selectedPeriods.push(p);          el.classList.add('selected');    }
+  checkReportForm();
+}
+function checkReportForm() {
+  var dateFrom = document.getElementById('reportDateFrom').value;
+  var reason   = document.getElementById('reportReasonType').value;
+  var periodOk = allDayOn || selectedPeriods.length > 0;
+  document.getElementById('reportSubmitBtn').disabled = !(dateFrom && reason && periodOk);
+}
+function handleReportSubmit() {
+  var btn = document.getElementById('reportSubmitBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Declaring…';
+  setTimeout(function() {
+    document.getElementById('reportFormState').style.display = 'none';
+    document.getElementById('reportSuccessState').style.display = 'flex';
+  }, 900);
+}
+function resetReportForm() {
+  document.getElementById('reportFormState').style.display = 'block';
+  document.getElementById('reportSuccessState').style.display = 'none';
+  document.getElementById('reportDateFrom').value = '';
+  document.getElementById('reportDateTo').value = '';
+  document.getElementById('reportReasonType').value = '';
+  document.getElementById('reportNote').value = '';
+  document.getElementById('reportSubmitBtn').disabled = true;
+  document.getElementById('reportSubmitBtn').innerHTML = '<i class="fa-solid fa-calendar-plus"></i> Declare Absence';
+  // Reset periods
+  allDayOn = true; selectedPeriods = [];
+  document.getElementById('allDayToggle').setAttribute('data-on', 'true');
+  document.getElementById('periodSection').style.display = 'none';
+  ['p1','p2','p3','p4'].forEach(function(p){ document.getElementById('pc-'+p).classList.remove('selected'); });
+  reportSelectChild('aaliyah');
+  navigate('dashboard');
+}
+
+/* ══ ACTIVE RECORDS FILTER ══ */
+var currentRecFilter = 'needs-reply';
+function setRecFilter(el) {
+  document.querySelectorAll('.rftab').forEach(function(t){ t.classList.remove('active'); });
+  el.classList.add('active');
+  var filter = el.getAttribute('data-filter');
+  currentRecFilter = filter;
+  ['needs-reply','awaiting','disputed','closed'].forEach(function(s) {
+    var sec = document.getElementById('rec-section-' + s);
+    if (sec) sec.style.display = s === filter ? 'block' : 'none';
+  });
+  var banner = document.getElementById('recInfoBanner');
+  if (banner) banner.style.display = filter === 'needs-reply' ? 'flex' : 'none';
+}
+
+/* ══ RECORD DETAIL SHEET ══ */
+var RECORD_DATA = {
+  'jaylen-absent': {
+    title: 'Jaylen — Absent · May 11',
+    ava: { initials:'JC', color:'#D97706' },
+    name: 'Jaylen Carter', grade: 'Grade 4B · Elementary', teacher: 'Mr. P. Côté',
+    status: 'absent', statusLabel: 'Absent', workflow: 'awaiting', workflowLabel: 'Awaiting your reply',
+    periods: [
+      { label:'P1', subject:'Math',    status:'present', statusLabel:'Present' },
+      { label:'P2', subject:'Reading', status:'absent',  statusLabel:'Absent'  },
+      { label:'P3', subject:'—',       status:'present', statusLabel:'Present' },
+      { label:'P4', subject:'—',       status:'present', statusLabel:'Present' }
+    ],
+    context: 'Jaylen has been marked <strong>Absent</strong> for P2 (Reading) on May 11 by Mr. Côté at 1:45 PM. You have <strong style="color:#DC2626">14 hours</strong> left to reply before this record closes as unjustified.',
+    showForm: true, closed: false
+  },
+  'jaylen-late': {
+    title: 'Jaylen — Late · May 12',
+    ava: { initials:'JC', color:'#D97706' },
+    name: 'Jaylen Carter', grade: 'Grade 4B · Elementary', teacher: 'Mr. P. Côté',
+    status: 'late', statusLabel: 'Late', workflow: 'awaiting', workflowLabel: 'Awaiting your reply',
+    periods: [
+      { label:'P1', subject:'Math',    status:'late',    statusLabel:'Late'    },
+      { label:'P2', subject:'Reading', status:'present', statusLabel:'Present' },
+      { label:'P3', subject:'—',       status:'present', statusLabel:'Present' },
+      { label:'P4', subject:'—',       status:'present', statusLabel:'Present' }
+    ],
+    context: 'Jaylen has been marked <strong>Late</strong> for P1 (Math) on May 12. Signed in at the office at 9:02 AM, confirmed in class at 9:24 AM — 22 min late.',
+    showForm: true, closed: false
+  },
+  'aaliyah-pending': {
+    title: 'Aaliyah — Absent · May 4',
+    ava: { initials:'AC', color:'#2E7DD1' },
+    name: 'Aaliyah Carter', grade: 'Grade 7A · Secondary', teacher: 'Ms. S. Tremblay',
+    status: 'absent', statusLabel: 'Absent', workflow: 'pending', workflowLabel: 'Pending approval',
+    periods: [
+      { label:'P1', subject:'Math',    status:'absent', statusLabel:'Absent' },
+      { label:'P2', subject:'French',  status:'absent', statusLabel:'Absent' },
+      { label:'P3', subject:'Science', status:'absent', statusLabel:'Absent' },
+      { label:'P4', subject:'Phys Ed', status:'absent', statusLabel:'Absent' }
+    ],
+    context: 'Aaliyah has been marked <strong>Absent</strong> for the full day on May 4. You submitted a medical appointment justification with a doctor\'s note on May 5. The Attendance Clerk is reviewing your submission.',
+    showForm: false, closed: false
+  },
+  'aaliyah-justified': {
+    title: 'Aaliyah — Late · Apr 22',
+    ava: { initials:'AC', color:'#2E7DD1' },
+    name: 'Aaliyah Carter', grade: 'Grade 7A · Secondary', teacher: 'Ms. S. Tremblay',
+    status: 'late', statusLabel: 'Late', workflow: 'justified', workflowLabel: 'Justified',
+    periods: [
+      { label:'P1', subject:'Math',    status:'late',    statusLabel:'Late'    },
+      { label:'P2', subject:'French',  status:'present', statusLabel:'Present' },
+      { label:'P3', subject:'Science', status:'present', statusLabel:'Present' },
+      { label:'P4', subject:'Phys Ed', status:'present', statusLabel:'Present' }
+    ],
+    context: 'Aaliyah arrived 12 min late to P1 (Math) on Apr 22 due to a bus delay. Reason: Transportation. The Attendance Clerk accepted the justification.',
+    showForm: false, closed: true, closedLabel: 'Record closed — Justified · No grade impact', closedType: 'justified'
+  },
+  'jaylen-disputed': {
+    title: 'Jaylen — Absent · May 5 · Disputed',
+    ava: { initials:'JC', color:'#D97706' },
+    name: 'Jaylen Carter', grade: 'Grade 4B · Elementary', teacher: 'Mr. P. Côté',
+    status: 'absent', statusLabel: 'Absent', workflow: 'disputed', workflowLabel: 'Disputed',
+    periods: [
+      { label:'P1', subject:'Math',    status:'absent', statusLabel:'Absent' },
+      { label:'P2', subject:'Reading', status:'absent', statusLabel:'Absent' },
+      { label:'P3', subject:'—',       status:'absent', statusLabel:'Absent' },
+      { label:'P4', subject:'—',       status:'absent', statusLabel:'Absent' }
+    ],
+    context: 'Jaylen was marked <strong>Absent</strong> for the full day on May 5. No reply was received within 24 hours; the record was closed as unjustified on May 6. You disputed this on May 12 citing a family emergency. The Attendance Clerk is reviewing.',
+    showForm: false, closed: true, closedLabel: 'Dispute filed — awaiting school review', closedType: 'disputed'
+  }
+};
+
+function openRecordSheet(id) {
+  var d = RECORD_DATA[id];
+  if (!d) return;
+  document.getElementById('sheetTitle').textContent = d.title;
+
+  var statusColors = {
+    absent: { bg:'rgba(220,38,38,.1)', color:'#DC2626' },
+    late:   { bg:'rgba(217,119,6,.1)',  color:'#D97706' }
+  };
+  var workflowColors = {
+    awaiting:   { bg:'rgba(37,99,235,.08)',  color:'#2563EB' },
+    pending:    { bg:'rgba(124,58,237,.08)', color:'#7C3AED' },
+    justified:  { bg:'rgba(5,150,105,.1)',   color:'#059669' },
+    disputed:   { bg:'rgba(217,119,6,.1)',   color:'#D97706' }
+  };
+  var sc = statusColors[d.status]   || { bg:'#F1F5F9', color:'#718096' };
+  var wc = workflowColors[d.workflow] || { bg:'#F1F5F9', color:'#718096' };
+
+  var html = '';
+
+  // Hero
+  html += '<div class="drawer-hero">'
+    + '<div class="drawer-ava" style="background:' + d.ava.color + '">' + d.ava.initials + '</div>'
+    + '<div style="flex:1;min-width:0">'
+    + '<div class="drawer-name">' + d.name + '</div>'
+    + '<div class="drawer-meta">' + d.grade + ' · ' + d.teacher + '</div>'
+    + '<div class="drawer-status-row">'
+    + '<span style="display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:600;padding:3px 9px;border-radius:20px;background:' + sc.bg + ';color:' + sc.color + '">' + d.statusLabel + '</span>'
+    + '<span style="display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:600;padding:3px 9px;border-radius:20px;background:' + wc.bg + ';color:' + wc.color + '">' + d.workflowLabel + '</span>'
+    + '</div></div></div>';
+
+  // Periods
+  html += '<div class="drawer-section">'
+    + '<div class="drawer-section-title"><i class="fa-solid fa-calendar-day"></i> Periods &amp; status</div>'
+    + '<div class="dperiods">';
+  d.periods.forEach(function(p) {
+    html += '<div class="dperiod dperiod--' + p.status + '">'
+      + '<div class="dperiod__label">' + p.label + '</div>'
+      + (p.subject !== '—' ? '<div class="dperiod__sub">' + p.subject + '</div>' : '')
+      + '<span class="dperiod__pill">' + p.statusLabel + '</span>'
+      + '</div>';
+  });
+  html += '</div></div>';
+
+  // Context
+  html += '<div class="drawer-section">'
+    + '<div class="drawer-section-title"><i class="fa-solid fa-circle-info"></i> Context</div>'
+    + '<div class="dcontext">' + d.context + '</div>'
+    + '</div>';
+
+  // Closed tag
+  if (d.closed) {
+    var cls = d.closedType === 'disputed' ? 'ct-disputed' : 'ct-justified';
+    var icon = d.closedType === 'disputed' ? 'fa-flag' : 'fa-circle-check';
+    html += '<div class="closed-tag ' + cls + '"><i class="fa-solid ' + icon + '"></i><span>' + d.closedLabel + '</span></div>';
+  }
+
+  // Form
+  if (d.showForm) {
+    html += '<div class="drawer-section">'
+      + '<div class="drawer-section-title"><i class="fa-solid fa-pen-to-square"></i> What happened?</div>'
+      + '<div class="dform-field"><label class="field-label" for="shReason">Reason <span style="color:#DC2626">*</span></label>'
+      + '<select class="field-select" id="shReason" onchange="checkSheetForm()">'
+      + '<option value="">Choose a reason…</option>'
+      + '<option>Illness / Sick</option>'
+      + '<option>Medical appointment</option>'
+      + '<option>Bereavement</option>'
+      + '<option>Religious observance</option>'
+      + '<option>Family / personal</option>'
+      + '<option>Transportation / weather</option>'
+      + '<option>Other</option>'
+      + '</select></div>'
+      + '<div class="dform-field"><label class="field-label" for="shNote">A few words for the school</label>'
+      + '<div class="dform-hint" style="margin-bottom:6px">Visible to school staff only.</div>'
+      + '<textarea class="field-textarea" id="shNote" rows="3" placeholder="e.g. Jaylen had a fever…" oninput="checkSheetForm()"></textarea></div>'
+      + '</div>';
+  }
+
+  document.getElementById('sheetBody').innerHTML = html;
+
+  // Footer
+  var footerHtml = '';
+  if (d.showForm) {
+    footerHtml = '<div style="display:flex;gap:8px">'
+      + '<button style="flex:1;padding:12px;border-radius:10px;border:1.5px solid #E2E8F0;background:#fff;font-size:13px;font-weight:600;color:#718096;cursor:pointer;font-family:inherit" onclick="closeRecordSheet()">Cancel</button>'
+      + '<button id="shSubmitBtn" style="flex:2;padding:12px;border-radius:10px;border:none;background:#2E7DD1;color:#fff;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:7px" disabled onclick="handleSheetSubmit()">'
+      + '<i class="fa-solid fa-paper-plane"></i> Send to school</button></div>';
+  } else {
+    footerHtml = '<button style="width:100%;padding:12px;border-radius:10px;border:1.5px solid #E2E8F0;background:#F8FAFC;font-size:13px;font-weight:600;color:#718096;cursor:pointer;font-family:inherit" onclick="closeRecordSheet()">Close</button>';
+  }
+  document.getElementById('sheetFooter').innerHTML = footerHtml;
+
+  document.getElementById('sheetBackdrop').classList.add('open');
+  document.getElementById('recordSheet').classList.add('open');
+}
+
+function checkSheetForm() {
+  var r = document.getElementById('shReason');
+  var n = document.getElementById('shNote');
+  var b = document.getElementById('shSubmitBtn');
+  if (r && b) b.disabled = !(r.value && n && n.value.trim().length >= 5);
+}
+
+function handleSheetSubmit() {
+  var btn = document.getElementById('shSubmitBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Sending…';
+  setTimeout(function() {
+    closeRecordSheet();
+    showToast('Justification sent — clerk will review shortly.');
+  }, 900);
+}
+
+function closeRecordSheet() {
+  document.getElementById('sheetBackdrop').classList.remove('open');
+  document.getElementById('recordSheet').classList.remove('open');
+}
+
+/* ══ HISTORY ══ */
+var CAL = {
+  aaliyah: {
+    '2026-05': { 1:'present',4:'absent',5:'present',6:'present',7:'present',8:'present', 11:'present',12:'today',13:'future',14:'future' },
+    '2026-04': { 1:'present',2:'present',3:'present',6:'present',7:'present',8:'present',9:'absent',10:'present', 13:'present',14:'present',15:'present',16:'present',17:'present', 20:'present',21:'present',22:'late',23:'present',24:'present', 27:'present',28:'present',29:'present',30:'present' },
+    '2026-03': { 3:'present',4:'present',5:'present',6:'present', 9:'present',10:'present',11:'present',12:'present',13:'present', 16:'present',17:'present',18:'present',19:'absent',20:'present', 23:'present',24:'present',25:'present',26:'present',27:'present' }
+  },
+  jaylen: {
+    '2026-05': { 1:'present',4:'present',5:'absent',6:'present',7:'present',8:'present', 11:'absent',12:'late' },
+    '2026-04': { 1:'present',2:'present',3:'present',6:'present',7:'present',8:'present',9:'present',10:'present', 13:'present',14:'present',15:'present',16:'present',17:'present', 20:'present',21:'present',22:'present',23:'present',24:'present', 27:'present',28:'present',29:'present',30:'present' },
+    '2026-03': { 3:'present',4:'present',5:'present',6:'present', 9:'present',10:'present',11:'present',12:'present',13:'present', 16:'present',17:'present',18:'present',19:'present',20:'present', 23:'present',24:'present',25:'present',26:'present',27:'present' }
+  }
+};
+
+var SUMMARY = {
+  aaliyah: { present:42, absent:2, late:1, rate:'96%' },
+  jaylen:  { present:40, absent:2, late:1, rate:'92%' }
+};
+
+// School days in order (most recent first for nav, index 0 = today)
+var SCHOOL_DAYS = [
+  { y:2026,m:4,d:12, label:'Tue, May 12', sub:'Today' },
+  { y:2026,m:4,d:11, label:'Mon, May 11', sub:'Yesterday' },
+  { y:2026,m:4,d:8,  label:'Fri, May 8',  sub:'Last week' },
+  { y:2026,m:4,d:7,  label:'Thu, May 7',  sub:'Last week' },
+  { y:2026,m:4,d:6,  label:'Wed, May 6',  sub:'Last week' },
+  { y:2026,m:4,d:5,  label:'Tue, May 5',  sub:'Last week' },
+  { y:2026,m:4,d:4,  label:'Mon, May 4',  sub:'Last week' },
+  { y:2026,m:4,d:1,  label:'Fri, May 1',  sub:'May 2026'  },
+  { y:2026,m:3,d:30, label:'Thu, Apr 30', sub:'April 2026' },
+  { y:2026,m:3,d:29, label:'Wed, Apr 29', sub:'April 2026' },
+  { y:2026,m:3,d:28, label:'Tue, Apr 28', sub:'April 2026' },
+  { y:2026,m:3,d:27, label:'Mon, Apr 27', sub:'April 2026' },
+  { y:2026,m:3,d:24, label:'Fri, Apr 24', sub:'April 2026' },
+  { y:2026,m:3,d:23, label:'Thu, Apr 23', sub:'April 2026' },
+  { y:2026,m:3,d:22, label:'Wed, Apr 22', sub:'April 2026' }
+];
+
+var DAY_DETAIL_DATA = {
+  aaliyah: {
+    '2026-05-12': {
+      overallStatus: 'present', overallLabel: 'Present today',
+      periods: [
+        { label:'P1', subject:'Math',    status:'present', pill:'Present' },
+        { label:'P2', subject:'French',  status:'present', pill:'Present' },
+        { label:'P3', subject:'Art',     status:'now',     pill:'Now ▸'  },
+        { label:'P4', subject:'Science', status:'upcoming',pill:'–'      }
+      ]
+    },
+    '2026-05-11': {
+      overallStatus: 'present', overallLabel: 'Present',
+      periods: [
+        { label:'P1', subject:'Math',    status:'present', pill:'Present' },
+        { label:'P2', subject:'French',  status:'present', pill:'Present' },
+        { label:'P3', subject:'Science', status:'present', pill:'Present' },
+        { label:'P4', subject:'Phys Ed', status:'present', pill:'Present' }
+      ]
+    },
+    '2026-05-08': {
+      overallStatus: 'present', overallLabel: 'Present',
+      periods: [
+        { label:'P1', subject:'Math',    status:'present', pill:'Present' },
+        { label:'P2', subject:'French',  status:'present', pill:'Present' },
+        { label:'P3', subject:'Science', status:'present', pill:'Present' },
+        { label:'P4', subject:'Phys Ed', status:'present', pill:'Present' }
+      ]
+    },
+    '2026-05-04': {
+      overallStatus: 'absent', overallLabel: 'Absent — full day',
+      periods: [
+        { label:'P1', subject:'Math',    status:'absent', pill:'Absent' },
+        { label:'P2', subject:'French',  status:'absent', pill:'Absent' },
+        { label:'P3', subject:'Science', status:'absent', pill:'Absent' },
+        { label:'P4', subject:'Phys Ed', status:'absent', pill:'Absent' }
+      ]
+    },
+    '2026-04-22': {
+      overallStatus: 'late', overallLabel: 'Late — 12 min',
+      periods: [
+        { label:'P1', subject:'Math',    status:'late',    pill:'Late'    },
+        { label:'P2', subject:'French',  status:'present', pill:'Present' },
+        { label:'P3', subject:'Science', status:'present', pill:'Present' },
+        { label:'P4', subject:'Phys Ed', status:'present', pill:'Present' }
+      ]
+    }
+  },
+  jaylen: {
+    '2026-05-12': {
+      overallStatus: 'late', overallLabel: 'Late — 22 min',
+      periods: [
+        { label:'P1', subject:'Math',    status:'late',    pill:'Late' },
+        { label:'P2', subject:'Reading', status:'now',     pill:'Now ▸' },
+        { label:'P3', subject:'—',       status:'upcoming',pill:'–'    },
+        { label:'P4', subject:'—',       status:'upcoming',pill:'–'    }
+      ]
+    },
+    '2026-05-11': {
+      overallStatus: 'absent', overallLabel: 'Absent — P2',
+      periods: [
+        { label:'P1', subject:'Math',    status:'present', pill:'Present' },
+        { label:'P2', subject:'Reading', status:'absent',  pill:'Absent'  },
+        { label:'P3', subject:'—',       status:'present', pill:'Present' },
+        { label:'P4', subject:'—',       status:'present', pill:'Present' }
+      ]
+    },
+    '2026-05-05': {
+      overallStatus: 'absent', overallLabel: 'Absent — full day',
+      periods: [
+        { label:'P1', subject:'Math',    status:'absent', pill:'Absent' },
+        { label:'P2', subject:'Reading', status:'absent', pill:'Absent' },
+        { label:'P3', subject:'—',       status:'absent', pill:'Absent' },
+        { label:'P4', subject:'—',       status:'absent', pill:'Absent' }
+      ]
+    },
+    '2026-05-08': {
+      overallStatus: 'present', overallLabel: 'Present',
+      periods: [
+        { label:'P1', subject:'Math',    status:'present', pill:'Present' },
+        { label:'P2', subject:'Reading', status:'present', pill:'Present' },
+        { label:'P3', subject:'—',       status:'present', pill:'Present' },
+        { label:'P4', subject:'—',       status:'present', pill:'Present' }
+      ]
+    }
+  }
+};
+
+var HIST_RECORDS = {
+  aaliyah: [
+    { dot:'present', date:'May 12',  cls:'All classes',  badge:'hrib-present', label:'Present'      },
+    { dot:'present', date:'May 11',  cls:'All classes',  badge:'hrib-present', label:'Present'      },
+    { dot:'present', date:'May 8',   cls:'All classes',  badge:'hrib-present', label:'Present'      },
+    { dot:'absent',  date:'May 4',   cls:'Full day',     badge:'hrib-absent',  label:'Absent'       },
+    { dot:'present', date:'May 1',   cls:'All classes',  badge:'hrib-present', label:'Present'      },
+    { dot:'late',    date:'Apr 22',  cls:'P1 — Math',    badge:'hrib-late',    label:'Late'         },
+    { dot:'present', date:'Apr 21',  cls:'All classes',  badge:'hrib-present', label:'Present'      },
+    { dot:'absent',  date:'Mar 19',  cls:'P2 — Science', badge:'hrib-absent',  label:'Absent'       },
+    { dot:'future',  date:'May 14',  cls:'P3–P4 (event)',badge:'hrib-future',  label:'Pre-declared' },
+    { dot:'future',  date:'May 22',  cls:'Full day',     badge:'hrib-future',  label:'Pre-declared' }
+  ],
+  jaylen: [
+    { dot:'late',    date:'May 12',  cls:'P1 — Math',    badge:'hrib-late',    label:'Late'    },
+    { dot:'absent',  date:'May 11',  cls:'P2 — Reading', badge:'hrib-absent',  label:'Absent'  },
+    { dot:'present', date:'May 8',   cls:'All classes',  badge:'hrib-present', label:'Present' },
+    { dot:'absent',  date:'May 5',   cls:'Full day',     badge:'hrib-absent',  label:'Absent'  },
+    { dot:'present', date:'May 1',   cls:'All classes',  badge:'hrib-present', label:'Present' },
+    { dot:'present', date:'Apr 30',  cls:'All classes',  badge:'hrib-present', label:'Present' },
+    { dot:'present', date:'Apr 29',  cls:'All classes',  badge:'hrib-present', label:'Present' },
+    { dot:'present', date:'Apr 28',  cls:'All classes',  badge:'hrib-present', label:'Present' }
+  ]
+};
+
+var MONTH_NAMES = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+var DOW = ['S','M','T','W','T','F','S'];
+var calYear = 2026, calMonth = 4; // May 2026
+var historyChild = 'aaliyah';
+var calOpen = false;
+
+// Day navigator state
+var dayIdx = 0; // 0 = today (index into SCHOOL_DAYS)
+
+function setHistoryChild(child) {
+  historyChild = child;
+  var tabA = document.getElementById('tab-aaliyah');
+  var tabJ = document.getElementById('tab-jaylen');
+  tabA.className = 'child-tab' + (child === 'aaliyah' ? ' active-aaliyah' : '');
+  tabJ.className = 'child-tab' + (child === 'jaylen'  ? ' active-jaylen'  : '');
+  renderSummary();
+  renderDayNav();
+  renderDayDetailCard();
+  renderHistRecords();
+}
+
+function renderDayNav() {
+  var day = SCHOOL_DAYS[dayIdx];
+  document.getElementById('dayNavDate').textContent = day.label;
+  document.getElementById('dayNavSub').textContent  = day.sub;
+  document.getElementById('prevDayBtn').disabled = (dayIdx >= SCHOOL_DAYS.length - 1);
+  document.getElementById('nextDayBtn').disabled = (dayIdx <= 0);
+}
+
+function prevDay() { if (dayIdx < SCHOOL_DAYS.length - 1) { dayIdx++; renderDayNav(); renderDayDetailCard(); updateCalSelected(); } }
+function nextDay() { if (dayIdx > 0) { dayIdx--; renderDayNav(); renderDayDetailCard(); updateCalSelected(); } }
+
+function renderDayDetailCard() {
+  var day = SCHOOL_DAYS[dayIdx];
+  var dateKey = day.y + '-' + String(day.m + 1).padStart(2,'0') + '-' + String(day.d).padStart(2,'0');
+  var detail = DAY_DETAIL_DATA[historyChild] && DAY_DETAIL_DATA[historyChild][dateKey];
+  var card = document.getElementById('dayDetailCard');
+
+  var statusColors = {
+    present:  { bg:'#ECFDF5', color:'#059669' },
+    absent:   { bg:'#FEF2F2', color:'#DC2626' },
+    late:     { bg:'#FFFBEB', color:'#D97706' },
+    now:      { bg:'#EFF6FF', color:'#2563EB' },
+    upcoming: { bg:'#F8FAFC', color:'#A0AEC0' }
+  };
+
+  var html = '';
+  if (detail) {
+    var sc = statusColors[detail.overallStatus] || statusColors.present;
+    html += '<div class="ddc-header">'
+      + '<div class="ddc-title">' + day.label + '</div>'
+      + '<span class="ddc-status" style="background:' + sc.bg + ';color:' + sc.color + ';padding:3px 9px;border-radius:20px;font-size:11.5px">' + detail.overallLabel + '</span>'
+      + '</div>'
+      + '<div class="ddc-periods">';
+    detail.periods.forEach(function(p) {
+      var pc = statusColors[p.status] || statusColors.upcoming;
+      html += '<div class="ddc-period ddc-p-' + p.status + '">'
+        + '<div class="ddc-period__label">' + p.label + '</div>'
+        + '<div class="ddc-period__sub">' + (p.subject !== '—' ? p.subject : '·') + '</div>'
+        + '<span class="ddc-period__pill">' + p.pill + '</span>'
+        + '</div>';
+    });
+    html += '</div>';
+  } else {
+    // Check CAL data for a simpler status
+    var calKey = day.y + '-' + String(day.m + 1).padStart(2,'0');
+    var calData = (CAL[historyChild] && CAL[historyChild][calKey]) || {};
+    var st = calData[day.d];
+    if (st) {
+      var sc2 = statusColors[st === 'today' ? 'present' : st] || statusColors.present;
+      var stLabel = st === 'today' ? 'Present today' : st.charAt(0).toUpperCase() + st.slice(1);
+      html += '<div class="ddc-header">'
+        + '<div class="ddc-title">' + day.label + '</div>'
+        + '<span class="ddc-status" style="background:' + sc2.bg + ';color:' + sc2.color + ';padding:3px 9px;border-radius:20px;font-size:11.5px">' + stLabel + '</span>'
+        + '</div>'
+        + '<div class="ddc-empty">No period breakdown available for this day.</div>';
+    } else {
+      html += '<div class="ddc-header"><div class="ddc-title">' + day.label + '</div></div>'
+        + '<div class="ddc-empty">No attendance record for this day.</div>';
+    }
+  }
+  card.innerHTML = html;
+}
+
+function updateCalSelected() {
+  // Sync selected day in calendar if it's visible
+  if (!calOpen) return;
+  var day = SCHOOL_DAYS[dayIdx];
+  if (day.y === calYear && day.m === calMonth) {
+    document.querySelectorAll('.cal-day.selected').forEach(function(x){ x.classList.remove('selected'); });
+    var cells = document.querySelectorAll('.cal-day');
+    cells.forEach(function(c) { if (parseInt(c.textContent) === day.d && !c.classList.contains('empty') && !c.classList.contains('weekend')) c.classList.add('selected'); });
+  }
+}
+
+function toggleCalendar() {
+  calOpen = !calOpen;
+  document.getElementById('calCollapsible').style.display = calOpen ? 'block' : 'none';
+  document.getElementById('calToggleChevron').style.transform = calOpen ? 'rotate(180deg)' : '';
+  if (calOpen) renderCalendar();
+}
+
+function renderCalendar() {
+  var key = calYear + '-' + String(calMonth + 1).padStart(2, '0');
+  var data = (CAL[historyChild] && CAL[historyChild][key]) || {};
+  document.getElementById('calTitle').textContent = MONTH_NAMES[calMonth] + ' ' + calYear;
+  document.getElementById('calToggleLabel').textContent = 'View ' + MONTH_NAMES[calMonth] + ' ' + calYear + ' calendar';
+
+  var dhRow = document.getElementById('calDhRow');
+  dhRow.innerHTML = DOW.map(function(d){ return '<div class="cal-dh">' + d + '</div>'; }).join('');
+
+  var firstDay = new Date(calYear, calMonth, 1).getDay();
+  var daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
+  var grid = document.getElementById('calDays');
+  grid.innerHTML = '';
+
+  for (var i = 0; i < firstDay; i++) {
+    var em = document.createElement('div'); em.className = 'cal-day empty'; grid.appendChild(em);
+  }
+  for (var d = 1; d <= daysInMonth; d++) {
+    (function(d) {
+      var dow = new Date(calYear, calMonth, d).getDay();
+      var e = document.createElement('div');
+      var cls = 'cal-day';
+      if (dow === 0 || dow === 6) { cls += ' weekend'; }
+      else if (data[d] === 'today') { cls += ' present today'; }
+      else if (data[d]) { cls += ' ' + data[d]; }
+      e.className = cls;
+      e.textContent = d;
+      if (dow !== 0 && dow !== 6) {
+        e.onclick = function() {
+          document.querySelectorAll('.cal-day.selected').forEach(function(x){ x.classList.remove('selected'); });
+          e.classList.add('selected');
+          // Navigate day nav to match selected date
+          var target = calYear + '-' + String(calMonth+1).padStart(2,'0') + '-' + String(d).padStart(2,'0');
+          var idx = SCHOOL_DAYS.findIndex(function(s){ return (s.y+'-'+String(s.m+1).padStart(2,'0')+'-'+String(s.d).padStart(2,'0')) === target; });
+          if (idx >= 0) { dayIdx = idx; renderDayNav(); renderDayDetailCard(); }
+          else { showToast(MONTH_NAMES[calMonth].slice(0,3) + ' ' + d + ' — ' + (data[d] || 'No record')); }
+        };
+      }
+      grid.appendChild(e);
+    })(d);
+  }
+  // Mark current day-nav selected day
+  updateCalSelected();
+}
+
+function changeMonth(dir) {
+  calMonth += dir;
+  if (calMonth < 0)  { calMonth = 11; calYear--; }
+  if (calMonth > 11) { calMonth = 0;  calYear++; }
+  document.getElementById('calToggleLabel').textContent = 'View ' + MONTH_NAMES[calMonth] + ' ' + calYear + ' calendar';
+  renderCalendar();
+}
+
+function renderSummary() {
+  var s = SUMMARY[historyChild];
+  document.getElementById('termSummary').innerHTML =
+    '<div class="ts-cell ts-present"><div class="ts-n">' + s.present + '</div><div class="ts-l">Present</div></div>' +
+    '<div class="ts-cell ts-absent"><div class="ts-n">'  + s.absent  + '</div><div class="ts-l">Absent</div></div>' +
+    '<div class="ts-cell ts-late"><div class="ts-n">'    + s.late    + '</div><div class="ts-l">Late</div></div>' +
+    '<div class="ts-cell ts-rate"><div class="ts-n">'    + s.rate    + '</div><div class="ts-l">Rate</div></div>';
+}
+
+function renderHistRecords() {
+  var list = HIST_RECORDS[historyChild];
+  var rc = document.getElementById('recordCount');
+  if (rc) rc.textContent = list.length + ' records';
+  var html = list.map(function(r) {
+    return '<div class="hist-record-item" onclick="showToast(\'' + r.date + ' — ' + r.label + '\')">'
+      + '<div class="hri-dot hrid-' + r.dot + '"></div>'
+      + '<div class="hri-date">' + r.date + '</div>'
+      + '<div class="hri-class">' + r.cls + '</div>'
+      + '<span class="hri-badge ' + r.badge + '">' + r.label + '</span>'
+      + '</div>';
+  }).join('');
+  document.getElementById('histRecords').innerHTML = html;
+}
+
+// Polyfill findIndex for older environments
+if (!Array.prototype.findIndex) {
+  Array.prototype.findIndex = function(fn) { for (var i=0;i<this.length;i++) { if(fn(this[i],i,this)) return i; } return -1; };
+}
+
+/* ══ TOAST ══ */
+var toastTimer;
+function showToast(msg) {
+  var t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(function(){ t.classList.remove('show'); }, 2600);
+}
+
+/* ══ INIT ══ */
+renderSummary();
+renderDayNav();
+renderDayDetailCard();
+renderHistRecords();
+updateBadge();
+</script>
+
+<!-- Prototype switcher -->
+<div id="proto-switcher" style="position:fixed;bottom:16px;right:16px;z-index:9999;background:rgba(15,37,70,.95);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.1);padding:5px;border-radius:999px;box-shadow:0 8px 24px rgba(0,0,0,.25);font-family:'Segoe UI',system-ui,sans-serif;display:flex;gap:2px;align-items:center;"><span style="color:rgba(255,255,255,.4);font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:0 6px 0 10px;">Prototype</span><a href="index.html" style="display:inline-flex;align-items:center;gap:4px;padding:6px 12px;border-radius:999px;font-size:12px;font-weight:600;text-decoration:none;background:transparent;color:#CBD5E0;">Index</a><a href="dashboard.html" style="display:inline-flex;align-items:center;gap:4px;padding:6px 12px;border-radius:999px;font-size:12px;font-weight:600;text-decoration:none;background:transparent;color:#CBD5E0;">Desktop</a><a href="parent-app.html" style="display:inline-flex;align-items:center;gap:4px;padding:6px 12px;border-radius:999px;font-size:12px;font-weight:600;text-decoration:none;background:transparent;color:#CBD5E0;">1 Child</a><a href="parent-app-2kids.html" style="display:inline-flex;align-items:center;gap:4px;padding:6px 12px;border-radius:999px;font-size:12px;font-weight:600;text-decoration:none;background:#2E7DD1;color:#fff;">2 Kids</a></div>
+
+</body>
+</html>

@@ -1,0 +1,1503 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ClassTrack — Attendance History</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="stylesheet" href="assets/styles.css">
+</head>
+<body>
+<a href="#main" class="skip-link" data-en="Skip to content" data-fr="Aller au contenu">Skip to content</a>
+
+<div class="app">
+<aside id="sidebar"></aside>
+<main id="main" class="shell">
+
+  <!-- ── Hero ──────────────────────────────────────────────────────────────── -->
+  <section class="hero-row">
+    <div>
+      <h1 class="hero-row__title" data-en="Attendance History" data-fr="Historique de présence">Attendance History</h1>
+      <p class="hero-row__sub" data-en="School year 2025–26 · All attendance records for your children." data-fr="Année scolaire 2025–26 · Tous les dossiers de présence de vos enfants.">School year 2025–26 · All attendance records for your children.</p>
+    </div>
+  </section>
+
+  <!-- ── Child filter chips ──────────────────────────────────────────────── -->
+  <div class="chip-filter" id="childFilter">
+    <button class="chip is-active" data-child="aaliyah" onclick="switchChild('aaliyah')">
+      <div class="avatar avatar--blue avatar--sm" style="width:20px;height:20px;font-size:9px;">AC</div>
+      <span>Aaliyah</span>
+      <span class="num">96%</span>
+    </button>
+    <button class="chip" data-child="jaylen" onclick="switchChild('jaylen')">
+      <div class="avatar avatar--orange avatar--sm" style="width:20px;height:20px;font-size:9px;">JC</div>
+      <span>Jaylen</span>
+      <span class="num">92%</span>
+    </button>
+  </div>
+
+  <!-- ── Page tabs ───────────────────────────────────────────────────────── -->
+  <div class="page-tabs">
+    <button class="page-tab is-active" data-tab="attendance" onclick="switchTab('attendance')" data-en="Attendance" data-fr="Présence">Attendance</button>
+    <button class="page-tab" data-tab="overview" onclick="switchTab('overview')" data-en="Grade impact" data-fr="Impact sur la note">Grade impact</button>
+  </div>
+
+  <!-- ════════════════════════════════════════════════════════════════════════
+       TAB: GRADE IMPACT (formerly Overview)
+  ════════════════════════════════════════════════════════════════════════ -->
+  <div id="tab-overview" class="tab-panel" style="display:none;">
+
+    <!-- Subject alert (shown only when threshold reached/approaching) -->
+    <div id="subjectAlert" style="display:none;"></div>
+
+    <!-- Top summary row: rate card + subject cards -->
+    <div class="ov-grid" id="ovGrid"></div>
+
+    <!-- Grade impact notice -->
+    <div class="banner banner--info">
+      <div class="banner__icon"><i class="fa-solid fa-graduation-cap"></i></div>
+      <div class="banner__body">
+        <div class="banner__title" data-en="Attendance counts toward final grades" data-fr="La présence compte dans la note finale">Attendance counts toward final grades</div>
+        <div class="banner__sub" data-en="As of September 2026, Ontario law requires attendance to count for up to 10% (Grades 7–9) or 12% (Grades 9–12) of your child's final grade per subject. Justified absences (medical, bereavement, transportation, religious observance) are excluded." data-fr="Depuis septembre 2026, la loi ontarienne exige que la présence compte jusqu'à 10 % (7e–9e) ou 12 % (9e–12e) de la note finale par matière. Les absences justifiées (médical, deuil, transport, observance religieuse) sont exclues.">As of September 2026, Ontario law requires attendance to count for up to 10% (Grades 7–9) or 12% (Grades 9–12) of your child's final grade per subject. Justified absences (medical, bereavement, transportation, religious observance) are excluded.</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ════════════════════════════════════════════════════════════════════════
+       TAB: ATTENDANCE
+  ════════════════════════════════════════════════════════════════════════ -->
+  <div id="tab-attendance" class="tab-panel">
+
+    <!-- ── Calendar + Day Detail ─────────────────────────────────────────── -->
+    <div class="cal-detail-row">
+
+      <!-- Compact Calendar -->
+      <section class="card cal-card">
+        <div class="card__h">
+          <div>
+            <div class="card__title" data-en="Attendance calendar" data-fr="Calendrier de présence">Attendance calendar</div>
+            <div class="card__sub" data-en="Click a day to see details." data-fr="Cliquez sur un jour pour voir les détails.">Click a day to see details.</div>
+          </div>
+        </div>
+        <div class="calendar calendar--compact">
+          <div class="cal-nav">
+            <div class="cal-month" id="calTitle">May 2026</div>
+            <div class="cal-nav-btns">
+              <button class="cal-nav-btn" onclick="changeMonth(-1)" aria-label="Previous"><i class="fa-solid fa-chevron-left"></i></button>
+              <button class="btn btn--ghost btn--sm" onclick="goToday()" data-en="Today" data-fr="Aujourd'hui">Today</button>
+              <button class="cal-nav-btn" onclick="changeMonth(1)" aria-label="Next"><i class="fa-solid fa-chevron-right"></i></button>
+            </div>
+          </div>
+          <div class="cal-dh-row" id="calDhRow"></div>
+          <div class="cal-days" id="calDays"></div>
+          <div class="cal-legend">
+            <div class="leg-item"><div class="leg-swatch leg-swatch--present"></div><span data-en="Present" data-fr="Présent">Present</span></div>
+            <div class="leg-item"><div class="leg-swatch leg-swatch--absent"></div><span data-en="Absent" data-fr="Absent">Absent</span></div>
+            <div class="leg-item"><div class="leg-swatch leg-swatch--late"></div><span data-en="Late" data-fr="Retard">Late</span></div>
+            <div class="leg-item"><div class="leg-swatch leg-swatch--future"></div><span data-en="Pre-declared" data-fr="Pré-déclarée">Pre-declared</span></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Day Detail Panel -->
+      <section class="card day-detail-card" id="dayDetailCard">
+        <div class="day-detail__placeholder">
+          <div class="day-detail__placeholder-icon"><i class="fa-regular fa-calendar-days"></i></div>
+          <div class="day-detail__placeholder-text" data-en="Select a day to see details" data-fr="Sélectionnez un jour pour voir les détails">Select a day to see details</div>
+        </div>
+      </section>
+
+    </div>
+
+    <!-- ── Records this year — table ─────────────────────────────────────── -->
+    <section class="card records-table-section">
+      <div class="card__h">
+        <div>
+          <div class="card__title" data-en="Records this year" data-fr="Dossiers cette année">Records this year</div>
+          <div class="card__sub" data-en="All attendance events for the selected child." data-fr="Tous les événements de présence pour l'enfant sélectionné.">All attendance events for the selected child.</div>
+        </div>
+        <button class="btn btn--ghost btn--sm" id="exportBtn" onclick="openExportModal()"><i class="fa-solid fa-download"></i> <span data-en="Export" data-fr="Exporter">Export</span></button>
+      </div>
+
+      <!-- Filters -->
+      <div class="table-filters" id="tableFilters">
+        <div class="filter-group">
+          <label class="filter-label" data-en="Status" data-fr="Statut">Status</label>
+          <select class="filter-select" id="filterStatus" onchange="applyFilters()">
+            <option value="all" data-en="All statuses" data-fr="Tous les statuts">All statuses</option>
+            <option value="absent" data-en="Absent" data-fr="Absent">Absent</option>
+            <option value="late" data-en="Late" data-fr="Retard">Late</option>
+            <option value="present" data-en="Present" data-fr="Présent">Present</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label class="filter-label" data-en="Workflow" data-fr="Traitement">Workflow</label>
+          <select class="filter-select" id="filterWorkflow" onchange="applyFilters()">
+            <option value="all" data-en="All stages" data-fr="Tous les états">All stages</option>
+            <option value="awaiting-reply" data-en="Awaiting reply" data-fr="En attente de réponse">Awaiting reply</option>
+            <option value="pending-approval" data-en="Pending approval" data-fr="En attente d'approbation">Pending approval</option>
+            <option value="justified" data-en="Justified" data-fr="Justifié">Justified</option>
+            <option value="unjustified" data-en="Unjustified" data-fr="Non motivé">Unjustified</option>
+            <option value="pre-declared" data-en="Pre-declared" data-fr="Pré-déclarée">Pre-declared</option>
+            <option value="pre-justified" data-en="Pre-justified" data-fr="Pré-justifiée">Pre-justified</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label class="filter-label" data-en="Subject" data-fr="Matière">Subject</label>
+          <select class="filter-select" id="filterSubject" onchange="applyFilters()">
+            <option value="all" data-en="All subjects" data-fr="Toutes les matières">All subjects</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label class="filter-label" data-en="School year" data-fr="Année scolaire">School year</label>
+          <select class="filter-select" id="filterYear">
+            <option value="2025-26">2025–26</option>
+            <option value="2024-25">2024–25</option>
+          </select>
+        </div>
+        <button class="btn btn--ghost btn--sm filter-reset" id="filterResetBtn" onclick="resetFilters()" style="display:none;">
+          <i class="fa-solid fa-xmark"></i>
+          <span data-en="Clear" data-fr="Effacer">Clear</span>
+        </button>
+        <div class="filter-count" id="filterCount"></div>
+      </div>
+
+      <!-- Table -->
+      <div class="table-wrapper">
+        <table class="records-table">
+          <thead>
+            <tr>
+              <th data-en="Date" data-fr="Date">Date</th>
+              <th data-en="Subject / Detail" data-fr="Matière / Détail">Subject / Detail</th>
+              <th data-en="Student status" data-fr="Statut élève">Student status</th>
+              <th data-en="Workflow stage" data-fr="Traitement">Workflow stage</th>
+              <th data-en="Grade impact" data-fr="Impact note">Grade impact</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="recordsTableBody"></tbody>
+        </table>
+      </div>
+    </section>
+
+  </div><!-- /tab-attendance -->
+
+</main>
+</div>
+
+<!-- ── Styles ─────────────────────────────────────────────────────────────── -->
+<style>
+  .hero-row { display:flex; align-items:center; justify-content:space-between; gap:var(--s-4); flex-wrap:wrap; }
+  .hero-row__title { font-size:var(--fs-3xl); font-weight:700; letter-spacing:-0.015em; }
+  .hero-row__sub { color:var(--c-ink-muted); font-size:var(--fs-lg); margin-top:6px; }
+  .hero-row__actions { display:flex; gap:var(--s-2); }
+
+  /* ── Page tabs ── */
+  .page-tabs {
+    display: flex;
+    border-bottom: 1px solid var(--c-border);
+    gap: 0;
+    margin-bottom: var(--s-4);
+  }
+  .page-tab {
+    font-size: var(--fs-sm); font-weight: 500;
+    padding: var(--s-2) var(--s-4);
+    color: var(--c-ink-muted);
+    background: none; border: none;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+    cursor: pointer;
+    transition: color 0.12s, border-color 0.12s;
+  }
+  .page-tab:hover { color: var(--c-ink); }
+  .page-tab.is-active { color: var(--c-ink); border-bottom-color: var(--c-brand); }
+
+  /* ── Calendar + day-detail side-by-side ── */
+  .cal-detail-row {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: var(--s-4);
+    align-items: start;
+  }
+  @media (max-width: 860px) { .cal-detail-row { grid-template-columns: 1fr; } }
+
+  /* Compact calendar overrides */
+  .calendar--compact .cal-nav { margin-bottom: var(--s-2); }
+  .calendar--compact .cal-dh-row { gap: 3px; }
+  .calendar--compact .cal-dh { width: 40px; text-align: center; font-size: 11px; }
+  .calendar--compact .cal-days { gap: 3px; }
+  .calendar--compact .cal-day { width: 40px !important; height: 38px !important; font-size: 11px; border-radius: 6px; }
+  .calendar--compact .cal-day__num { font-size: 11px; line-height: 1; }
+  .calendar--compact .cal-day__icon { font-size: 8px; margin-top: 2px; }
+  .calendar--compact .cal-legend { gap: var(--s-2); flex-wrap: wrap; margin-top: var(--s-3); }
+  .calendar--compact .leg-item { font-size: 10px; gap: 4px; }
+  .calendar--compact .leg-swatch { width: 7px; height: 7px; border-radius: 2px; }
+  .cal-day.selected { outline: 2px solid var(--c-brand) !important; outline-offset: -2px; }
+
+  /* ── Day detail panel ── */
+  .day-detail-card { min-height: 280px; display: flex; flex-direction: column; }
+  .day-detail__placeholder {
+    flex: 1; display: flex; flex-direction: column; align-items: center;
+    justify-content: center; gap: var(--s-2); padding: var(--s-8) var(--s-4);
+    color: var(--c-ink-muted); text-align: center;
+  }
+  .day-detail__placeholder-icon {
+    width: 52px; height: 52px; border-radius: 50%; background: var(--c-surface-2);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px; color: var(--c-ink-subtle); margin-bottom: var(--s-1);
+  }
+  .day-detail__placeholder-text { font-size: 13px; }
+  .day-detail__empty-state {
+    flex: 1; display: flex; flex-direction: column; align-items: center;
+    justify-content: center; gap: var(--s-2); padding: var(--s-6) var(--s-4);
+    font-size: 13px; color: var(--c-ink-muted); text-align: center;
+  }
+  .day-detail__empty-icon {
+    width: 46px; height: 46px; border-radius: 50%; background: var(--c-surface-2);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 19px; color: var(--c-ink-subtle);
+  }
+  .day-detail__classes { padding: 0 var(--s-4) var(--s-3); }
+  .day-detail__classes-label {
+    font-size: 11px; font-weight: 600; text-transform: uppercase;
+    letter-spacing: .05em; color: var(--c-ink-muted); margin-bottom: var(--s-2);
+  }
+  .day-detail__class-row {
+    display: flex; align-items: center; gap: var(--s-2);
+    padding: 5px 0; border-bottom: 1px solid var(--c-border); font-size: 13px;
+  }
+  .day-detail__class-row:last-child { border-bottom: none; }
+  .day-detail__period { font-weight: 600; color: var(--c-ink-muted); min-width: 24px; font-size: 12px; }
+  .day-detail__class-name { flex: 1; }
+  .day-detail__class-subject { font-size: 11px; color: var(--c-ink-muted); }
+  .day-detail__class-time { font-size: 11px; color: var(--c-ink-muted); white-space: nowrap; }
+  .day-detail__workflow { padding: 0 var(--s-4) var(--s-3); display: flex; gap: var(--s-2); flex-wrap: wrap; }
+  .day-detail__action { padding: 0 var(--s-4) var(--s-4); }
+
+  /* ── Overview grid ── */
+  .ov-grid {
+    display: grid;
+    grid-template-columns: 220px 1fr;
+    gap: var(--s-4);
+    margin-bottom: var(--s-4);
+    align-items: start;
+  }
+  @media (max-width: 860px) { .ov-grid { grid-template-columns: 1fr; } }
+
+  /* Rate card */
+  .ov-rate-card {
+    background: var(--c-surface);
+    border: 1px solid var(--c-border);
+    border-radius: var(--r-lg);
+    padding: var(--s-5) var(--s-4);
+    display: flex; flex-direction: column; align-items: center;
+    gap: var(--s-3);
+    box-shadow: var(--shadow-sm);
+  }
+  .ov-rate-card__label {
+    font-size: 11px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.07em; color: var(--c-ink-muted);
+  }
+  .ov-donut-wrap { position: relative; width: 120px; height: 120px; }
+  .ov-donut-wrap svg { width: 120px; height: 120px; }
+  .ov-donut-center {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 0;
+  }
+  .ov-donut-pct { font-size: 26px; font-weight: 800; letter-spacing: -0.02em; line-height: 1; }
+  .ov-donut-sub { font-size: 10px; color: var(--c-ink-muted); margin-top: 2px; }
+  .ov-rate-pills {
+    display: flex; flex-direction: column; gap: var(--s-2); width: 100%;
+  }
+  .ov-rate-pill {
+    display: flex; align-items: center; justify-content: space-between;
+    background: var(--c-surface-2); border-radius: var(--r-md);
+    padding: 6px 10px;
+  }
+  .ov-rate-pill__l { font-size: 12px; color: var(--c-ink-muted); }
+  .ov-rate-pill__n { font-size: 14px; font-weight: 700; color: var(--c-ink); }
+  .ov-rate-pill__n--danger  { color: var(--c-danger); }
+  .ov-rate-pill__n--warning { color: var(--c-warning); }
+
+  /* Subject cards panel */
+  .ov-subjects-card {
+    background: var(--c-surface);
+    border: 1px solid var(--c-border);
+    border-radius: var(--r-lg);
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+  }
+  .ov-subjects-card__h {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: var(--s-4) var(--s-4) var(--s-3);
+    border-bottom: 1px solid var(--c-border-2);
+  }
+  .ov-subjects-card__title {
+    font-size: var(--fs-md); font-weight: 700; color: var(--c-ink);
+  }
+  .ov-subjects-card__sub {
+    font-size: var(--fs-xs); color: var(--c-ink-muted); margin-top: 2px;
+  }
+  .ov-subjects-list { padding: var(--s-3) var(--s-4); display: flex; flex-direction: column; gap: var(--s-3); }
+
+  /* Individual subject row */
+  .ov-subj-row { display: flex; flex-direction: column; gap: 6px; }
+  .ov-subj-row__top {
+    display: flex; align-items: center; justify-content: space-between; gap: var(--s-2);
+  }
+  .ov-subj-row__name { font-size: var(--fs-sm); font-weight: 600; color: var(--c-ink); }
+  .ov-subj-row__counts {
+    display: flex; align-items: center; gap: var(--s-3);
+    font-size: var(--fs-xs); color: var(--c-ink-muted);
+  }
+  .ov-subj-row__count { display: flex; align-items: center; gap: 4px; }
+  .ov-subj-row__count i { font-size: 10px; }
+  .ov-subj-row__count--absent i { color: var(--c-danger); }
+  .ov-subj-row__count--late   i { color: var(--c-warning); }
+  .ov-subj-row__right { display: flex; align-items: center; gap: var(--s-3); flex-shrink: 0; }
+
+  /* Progress bar */
+  .ov-progress { height: 6px; border-radius: 99px; background: var(--c-surface-alt); overflow: hidden; }
+  .ov-progress__fill { height: 100%; border-radius: 99px; transition: width 0.4s ease; }
+  .ov-progress__fill--ok       { background: var(--c-success); }
+  .ov-progress__fill--approaching { background: var(--c-warning); }
+  .ov-progress__fill--at-limit  { background: var(--c-danger); }
+
+  /* Threshold badge */
+  .ov-badge {
+    display: inline-flex; align-items: center; gap: 4px;
+    font-size: 11px; font-weight: 600; border-radius: var(--r-pill);
+    padding: 3px 10px; white-space: nowrap; flex-shrink: 0;
+  }
+  .ov-badge--ok          { background: var(--c-success-tint); color: var(--c-success); }
+  .ov-badge--approaching { background: var(--c-warning-tint); color: var(--c-warning); border: 1px solid var(--c-warning-bord); }
+  .ov-badge--at-limit    { background: var(--c-danger-tint);  color: var(--c-danger);  border: 1px solid var(--c-danger-bord); }
+
+  .ov-subj-divider { height: 1px; background: var(--c-border-2); }
+
+  /* ── Subject alert banner ── */
+  .subject-alert {
+    display: flex; align-items: flex-start; gap: var(--s-3);
+    border-radius: 10px; padding: var(--s-3) var(--s-4); margin-bottom: var(--s-4);
+  }
+  .subject-alert--warning { background: rgba(217,119,6,.08); border: 1px solid rgba(217,119,6,.25); }
+  .subject-alert--danger  { background: rgba(220,38,38,.07); border: 1px solid rgba(220,38,38,.2); }
+  .subject-alert__icon { font-size: 16px; margin-top: 1px; flex-shrink: 0; }
+  .subject-alert--warning .subject-alert__icon { color: var(--c-warning); }
+  .subject-alert--danger  .subject-alert__icon { color: var(--c-danger); }
+  .subject-alert__body { font-size: 13px; line-height: 1.5; }
+  .subject-alert--warning .subject-alert__body { color: #92400e; }
+  .subject-alert--danger  .subject-alert__body { color: #991b1b; }
+
+  /* ── Grade-impact chip in table ── */
+  .gi-chip {
+    display: inline-flex; align-items: center; gap: 4px;
+    font-size: 10px; font-weight: 600; border-radius: 20px; padding: 2px 8px; white-space: nowrap;
+  }
+  .gi-chip--yes     { background: rgba(220,38,38,.08); color: var(--c-danger); border: 1px solid rgba(220,38,38,.2); }
+  .gi-chip--no      { background: rgba(22,163,74,.08);  color: var(--c-success); }
+  .gi-chip--pending { background: rgba(217,119,6,.08);  color: var(--c-warning); }
+
+  /* ── Subject chip in table ── */
+  .subj-chip {
+    display: inline-flex; align-items: center; gap: 3px;
+    font-size: 11px; font-weight: 500; border-radius: 20px; padding: 2px 8px;
+    background: var(--c-surface-2); color: var(--c-ink-muted); white-space: nowrap;
+    border: 1px solid var(--c-border); margin-bottom: 3px;
+  }
+
+  /* Status & workflow pills */
+  .spill {
+    display: inline-flex; align-items: center; gap: 4px;
+    font-size: 11px; font-weight: 600; border-radius: 20px; padding: 2px 9px; white-space: nowrap;
+  }
+  .spill--absent    { background: rgba(220,38,38,.1);  color: var(--c-danger); }
+  .spill--late      { background: rgba(217,119,6,.1);  color: var(--c-warning); }
+  .spill--present   { background: rgba(22,163,74,.1);  color: var(--c-success); }
+  .spill--signed-in { background: rgba(59,130,246,.1); color: var(--c-info); }
+  .wpill {
+    display: inline-flex; align-items: center; gap: 4px;
+    font-size: 11px; font-weight: 600; border-radius: 20px; padding: 2px 9px; white-space: nowrap;
+  }
+  .wpill--awaiting-reply   { background: rgba(59,130,246,.08); color: var(--c-info);    border: 1px solid rgba(59,130,246,.2); }
+  .wpill--pending-approval { background: rgba(124,58,237,.08); color: #7c3aed;          border: 1px solid rgba(124,58,237,.2); }
+  .wpill--justified        { background: rgba(22,163,74,.1);   color: var(--c-success); }
+  .wpill--unjustified      { background: rgba(220,38,38,.08);  color: var(--c-danger);  border: 1px solid rgba(220,38,38,.2); }
+  .wpill--pre-declared     { background: rgba(59,130,246,.08); color: var(--c-info); }
+  .wpill--pre-justified    { background: rgba(22,163,74,.08);  color: var(--c-success); }
+  .wpill--disputed         { background: rgba(234,88,12,.1);   color: #ea580c;          border: 1px solid rgba(234,88,12,.3); }
+
+  /* ── Records table ── */
+  .table-filters {
+    display: flex; gap: var(--s-3); align-items: center; flex-wrap: wrap;
+    padding: var(--s-3) var(--s-4); border-bottom: 1px solid var(--c-border);
+    background: var(--c-surface-2);
+  }
+  .filter-group { display: flex; align-items: center; gap: var(--s-1); }
+  .filter-label { font-size: 12px; font-weight: 600; color: var(--c-ink-muted); white-space: nowrap; }
+  .filter-select {
+    font-size: 12px; padding: 4px 10px; border-radius: 6px;
+    border: 1px solid var(--c-border); background: var(--c-surface);
+    color: var(--c-ink); cursor: pointer; height: 30px; min-width: 128px;
+  }
+  .filter-select:focus { outline: 2px solid var(--c-brand); outline-offset: 1px; }
+  .filter-count { font-size: 12px; color: var(--c-ink-muted); margin-left: auto; }
+  .table-wrapper { overflow-x: auto; }
+  .records-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .records-table th {
+    font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;
+    color: var(--c-ink-muted); padding: 9px var(--s-4); text-align: left;
+    border-bottom: 1px solid var(--c-border); white-space: nowrap; background: var(--c-surface-2);
+  }
+  .records-table td { padding: 11px var(--s-4); border-bottom: 1px solid var(--c-border); vertical-align: middle; }
+  .records-table tbody tr:last-child td { border-bottom: none; }
+  .records-table tbody tr:hover td { background: var(--c-surface-2); transition: background .1s; }
+  .rt-date { font-weight: 600; white-space: nowrap; color: var(--c-ink); }
+  .rt-detail { font-size: 12px; color: var(--c-ink-muted); margin-top: 2px; line-height: 1.4; }
+  .rt-actions { display: flex; gap: var(--s-1); align-items: center; flex-wrap: nowrap; justify-content: flex-end; }
+  .table-empty { text-align: center; padding: var(--s-8) var(--s-4); color: var(--c-ink-muted); font-size: 13px; font-style: italic; }
+
+  /* Dispute button — visible on hover only */
+  .dispute-btn { opacity: 0; transition: opacity 0.12s; }
+  tr:hover .dispute-btn { opacity: 1; }
+  @media (max-width: 720px) { .dispute-btn { opacity: 1; } }
+</style>
+
+<!-- ── Data + logic ───────────────────────────────────────────────────────── -->
+<script src="assets/app.js"></script>
+<script>
+/* ─────────────────────────────────────────────────────────────────────────────
+   CHILDREN DATA
+───────────────────────────────────────────────────────────────────────────── */
+var CHILDREN = {
+  aaliyah: {
+    name: 'Aaliyah Carter',
+    nameShort: 'Aaliyah',
+    avatarClass: 'avatar--blue',
+    initials: 'AC',
+    grade: { en: 'Grade 7A · Secondary · Ms. S. Tremblay', fr: '7e A · Secondaire · Mme S. Tremblay' },
+    stats: { pct: '96%', pctClass: 'text-success', abs: 2, late: 1, pending: 0 },
+    /* Per-subject summary (threshold: 'ok' | 'approaching' | 'at-limit') */
+    subjects: [
+      { name: { en: 'Math',    fr: 'Maths'     }, absences: 1, late: 1, threshold: 'ok' },
+      { name: { en: 'Science', fr: 'Sciences'  }, absences: 1, late: 0, threshold: 'ok' },
+      { name: { en: 'French',  fr: 'Français'  }, absences: 0, late: 0, threshold: 'ok' },
+      { name: { en: 'History', fr: 'Histoire'  }, absences: 0, late: 0, threshold: 'ok' }
+    ],
+    schedule: [
+      { label: 'P1', className: { en: 'Math',    fr: 'Maths'    }, time: '8:30–9:15'   },
+      { label: 'P2', className: { en: 'Science', fr: 'Sciences' }, time: '9:20–10:05'  },
+      { label: 'P3', className: { en: 'French',  fr: 'Français' }, time: '10:10–10:55' },
+      { label: 'P4', className: { en: 'History', fr: 'Histoire' }, time: '11:00–11:45' }
+    ],
+    cal: {
+      '2026-05': {1:'present',4:'absent',5:'present',6:'present',7:'present',8:'present',11:'present',12:'today',14:'future',15:'present',18:'present',19:'present',20:'present',21:'present',22:'future',25:'present',26:'present',27:'present',28:'present',29:'present'},
+      '2026-04': {1:'present',2:'present',3:'present',6:'present',7:'present',8:'absent',9:'present',10:'present',13:'present',14:'present',15:'present',16:'present',17:'present',20:'present',21:'present',22:'late',23:'present',24:'present',27:'present',28:'present',29:'present',30:'present'}
+    },
+    records: [
+      { icon:'calendar-day', iconClass:'event',
+        date:{ en:'Friday, May 22', fr:'Vendredi 22 mai' },
+        subject:{ en:'All subjects · Full day', fr:'Toutes les matières · Journée complète' },
+        subjectKey: 'all',
+        detail:{ en:'Medical appointment · Pre-declared', fr:'Rendez-vous médical · Pré-déclarée' },
+        studentStatus:'absent', studentStatusLabel:{ en:'Absent', fr:'Absent' },
+        workflowStage:'pre-declared', workflowStageLabel:{ en:'Pre-declared', fr:'Pré-déclarée' },
+        gradeImpact: 'no',
+        disputable:false },
+      { icon:'trophy', iconClass:'event',
+        date:{ en:'Thursday, May 14', fr:'Jeudi 14 mai' },
+        subject:{ en:'French · P3 · History · P4', fr:'Français · P3 · Histoire · P4' },
+        subjectKey: 'french,history',
+        detail:{ en:'Soccer tournament · School event', fr:'Tournoi de soccer · Événement scolaire' },
+        studentStatus:'absent', studentStatusLabel:{ en:'Absent', fr:'Absent' },
+        workflowStage:'pre-justified', workflowStageLabel:{ en:'Pre-justified · School event', fr:'Pré-justifiée · Événement scolaire' },
+        gradeImpact: 'no',
+        disputable:false },
+      { icon:'circle-minus', iconClass:'absent',
+        date:{ en:'Monday, May 4', fr:'Lundi 4 mai' },
+        subject:{ en:'All subjects · Full day', fr:'Toutes les matières · Journée complète' },
+        subjectKey: 'all',
+        detail:{ en:'Medical appointment · Doctor\'s note submitted', fr:'Rendez-vous médical · Billet soumis' },
+        studentStatus:'absent', studentStatusLabel:{ en:'Absent', fr:'Absent' },
+        workflowStage:'pending-approval', workflowStageLabel:{ en:'Pending approval', fr:'En attente d\'approbation' },
+        gradeImpact: 'pending',
+        disputable:false, action:{ en:'View record', fr:'Voir le dossier', href:'active-records.html' } },
+      { icon:'clock', iconClass:'late',
+        date:{ en:'Wednesday, Apr 22', fr:'Mercredi 22 avr' },
+        subject:{ en:'Math · P1', fr:'Maths · P1' },
+        subjectKey: 'math',
+        detail:{ en:'Late 12 min · Bus delay (transportation)', fr:'Retard 12 min · Retard d\'autobus (transport)' },
+        studentStatus:'late', studentStatusLabel:{ en:'Late', fr:'Retard' },
+        workflowStage:'justified', workflowStageLabel:{ en:'Justified', fr:'Justifié' },
+        gradeImpact: 'no',
+        disputable:true, disputeDate:'Apr 22, 2026', disputePeriod:'P1 — Math' },
+      { icon:'circle-minus', iconClass:'absent',
+        date:{ en:'Wednesday, Apr 8', fr:'Mercredi 8 avr' },
+        subject:{ en:'French · P3 · History · P4', fr:'Français · P3 · Histoire · P4' },
+        subjectKey: 'french,history',
+        detail:{ en:'Family medical appointment · Pre-declared', fr:'Rendez-vous médical familial · Pré-déclaré' },
+        studentStatus:'absent', studentStatusLabel:{ en:'Absent', fr:'Absent' },
+        workflowStage:'justified', workflowStageLabel:{ en:'Justified', fr:'Justifiée' },
+        gradeImpact: 'no',
+        disputable:false }
+    ]
+  },
+  jaylen: {
+    name: 'Jaylen Carter',
+    nameShort: 'Jaylen',
+    avatarClass: 'avatar--orange',
+    initials: 'JC',
+    grade: { en: 'Grade 4B · Elementary · Mr. P. Côté', fr: '4e B · Primaire · M. P. Côté' },
+    stats: { pct: '92%', pctClass: 'text-success', abs: 3, late: 1, pending: 2 },
+    /* Per-subject summary */
+    subjects: [
+      { name: { en: 'Math',    fr: 'Maths'   }, absences: 4, late: 2, threshold: 'at-limit'   },
+      { name: { en: 'Reading', fr: 'Lecture' }, absences: 2, late: 1, threshold: 'approaching' },
+      { name: { en: 'Art',     fr: 'Arts'    }, absences: 0, late: 0, threshold: 'ok'          },
+      { name: { en: 'P.E.',    fr: 'Éd. phys.' }, absences: 0, late: 0, threshold: 'ok'       }
+    ],
+    schedule: [
+      { label: 'P1', className: { en: 'Math',    fr: 'Maths'     }, time: '8:30–9:15'   },
+      { label: 'P2', className: { en: 'Reading', fr: 'Lecture'   }, time: '9:20–10:05'  },
+      { label: 'P3', className: { en: 'Art',     fr: 'Arts'      }, time: '10:10–10:55' },
+      { label: 'P4', className: { en: 'P.E.',    fr: 'Éd. phys.' }, time: '11:00–11:45' }
+    ],
+    cal: {
+      '2026-05': {1:'present',4:'present',5:'absent',6:'present',7:'present',8:'present',11:'absent',12:'today',15:'present',18:'present',19:'present',20:'present',21:'present',25:'present',26:'present',27:'present',28:'present',29:'present'},
+      '2026-04': {1:'present',2:'present',3:'present',6:'present',7:'present',8:'present',9:'present',10:'present',13:'absent',14:'present',15:'present',16:'present',17:'present',20:'present',21:'present',22:'present',23:'present',24:'present',27:'present',28:'present',29:'late',30:'present'}
+    },
+    records: [
+      { icon:'clock', iconClass:'late',
+        date:{ en:'Today, May 12', fr:'Aujourd\'hui, 12 mai' },
+        subject:{ en:'Math · P1', fr:'Maths · P1' },
+        subjectKey: 'math',
+        detail:{ en:'Late 22 min · Signed in at office · In P2 now', fr:'Retard de 22 min · Signé au bureau · En P2 maintenant' },
+        studentStatus:'late', studentStatusLabel:{ en:'Late', fr:'Retard' },
+        workflowStage:'awaiting-reply', workflowStageLabel:{ en:'Awaiting your reply', fr:'En attente de votre réponse' },
+        gradeImpact: 'pending',
+        disputable:false, action:{ en:'Open record', fr:'Ouvrir le dossier', href:'active-records.html' } },
+      { icon:'circle-minus', iconClass:'absent',
+        date:{ en:'Monday, May 11', fr:'Lundi 11 mai' },
+        subject:{ en:'Reading · P2', fr:'Lecture · P2' },
+        subjectKey: 'reading',
+        detail:{ en:'Absent · School notification sent. 14 h left to reply.', fr:'Absent · Notification envoyée. 14 h restantes pour répondre.' },
+        studentStatus:'absent', studentStatusLabel:{ en:'Absent', fr:'Absent' },
+        workflowStage:'awaiting-reply', workflowStageLabel:{ en:'Awaiting your reply', fr:'En attente de votre réponse' },
+        gradeImpact: 'pending',
+        disputable:false, action:{ en:'Open record', fr:'Ouvrir le dossier', href:'active-records.html' } },
+      { icon:'circle-minus', iconClass:'absent',
+        date:{ en:'Tuesday, May 5', fr:'Mardi 5 mai' },
+        subject:{ en:'Math · Full day', fr:'Maths · Journée complète' },
+        subjectKey: 'math',
+        detail:{ en:'Absent · No reply submitted — closed as unjustified. Dispute submitted May 12.', fr:'Absent · Sans réponse — fermé non motivé. Contestation soumise le 12 mai.' },
+        studentStatus:'absent', studentStatusLabel:{ en:'Absent', fr:'Absent' },
+        workflowStage:'unjustified', workflowStageLabel:{ en:'Unjustified', fr:'Non motivé' },
+        extraWorkflowStage:'disputed', extraWorkflowStageLabel:{ en:'Disputed', fr:'Contesté' },
+        gradeImpact: 'yes',
+        disputable:false, action:{ en:'View dispute', fr:'Voir la contestation', href:'active-records.html' } },
+      { icon:'circle-minus', iconClass:'absent',
+        date:{ en:'Monday, Apr 13', fr:'Lundi 13 avr' },
+        subject:{ en:'Reading · P2–P3', fr:'Lecture · P2–P3' },
+        subjectKey: 'reading',
+        detail:{ en:'Doctor appointment · Medical justification', fr:'Rendez-vous médecin · Justification médicale' },
+        studentStatus:'absent', studentStatusLabel:{ en:'Absent', fr:'Absent' },
+        workflowStage:'justified', workflowStageLabel:{ en:'Justified', fr:'Justifié' },
+        gradeImpact: 'no',
+        disputable:true, disputeDate:'Apr 13, 2026', disputePeriod:'P2–P3' },
+      { icon:'clock', iconClass:'late',
+        date:{ en:'Wednesday, Apr 29', fr:'Mercredi 29 avr' },
+        subject:{ en:'Math · P1', fr:'Maths · P1' },
+        subjectKey: 'math',
+        detail:{ en:'Late 18 min · Family reason', fr:'Retard 18 min · Raison familiale' },
+        studentStatus:'late', studentStatusLabel:{ en:'Late', fr:'Retard' },
+        workflowStage:'justified', workflowStageLabel:{ en:'Justified', fr:'Justifié' },
+        gradeImpact: 'no',
+        disputable:true, disputeDate:'Apr 29, 2026', disputePeriod:'P1' }
+    ]
+  }
+};
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   PER-DAY DETAIL DATA  (keyed YYYY-MM-DD)
+───────────────────────────────────────────────────────────────────────────── */
+var DAY_DETAILS = {
+  aaliyah: {
+    '2026-05-12': {
+      note: { en:'All periods attended · P3 in progress now', fr:'Toutes les périodes présentes · P3 en cours' },
+      periods: [{label:'P1',status:'present'},{label:'P2',status:'present'},{label:'P3',status:'now'},{label:'P4',status:'upcoming'}]
+    },
+    '2026-05-04': {
+      note: { en:'Full day · Medical appointment · Doctor\'s note submitted', fr:'Journée complète · Rendez-vous médical · Billet soumis' },
+      workflowStage:'pending-approval', workflowStageLabel:{ en:'Pending approval', fr:'En attente d\'approbation' },
+      periods: [{label:'P1',status:'absent'},{label:'P2',status:'absent'},{label:'P3',status:'absent'},{label:'P4',status:'absent'}],
+      action: { en:'View record', fr:'Voir le dossier', href:'active-records.html' }
+    },
+    '2026-05-14': {
+      note: { en:'Soccer tournament · P3–P4 pre-justified by Coach Lévesque', fr:'Tournoi de soccer · P3–P4 pré-justifiées par l\'entraîneur Lévesque' },
+      workflowStage:'pre-justified', workflowStageLabel:{ en:'Pre-justified · School event', fr:'Pré-justifiée · Événement scolaire' },
+      periods: [{label:'P1',status:'present'},{label:'P2',status:'present'},{label:'P3',status:'absent'},{label:'P4',status:'absent'}]
+    },
+    '2026-05-22': {
+      note: { en:'Medical appointment · Full day pre-declared', fr:'Rendez-vous médical · Journée complète pré-déclarée' },
+      workflowStage:'pre-declared', workflowStageLabel:{ en:'Pre-declared', fr:'Pré-déclarée' },
+      periods: [{label:'P1',status:'absent'},{label:'P2',status:'absent'},{label:'P3',status:'absent'},{label:'P4',status:'absent'}]
+    },
+    '2026-04-22': {
+      note: { en:'Late 12 min to P1 — Math · Bus delay (transportation)', fr:'Retard 12 min en P1 — Maths · Retard d\'autobus' },
+      workflowStage:'justified', workflowStageLabel:{ en:'Justified', fr:'Justifié' },
+      periods: [{label:'P1',status:'late'},{label:'P2',status:'present'},{label:'P3',status:'present'},{label:'P4',status:'present'}]
+    },
+    '2026-04-08': {
+      note: { en:'P3–P4 absent · Family medical appointment · Pre-declared', fr:'P3–P4 absent · Rendez-vous médical familial · Pré-déclaré' },
+      workflowStage:'justified', workflowStageLabel:{ en:'Justified', fr:'Justifiée' },
+      periods: [{label:'P1',status:'present'},{label:'P2',status:'present'},{label:'P3',status:'absent'},{label:'P4',status:'absent'}]
+    }
+  },
+  jaylen: {
+    '2026-05-12': {
+      note: { en:'Late 22 min to P1 (Math) · Signed in at office · Now in P2. Reason needed.', fr:'Retard 22 min en P1 (Maths) · Signé au bureau · En P2. Motif requis.' },
+      workflowStage:'awaiting-reply', workflowStageLabel:{ en:'Awaiting your reply', fr:'En attente de votre réponse' },
+      periods: [{label:'P1',status:'late',subject:'Math'},{label:'P2',status:'now',subject:'Reading'},{label:'P3',status:'upcoming',subject:'Art'},{label:'P4',status:'upcoming',subject:'P.E.'}],
+      action: { en:'Open record', fr:'Ouvrir le dossier', href:'active-records.html' }
+    },
+    '2026-05-11': {
+      note: { en:'Absent in P2 (Reading) · Notification sent. 14 h to reply.', fr:'Absent en P2 (Lecture) · Notification envoyée. 14 h pour répondre.' },
+      workflowStage:'awaiting-reply', workflowStageLabel:{ en:'Awaiting your reply', fr:'En attente de votre réponse' },
+      periods: [{label:'P1',status:'present',subject:'Math'},{label:'P2',status:'absent',subject:'Reading'},{label:'P3',status:'present',subject:'Art'},{label:'P4',status:'present',subject:'P.E.'}],
+      action: { en:'Open record', fr:'Ouvrir le dossier', href:'active-records.html' }
+    },
+    '2026-05-05': {
+      note: { en:'Full day absent · Closed as unjustified · Dispute submitted May 12', fr:'Journée complète absente · Fermé non motivé · Contestation soumise le 12 mai' },
+      workflowStage:'unjustified', workflowStageLabel:{ en:'Unjustified', fr:'Non motivé' },
+      extraWorkflowStage:'disputed', extraWorkflowStageLabel:{ en:'Disputed', fr:'Contesté' },
+      periods: [{label:'P1',status:'absent',subject:'Math'},{label:'P2',status:'absent',subject:'Reading'},{label:'P3',status:'absent',subject:'Art'},{label:'P4',status:'absent',subject:'P.E.'}],
+      action: { en:'View dispute', fr:'Voir la contestation', href:'active-records.html' }
+    },
+    '2026-04-13': {
+      note: { en:'P2–P3 absent · Doctor appointment · Medical justification submitted', fr:'P2–P3 absent · Rendez-vous médecin · Justification médicale soumise' },
+      workflowStage:'justified', workflowStageLabel:{ en:'Justified', fr:'Justifié' },
+      periods: [{label:'P1',status:'present',subject:'Math'},{label:'P2',status:'absent',subject:'Reading'},{label:'P3',status:'absent',subject:'Art'},{label:'P4',status:'present',subject:'P.E.'}]
+    },
+    '2026-04-29': {
+      note: { en:'P1 late 18 min · Family reason', fr:'P1 retard 18 min · Raison familiale' },
+      workflowStage:'justified', workflowStageLabel:{ en:'Justified', fr:'Justifié' },
+      periods: [{label:'P1',status:'late',subject:'Math'},{label:'P2',status:'present',subject:'Reading'},{label:'P3',status:'present',subject:'Art'},{label:'P4',status:'present',subject:'P.E.'}]
+    }
+  }
+};
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   STATE
+───────────────────────────────────────────────────────────────────────────── */
+var activeChild    = 'aaliyah';
+var activeTab      = 'attendance';
+var calYear = 2026, calMonth = 4;
+var selectedDay    = null;
+var filterStatus   = 'all', filterWorkflow = 'all', filterSubject = 'all';
+
+var MONTHS_EN = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+var MONTHS_FR = ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
+var DAYS_EN   = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+var DAYS_FR   = ['Dimanche','Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi'];
+var DOW_EN    = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+var DOW_FR    = ['Dim','Lun','Mar','Mer','Jeu','Ven','Sam'];
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   TAB SWITCH
+───────────────────────────────────────────────────────────────────────────── */
+function switchTab(tab) {
+  activeTab = tab;
+  document.querySelectorAll('.page-tab').forEach(function(b) {
+    b.classList.toggle('is-active', b.getAttribute('data-tab') === tab);
+  });
+  document.getElementById('tab-overview').style.display   = tab === 'overview'   ? '' : 'none';
+  document.getElementById('tab-attendance').style.display = tab === 'attendance' ? '' : 'none';
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   CHILD SWITCH
+───────────────────────────────────────────────────────────────────────────── */
+function switchChild(childKey) {
+  activeChild = childKey;
+  selectedDay = null;
+  document.querySelectorAll('#childFilter .chip').forEach(function(c) {
+    c.classList.toggle('is-active', c.getAttribute('data-child') === childKey);
+  });
+  resetFilters(true);
+  renderOverview();
+  populateSubjectFilter();
+  renderCalendar();
+  renderTable();
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   OVERVIEW TAB — renders rate card + subject cards + alert banner
+───────────────────────────────────────────────────────────────────────────── */
+function renderStats() { renderOverview(); } /* legacy alias */
+function renderSubjects() { renderOverview(); } /* legacy alias */
+
+function renderOverview() {
+  var lang     = window.__ct_i18n.getLang();
+  var child    = CHILDREN[activeChild];
+  var s        = child.stats;
+  var subjects = child.subjects;
+
+  /* ── Alert banner ── */
+  var alertEl    = document.getElementById('subjectAlert');
+  var atLimit    = subjects.filter(function(x){ return x.threshold === 'at-limit'; });
+  var approaching= subjects.filter(function(x){ return x.threshold === 'approaching'; });
+  var pronoun    = child.nameShort === 'Aaliyah' ? 'her' : 'his';
+
+  if (atLimit.length > 0) {
+    var names    = atLimit.map(function(x){ return '<strong>' + (lang==='fr'?x.name.fr:x.name.en) + '</strong>'; }).join(', ');
+    var nearStr  = approaching.length > 0
+      ? (lang==='fr' ? ' ' + approaching.map(function(x){ return '<strong>' + x.name.fr + '</strong>'; }).join(', ') + ' approche également.'
+                     : ' ' + approaching.map(function(x){ return '<strong>' + x.name.en + '</strong>'; }).join(', ') + ' is also approaching the limit.')
+      : '';
+    var msg = lang==='fr'
+      ? child.nameShort + ' a atteint la limite d\'absences en ' + names + '. D\'autres absences non motivées pourraient affecter sa note.' + nearStr
+      : child.nameShort + ' has reached the absence limit for ' + names + '. Further unexcused absences may affect ' + pronoun + ' grade.' + nearStr;
+    alertEl.className = 'subject-alert subject-alert--danger';
+    alertEl.innerHTML = '<i class="fa-solid fa-triangle-exclamation subject-alert__icon"></i><div class="subject-alert__body">' + msg + '</div>';
+    alertEl.style.display = '';
+  } else if (approaching.length > 0) {
+    var names2 = approaching.map(function(x){ return '<strong>' + (lang==='fr'?x.name.fr:x.name.en) + '</strong>'; }).join(', ');
+    var msg2 = lang==='fr'
+      ? child.nameShort + ' approche de la limite en ' + names2 + '. Continuez à justifier les absences pour protéger sa note.'
+      : child.nameShort + ' is approaching the absence limit for ' + names2 + '. Keep absences justified to protect ' + pronoun + ' grade.';
+    alertEl.className = 'subject-alert subject-alert--warning';
+    alertEl.innerHTML = '<i class="fa-solid fa-circle-exclamation subject-alert__icon"></i><div class="subject-alert__body">' + msg2 + '</div>';
+    alertEl.style.display = '';
+  } else {
+    alertEl.style.display = 'none';
+  }
+
+  /* ── Donut SVG ── */
+  var pctNum   = parseInt(s.pct);
+  var r        = 46, cx = 60, cy = 60;
+  var circ     = 2 * Math.PI * r;
+  var dash     = (pctNum / 100) * circ;
+  var donutClr = pctNum >= 95 ? 'var(--c-success)' : pctNum >= 85 ? 'var(--c-warning)' : 'var(--c-danger)';
+  var pctClr   = pctNum >= 95 ? 'var(--c-success)' : pctNum >= 85 ? 'var(--c-warning)' : 'var(--c-danger)';
+
+  var rateCard = '<div class="ov-rate-card">'
+    + '<div class="ov-rate-card__label">' + (lang==='fr'?'Présence ce trimestre':'This term') + '</div>'
+    + '<div class="ov-donut-wrap">'
+    +   '<svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">'
+    +     '<circle cx="' + cx + '" cy="' + cy + '" r="' + r + '" fill="none" stroke="var(--c-surface-alt)" stroke-width="10"/>'
+    +     '<circle cx="' + cx + '" cy="' + cy + '" r="' + r + '" fill="none" stroke="' + donutClr + '" stroke-width="10"'
+    +       ' stroke-dasharray="' + dash.toFixed(1) + ' ' + circ.toFixed(1) + '"'
+    +       ' stroke-dashoffset="' + (circ / 4).toFixed(1) + '"'
+    +       ' stroke-linecap="round"/>'
+    +   '</svg>'
+    +   '<div class="ov-donut-center">'
+    +     '<div class="ov-donut-pct" style="color:' + pctClr + ';">' + s.pct + '</div>'
+    +     '<div class="ov-donut-sub">' + (lang==='fr'?'présence':'attendance') + '</div>'
+    +   '</div>'
+    + '</div>'
+    + '<div class="ov-rate-pills">'
+    +   '<div class="ov-rate-pill"><span class="ov-rate-pill__l"><i class="fa-solid fa-circle-minus" style="color:var(--c-danger);font-size:10px;margin-right:4px;"></i>' + (lang==='fr'?'Absences':'Absences') + '</span><span class="ov-rate-pill__n' + (s.abs > 2 ? ' ov-rate-pill__n--danger' : '') + '">' + s.abs + '</span></div>'
+    +   '<div class="ov-rate-pill"><span class="ov-rate-pill__l"><i class="fa-solid fa-clock" style="color:var(--c-warning);font-size:10px;margin-right:4px;"></i>' + (lang==='fr'?'Retards':'Late arrivals') + '</span><span class="ov-rate-pill__n">' + s.late + '</span></div>'
+    +   (s.pending > 0 ? '<div class="ov-rate-pill"><span class="ov-rate-pill__l"><i class="fa-regular fa-clock" style="color:var(--c-danger);font-size:10px;margin-right:4px;"></i>' + (lang==='fr'?'En attente':'Pending reply') + '</span><span class="ov-rate-pill__n ov-rate-pill__n--danger">' + s.pending + '</span></div>' : '')
+    + '</div>'
+    + '</div>';
+
+  /* ── Subject cards ── */
+  /* Threshold cap per grade band (Secondary: 10%, Elementary: ~8 absences for demo) */
+  var CAP = { 'at-limit': 5, 'approaching': 5, 'ok': 5 };
+  var BADGE = {
+    'at-limit':    { en:'<i class="fa-solid fa-triangle-exclamation"></i> At limit',  fr:'<i class="fa-solid fa-triangle-exclamation"></i> Limite atteinte' },
+    'approaching': { en:'<i class="fa-solid fa-circle-exclamation"></i> Approaching', fr:'<i class="fa-solid fa-circle-exclamation"></i> Approche limite'   },
+    'ok':          { en:'<i class="fa-solid fa-circle-check"></i> Within limit',       fr:'<i class="fa-solid fa-circle-check"></i> Dans la limite'           }
+  };
+
+  var rows = '';
+  subjects.forEach(function(subj, i) {
+    var cap      = CAP[subj.threshold] || 5;
+    var fillPct  = Math.min(100, Math.round((subj.absences / cap) * 100));
+    var badge    = BADGE[subj.threshold];
+    var subjName = lang==='fr' ? subj.name.fr : subj.name.en;
+    if (i > 0) rows += '<div class="ov-subj-divider"></div>';
+    rows += '<div class="ov-subj-row">'
+      + '<div class="ov-subj-row__top">'
+      +   '<span class="ov-subj-row__name">' + subjName + '</span>'
+      +   '<div class="ov-subj-row__right">'
+      +     '<div class="ov-subj-row__counts">'
+      +       '<span class="ov-subj-row__count ov-subj-row__count--absent"><i class="fa-solid fa-circle-minus"></i>' + subj.absences + ' ' + (lang==='fr'?'abs.':'abs.') + '</span>'
+      +       '<span class="ov-subj-row__count ov-subj-row__count--late"><i class="fa-solid fa-clock"></i>' + subj.late + ' ' + (lang==='fr'?'ret.':'late') + '</span>'
+      +     '</div>'
+      +     '<span class="ov-badge ov-badge--' + subj.threshold + '">' + (lang==='fr'?badge.fr:badge.en) + '</span>'
+      +   '</div>'
+      + '</div>'
+      + '<div class="ov-progress">'
+      +   '<div class="ov-progress__fill ov-progress__fill--' + subj.threshold + '" style="width:' + fillPct + '%"></div>'
+      + '</div>'
+      + '</div>';
+  });
+
+  var subjCard = '<div class="ov-subjects-card">'
+    + '<div class="ov-subjects-card__h">'
+    +   '<div>'
+    +     '<div class="ov-subjects-card__title">' + (lang==='fr'?'Présence par matière':'Attendance by subject') + '</div>'
+    +     '<div class="ov-subjects-card__sub">' + (lang==='fr'?'Absences non motivées comptées par matière · ce trimestre':'Unexcused absences per subject · this term') + '</div>'
+    +   '</div>'
+    + '</div>'
+    + '<div class="ov-subjects-list">' + rows + '</div>'
+    + '</div>';
+
+  document.getElementById('ovGrid').innerHTML = rateCard + subjCard;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   SUBJECT FILTER DROPDOWN
+───────────────────────────────────────────────────────────────────────────── */
+function populateSubjectFilter() {
+  var lang    = window.__ct_i18n.getLang();
+  var child   = CHILDREN[activeChild];
+  var select  = document.getElementById('filterSubject');
+  if (!select) return;
+  var allLabel = lang === 'fr' ? 'Toutes les matières' : 'All subjects';
+  var html = '<option value="all">' + allLabel + '</option>';
+  child.subjects.forEach(function(s) {
+    var key = (lang==='fr'?s.name.fr:s.name.en).toLowerCase();
+    html += '<option value="' + key + '">' + (lang==='fr'?s.name.fr:s.name.en) + '</option>';
+  });
+  select.innerHTML = html;
+  select.value = 'all';
+  filterSubject = 'all';
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   CALENDAR
+───────────────────────────────────────────────────────────────────────────── */
+function renderCalendar() {
+  var lang   = window.__ct_i18n.getLang();
+  var MONTHS = lang==='fr' ? MONTHS_FR : MONTHS_EN;
+  var DOW    = lang==='fr' ? DOW_FR    : DOW_EN;
+  var key    = calYear + '-' + String(calMonth+1).padStart(2,'0');
+  var data   = CHILDREN[activeChild].cal[key] || {};
+
+  document.getElementById('calTitle').textContent = MONTHS[calMonth] + ' ' + calYear;
+  document.getElementById('calDhRow').innerHTML   = DOW.map(function(d){ return '<div class="cal-dh">' + d + '</div>'; }).join('');
+
+  if (selectedDay === null) {
+    Object.keys(data).forEach(function(k){ if (data[k] === 'today') selectedDay = parseInt(k); });
+  }
+
+  var firstDay    = new Date(calYear, calMonth, 1).getDay();
+  var daysInMonth = new Date(calYear, calMonth+1, 0).getDate();
+  var grid = document.getElementById('calDays'); grid.innerHTML = '';
+  var ICON = { present:'check', absent:'xmark', late:'clock', future:'calendar' };
+
+  for (var i = 0; i < firstDay; i++) {
+    var blank = document.createElement('div'); blank.className = 'cal-day empty'; grid.appendChild(blank);
+  }
+  for (var d = 1; d <= daysInMonth; d++) { (function(d) {
+    var dow    = new Date(calYear, calMonth, d).getDay();
+    var status = data[d];
+    var cls    = 'cal-day';
+    if      (dow === 0 || dow === 6)    cls += ' weekend';
+    else if (status === 'today')        { cls += ' today present'; status = 'present'; }
+    else if (status)                    cls += ' ' + status;
+    if (d === selectedDay && dow !== 0 && dow !== 6) cls += ' selected';
+    var e = document.createElement('div'); e.className = cls;
+    var inner = '<div class="cal-day__num">' + d + '</div>';
+    if (status && status !== 'today' && !(dow === 0 || dow === 6))
+      inner += '<i class="cal-day__icon fa-solid fa-' + ICON[status] + '"></i>';
+    e.innerHTML = inner;
+    if (dow !== 0 && dow !== 6) e.onclick = function() {
+      document.querySelectorAll('.cal-day.selected').forEach(function(x){ x.classList.remove('selected'); });
+      e.classList.add('selected');
+      selectedDay = d;
+      renderDayDetail();
+    };
+    grid.appendChild(e);
+  })(d); }
+
+  renderDayDetail();
+}
+
+function changeMonth(dir) {
+  calMonth += dir;
+  if (calMonth < 0)  { calMonth = 11; calYear--; }
+  if (calMonth > 11) { calMonth = 0;  calYear++; }
+  selectedDay = null;
+  renderCalendar();
+}
+function goToday() { calYear = 2026; calMonth = 4; selectedDay = null; renderCalendar(); }
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   DAY DETAIL PANEL
+───────────────────────────────────────────────────────────────────────────── */
+function renderDayDetail() {
+  var panel = document.getElementById('dayDetailCard');
+  if (!panel) return;
+  var lang   = window.__ct_i18n.getLang();
+  var child  = CHILDREN[activeChild];
+  var MONTHS = lang==='fr' ? MONTHS_FR : MONTHS_EN;
+  var WDAYS  = lang==='fr' ? DAYS_FR   : DAYS_EN;
+
+  if (selectedDay === null) {
+    panel.innerHTML =
+      '<div class="day-detail__placeholder">'
+      + '<div class="day-detail__placeholder-icon"><i class="fa-regular fa-calendar-days"></i></div>'
+      + '<div class="day-detail__placeholder-text">' + (lang==='fr'?'Sélectionnez un jour pour voir les détails':'Select a day to see details') + '</div>'
+      + '</div>';
+    return;
+  }
+
+  var dow        = new Date(calYear, calMonth, selectedDay).getDay();
+  var isWeekend  = dow === 0 || dow === 6;
+  var calKey     = calYear + '-' + String(calMonth+1).padStart(2,'0');
+  var calData    = child.cal[calKey] || {};
+  var calStatus  = calData[selectedDay];
+  var effStatus  = (calStatus === 'today') ? 'present' : calStatus;
+  var dateLabel  = WDAYS[dow] + ', ' + MONTHS[calMonth] + ' ' + selectedDay + ', ' + calYear;
+  var dateKey    = calYear + '-' + String(calMonth+1).padStart(2,'0') + '-' + String(selectedDay).padStart(2,'0');
+  var detail     = DAY_DETAILS[activeChild] && DAY_DETAILS[activeChild][dateKey];
+
+  var html = '<div class="card__h">'
+    + '<div>'
+    + '<div class="card__title">' + dateLabel + '</div>'
+    + '<div class="card__sub">' + child.name + ' · ' + (lang==='fr'?child.grade.fr:child.grade.en) + '</div>'
+    + '</div></div>';
+
+  if (isWeekend) {
+    html += '<div class="day-detail__empty-state">'
+      + '<div class="day-detail__empty-icon"><i class="fa-solid fa-umbrella-beach"></i></div>'
+      + '<div>' + (lang==='fr'?'Fin de semaine · Aucun cours':'Weekend · No school') + '</div>'
+      + '</div>';
+    panel.innerHTML = html; return;
+  }
+
+  if (!calStatus) {
+    html += '<div class="day-detail__empty-state">'
+      + '<div class="day-detail__empty-icon"><i class="fa-regular fa-calendar-xmark"></i></div>'
+      + '<div>' + (lang==='fr'?'Aucun dossier pour cette date':'No attendance record for this date') + '</div>'
+      + '</div>';
+    panel.innerHTML = html; return;
+  }
+
+  var SC = {
+    present: { cls:'present',   icon:'circle-check', en:'Present',      fr:'Présent'       },
+    absent:  { cls:'absent',    icon:'circle-minus', en:'Absent',       fr:'Absent'        },
+    late:    { cls:'late',      icon:'clock',        en:'Late',         fr:'Retard'        },
+    future:  { cls:'signed-in', icon:'calendar',     en:'Pre-declared', fr:'Pré-déclarée'  }
+  };
+  var sc      = SC[effStatus] || SC.present;
+  var noteStr = detail && detail.note
+    ? (lang==='fr' ? detail.note.fr : detail.note.en)
+    : (lang==='fr' ? 'Toutes les périodes présentes' : 'All periods attended');
+
+  html += '<div class="child-card__status child-card__status--' + sc.cls + '" style="margin:var(--s-3) var(--s-4);border-radius:8px;">'
+    + '<div class="child-card__status-icon"><i class="fa-solid fa-' + sc.icon + '"></i></div>'
+    + '<div class="child-card__status-text">'
+    + '<div class="child-card__status-title">' + (lang==='fr'?sc.fr:sc.en) + '</div>'
+    + '<div class="child-card__status-sub">' + noteStr + '</div>'
+    + '</div></div>';
+
+  /* Period strip */
+  var periods = (detail && detail.periods) || child.schedule.map(function(s){ return { label:s.label, status:'present' }; });
+  html += '<div class="period-strip" style="padding:0 var(--s-4) var(--s-2);">'
+    + '<div class="period-strip__lbl">' + (lang==='fr'?'Périodes':'Periods') + '</div>'
+    + '<div class="period-strip__slots">';
+  periods.forEach(function(p) {
+    var slotCls = 'period-strip__slot period-strip__slot--' + p.status;
+    html += '<div class="' + slotCls + '"><span class="period-strip__p">' + p.label + '</span>';
+    if      (p.status==='present')  html += '<i class="fa-solid fa-check"></i>';
+    else if (p.status==='absent')   html += '<i class="fa-solid fa-xmark"></i>';
+    else if (p.status==='late')     html += '<i class="fa-solid fa-clock"></i>';
+    else if (p.status==='now')      html += '<span class="period-strip__live">' + (lang==='fr'?'Maint.':'Now') + '</span>';
+    else                            html += '<span style="font-size:10px;color:var(--c-ink-subtle);">—</span>';
+    html += '</div>';
+  });
+  html += '</div></div>';
+
+  /* Classes list — now includes subject name */
+  var P_ICON  = { present:'circle-check', absent:'circle-xmark', late:'clock', now:'circle-dot', upcoming:'circle' };
+  var P_COLOR = { present:'var(--c-success)', absent:'var(--c-danger)', late:'var(--c-warning)', now:'var(--c-brand)', upcoming:'var(--c-ink-subtle)' };
+  html += '<div class="day-detail__classes"><div class="day-detail__classes-label">' + (lang==='fr'?'Cours du jour':'Classes') + '</div>';
+  periods.forEach(function(p, i) {
+    var sched = child.schedule[i] || { className:{en:'-',fr:'-'}, time:'' };
+    var subjectName = p.subject || (lang==='fr'?sched.className.fr:sched.className.en);
+    html += '<div class="day-detail__class-row">'
+      + '<i class="fa-solid fa-' + (P_ICON[p.status]||'circle') + '" style="color:' + (P_COLOR[p.status]||'var(--c-ink-subtle)') + ';font-size:11px;width:14px;flex-shrink:0;"></i>'
+      + '<span class="day-detail__period">' + p.label + '</span>'
+      + '<span class="day-detail__class-name">' + subjectName + '</span>'
+      + '<span class="day-detail__class-time">' + sched.time + '</span>'
+      + '</div>';
+  });
+  html += '</div>';
+
+  /* Workflow pills */
+  if (detail && detail.workflowStage) {
+    html += '<div class="day-detail__workflow">'
+      + '<span class="wpill wpill--' + detail.workflowStage + '">' + workflowIcon(detail.workflowStage) + ' ' + (lang==='fr'?detail.workflowStageLabel.fr:detail.workflowStageLabel.en) + '</span>';
+    if (detail.extraWorkflowStage)
+      html += '<span class="wpill wpill--' + detail.extraWorkflowStage + '">' + workflowIcon(detail.extraWorkflowStage) + ' ' + (lang==='fr'?detail.extraWorkflowStageLabel.fr:detail.extraWorkflowStageLabel.en) + '</span>';
+    html += '</div>';
+  }
+
+  if (detail && detail.action)
+    html += '<div class="day-detail__action"><a href="' + detail.action.href + '" class="btn btn--primary btn--sm">' + (lang==='fr'?detail.action.fr:detail.action.en) + '</a></div>';
+
+  panel.innerHTML = html;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   RECORDS TABLE
+───────────────────────────────────────────────────────────────────────────── */
+function renderTable() {
+  var lang  = window.__ct_i18n.getLang();
+  var recs  = CHILDREN[activeChild].records;
+  var tbody = document.getElementById('recordsTableBody');
+  if (!tbody) return;
+
+  var filtered = recs.filter(function(r) {
+    var subjectMatch = filterSubject === 'all'
+      || (r.subjectKey && r.subjectKey.indexOf(filterSubject) !== -1);
+    return (filterStatus   === 'all' || r.studentStatus === filterStatus)
+        && (filterWorkflow === 'all' || r.workflowStage === filterWorkflow
+            || (r.extraWorkflowStage && r.extraWorkflowStage === filterWorkflow))
+        && subjectMatch;
+  });
+
+  var countEl = document.getElementById('filterCount');
+  if (countEl) countEl.textContent = (filterStatus !== 'all' || filterWorkflow !== 'all' || filterSubject !== 'all')
+    ? filtered.length + ' of ' + recs.length + (lang==='fr' ? ' dossier' + (recs.length!==1?'s':'') : ' record' + (recs.length!==1?'s':''))
+    : recs.length + (lang==='fr' ? ' dossier' + (recs.length!==1?'s':'') : ' record' + (recs.length!==1?'s':''));
+
+  var resetBtn = document.getElementById('filterResetBtn');
+  if (resetBtn) resetBtn.style.display = (filterStatus !== 'all' || filterWorkflow !== 'all' || filterSubject !== 'all') ? '' : 'none';
+
+  if (!filtered.length) {
+    tbody.innerHTML = '<tr><td colspan="6" class="table-empty">'
+      + (lang==='fr'?'Aucun dossier ne correspond aux filtres sélectionnés.':'No records match the selected filters.')
+      + '</td></tr>';
+    return;
+  }
+
+  /* Grade impact chip */
+  var GI = {
+    yes:     { en:'<i class="fa-solid fa-chart-bar"></i> Counts toward grade', fr:'<i class="fa-solid fa-chart-bar"></i> Compte pour la note', cls:'gi-chip--yes' },
+    no:      { en:'<i class="fa-solid fa-circle-check"></i> No impact',        fr:'<i class="fa-solid fa-circle-check"></i> Sans impact',        cls:'gi-chip--no' },
+    pending: { en:'<i class="fa-regular fa-clock"></i> Pending',               fr:'<i class="fa-regular fa-clock"></i> En attente',              cls:'gi-chip--pending' }
+  };
+
+  var html = '';
+  filtered.forEach(function(r) {
+    var sPill = '<span class="spill spill--' + r.studentStatus + '">' + studentStatusIcon(r.studentStatus) + ' ' + (lang==='fr'?r.studentStatusLabel.fr:r.studentStatusLabel.en) + '</span>';
+    var wPill = '<span class="wpill wpill--' + r.workflowStage + '">' + workflowIcon(r.workflowStage) + ' ' + (lang==='fr'?r.workflowStageLabel.fr:r.workflowStageLabel.en) + '</span>';
+    var xPill = r.extraWorkflowStage
+      ? ' <span class="wpill wpill--' + r.extraWorkflowStage + '">' + workflowIcon(r.extraWorkflowStage) + ' ' + (lang==='fr'?r.extraWorkflowStageLabel.fr:r.extraWorkflowStageLabel.en) + '</span>'
+      : '';
+    var gi    = r.gradeImpact && GI[r.gradeImpact] ? GI[r.gradeImpact] : null;
+    var giCell = gi ? '<span class="gi-chip ' + gi.cls + '">' + (lang==='fr'?gi.fr:gi.en) + '</span>' : '—';
+    var subjectLabel = r.subject ? (lang==='fr'?r.subject.fr:r.subject.en) : '';
+    var acts = '';
+    if (r.action)     acts += '<a href="' + r.action.href + '" class="btn btn--primary btn--sm">' + (lang==='fr'?r.action.fr:r.action.en) + '</a>';
+    if (r.disputable) acts += '<button class="btn btn--ghost btn--sm dispute-btn" onclick="openDispute({child:\'' + CHILDREN[activeChild].name + '\',date:\'' + r.disputeDate + '\',period:\'' + r.disputePeriod + '\'})">' + '<i class="fa-solid fa-flag"></i> ' + (lang==='fr'?'Contester':'Dispute') + '</button>';
+    html += '<tr>'
+      + '<td><div class="rt-date">' + (lang==='fr'?r.date.fr:r.date.en) + '</div></td>'
+      + '<td>'
+      + (subjectLabel ? '<div><span class="subj-chip"><i class="fa-solid fa-book-open" style="font-size:9px;"></i> ' + subjectLabel + '</span></div>' : '')
+      + '<div class="rt-detail">' + (lang==='fr'?r.detail.fr:r.detail.en) + '</div>'
+      + '</td>'
+      + '<td>' + sPill + '</td>'
+      + '<td>' + wPill + xPill + '</td>'
+      + '<td>' + giCell + '</td>'
+      + '<td><div class="rt-actions">' + acts + '</div></td>'
+      + '</tr>';
+  });
+  tbody.innerHTML = html;
+}
+
+function applyFilters() {
+  filterStatus   = document.getElementById('filterStatus').value;
+  filterWorkflow = document.getElementById('filterWorkflow').value;
+  filterSubject  = document.getElementById('filterSubject') ? document.getElementById('filterSubject').value : 'all';
+  renderTable();
+}
+function resetFilters(silent) {
+  filterStatus = 'all'; filterWorkflow = 'all'; filterSubject = 'all';
+  var s = document.getElementById('filterStatus'),
+      w = document.getElementById('filterWorkflow'),
+      j = document.getElementById('filterSubject');
+  if (s) s.value = 'all';
+  if (w) w.value = 'all';
+  if (j) j.value = 'all';
+  if (!silent) renderTable();
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   ICON HELPERS
+───────────────────────────────────────────────────────────────────────────── */
+function studentStatusIcon(s) {
+  return s==='absent'    ? '<i class="fa-solid fa-circle-minus"></i>'
+       : s==='late'      ? '<i class="fa-solid fa-clock"></i>'
+       : s==='signed-in' ? '<i class="fa-solid fa-door-open"></i>'
+       :                   '<i class="fa-solid fa-circle-check"></i>';
+}
+function workflowIcon(s) {
+  return s==='awaiting-reply'   ? '<i class="fa-regular fa-clock"></i>'
+       : s==='pending-approval' ? '<i class="fa-solid fa-paper-plane"></i>'
+       : s==='justified'        ? '<i class="fa-solid fa-circle-check"></i>'
+       : s==='unjustified'      ? '<i class="fa-solid fa-lock"></i>'
+       : s==='pre-declared'     ? '<i class="fa-solid fa-calendar"></i>'
+       : s==='pre-justified'    ? '<i class="fa-solid fa-calendar-check"></i>'
+       : s==='disputed'         ? '<i class="fa-solid fa-flag"></i>'
+       :                          '';
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   INIT
+───────────────────────────────────────────────────────────────────────────── */
+window.__ct_page_rerender = function() {
+  renderOverview();
+  populateSubjectFilter();
+  renderCalendar();
+  renderTable();
+};
+
+(function() {
+  var p = new URLSearchParams(window.location.search);
+  var child = p.get('child');
+  if (child && CHILDREN[child]) activeChild = child;
+  var tab = p.get('tab');
+  if (tab === 'overview') switchTab('overview');
+})();
+
+renderOverview();
+populateSubjectFilter();
+renderCalendar();
+renderTable();
+
+document.querySelectorAll('#childFilter .chip').forEach(function(c){
+  c.classList.toggle('is-active', c.getAttribute('data-child') === activeChild);
+});
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   EXPORT PREVIEW MODAL
+───────────────────────────────────────────────────────────────────────────── */
+function openExportModal() {
+  var lang  = window.__ct_i18n.getLang();
+  var child = CHILDREN[activeChild];
+  var recs  = child.records;
+
+  /* Apply same filters as the table */
+  var filtered = recs.filter(function(r) {
+    var subjectMatch = filterSubject === 'all'
+      || (r.subjectKey && r.subjectKey.indexOf(filterSubject) !== -1);
+    return (filterStatus   === 'all' || r.studentStatus === filterStatus)
+        && (filterWorkflow === 'all' || r.workflowStage === filterWorkflow
+            || (r.extraWorkflowStage && r.extraWorkflowStage === filterWorkflow))
+        && subjectMatch;
+  });
+
+  /* Filter label chips for the report header */
+  var filterLabels = [];
+  if (filterStatus !== 'all') {
+    var statusMap = { absent:'Absent', late:'Late', present:'Present' };
+    filterLabels.push({ icon:'fa-circle-minus', label: statusMap[filterStatus] || filterStatus });
+  }
+  if (filterWorkflow !== 'all') {
+    var wfMap = { 'awaiting-reply':'Awaiting reply', 'pending-approval':'Pending approval',
+                  'justified':'Justified', 'unjustified':'Unjustified',
+                  'pre-declared':'Pre-declared', 'pre-justified':'Pre-justified' };
+    filterLabels.push({ icon:'fa-arrows-rotate', label: wfMap[filterWorkflow] || filterWorkflow });
+  }
+  if (filterSubject !== 'all') {
+    filterLabels.push({ icon:'fa-book-open', label: filterSubject.charAt(0).toUpperCase() + filterSubject.slice(1) });
+  }
+
+  /* Summary counts from filtered set */
+  var nAbsent  = filtered.filter(function(r){ return r.studentStatus === 'absent'; }).length;
+  var nLate    = filtered.filter(function(r){ return r.studentStatus === 'late'; }).length;
+  var nPresent = filtered.filter(function(r){ return r.studentStatus === 'present'; }).length;
+
+  /* Table rows */
+  var GI = {
+    yes:     { label: 'Counts toward grade', cls: 'ex-gi--yes' },
+    no:      { label: 'No impact',           cls: 'ex-gi--no' },
+    pending: { label: 'Pending',             cls: 'ex-gi--pending' }
+  };
+  var WF = {
+    'awaiting-reply':   'Awaiting reply',
+    'pending-approval': 'Pending approval',
+    'justified':        'Justified',
+    'unjustified':      'Unjustified',
+    'pre-declared':     'Pre-declared',
+    'pre-justified':    'Pre-justified',
+    'disputed':         'Disputed'
+  };
+  var SS = { absent:'Absent', late:'Late', present:'Present', 'signed-in':'Signed in' };
+
+  var rows = filtered.length ? filtered.map(function(r) {
+    var dateStr    = lang === 'fr' ? r.date.fr : r.date.en;
+    var subjStr    = lang === 'fr' ? r.subject.fr : r.subject.en;
+    var detailStr  = lang === 'fr' ? r.detail.fr  : r.detail.en;
+    var wfStr      = WF[r.workflowStage] || r.workflowStage;
+    if (r.extraWorkflowStage) wfStr += ' · ' + (WF[r.extraWorkflowStage] || r.extraWorkflowStage);
+    var ssStr      = SS[r.studentStatus] || r.studentStatus;
+    var giStr      = r.gradeImpact && GI[r.gradeImpact] ? GI[r.gradeImpact].label : '—';
+    var giCls      = r.gradeImpact && GI[r.gradeImpact] ? GI[r.gradeImpact].cls   : '';
+    return '<tr>'
+      + '<td class="ex-td ex-td--date">' + dateStr + '</td>'
+      + '<td class="ex-td"><div class="ex-subj">' + subjStr + '</div><div class="ex-detail">' + detailStr + '</div></td>'
+      + '<td class="ex-td"><span class="ex-pill ex-pill--' + r.studentStatus + '">' + ssStr + '</span></td>'
+      + '<td class="ex-td ex-wf">' + wfStr + '</td>'
+      + '<td class="ex-td"><span class="ex-gi ' + giCls + '">' + giStr + '</span></td>'
+      + '</tr>';
+  }).join('') : '<tr><td colspan="5" style="text-align:center;padding:24px;color:#888;font-style:italic;">No records match the selected filters.</td></tr>';
+
+  /* Filter chips HTML */
+  var filterBadges = filterLabels.length
+    ? filterLabels.map(function(f){ return '<span class="ex-filter-badge"><i class="fa-solid ' + f.icon + '"></i> ' + f.label + '</span>'; }).join('')
+    : '<span class="ex-filter-badge ex-filter-badge--all"><i class="fa-solid fa-list"></i> All records</span>';
+
+  /* Today's date */
+  var today = new Date();
+  var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  var dateGenerated = months[today.getMonth()] + ' ' + today.getDate() + ', ' + today.getFullYear();
+
+  /* Build the paper preview */
+  var paper = ''
+    + '<div class="ex-paper">'
+
+    /* Report header */
+    + '<div class="ex-paper__head">'
+    +   '<div class="ex-paper__brand">'
+    +     '<div class="ex-brand-mark">CT</div>'
+    +     '<div>'
+    +       '<div class="ex-paper__brand-name">ClassTrack</div>'
+    +       '<div class="ex-paper__brand-sub">Attendance Report</div>'
+    +     '</div>'
+    +   '</div>'
+    +   '<div class="ex-paper__meta">'
+    +     '<div class="ex-meta-row"><span class="ex-meta-l">Student</span><span class="ex-meta-r">' + child.name + '</span></div>'
+    +     '<div class="ex-meta-row"><span class="ex-meta-l">School year</span><span class="ex-meta-r">2025–26</span></div>'
+    +     '<div class="ex-meta-row"><span class="ex-meta-l">Generated</span><span class="ex-meta-r">' + dateGenerated + '</span></div>'
+    +   '</div>'
+    + '</div>'
+
+    /* Filters applied */
+    + '<div class="ex-filters-row">'
+    +   '<span class="ex-filters-label">Filtered by</span>'
+    +   filterBadges
+    + '</div>'
+
+    /* Summary bar */
+    + '<div class="ex-summary">'
+    +   '<div class="ex-summary__item"><span class="ex-summary__n">' + filtered.length + '</span><span class="ex-summary__l">Records</span></div>'
+    +   '<div class="ex-summary__div"></div>'
+    +   '<div class="ex-summary__item"><span class="ex-summary__n ex-summary__n--danger">' + nAbsent + '</span><span class="ex-summary__l">Absences</span></div>'
+    +   '<div class="ex-summary__div"></div>'
+    +   '<div class="ex-summary__item"><span class="ex-summary__n ex-summary__n--warning">' + nLate + '</span><span class="ex-summary__l">Late arrivals</span></div>'
+    +   (nPresent ? '<div class="ex-summary__div"></div><div class="ex-summary__item"><span class="ex-summary__n ex-summary__n--success">' + nPresent + '</span><span class="ex-summary__l">Present</span></div>' : '')
+    + '</div>'
+
+    /* Records table */
+    + '<div class="ex-table-wrap">'
+    +   '<table class="ex-table">'
+    +     '<thead><tr>'
+    +       '<th class="ex-th">Date</th>'
+    +       '<th class="ex-th">Subject / Detail</th>'
+    +       '<th class="ex-th">Status</th>'
+    +       '<th class="ex-th">Workflow</th>'
+    +       '<th class="ex-th">Grade impact</th>'
+    +     '</tr></thead>'
+    +     '<tbody>' + rows + '</tbody>'
+    +   '</table>'
+    + '</div>'
+
+    /* Footer note */
+    + '<div class="ex-paper__foot">This report was generated from ClassTrack · Attendance data is updated in real time · For questions contact your school\'s Attendance Clerk.</div>'
+
+    + '</div>'; /* /ex-paper */
+
+  document.getElementById('exportPreviewBody').innerHTML = paper;
+
+  /* Open */
+  var backdrop = document.getElementById('modal-export');
+  backdrop.classList.add('is-open');
+  backdrop.querySelector('[data-close-export]').focus();
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  /* Close handlers */
+  document.querySelectorAll('[data-close-export]').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      document.getElementById('modal-export').classList.remove('is-open');
+    });
+  });
+  document.getElementById('modal-export').addEventListener('click', function(e){
+    if (e.target === this) this.classList.remove('is-open');
+  });
+  document.addEventListener('keydown', function(e){
+    if (e.key === 'Escape') document.getElementById('modal-export').classList.remove('is-open');
+  });
+
+  /* Download buttons */
+  document.getElementById('exportCsvBtn').addEventListener('click', function(){ showToast('Downloading CSV…'); });
+  document.getElementById('exportPdfBtn').addEventListener('click', function(){ showToast('Downloading PDF…'); });
+});
+
+__ct_mountSidebar('attendance-history');
+__ct_mountProtoSwitcher('parent');
+</script>
+
+<!-- ═══════════════════════════════════════════════════════════
+     MODAL: Export preview
+════════════════════════════════════════════════════════════ -->
+<div class="modal-backdrop" id="modal-export" style="display:none;" role="dialog" aria-modal="true" aria-labelledby="export-modal-title">
+  <div class="modal" style="max-width:780px; display:flex; flex-direction:column; max-height:calc(100vh - 48px);">
+
+    <div class="modal__h" style="flex-shrink:0;">
+      <div>
+        <div class="modal__title" id="export-modal-title">
+          <i class="fa-solid fa-file-lines" style="color:var(--c-brand);"></i>
+          Export preview
+        </div>
+        <div class="modal__sub">This is how your report will look. Filters are applied.</div>
+      </div>
+      <div style="display:flex; gap:8px; align-items:center;">
+        <button class="btn btn--ghost btn--sm" id="exportCsvBtn" type="button">
+          <i class="fa-solid fa-file-csv"></i> CSV
+        </button>
+        <button class="btn btn--primary btn--sm" id="exportPdfBtn" type="button">
+          <i class="fa-solid fa-file-pdf"></i> PDF
+        </button>
+        <button class="modal__close" data-close-export aria-label="Close"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+    </div>
+
+    <!-- Scrollable paper preview -->
+    <div style="overflow-y:auto; padding:var(--s-4) var(--s-5) var(--s-5); background:#E8ECF0; flex:1;">
+      <div id="exportPreviewBody"></div>
+    </div>
+
+    <div class="modal__footer" style="flex-shrink:0;">
+      <button class="btn btn--ghost" data-close-export type="button">Close</button>
+      <div style="display:flex; gap:var(--s-2);">
+        <button class="btn btn--secondary" id="exportCsvBtn2" type="button" onclick="showToast('Downloading CSV…')">
+          <i class="fa-solid fa-file-csv"></i> Download CSV
+        </button>
+        <button class="btn btn--primary" id="exportPdfBtn2" type="button" onclick="showToast('Downloading PDF…')">
+          <i class="fa-solid fa-file-pdf"></i> Download PDF
+        </button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<style>
+  /* ── Modal open state (override inline display:none) ── */
+  #modal-export.is-open { display:flex !important; }
+
+  /* ── Paper document ── */
+  .ex-paper {
+    background: #fff;
+    border-radius: 6px;
+    box-shadow: 0 2px 16px rgba(0,0,0,0.13);
+    overflow: hidden;
+    font-family: "Segoe UI", system-ui, sans-serif;
+    font-size: 13px;
+    color: #1a2a3a;
+  }
+
+  /* Header band */
+  .ex-paper__head {
+    display: flex; align-items: flex-start; justify-content: space-between;
+    gap: 24px; padding: 24px 28px 20px;
+    background: #0E2E55; color: #fff;
+  }
+  .ex-paper__brand { display:flex; align-items:center; gap:12px; }
+  .ex-brand-mark {
+    width:40px; height:40px; border-radius:10px;
+    background:linear-gradient(135deg,#2E7DD1,#0E2E55);
+    border:2px solid rgba(255,255,255,0.2);
+    display:flex; align-items:center; justify-content:center;
+    font-weight:800; font-size:15px; color:#fff; flex-shrink:0;
+  }
+  .ex-paper__brand-name { font-size:18px; font-weight:700; letter-spacing:-0.01em; }
+  .ex-paper__brand-sub  { font-size:12px; opacity:0.65; margin-top:2px; }
+
+  .ex-paper__meta { text-align:right; }
+  .ex-meta-row { display:flex; gap:16px; justify-content:flex-end; margin-bottom:4px; font-size:12px; }
+  .ex-meta-l { opacity:0.6; }
+  .ex-meta-r { font-weight:600; }
+
+  /* Filters row */
+  .ex-filters-row {
+    display:flex; align-items:center; gap:8px; flex-wrap:wrap;
+    padding:12px 28px; background:#F1F5FA;
+    border-bottom:1px solid #DDE3ED;
+    font-size:12px;
+  }
+  .ex-filters-label { color:#6E7682; font-weight:600; margin-right:4px; }
+  .ex-filter-badge {
+    display:inline-flex; align-items:center; gap:5px;
+    background:#1B5DAF; color:#fff;
+    padding:3px 10px; border-radius:999px;
+    font-size:11px; font-weight:600;
+  }
+  .ex-filter-badge--all { background:#475467; }
+  .ex-filter-badge i { font-size:9px; }
+
+  /* Summary bar */
+  .ex-summary {
+    display:flex; align-items:center; gap:0;
+    padding:14px 28px; border-bottom:1px solid #EEF1F5;
+    background:#FAFBFC;
+  }
+  .ex-summary__item { display:flex; flex-direction:column; align-items:center; min-width:80px; }
+  .ex-summary__n { font-size:22px; font-weight:800; line-height:1.1; }
+  .ex-summary__n--danger  { color:#B42318; }
+  .ex-summary__n--warning { color:#9A4708; }
+  .ex-summary__n--success { color:#1F7A3F; }
+  .ex-summary__l { font-size:11px; color:#6E7682; font-weight:600; text-transform:uppercase; letter-spacing:0.05em; margin-top:2px; }
+  .ex-summary__div { width:1px; background:#DDE3ED; align-self:stretch; margin:0 16px; flex-shrink:0; }
+
+  /* Table */
+  .ex-table-wrap { padding:0 28px 24px; }
+  .ex-table { width:100%; border-collapse:collapse; font-size:12px; margin-top:16px; }
+  .ex-th {
+    font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:0.07em;
+    color:#6E7682; padding:8px 10px; text-align:left;
+    border-bottom:2px solid #DDE3ED; background:#FAFBFC;
+    white-space:nowrap;
+  }
+  .ex-td { padding:10px 10px; border-bottom:1px solid #EEF1F5; vertical-align:top; color:#1a2a3a; }
+  .ex-td--date { white-space:nowrap; font-weight:600; font-size:12px; }
+  .ex-table tbody tr:last-child .ex-td { border-bottom:none; }
+  .ex-table tbody tr:nth-child(even) .ex-td { background:#FAFBFC; }
+  .ex-subj   { font-weight:600; font-size:12px; }
+  .ex-detail { font-size:11px; color:#6E7682; margin-top:2px; }
+  .ex-wf     { font-size:11px; color:#475467; }
+
+  .ex-pill {
+    display:inline-flex; align-items:center; gap:4px;
+    font-size:10px; font-weight:700; border-radius:999px; padding:2px 9px;
+    white-space:nowrap;
+  }
+  .ex-pill--absent  { background:#FCE9E7; color:#B42318; }
+  .ex-pill--late    { background:#FCF1DD; color:#9A4708; }
+  .ex-pill--present { background:#E6F4EC; color:#1F7A3F; }
+
+  .ex-gi { font-size:10px; font-weight:600; white-space:nowrap; }
+  .ex-gi--yes     { color:#B42318; }
+  .ex-gi--no      { color:#1F7A3F; }
+  .ex-gi--pending { color:#9A4708; }
+
+  /* Footer note */
+  .ex-paper__foot {
+    padding:12px 28px; font-size:10px; color:#9AA5B4;
+    border-top:1px solid #EEF1F5; background:#FAFBFC;
+    text-align:center; line-height:1.6;
+  }
+</style>
+</body>
+</html>

@@ -1,0 +1,1336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ClassTrack — My Classes</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <style>
+    /* ── Design tokens ──────────────────────────────────────────────── */
+    :root {
+      --c-bg:#F4F6FA; --c-surface:#FFFFFF; --c-surface-2:#F8FAFC; --c-surface-alt:#EEF2F7;
+      --c-sidebar:#0F2546; --c-sidebar-2:#0A1B36; --c-sidebar-hover:rgba(255,255,255,0.08); --c-sidebar-active:#2E7DD1;
+      --c-border:#D6DBE2; --c-border-2:#E5E8EE; --c-border-strong:#A6ADBB;
+      --c-ink:#0F2546; --c-ink-muted:#475467; --c-ink-subtle:#5C6470;
+      --c-brand:#2E7DD1; --c-brand-ink:#1A5FA8; --c-brand-tint:#EBF4FF;
+      --c-success:#1F7A3F; --c-success-tint:#E6F4EC;
+      --c-warning:#9A4708; --c-warning-tint:#FCF1DD; --c-warning-bord:#B97F38;
+      --c-danger:#B42318; --c-danger-tint:#FCE9E7;
+      --c-info:#0E5C8A; --c-info-tint:#E0EFF7;
+      --c-neutral-tint:#EEF1F5;
+      --s-1:4px; --s-2:8px; --s-3:12px; --s-4:16px; --s-5:24px; --s-6:32px;
+      --r-sm:4px; --r-md:6px; --r-lg:10px; --r-xl:14px; --r-pill:999px;
+      --ff:"Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+      --fs-xs:12px; --fs-sm:13px; --fs-md:14px; --fs-lg:16px; --fs-xl:20px; --fs-2xl:24px;
+      --shadow-md: 0 4px 12px rgba(15,37,70,0.08);
+      --shadow-lg: 0 8px 28px rgba(15,37,70,0.12);
+    }
+    *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+    body { font-family:var(--ff); background:var(--c-bg); color:var(--c-ink); display:flex; min-height:100vh; font-size:var(--fs-md); line-height:1.55; }
+
+    /* ── Sidebar ────────────────────────────────────────────────────── */
+    .sidebar { width:240px; min-height:100vh; background:linear-gradient(180deg,var(--c-sidebar) 0%, var(--c-sidebar-2) 100%); color:rgba(255,255,255,0.85); display:flex; flex-direction:column; flex-shrink:0; position:fixed; top:0; left:0; bottom:0; z-index:100; }
+    .sidebar-logo { padding:var(--s-5) var(--s-4) var(--s-4); border-bottom:1px solid rgba(255,255,255,0.08); display:flex; align-items:center; gap:var(--s-3); }
+    .logo-mark { display:flex; align-items:center; gap:var(--s-3); }
+    .logo-icon { width:36px; height:36px; background:var(--c-sidebar-active); border-radius:var(--r-lg); display:flex; align-items:center; justify-content:center; font-weight:800; font-size:var(--fs-lg); color:#fff; }
+    .logo-text { color:#fff; font-size:16px; font-weight:700; letter-spacing:-.01em; }
+    .logo-sub { color:rgba(255,255,255,0.6); font-size:11px; margin-top:2px; }
+    .sidebar-nav { flex:1; overflow-y:auto; }
+    .sidebar-section { padding:var(--s-4) var(--s-3) var(--s-1); }
+    .sidebar-section-label { text-transform:uppercase; font-size:10px; font-weight:700; letter-spacing:.12em; color:rgba(255,255,255,0.55); padding:0 var(--s-3); margin-bottom:var(--s-1); }
+    .nav-item { display:flex; align-items:center; gap:var(--s-3); padding:10px var(--s-3); border-radius:var(--r-md); color:rgba(255,255,255,0.78); font-size:var(--fs-sm); font-weight:500; min-height:36px; text-decoration:none; }
+    .nav-item:hover { background:var(--c-sidebar-hover); color:#fff; }
+    .nav-item.active { background:var(--c-sidebar-active); color:#fff; font-weight:600; }
+    .nav-item .nav-icon { width:20px; text-align:center; font-size:14px; }
+    .nav-badge { margin-left:auto; background:var(--c-danger); color:#fff; font-size:11px; font-weight:700; padding:2px 8px; border-radius:var(--r-pill); min-width:22px; text-align:center; }
+    .sidebar-footer { margin-top:auto; padding:var(--s-3) var(--s-4); border-top:1px solid rgba(255,255,255,0.08); }
+    .user-info { display:flex; align-items:center; gap:var(--s-3); }
+    .user-avatar { width:36px; height:36px; border-radius:var(--r-pill); background:var(--c-brand-tint); color:var(--c-brand-ink); display:flex; align-items:center; justify-content:center; font-weight:700; font-size:var(--fs-sm); flex-shrink:0; }
+    .user-name { color:#fff; font-size:var(--fs-sm); font-weight:600; }
+    .user-role { color:rgba(255,255,255,0.6); font-size:11px; }
+
+    /* ── Main layout ────────────────────────────────────────────────── */
+    .main { margin-left:240px; flex:1; display:flex; flex-direction:column; min-height:100vh; }
+    .topbar { background:var(--c-surface); border-bottom:1px solid var(--c-border); padding:var(--s-3) var(--s-5); min-height:64px; display:flex; align-items:center; gap:var(--s-4); position:sticky; top:0; z-index:50; }
+    .topbar h1 { font-size:var(--fs-xl); font-weight:700; color:var(--c-ink); }
+    .topbar p { font-size:var(--fs-xs); color:var(--c-ink-muted); margin-top:1px; }
+    .topbar-right { margin-left:auto; display:flex; align-items:center; gap:var(--s-2); }
+    .term-badge { display:flex; align-items:center; gap:var(--s-2); padding:6px var(--s-3); border:1px solid var(--c-border-strong); border-radius:var(--r-md); background:var(--c-surface); font-size:var(--fs-xs); font-weight:600; color:var(--c-ink-muted); min-height:36px; }
+    .term-badge i { color:var(--c-ink-subtle); font-size:12px; }
+    .icon-btn { width:36px; height:36px; border-radius:var(--r-md); border:1px solid transparent; background:transparent; color:var(--c-ink-muted); display:inline-flex; align-items:center; justify-content:center; cursor:pointer; font-size:var(--fs-md); position:relative; }
+    .icon-btn:hover { background:var(--c-surface-alt); color:var(--c-ink); }
+    .notif-dot { position:absolute; top:6px; right:6px; width:8px; height:8px; border-radius:50%; background:var(--c-danger); border:2px solid var(--c-surface); }
+
+    .content { padding:var(--s-5); flex:1; display:flex; flex-direction:column; gap:var(--s-4); }
+    .page-header { display:flex; align-items:flex-end; justify-content:space-between; gap:var(--s-4); }
+    .page-header h2 { font-size:var(--fs-2xl); font-weight:700; letter-spacing:-.01em; }
+    .page-header p { color:var(--c-ink-muted); font-size:var(--fs-md); margin-top:4px; }
+
+    /* ── Section tabs (My Classes | My Students) ────────────────────── */
+    .section-tabs-bar { display:flex; gap:0; border-bottom:2px solid var(--c-border); }
+    .section-tab-btn { padding:10px var(--s-4); font-size:var(--fs-sm); font-weight:600; color:var(--c-ink-muted); background:transparent; border:none; border-bottom:2px solid transparent; margin-bottom:-2px; cursor:pointer; display:inline-flex; align-items:center; gap:var(--s-2); font-family:inherit; transition:color .15s, border-color .15s; }
+    .section-tab-btn:hover { color:var(--c-ink); }
+    .section-tab-btn.active { color:var(--c-brand); border-bottom-color:var(--c-brand); }
+    .section-tab-btn i { font-size:13px; }
+
+    /* Section panels */
+    .section-panel { display:none; }
+    .section-panel.active { display:block; }
+
+    /* ── Schedule view tab strip (Today / This week) ─────────────────── */
+    .tab-strip { display:flex; align-items:center; gap:var(--s-2); }
+    .tab-pill { padding:6px var(--s-3); border:1px solid var(--c-border); border-radius:var(--r-pill); font-size:var(--fs-xs); font-weight:600; color:var(--c-ink-muted); background:var(--c-surface); cursor:pointer; min-height:30px; font-family:inherit; }
+    .tab-pill:hover { color:var(--c-brand); border-color:var(--c-brand); }
+    .tab-pill[aria-pressed="true"] { background:var(--c-brand-ink); color:#fff; border-color:var(--c-brand-ink); }
+
+    /* ── Card ───────────────────────────────────────────────────────── */
+    .card { background:var(--c-surface); border:1px solid var(--c-border); border-radius:var(--r-lg); overflow:hidden; }
+    .card__h { padding:var(--s-4); border-bottom:1px solid var(--c-border-2); display:flex; align-items:center; justify-content:space-between; gap:var(--s-3); }
+    .card__title { font-size:var(--fs-lg); font-weight:700; color:var(--c-ink); display:flex; align-items:center; gap:var(--s-2); }
+    .card__title-count { background:var(--c-neutral-tint); color:var(--c-ink-muted); padding:2px 10px; border-radius:var(--r-pill); font-size:var(--fs-xs); font-weight:700; }
+    .card__sub { font-size:var(--fs-xs); color:var(--c-ink-subtle); }
+
+    /* ── Period groups + class rows ─────────────────────────────────── */
+    .period-group { border-bottom:1px solid var(--c-border-2); }
+    .period-group:last-child { border-bottom:0; }
+    .period-header { display:flex; align-items:center; gap:var(--s-3); padding:var(--s-3) var(--s-4); background:var(--c-surface-2); }
+    .period-num { font-size:11px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--c-ink-muted); }
+    .period-time { font-size:var(--fs-xs); color:var(--c-ink-subtle); }
+    .class-row { display:grid; grid-template-columns:24px 1fr auto auto; gap:var(--s-3); align-items:center; padding:var(--s-3) var(--s-4); cursor:pointer; transition:background .12s; }
+    .class-row + .class-row { border-top:1px solid var(--c-border-2); }
+    .class-row:hover { background:var(--c-surface-2); }
+    .cr-dot { width:12px; height:12px; border-radius:50%; }
+    .cr-dot.done     { background:var(--c-success); }
+    .cr-dot.active   { background:var(--c-brand); box-shadow:0 0 0 3px rgba(46,125,209,0.2); }
+    .cr-dot.upcoming { background:var(--c-surface); border:2px solid var(--c-border-strong); }
+    .cr-name { font-size:var(--fs-sm); font-weight:600; color:var(--c-ink); }
+    .cr-meta { font-size:var(--fs-xs); color:var(--c-ink-subtle); margin-top:2px; display:flex; align-items:center; gap:var(--s-2); }
+    .cr-meta i { color:var(--c-ink-subtle); font-size:10px; }
+    .status { display:inline-flex; align-items:center; gap:4px; padding:2px 10px; border-radius:var(--r-pill); font-size:11px; font-weight:700; letter-spacing:.02em; border:1px solid transparent; white-space:nowrap; }
+    .status i { font-size:9px; }
+    .status--done     { background:var(--c-success-tint); color:var(--c-success); border-color:#4F9A6C; }
+    .status--active   { background:var(--c-brand-tint);    color:var(--c-brand-ink); border-color:#6E94BF; }
+    .status--upcoming { background:var(--c-neutral-tint);  color:var(--c-ink-muted); border-color:var(--c-border-strong); }
+    .status--missed   { background:var(--c-warning-tint);  color:var(--c-warning); border-color:var(--c-warning-bord); }
+    .cr-chevron { color:var(--c-border-strong); font-size:12px; }
+
+    /* ── Master-detail panel ────────────────────────────────────────── */
+    .panel-area { display:grid; grid-template-columns:1fr; gap:var(--s-4); align-items:start; }
+    .panel-area.has-drawer { grid-template-columns:1fr minmax(540px, 620px); }
+    @media (max-width: 1200px) { .panel-area.has-drawer { grid-template-columns:1fr minmax(460px, 520px); } }
+    @media (max-width: 1100px) { .panel-area.has-drawer { grid-template-columns:1fr; } }
+
+    /* ── Inline drawer (class detail) ───────────────────────────────── */
+    .drawer { background:var(--c-surface); border:1px solid var(--c-border); border-radius:var(--r-lg); box-shadow:var(--shadow-md); display:flex; flex-direction:column; min-height:0; overflow:hidden; height:calc(100vh - 112px); max-height:calc(100vh - 112px); position:sticky; top:88px; }
+    .drawer[hidden] { display:none; }
+    .drawer__h { padding:var(--s-4); border-bottom:1px solid var(--c-border-2); display:flex; align-items:center; justify-content:space-between; gap:var(--s-3); background:var(--c-surface-2); }
+    .drawer__title { font-size:var(--fs-lg); font-weight:700; color:var(--c-ink); }
+    .drawer__close { background:transparent; border:none; color:var(--c-ink-muted); font-size:var(--fs-md); cursor:pointer; padding:6px 10px; border-radius:var(--r-md); }
+    .drawer__close:hover { background:var(--c-surface-alt); color:var(--c-ink); }
+    .drawer__b { padding:var(--s-4); flex:1; overflow-y:auto; min-height:0; }
+    .drawer__actions { padding:var(--s-3) var(--s-4); border-top:1px solid var(--c-border-2); background:var(--c-surface-2); display:flex; gap:var(--s-2); flex-wrap:wrap; }
+    .class-row.is-selected { background:var(--c-brand-tint); box-shadow:inset 3px 0 0 var(--c-brand); }
+
+    .drawer-hero { display:flex; gap:var(--s-3); align-items:center; padding-bottom:var(--s-4); border-bottom:1px solid var(--c-border-2); margin-bottom:var(--s-4); }
+    .dh-icon { width:44px; height:44px; border-radius:var(--r-lg); background:var(--c-brand-tint); color:var(--c-brand-ink); display:flex; align-items:center; justify-content:center; font-size:18px; flex-shrink:0; }
+    .dh-class { font-size:var(--fs-lg); font-weight:700; color:var(--c-ink); }
+    .dh-meta { font-size:var(--fs-xs); color:var(--c-ink-muted); margin-top:3px; display:flex; flex-wrap:wrap; gap:var(--s-3); }
+    .dh-meta span { display:inline-flex; align-items:center; gap:5px; }
+    .dh-meta i { color:var(--c-ink-subtle); font-size:10px; }
+    .drawer-section { margin-bottom:var(--s-4); }
+    .drawer-section h3 { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--c-ink-muted); margin-bottom:var(--s-2); display:flex; align-items:center; gap:6px; }
+    .drawer-section h3 i { color:var(--c-ink-subtle); }
+
+    /* Roster inside class drawer */
+    .roster-search { display:flex; gap:var(--s-2); align-items:center; margin-bottom:var(--s-2); }
+    .roster-search .search-input { flex:1; display:flex; align-items:center; gap:var(--s-2); background:var(--c-surface-2); border:1px solid var(--c-border); border-radius:var(--r-md); padding:6px var(--s-3); }
+    .roster-search input { border:none; outline:none; font-size:var(--fs-xs); background:transparent; width:100%; font-family:inherit; }
+    .roster-search i { color:var(--c-ink-subtle); font-size:12px; }
+    table.tbl { width:100%; border-collapse:collapse; font-size:var(--fs-sm); }
+    table.tbl thead th { padding:var(--s-2) var(--s-3); text-align:left; background:var(--c-surface-2); border-bottom:1px solid var(--c-border-2); font-size:11px; font-weight:700; color:var(--c-ink-muted); text-transform:uppercase; letter-spacing:.06em; }
+    table.tbl tbody td { padding:var(--s-3); border-bottom:1px solid var(--c-border-2); vertical-align:middle; }
+    table.tbl tbody tr:last-child td { border-bottom:0; }
+    table.tbl tbody tr { cursor:pointer; }
+    table.tbl tbody tr:hover { background:var(--c-surface-2); }
+
+    /* ── Student list ───────────────────────────────────────────────── */
+    .filter-bar { display:flex; align-items:center; gap:var(--s-2); flex-wrap:wrap; margin-bottom:var(--s-3); }
+    .filter-chip { display:inline-flex; align-items:center; gap:6px; padding:7px var(--s-3); border:1.5px solid var(--c-border); border-radius:var(--r-pill); font-size:var(--fs-xs); font-weight:600; color:var(--c-ink-muted); background:var(--c-surface); cursor:pointer; font-family:inherit; transition:all .15s; white-space:nowrap; }
+    .filter-chip:hover { border-color:var(--c-brand); color:var(--c-brand); background:var(--c-brand-tint); }
+    .filter-chip.active { background:var(--c-brand-ink); color:#fff; border-color:var(--c-brand-ink); }
+    .chip-count { padding:1px 7px; border-radius:var(--r-pill); font-size:10px; font-weight:700; background:var(--c-neutral-tint); color:var(--c-ink-subtle); }
+    .filter-chip.active .chip-count { background:rgba(255,255,255,0.22); color:#fff; }
+
+    .student-row { display:grid; grid-template-columns:1fr auto auto auto; gap:var(--s-3); align-items:center; padding:var(--s-3) var(--s-4); cursor:pointer; transition:background .12s; }
+    .student-row + .student-row { border-top:1px solid var(--c-border-2); }
+    .student-row:hover { background:var(--c-surface-2); }
+    .student-row.is-selected { background:var(--c-brand-tint); box-shadow:inset 3px 0 0 var(--c-brand); }
+
+    .stu-cell { display:flex; align-items:center; gap:var(--s-2); }
+    .stu-avatar { width:32px; height:32px; border-radius:var(--r-pill); display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; color:#fff; flex-shrink:0; }
+    .stu-name { font-weight:600; color:var(--c-ink); font-size:var(--fs-sm); }
+    .stu-id { font-size:11px; color:var(--c-ink-subtle); }
+    .stu-class-tag { font-size:11px; color:var(--c-brand-ink); background:var(--c-brand-tint); padding:2px 8px; border-radius:var(--r-pill); font-weight:600; white-space:nowrap; }
+
+    .att-bar-wrap { display:inline-block; width:60px; height:8px; background:var(--c-surface-alt); border-radius:var(--r-pill); overflow:hidden; border:1px solid var(--c-border-2); vertical-align:middle; }
+    .att-bar-fill { height:100%; }
+
+    /* ── Student detail drawer ──────────────────────────────────────── */
+    /* Reuses .drawer base styles; extra bits below */
+    .stu-drawer-hero { display:flex; gap:var(--s-3); align-items:center; padding:var(--s-4); background:var(--c-surface-2); border-bottom:1px solid var(--c-border-2); flex-shrink:0; }
+    .stu-drawer-avatar { width:46px; height:46px; border-radius:var(--r-pill); display:flex; align-items:center; justify-content:center; font-size:16px; font-weight:700; color:#fff; flex-shrink:0; }
+    .stu-drawer-name { font-size:var(--fs-lg); font-weight:700; color:var(--c-ink); line-height:1.2; }
+    .stu-drawer-sub { font-size:var(--fs-xs); color:var(--c-ink-muted); margin-top:3px; }
+    .stu-quick-stats { display:flex; gap:var(--s-4); margin-left:auto; flex-shrink:0; }
+    .stu-stat { text-align:center; }
+    .stu-stat-val { font-size:var(--fs-xl); font-weight:700; line-height:1; }
+    .stu-stat-lbl { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.05em; color:var(--c-ink-subtle); margin-top:3px; }
+
+    /* Drawer tab strip */
+    .drawer-tabs { display:flex; gap:0; border-bottom:1px solid var(--c-border-2); background:var(--c-surface); padding:0 var(--s-3); flex-shrink:0; overflow-x:auto; }
+    .drawer-tab-btn { padding:10px var(--s-3); font-size:var(--fs-xs); font-weight:600; color:var(--c-ink-muted); background:transparent; border:none; border-bottom:2px solid transparent; margin-bottom:-1px; cursor:pointer; white-space:nowrap; font-family:inherit; transition:color .15s, border-color .15s; display:inline-flex; align-items:center; gap:5px; }
+    .drawer-tab-btn:hover { color:var(--c-ink); }
+    .drawer-tab-btn.active { color:var(--c-brand); border-bottom-color:var(--c-brand); }
+    .drawer-tab-btn i { font-size:11px; }
+
+    /* Drawer tab panels */
+    .drawer-tab-panel { display:none; padding:var(--s-4); }
+    .drawer-tab-panel.active { display:block; }
+
+    /* Inside drawer panels */
+    .dp-section { margin-bottom:var(--s-4); }
+    .dp-section:last-child { margin-bottom:0; }
+    .dp-section-title { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--c-ink-muted); margin-bottom:var(--s-2); display:flex; align-items:center; gap:6px; }
+
+    /* Records inside student drawer */
+    .dp-record { display:flex; gap:var(--s-3); align-items:flex-start; padding:var(--s-3) 0; border-bottom:1px solid var(--c-border-2); }
+    .dp-record:last-child { border-bottom:none; }
+    .dp-rec-icon { width:32px; height:32px; border-radius:var(--r-lg); display:flex; align-items:center; justify-content:center; font-size:12px; flex-shrink:0; }
+    .dp-rec-title { font-size:var(--fs-sm); font-weight:600; color:var(--c-ink); }
+    .dp-rec-desc { font-size:11px; color:var(--c-ink-subtle); margin-top:2px; line-height:1.45; }
+    .dp-rec-badge { display:inline-flex; align-items:center; padding:2px 8px; border-radius:var(--r-pill); font-size:10px; font-weight:700; margin-top:5px; }
+    .badge-pending  { background:var(--c-warning-tint); color:var(--c-warning); }
+    .badge-resolved { background:var(--c-success-tint); color:var(--c-success); }
+
+    /* Attendance inside student drawer */
+    .dp-att-row { display:flex; align-items:center; gap:var(--s-3); padding:var(--s-2) 0; border-bottom:1px solid var(--c-border-2); font-size:var(--fs-xs); }
+    .dp-att-row:last-child { border-bottom:none; }
+    .dp-att-date { color:var(--c-ink-subtle); min-width:90px; }
+    .dp-att-period { color:var(--c-ink-muted); flex:1; }
+    .status-badge { display:inline-flex; align-items:center; gap:4px; padding:2px 8px; border-radius:var(--r-pill); font-size:11px; font-weight:700; }
+    .status-dot { width:6px; height:6px; border-radius:50%; }
+    .badge-present  { background:var(--c-success-tint); color:var(--c-success); border:1px solid #4F9A6C; }   .badge-present .status-dot  { background:var(--c-success); }
+    .badge-absent   { background:var(--c-danger-tint);  color:var(--c-danger);  border:1px solid #B0625A; }   .badge-absent .status-dot   { background:var(--c-danger); }
+    .badge-late     { background:var(--c-warning-tint); color:var(--c-warning); border:1px solid var(--c-warning-bord); } .badge-late .status-dot { background:var(--c-warning); }
+    .badge-late-just { background:var(--c-success-tint); color:var(--c-success); border:1px solid #4F9A6C; } .badge-late-just .status-dot { background:var(--c-success); }
+    .badge-await    { background:#FCF1DD; color:#9A4708; border:1px solid #B97F38; } .badge-await .status-dot { background:#D97706; }
+
+    /* Period & Subject chips */
+    .period-chip  { display:inline-flex; align-items:center; padding:3px 9px; border-radius:99px; font-size:11.5px; font-weight:600; background:#F8FAFC; color:#475467; border:1px solid #E2E8F0; white-space:nowrap; }
+    .subject-chip { display:inline-flex; align-items:center; padding:3px 9px; border-radius:99px; font-size:11.5px; font-weight:600; background:#F0FDFA; color:#0F766E; border:1px solid #99F6E4; white-space:nowrap; }
+    .att-chips    { display:flex; gap:4px; align-items:center; flex-wrap:wrap; flex:1; }
+
+    /* Per-subject summary card */
+    .subj-summary { background:var(--c-surface-2); border:1px solid var(--c-border-2); border-radius:var(--r-md); overflow:hidden; margin-bottom:var(--s-4); }
+    .subj-summary-hd { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--c-ink-muted); padding:6px var(--s-3); background:var(--c-surface-alt); border-bottom:1px solid var(--c-border-2); display:flex; align-items:center; gap:5px; }
+    .subj-summary table { width:100%; border-collapse:collapse; }
+    .subj-summary th { padding:5px var(--s-3); text-align:left; color:var(--c-ink-subtle); font-weight:700; font-size:10px; text-transform:uppercase; letter-spacing:.05em; border-bottom:1px solid var(--c-border-2); }
+    .subj-summary td { padding:var(--s-2) var(--s-3); border-bottom:1px solid var(--c-border-2); font-size:12px; color:var(--c-ink); vertical-align:middle; }
+    .subj-summary tr:last-child td { border-bottom:none; }
+    .thresh-badge { display:inline-flex; align-items:center; gap:4px; padding:2px 8px; border-radius:var(--r-pill); font-size:10px; font-weight:700; white-space:nowrap; }
+    .thresh-within     { background:var(--c-success-tint); color:var(--c-success); border:1px solid #4F9A6C; }
+    .thresh-approaching { background:var(--c-warning-tint); color:var(--c-warning); border:1px solid var(--c-warning-bord); }
+    .thresh-exceeded   { background:var(--c-danger-tint);  color:var(--c-danger);  border:1px solid #B0625A; }
+
+    /* Attendance grid (flat list with columns) */
+    .att-grid-hd  { display:grid; grid-template-columns:82px auto auto auto 1fr; gap:6px; padding:5px 14px; background:var(--c-surface-2); border-bottom:1px solid var(--c-border-2); }
+    .att-grid-hd span { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--c-ink-subtle); }
+    .att-grid-row { display:grid; grid-template-columns:82px auto auto auto 1fr; gap:6px; align-items:center; padding:7px 14px; border-bottom:1px solid var(--c-border-2); font-size:var(--fs-xs); }
+    .att-grid-row:last-child { border-bottom:none; }
+    .badge-just   { display:inline-flex; align-items:center; gap:4px; padding:2px 7px; border-radius:var(--r-pill); font-size:10px; font-weight:700; white-space:nowrap; }
+    .badge-just-y { background:var(--c-success-tint); color:var(--c-success); border:1px solid #4F9A6C; }
+    .badge-just-n { background:var(--c-danger-tint);  color:var(--c-danger);  border:1px solid #B0625A; }
+
+    /* Per-subject summary band (flex rows, not a table) */
+    .att-summary { border-bottom:1px solid var(--c-border-2); }
+    .att-summary-hd { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--c-ink-subtle); padding:8px 14px 4px; display:flex; align-items:center; gap:5px; }
+    .att-sum-row { display:flex; align-items:center; gap:8px; padding:6px 14px; border-top:1px solid var(--c-border-2); }
+    .att-sum-stats { font-size:12px; color:var(--c-ink-muted); flex:1; }
+
+    /* Notes inside student drawer */
+    .dp-note { padding:var(--s-3) 0; border-bottom:1px solid var(--c-border-2); }
+    .dp-note:last-child { border-bottom:none; }
+    .dp-note-meta { font-size:11px; color:var(--c-ink-subtle); margin-bottom:4px; }
+    .dp-note-body { font-size:var(--fs-sm); color:var(--c-ink); line-height:1.55; }
+
+    /* Guardian info */
+    .guardian-header { display:flex; align-items:center; gap:var(--s-3); padding:var(--s-3); background:var(--c-brand-tint); border:1px solid #BFDBFE; border-radius:var(--r-lg); margin-bottom:var(--s-4); }
+    .guardian-header-avatar { width:40px; height:40px; border-radius:var(--r-pill); background:var(--c-brand); color:#fff; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:var(--fs-sm); flex-shrink:0; }
+    .guardian-header-name { font-size:var(--fs-md); font-weight:700; color:var(--c-ink); }
+    .guardian-header-rel { font-size:var(--fs-xs); color:var(--c-brand-ink); font-weight:600; margin-top:1px; }
+
+    .guardian-field { display:flex; align-items:flex-start; gap:var(--s-3); padding:var(--s-3) 0; border-bottom:1px solid var(--c-border-2); }
+    .guardian-field:last-child { border-bottom:none; }
+    .gf-icon { width:28px; height:28px; border-radius:var(--r-md); background:var(--c-neutral-tint); color:var(--c-ink-subtle); display:flex; align-items:center; justify-content:center; font-size:11px; flex-shrink:0; margin-top:1px; }
+    .gf-label { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.07em; color:var(--c-ink-subtle); margin-bottom:2px; }
+    .gf-value { font-size:var(--fs-sm); color:var(--c-ink); font-weight:500; }
+    .gf-link { font-size:var(--fs-sm); color:var(--c-brand); font-weight:500; text-decoration:none; }
+    .gf-link:hover { text-decoration:underline; }
+
+    .guardian-emergency { margin-top:var(--s-4); }
+    .emergency-banner { display:flex; align-items:flex-start; gap:var(--s-2); background:var(--c-danger-tint); border:1px solid #F5B9B4; border-radius:var(--r-md); padding:var(--s-3); }
+    .emergency-banner i { color:var(--c-danger); font-size:12px; margin-top:1px; flex-shrink:0; }
+    .emergency-label { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.07em; color:var(--c-danger); margin-bottom:3px; }
+    .emergency-value { font-size:var(--fs-sm); color:var(--c-ink); font-weight:500; }
+    .emergency-phone { font-size:var(--fs-xs); color:var(--c-ink-muted); margin-top:2px; }
+
+    /* ── Buttons ────────────────────────────────────────────────────── */
+    .btn { display:inline-flex; align-items:center; justify-content:center; gap:6px; padding:8px 14px; border-radius:var(--r-md); font-size:var(--fs-sm); font-weight:600; border:1px solid transparent; min-height:36px; text-decoration:none; font-family:inherit; cursor:pointer; }
+    .btn--primary { background:var(--c-brand); color:#fff; border-color:var(--c-brand); }
+    .btn--primary:hover { background:var(--c-brand-ink); border-color:var(--c-brand-ink); }
+    .btn--secondary { background:var(--c-surface); color:var(--c-ink); border-color:var(--c-border-strong); }
+    .btn--secondary:hover { background:var(--c-surface-alt); }
+    .btn--ghost { background:transparent; color:var(--c-ink-muted); border-color:transparent; }
+    .btn--ghost:hover { background:var(--c-surface-alt); color:var(--c-ink); }
+
+    /* ── Toast ──────────────────────────────────────────────────────── */
+    .toast { position:fixed; bottom:24px; right:24px; background:var(--c-surface); border:1px solid var(--c-border); border-left:4px solid var(--c-success); box-shadow:var(--shadow-lg); padding:var(--s-3) var(--s-4); border-radius:var(--r-md); font-size:var(--fs-sm); opacity:0; transform:translateY(20px); transition:all .25s; pointer-events:none; z-index:999; }
+    .toast.show { opacity:1; transform:translateY(0); }
+
+    /* ── Simplified attendance rows (v2) ── */
+    .att-row2-hd { display:grid; grid-template-columns:82px 72px 90px 1fr; gap:8px; padding:6px 14px; background:var(--c-surface-2); border-bottom:1px solid var(--c-border-2); }
+    .att-row2-hd span { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--c-ink-subtle); }
+    .att-row2 { display:grid; grid-template-columns:82px 72px 90px 1fr; gap:8px; align-items:center; padding:8px 14px; border-bottom:1px solid var(--c-border-2); }
+    .att-row2:last-child { border-bottom:none; }
+    .att-row2__date { font-size:11px; color:var(--c-ink-subtle); font-variant-numeric:tabular-nums; line-height:1.4; }
+    .att-row2__subj { font-size:11px; font-weight:600; color:var(--c-brand-ink); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .att-row2__status { display:inline-flex; align-items:center; gap:5px; white-space:nowrap; }
+    .att-row2__status-dot { width:6px; height:6px; border-radius:50%; flex-shrink:0; }
+
+    /* ── Attendance threshold warning banner ── */
+    .att-thresh-banner { background:var(--c-warning-tint); border:1px solid var(--c-warning-bord); border-radius:var(--r-md); margin:var(--s-3) var(--s-3) 0; }
+    .att-thresh-banner__h { display:flex; align-items:center; justify-content:space-between; gap:var(--s-2); padding:9px var(--s-3); }
+    .att-thresh-banner__text { font-size:var(--fs-xs); font-weight:600; color:var(--c-warning); display:flex; align-items:center; gap:6px; flex:1; min-width:0; }
+    .att-thresh-banner__btn { font-size:var(--fs-xs); color:var(--c-warning); font-weight:700; background:none; border:1px solid var(--c-warning-bord); border-radius:var(--r-sm); padding:3px 8px; cursor:pointer; white-space:nowrap; font-family:inherit; }
+    .att-thresh-banner__btn:hover { background:rgba(154,71,8,0.08); }
+
+    /* ── Grade-impact modal (matches clerk portal) ── */
+    .gm-overlay { display:none; position:absolute; inset:0; background:rgba(15,37,70,0.50); align-items:flex-start; justify-content:center; padding:var(--s-4); z-index:30; }
+    .gm-overlay.is-on { display:flex; }
+    .gm { background:var(--c-surface); border:1px solid var(--c-border); border-radius:var(--r-lg); width:100%; overflow:hidden; box-shadow:var(--shadow-lg); max-height:100%; overflow-y:auto; }
+    .gm__hdr { display:flex; align-items:center; justify-content:space-between; padding:var(--s-3) var(--s-4); border-bottom:1px solid var(--c-border-2); background:var(--c-surface-2); position:sticky; top:0; z-index:1; }
+    .gm__title { font-size:var(--fs-sm); font-weight:700; color:var(--c-ink); }
+    .gm__close { background:none; border:none; color:var(--c-ink-muted); cursor:pointer; padding:4px 6px; border-radius:var(--r-sm); font-size:16px; font-family:inherit; }
+    .gm__close:hover { background:var(--c-surface-alt); }
+    .gm__body { padding:var(--s-3) var(--s-4); display:flex; flex-direction:column; gap:var(--s-3); }
+    .gm__subj { display:flex; flex-direction:column; gap:6px; padding:var(--s-3); border-radius:var(--r-md); border:1px solid var(--c-border-2); background:var(--c-surface-2); }
+    .gm__subj--warn { border-color:var(--c-warning-bord); background:var(--c-warning-tint); }
+    .gm__subj--danger { border-color:#B0625A; background:var(--c-danger-tint); }
+    .gm__subj-hdr { display:flex; align-items:center; justify-content:space-between; gap:var(--s-2); }
+    .gm__subj-name { font-size:var(--fs-xs); font-weight:700; color:var(--c-ink); }
+    .gm__chip { display:inline-flex; align-items:center; gap:4px; padding:1px 8px; border-radius:var(--r-pill); font-size:10px; font-weight:700; }
+    .gm__chip--warn { background:var(--c-warning-tint); color:var(--c-warning); border:1px solid var(--c-warning-bord); }
+    .gm__chip--ok { background:var(--c-success-tint); color:var(--c-success); border:1px solid #4F9A6C; }
+    .gm__chip--danger { background:var(--c-danger-tint); color:var(--c-danger); border:1px solid #B0625A; }
+    .gm__counts { font-size:11px; color:var(--c-ink-muted); }
+    .gm__bar-row { display:flex; align-items:center; gap:var(--s-2); }
+    .gm__bar { flex:1; height:6px; background:var(--c-neutral-tint); border-radius:var(--r-pill); overflow:hidden; }
+    .gm__bar-fill { height:100%; border-radius:var(--r-pill); }
+    .gm__bar-fill--ok { background:var(--c-success); }
+    .gm__bar-fill--warn { background:var(--c-warning-bord); }
+    .gm__bar-fill--danger { background:var(--c-danger); }
+    .gm__bar-pct { font-size:10px; font-weight:700; color:var(--c-ink-muted); min-width:28px; text-align:right; }
+    .gm__note { font-size:11px; color:var(--c-ink-subtle); padding:var(--s-2) var(--s-3); background:var(--c-surface-alt); border-radius:var(--r-sm); }
+
+    /* ── Mobile: student drawer as full-screen modal ─────────────────── */
+    @media (max-width:768px) {
+      #studentDrawer:not([hidden]) {
+        position:fixed; inset:0; top:auto; border-radius:var(--r-xl) var(--r-xl) 0 0;
+        max-height:92dvh; z-index:300; box-shadow:var(--shadow-lg);
+      }
+      #studentPanelArea.has-drawer { grid-template-columns:1fr; }
+    }
+    @media (max-width:600px) {
+      .main { margin-left:0; }
+      .sidebar { display:none; }
+    }
+  </style>
+</head>
+<body>
+
+<aside class="sidebar" aria-label="Primary navigation">
+  <div class="sidebar-logo">
+    <div class="logo-mark">
+      <div class="logo-icon">CT</div>
+      <div><div class="logo-text">ClassTrack</div><div class="logo-sub" data-en="Teacher Portal" data-fr="Portail enseignant">Teacher Portal</div></div>
+    </div>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="sidebar-section">
+      <div class="sidebar-section-label" data-en="Overview" data-fr="Vue d'ensemble">Overview</div>
+      <a class="nav-item" href="teacher-dashboard.html"><span class="nav-icon"><i class="fa-solid fa-gauge-high"></i></span> <span data-en="Dashboard" data-fr="Tableau de bord">Dashboard</span></a>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-section-label" data-en="Teaching" data-fr="Enseignement">Teaching</div>
+      <a class="nav-item" href="teacher-attendance.html"><span class="nav-icon"><i class="fa-solid fa-clipboard-check"></i></span> <span data-en="Mark Attendance" data-fr="Saisir les présences">Mark Attendance</span><span class="nav-badge">1</span></a>
+      <a class="nav-item active" href="teacher-schedule-axon file.html"><span class="nav-icon"><i class="fa-solid fa-calendar-week"></i></span> <span data-en="My Classes" data-fr="Mes classes">My Classes</span></a>
+      <a class="nav-item" href="teacher-history.html"><span class="nav-icon"><i class="fa-solid fa-calendar-days"></i></span> <span data-en="Attendance History" data-fr="Historique des présences">Attendance History</span></a>
+      <a class="nav-item" href="teacher-disputes.html"><span class="nav-icon"><i class="fa-solid fa-scale-balanced"></i></span> <span data-en="Disputes" data-fr="Contestations">Disputes</span><span class="nav-badge" style="background:#4F46E5">2</span></a>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-section-label" data-en="System" data-fr="Système">System</div>
+      <a class="nav-item" onclick="showToast(T('settings_soon'))"><span class="nav-icon"><i class="fa-solid fa-gear"></i></span> <span data-en="Settings" data-fr="Paramètres">Settings</span></a>
+    </div>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="user-info">
+      <div class="user-avatar">ST</div>
+      <div><div class="user-name" data-en="Ms. S. Tremblay" data-fr="Mme S. Tremblay">Ms. S. Tremblay</div><div class="user-role" data-en="Science Dept · Grade 7A" data-fr="Dépt. Sciences · 7e A">Science Dept · Grade 7A</div></div>
+    </div>
+  </div>
+</aside>
+
+<div class="main">
+  <div class="topbar">
+    <div>
+      <h1 data-en="My Classes" data-fr="Mes classes">My Classes</h1>
+      <p data-en="Monday, March 23, 2026" data-fr="lundi 23 mars 2026">Monday, March 23, 2026</p>
+    </div>
+    <div class="topbar-right">
+      <div class="term-badge"><i class="fa-solid fa-calendar-alt"></i> <span data-en="Term 2 — 2025/26" data-fr="Étape 2 — 2025/26">Term 2 — 2025/26</span> <i class="fa-solid fa-chevron-down"></i></div>
+      <div class="icon-btn" title="Notifications"><i class="fa-solid fa-bell"></i><span class="notif-dot"></span></div>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- Page header -->
+    <div class="page-header">
+      <div>
+        <h2 data-en="My Classes" data-fr="Mes classes">My Classes</h2>
+        <p data-en="Your assigned classes and students." data-fr="Vos classes assignées et vos élèves.">Your assigned classes and students.</p>
+      </div>
+      <div class="tab-strip" role="tablist" id="scheduleTabStrip">
+        <button class="tab-pill" role="tab" aria-pressed="true"  onclick="setView('today',this)" data-en="Today" data-fr="Aujourd'hui">Today</button>
+        <button class="tab-pill" role="tab" aria-pressed="false" onclick="setView('week',this)"  data-en="This week" data-fr="Cette semaine">This week</button>
+      </div>
+    </div>
+
+    <!-- Section tabs -->
+    <div class="section-tabs-bar" role="tablist">
+      <button class="section-tab-btn active" role="tab" onclick="switchSection('classes', this)" data-en="My Classes" data-fr="Mes classes"><i class="fa-solid fa-calendar-week"></i> My Classes</button>
+      <button class="section-tab-btn" role="tab" onclick="switchSection('students', this)" data-en="My Students" data-fr="Mes élèves"><i class="fa-solid fa-users"></i> My Students</button>
+    </div>
+
+    <!-- ── SECTION: My Classes (schedule) ──────────────────────────── -->
+    <div class="section-panel active" id="sec-classes">
+      <div class="panel-area" id="panelArea">
+        <div class="card">
+          <div class="card__h">
+            <div class="card__title"><span data-en="My Classes" data-fr="Mes classes">My Classes</span> <span class="card__title-count" id="classCount">4</span></div>
+            <span class="card__sub" data-en="Click a class to view its roster" data-fr="Cliquez sur une classe pour voir sa liste">Click a class to view its roster</span>
+          </div>
+          <div id="periodList"></div>
+        </div>
+
+        <!-- Class detail inline drawer -->
+        <aside class="drawer" id="classDrawer" role="region" aria-labelledby="drawerTitle" hidden>
+          <div class="drawer__h">
+            <div id="drawerTitle" class="drawer__title">Class detail</div>
+            <button class="drawer__close" onclick="closeDrawer()" aria-label="Close"><i class="fa-solid fa-xmark"></i></button>
+          </div>
+          <div class="drawer__b" id="drawerBody"></div>
+          <div class="drawer__actions" id="drawerActions"></div>
+        </aside>
+      </div>
+    </div>
+
+    <!-- ── SECTION: My Students ────────────────────────────────────── -->
+    <div class="section-panel" id="sec-students">
+
+      <!-- Class filter chips -->
+      <div class="filter-bar" id="filterBar" role="group" aria-label="Filter by class"></div>
+
+      <!-- Student list + student detail drawer -->
+      <div class="panel-area" id="studentPanelArea">
+
+        <!-- Student list card -->
+        <div class="card">
+          <div class="card__h">
+            <div class="card__title"><span data-en="All Students" data-fr="Tous les élèves">All Students</span> <span class="card__title-count" id="studentCount">—</span></div>
+            <span class="card__sub" data-en="Click a student to view their profile" data-fr="Cliquez sur un élève pour voir son profil">Click a student to view their profile</span>
+          </div>
+          <div id="studentListBody"></div>
+        </div>
+
+        <!-- Student detail drawer -->
+        <aside class="drawer" id="studentDrawer" role="region" aria-label="Student profile" hidden>
+          <!-- Hero -->
+          <div class="stu-drawer-hero" id="studentDrawerHero"></div>
+          <!-- Tabs -->
+          <div class="drawer-tabs" id="studentDrawerTabs" role="tablist"></div>
+          <!-- Scrollable tab content -->
+          <div style="flex:1;overflow-y:auto;min-height:0;position:relative" id="studentDrawerPanels"></div>
+          <!-- Footer actions -->
+          <div class="drawer__actions" id="studentDrawerActions"></div>
+        </aside>
+      </div>
+    </div>
+
+  </div><!-- .content -->
+</div><!-- .main -->
+
+<div class="toast" id="toast"></div>
+
+<script>
+  /* ── i18n helpers ──────────────────────────────────────────────── */
+  const AVATAR_COLORS = ['#2E7DD1','#6366F1','#10B981','#F59E0B','#EF4444','#8B5CF6','#EC4899','#0891B2'];
+
+  const STRINGS = {
+    en: {
+      period:'Period', room:'Room', students:'students', student:'student',
+      submitted:'Submitted', in_progress:'In progress', upcoming:'Upcoming', missed:'Missed',
+      science_7a:'Grade 7A · Science', math_7a:'Grade 7A · Math', science_8b:'Grade 8B · Science',
+      mark_attendance:'Open attendance', view_history:'View history',
+      view_student_profile:'View full profile',
+      time_830:'8:30 AM', time_945:'9:45 AM', time_1045:'10:45 AM', time_115:'1:15 PM',
+      meta_15:'15 students · Room 204', meta_14:'14 students · Room 312', meta_15m:'15 students · Room 110',
+      summary_p1:'13 present · 1 absent · 1 late', summary_p2:'Not submitted', summary_p5:'',
+      sec_roster:'Roster', sec_summary:'Period summary',
+      filter_students:'Filter students…',
+      hint:'Click a student to open their profile.',
+      no_students:'No students match this filter.',
+      st_present:'Present', st_absent:'Absent', st_late:'Late', st_await:'Awaiting', no_mark:'Not marked',
+      st_absent_just:'Absent — justified', st_late_just:'Late — justified',
+      settings_soon:'Settings coming soon',
+      tab_records:'Records', tab_attendance:'Attendance', tab_notes:'Notes', tab_guardian:'Parent/Guardian',
+      all_classes:'All Classes',
+      subj_science:'Science', subj_math:'Math', subj_geography:'Geography', subj_spanish:'Spanish',
+      thresh_within:'Within limit', thresh_approaching:'Approaching', thresh_exceeded:'Exceeded',
+      subj_summary:'Per-subject breakdown', subject:'Subject', threshold_status:'Grade impact',
+      att_col_date:'Date', att_col_period:'Period', att_col_status:'Status', att_col_just:'Justification',
+      just_y:'Justified', just_n:'Unjustified',
+      // drawer column headers
+      student_col:'Student', today_col:'Today', reason_col:'Reason', rate_col:'Rate',
+      // student drawer stat labels
+      rate_lbl:'Rate', abs_lbl:'Abs.', late_lbl:'Late',
+      // empty states
+      no_active_records:'No active records',
+      no_att_records:'No attendance records available.',
+      no_notes_yet:'No notes yet.',
+      add_view_notes:'Add or view all notes',
+      // guardian labels
+      gf_phone:'Phone', gf_email:'Email', gf_relationship:'Relationship', gf_of:'of',
+      gf_emergency:'Emergency Contact', gf_notes:'Notes',
+      // grade impact
+      grade_impact_title:'Grade-impact summary',
+      grade_impact_approaching:' approaching grade threshold',
+      view_grade_impact:'View grade impact ↗',
+      grade_impact_counts_suffix:' late this term (threshold: ',
+      grade_impact_policy:'§ Justified medical absences may be excluded from grade-impact counts per school policy.',
+      term_2:'Term 2',
+    },
+    fr: {
+      period:'Période', room:'Salle', students:'élèves', student:'élève',
+      submitted:'Saisie', in_progress:'En cours', upcoming:'À venir', missed:'Manquée',
+      science_7a:'7e A · Sciences', math_7a:'7e A · Maths', science_8b:'8e B · Sciences',
+      mark_attendance:'Ouvrir les présences', view_history:'Voir l\'historique',
+      view_student_profile:'Voir le profil complet',
+      time_830:'08 h 30', time_945:'09 h 45', time_1045:'10 h 45', time_115:'13 h 15',
+      meta_15:'15 élèves · Salle 204', meta_14:'14 élèves · Salle 312', meta_15m:'15 élèves · Salle 110',
+      summary_p1:'13 présents · 1 absent · 1 en retard', summary_p2:'Non saisie', summary_p5:'',
+      sec_roster:'Liste de classe', sec_summary:'Résumé de la période',
+      filter_students:'Filtrer les élèves…',
+      hint:'Cliquez sur un élève pour ouvrir son profil.',
+      no_students:'Aucun élève ne correspond à ce filtre.',
+      st_present:'Présent', st_absent:'Absent', st_late:'En retard', st_await:'À accepter', no_mark:'Non saisi',
+      st_absent_just:'Absence motivée', st_late_just:'Retard motivé',
+      settings_soon:'Paramètres — bientôt disponibles',
+      tab_records:'Dossiers', tab_attendance:'Présences', tab_notes:'Notes', tab_guardian:'Parent/Tuteur',
+      all_classes:'Toutes les classes',
+      subj_science:'Sciences', subj_math:'Maths', subj_geography:'Géographie', subj_spanish:'Espagnol',
+      thresh_within:'Dans la limite', thresh_approaching:'Approche seuil', thresh_exceeded:'Seuil dépassé',
+      subj_summary:'Bilan par matière', subject:'Matière', threshold_status:'Impact note',
+      att_col_date:'Date', att_col_period:'Période', att_col_status:'Statut', att_col_just:'Justification',
+      just_y:'Justifiée', just_n:'Non justifiée',
+      // en-tête colonnes tiroir
+      student_col:'Élève', today_col:'Aujourd\'hui', reason_col:'Motif', rate_col:'Taux',
+      // libellés stats élève
+      rate_lbl:'Taux', abs_lbl:'Abs.', late_lbl:'Retard',
+      // états vides
+      no_active_records:'Aucun dossier actif',
+      no_att_records:'Aucun dossier de présence disponible.',
+      no_notes_yet:'Aucune note pour l\'instant.',
+      add_view_notes:'Ajouter ou voir toutes les notes',
+      // libellés tuteur
+      gf_phone:'Téléphone', gf_email:'Courriel', gf_relationship:'Lien de parenté', gf_of:'de',
+      gf_emergency:'Contact d\'urgence', gf_notes:'Notes',
+      // impact sur la note
+      grade_impact_title:'Impact sur la note',
+      grade_impact_approaching:' — seuil approché',
+      view_grade_impact:'Voir l\'impact sur la note ↗',
+      grade_impact_counts_suffix:' retard(s) ce trimestre (seuil : ',
+      grade_impact_policy:'§ Les absences médicales motivées peuvent être exclues du décompte selon la politique de l\'école.',
+      term_2:'Étape 2',
+    }
+  };
+  function T(k){ var lang=(window.__ct_i18n&&window.__ct_i18n.getLang())||'en'; return (STRINGS[lang]&&STRINGS[lang][k])||STRINGS.en[k]||k; }
+  function initials(n){ return n.split(' ').map(function(w){return w[0];}).join('').slice(0,2).toUpperCase(); }
+  function avatarColor(n){ var h=0; for(var i=0;i<n.length;i++) h=(h*31+n.charCodeAt(i))&0xFFFFFF; return AVATAR_COLORS[Math.abs(h)%AVATAR_COLORS.length]; }
+
+  /* ── Schedule data ─────────────────────────────────────────────── */
+  const CLASSES = [
+    { id:'p1-mon',  timeKey:'time_830',  periodNum:1, classKey:'science_7a', metaKey:'meta_15',  state:'done',     summaryKey:'summary_p1', students:15 },
+    { id:'p2-mon',  timeKey:'time_945',  periodNum:2, classKey:'math_7a',    metaKey:'meta_15m', state:'missed',   summaryKey:'summary_p2', students:15 },
+    { id:'p3-mon',  timeKey:'time_1045', periodNum:3, classKey:'science_7a', metaKey:'meta_15',  state:'active',   summaryKey:'',           students:15 },
+    { id:'p5-mon',  timeKey:'time_115',  periodNum:5, classKey:'science_8b', metaKey:'meta_14',  state:'upcoming', summaryKey:'',           students:14 },
+  ];
+
+  const ROSTERS = {
+    'p3-mon': [
+      { id:'ST-1041', name:'Aaliyah Carter',  rate:94, status:'no_mark' },
+      { id:'ST-1082', name:'Ben Okafor',       rate:78, status:'absent',  reason:'Medical appointment — pre-justified', reason_fr:'Rendez-vous médical — pré-motivée' },
+      { id:'ST-1055', name:'Chloe Nguyen',     rate:88, status:'absent',  reason:'Awaiting parent reply', reason_fr:'Réponse du parent attendue' },
+      { id:'ST-1067', name:'Daniel Ferreira',  rate:96, status:'absent',  reason:'School event — Soccer tournament', reason_fr:'Activité scolaire — Tournoi de soccer' },
+      { id:'ST-1074', name:'Emma Kowalski',    rate:82, status:'late',    reason:'Awaiting check-in · 9:08 AM', reason_fr:'À accepter en classe · 9 h 08' },
+      { id:'ST-1079', name:'Finn Bergström',   rate:100,status:'no_mark' },
+      { id:'ST-1083', name:'Grace Osei',       rate:91, status:'no_mark' },
+      { id:'ST-1088', name:'Hassan Al-Amin',   rate:85, status:'no_mark' },
+      { id:'ST-1091', name:'Isabel Martins',   rate:97, status:'absent',  reason:'School event — Soccer tournament', reason_fr:'Activité scolaire — Tournoi de soccer' },
+      { id:'ST-1096', name:'Jonas Weber',      rate:89, status:'no_mark' },
+      { id:'ST-1102', name:'Kira Nakamura',    rate:93, status:'no_mark' },
+      { id:'ST-1109', name:'Luca Esposito',    rate:79, status:'absent',  reason:'Disputed by parent', reason_fr:'Contesté par le parent' },
+      { id:'ST-1115', name:'Maya Robinson',    rate:98, status:'no_mark' },
+      { id:'ST-1121', name:'Noah Petersen',    rate:86, status:'no_mark' },
+      { id:'ST-1128', name:'Olivia Thompson',  rate:92, status:'no_mark' },
+    ],
+    'p1-mon': [
+      { id:'ST-1041', name:'Aaliyah Carter',  rate:94, status:'present' },
+      { id:'ST-1082', name:'Ben Okafor',       rate:78, status:'absent' },
+      { id:'ST-1055', name:'Chloe Nguyen',     rate:88, status:'present' },
+      { id:'ST-1067', name:'Daniel Ferreira',  rate:96, status:'present' },
+      { id:'ST-1074', name:'Emma Kowalski',    rate:82, status:'late' },
+      { id:'ST-1079', name:'Finn Bergström',   rate:100,status:'present' },
+    ],
+    'p2-mon': [],
+    'p5-mon': [
+      { id:'ST-1131', name:'Priya Sharma',   rate:95, status:'no_mark' },
+      { id:'ST-1135', name:'Quinn Murphy',   rate:88, status:'no_mark' },
+      { id:'ST-1142', name:'Rafael Costa',   rate:71, status:'no_mark' },
+      { id:'ST-1148', name:'Sara Johansson', rate:99, status:'no_mark' },
+    ],
+  };
+
+  let rosterFilter = '';
+
+  /* ── Schedule render ───────────────────────────────────────────── */
+  function setView(view, el) {
+    document.querySelectorAll('.tab-pill').forEach(function(t){ t.setAttribute('aria-pressed','false'); });
+    if (el) el.setAttribute('aria-pressed','true');
+    renderPeriodList();
+  }
+
+  function renderPeriodList() {
+    document.getElementById('classCount').textContent = CLASSES.length;
+    var byPeriod = {};
+    CLASSES.forEach(function(c){ (byPeriod[c.periodNum] = byPeriod[c.periodNum] || []).push(c); });
+    var periods = Object.keys(byPeriod).map(Number).sort(function(a,b){ return a-b; });
+    document.getElementById('periodList').innerHTML = periods.map(function(p){
+      var classes = byPeriod[p];
+      var first = classes[0];
+      var html = '<div class="period-group">' +
+        '<div class="period-header">' +
+          '<span class="period-num">' + T('period') + ' ' + p + '</span>' +
+          '<span class="period-time">' + T(first.timeKey) + '</span>' +
+        '</div>';
+      classes.forEach(function(c){
+        var statusCls = c.state==='done'?'status--done':c.state==='active'?'status--active':c.state==='missed'?'status--missed':'status--upcoming';
+        var statusKey = c.state==='done'?'submitted':c.state==='active'?'in_progress':c.state==='missed'?'missed':'upcoming';
+        var sel = c.id===currentClassId ? ' is-selected' : '';
+        html += '<div class="class-row' + sel + '" onclick="openClass(\'' + c.id + '\')">' +
+          '<div class="cr-dot ' + c.state + '"></div>' +
+          '<div>' +
+            '<div class="cr-name">' + T(c.classKey) + '</div>' +
+            '<div class="cr-meta"><i class="fa-solid fa-door-open"></i> ' + T(c.metaKey) + '</div>' +
+          '</div>' +
+          '<span class="status ' + statusCls + '"><i class="fa-solid fa-circle"></i> ' + T(statusKey) + '</span>' +
+          '<i class="fa-solid fa-chevron-right cr-chevron"></i>' +
+        '</div>';
+      });
+      html += '</div>';
+      return html;
+    }).join('');
+  }
+
+  /* ── Class drawer ──────────────────────────────────────────────── */
+  let currentClassId = null;
+
+  function openClass(id) {
+    currentClassId = id;
+    rosterFilter = '';
+    document.getElementById('classDrawer').hidden = false;
+    document.getElementById('panelArea').classList.add('has-drawer');
+    renderDrawer();
+    renderPeriodList();
+  }
+  function closeDrawer() {
+    document.getElementById('classDrawer').hidden = true;
+    document.getElementById('panelArea').classList.remove('has-drawer');
+    currentClassId = null;
+    renderPeriodList();
+  }
+  function renderDrawer() {
+    if (!currentClassId) return;
+    var c = CLASSES.find(function(x){ return x.id===currentClassId; });
+    if (!c) return;
+    var roster = ROSTERS[currentClassId] || [];
+    document.getElementById('drawerTitle').textContent = T(c.classKey);
+    var q = (rosterFilter||'').toLowerCase();
+    var filtered = roster.filter(function(s){ return !q||s.name.toLowerCase().includes(q)||s.id.toLowerCase().includes(q); });
+    var rosterHtml;
+    if (roster.length===0) {
+      rosterHtml = '<div style="padding:30px;text-align:center;color:var(--c-ink-subtle);font-size:13px">' + T('hint') + '</div>';
+    } else if (filtered.length===0) {
+      rosterHtml = '<div style="padding:30px;text-align:center;color:var(--c-ink-subtle);font-size:13px">' + T('no_students') + '</div>';
+    } else {
+      rosterHtml = '<table class="tbl"><thead><tr>' +
+          '<th>' + T('student_col') + '</th>' +
+          '<th>' + T('today_col') + '</th>' +
+          '<th>' + T('reason_col') + '</th>' +
+          '<th>' + T('rate_col') + '</th>' +
+        '</tr></thead><tbody>' +
+        filtered.map(function(s){
+          var badge = renderStatusBadge(s.status);
+          var rateColor = s.rate>=90?'var(--c-success)':s.rate>=80?'var(--c-warning)':'var(--c-danger)';
+          var lang = (window.__ct_i18n && window.__ct_i18n.getLang()) || 'en';
+          var reasonText = (lang==='fr' && s.reason_fr) ? s.reason_fr : (s.reason||'—');
+          return '<tr onclick="openStudentFromClassDrawer(\'' + s.id + '\',\'' + c.classKey + '\')">' +
+            '<td><div class="stu-cell"><div class="stu-avatar" style="background:' + avatarColor(s.name) + '">' + initials(s.name) + '</div><div><div class="stu-name">' + s.name + '</div><div class="stu-id">' + s.id + '</div></div></div></td>' +
+            '<td>' + badge + '</td>' +
+            '<td style="font-size:12px;color:var(--c-ink-subtle)">' + reasonText + '</td>' +
+            '<td><div style="display:flex;align-items:center;gap:6px"><div class="att-bar-wrap"><div class="att-bar-fill" style="width:'+s.rate+'%;background:'+rateColor+'"></div></div><span style="font-size:12px;color:'+rateColor+';font-weight:700">'+s.rate+'%</span></div></td>' +
+          '</tr>';
+        }).join('') + '</tbody></table>';
+    }
+    document.getElementById('drawerBody').innerHTML =
+      '<div class="drawer-hero">' +
+        '<div class="dh-icon"><i class="fa-solid fa-chalkboard-user"></i></div>' +
+        '<div style="flex:1">' +
+          '<div class="dh-class">' + T(c.classKey) + '</div>' +
+          '<div class="dh-meta">' +
+            '<span><i class="fa-solid fa-clock"></i> ' + T(c.timeKey) + ' · ' + T('period') + ' ' + c.periodNum + '</span>' +
+            '<span><i class="fa-solid fa-users"></i> ' + c.students + ' ' + T('students') + '</span>' +
+            '<span><i class="fa-solid fa-door-open"></i> ' + T(c.metaKey).split('·').slice(-1)[0].trim() + '</span>' +
+          '</div>' +
+        '</div>' +
+      '</div>' +
+      (c.summaryKey?'<div class="drawer-section"><h3><i class="fa-solid fa-list-check"></i> '+T('sec_summary')+'</h3><div style="font-size:13px;color:var(--c-ink)">'+T(c.summaryKey)+'</div></div>':'') +
+      '<div class="drawer-section">' +
+        '<h3><i class="fa-solid fa-users"></i> ' + T('sec_roster') + '</h3>' +
+        (roster.length>0?'<div class="roster-search"><div class="search-input"><i class="fa-solid fa-magnifying-glass"></i><input type="text" placeholder="'+T('filter_students')+'" data-placeholder-en="Filter students…" data-placeholder-fr="Filtrer les élèves…" oninput="onRosterFilter(this.value)" value="'+(rosterFilter||'').replace(/"/g,'&quot;')+'"/></div></div>':'') +
+        rosterHtml +
+      '</div>';
+    document.getElementById('drawerActions').innerHTML =
+      '<a class="btn btn--primary" href="teacher-attendance.html?id=' + c.id + '"><i class="fa-solid fa-clipboard-check"></i> ' + T('mark_attendance') + '</a>' +
+      '<a class="btn btn--secondary" href="teacher-history.html?class=' + c.id + '"><i class="fa-solid fa-calendar-days"></i> ' + T('view_history') + '</a>';
+  }
+  function renderStatusBadge(status) {
+    var map = {
+      present:'<span class="status-badge badge-present"><span class="status-dot"></span>' + T('st_present') + '</span>',
+      absent: '<span class="status-badge badge-absent"><span class="status-dot"></span>' + T('st_absent') + '</span>',
+      late:   '<span class="status-badge badge-late"><span class="status-dot"></span>' + T('st_late') + '</span>',
+      await:  '<span class="status-badge badge-await"><span class="status-dot"></span>' + T('st_await') + '</span>',
+      no_mark:'<span style="color:var(--c-ink-subtle);font-size:12px">—</span>',
+    };
+    return map[status]||map['no_mark'];
+  }
+  function onRosterFilter(v) { rosterFilter=v; renderDrawer(); }
+
+  /* ── Section switcher ──────────────────────────────────────────── */
+  let currentSection = 'classes';
+
+  function switchSection(name, el) {
+    currentSection = name;
+    document.querySelectorAll('.section-tab-btn').forEach(function(t){ t.classList.remove('active'); });
+    if (el) el.classList.add('active');
+    document.querySelectorAll('.section-panel').forEach(function(p){ p.classList.remove('active'); });
+    document.getElementById('sec-' + name).classList.add('active');
+    document.getElementById('scheduleTabStrip').style.display = name==='classes' ? '' : 'none';
+    if (name==='students') { renderFilterBar(); renderStudentList(); }
+  }
+
+  /* ── Student data ──────────────────────────────────────────────── */
+  const ALL_STUDENTS = [
+    // Grade 7A · Science
+    { id:'ST-1041', name:'Aaliyah Carter',  classKey:'science_7a', rate:94, absences:2, lateCount:1 },
+    { id:'ST-1082', name:'Ben Okafor',       classKey:'science_7a', rate:78, absences:5, lateCount:0 },
+    { id:'ST-1055', name:'Chloe Nguyen',     classKey:'science_7a', rate:88, absences:3, lateCount:1 },
+    { id:'ST-1067', name:'Daniel Ferreira',  classKey:'science_7a', rate:96, absences:1, lateCount:0 },
+    { id:'ST-1074', name:'Emma Kowalski',    classKey:'science_7a', rate:82, absences:4, lateCount:2 },
+    { id:'ST-1079', name:'Finn Bergström',   classKey:'science_7a', rate:100,absences:0, lateCount:0 },
+    { id:'ST-1083', name:'Grace Osei',       classKey:'science_7a', rate:91, absences:2, lateCount:1 },
+    { id:'ST-1088', name:'Hassan Al-Amin',   classKey:'science_7a', rate:85, absences:3, lateCount:2 },
+    { id:'ST-1091', name:'Isabel Martins',   classKey:'science_7a', rate:97, absences:1, lateCount:0 },
+    { id:'ST-1096', name:'Jonas Weber',      classKey:'science_7a', rate:89, absences:3, lateCount:1 },
+    { id:'ST-1102', name:'Kira Nakamura',    classKey:'science_7a', rate:93, absences:2, lateCount:0 },
+    { id:'ST-1109', name:'Luca Esposito',    classKey:'science_7a', rate:79, absences:5, lateCount:1 },
+    { id:'ST-1115', name:'Maya Robinson',    classKey:'science_7a', rate:98, absences:1, lateCount:0 },
+    { id:'ST-1121', name:'Noah Petersen',    classKey:'science_7a', rate:86, absences:3, lateCount:1 },
+    { id:'ST-1128', name:'Olivia Thompson',  classKey:'science_7a', rate:92, absences:2, lateCount:0 },
+    // Grade 7A · Math
+    { id:'ST-2001', name:'Aaron Mitchell',   classKey:'math_7a', rate:88, absences:3, lateCount:1 },
+    { id:'ST-2002', name:'Bianca Ferreira',  classKey:'math_7a', rate:92, absences:2, lateCount:0 },
+    { id:'ST-2003', name:'Carlos Rivera',    classKey:'math_7a', rate:76, absences:6, lateCount:2 },
+    { id:'ST-2004', name:'Diana Okonkwo',    classKey:'math_7a', rate:95, absences:1, lateCount:0 },
+    // Grade 8B · Science
+    { id:'ST-1131', name:'Priya Sharma',     classKey:'science_8b', rate:95, absences:1, lateCount:0 },
+    { id:'ST-1135', name:'Quinn Murphy',     classKey:'science_8b', rate:88, absences:3, lateCount:1 },
+    { id:'ST-1142', name:'Rafael Costa',     classKey:'science_8b', rate:71, absences:7, lateCount:2 },
+    { id:'ST-1148', name:'Sara Johansson',   classKey:'science_8b', rate:99, absences:0, lateCount:0 },
+  ];
+
+  const GUARDIANS = {
+    'ST-1041': { name:'Michael Carter',   rel:'Father',          phone:'+1 (416) 555-0182', email:'m.carter@email.com',    emergency:'Linda Carter',     emergencyRel:'Mother',  emergencyPhone:'+1 (416) 555-0199', notes:'' },
+    'ST-1082': { name:'Amara Okafor',     rel:'Mother',          phone:'+1 (647) 555-0234', email:'a.okafor@email.com',    emergency:'David Okafor',     emergencyRel:'Father',  emergencyPhone:'+1 (647) 555-0235', notes:'Preferred contact by text only.' },
+    'ST-1055': { name:'Linh Nguyen',      rel:'Mother',          phone:'+1 (514) 555-0311', email:'linh.nguyen@email.com', emergency:'Huy Nguyen',       emergencyRel:'Father',  emergencyPhone:'+1 (514) 555-0312', notes:'' },
+    'ST-1067': { name:'Paulo Ferreira',   rel:'Father',          phone:'+1 (416) 555-0455', email:'p.ferreira@email.com',  emergency:'Ana Ferreira',     emergencyRel:'Mother',  emergencyPhone:'+1 (416) 555-0456', notes:'' },
+    'ST-1074': { name:'Helena Kowalski',  rel:'Mother',          phone:'+1 (604) 555-0521', email:'h.kowalski@email.com',  emergency:'Jan Kowalski',     emergencyRel:'Father',  emergencyPhone:'+1 (604) 555-0522', notes:'Emma has a peanut allergy (EpiPen on file).' },
+    'ST-1079': { name:'Erik Bergström',   rel:'Father',          phone:'+1 (416) 555-0618', email:'e.bergstrom@email.com', emergency:'Anna Bergström',   emergencyRel:'Mother',  emergencyPhone:'+1 (416) 555-0619', notes:'' },
+    'ST-1083': { name:'Abena Osei',       rel:'Mother',          phone:'+1 (647) 555-0712', email:'a.osei@email.com',      emergency:'Kofi Osei',        emergencyRel:'Father',  emergencyPhone:'+1 (647) 555-0713', notes:'' },
+    'ST-1088': { name:'Fatima Al-Amin',   rel:'Mother',          phone:'+1 (416) 555-0822', email:'f.alamin@email.com',    emergency:'Omar Al-Amin',     emergencyRel:'Father',  emergencyPhone:'+1 (416) 555-0823', notes:'' },
+    'ST-1091': { name:'Sofia Martins',    rel:'Mother',          phone:'+1 (514) 555-0934', email:'s.martins@email.com',   emergency:'Pedro Martins',    emergencyRel:'Father',  emergencyPhone:'+1 (514) 555-0935', notes:'' },
+    'ST-1096': { name:'Klaus Weber',      rel:'Father',          phone:'+1 (604) 555-1041', email:'k.weber@email.com',     emergency:'Ingrid Weber',     emergencyRel:'Mother',  emergencyPhone:'+1 (604) 555-1042', notes:'' },
+    'ST-1102': { name:'Yuki Nakamura',    rel:'Mother',          phone:'+1 (416) 555-1123', email:'y.nakamura@email.com',  emergency:'Kenji Nakamura',   emergencyRel:'Father',  emergencyPhone:'+1 (416) 555-1124', notes:'' },
+    'ST-1109': { name:'Marco Esposito',   rel:'Father',          phone:'+1 (647) 555-1219', email:'m.esposito@email.com',  emergency:'Giulia Esposito',  emergencyRel:'Mother',  emergencyPhone:'+1 (647) 555-1220', notes:'Currently disputing Mar 19 absence — see active records.' },
+    'ST-1115': { name:'Sandra Robinson',  rel:'Mother',          phone:'+1 (416) 555-1332', email:'s.robinson@email.com',  emergency:'Derek Robinson',   emergencyRel:'Father',  emergencyPhone:'+1 (416) 555-1333', notes:'' },
+    'ST-1121': { name:'Lars Petersen',    rel:'Father',          phone:'+1 (514) 555-1448', email:'l.petersen@email.com',  emergency:'Eva Petersen',     emergencyRel:'Mother',  emergencyPhone:'+1 (514) 555-1449', notes:'' },
+    'ST-1128': { name:'Claire Thompson',  rel:'Mother',          phone:'+1 (604) 555-1561', email:'c.thompson@email.com',  emergency:'James Thompson',   emergencyRel:'Father',  emergencyPhone:'+1 (604) 555-1562', notes:'' },
+    'ST-2001': { name:'Patricia Mitchell',rel:'Mother',          phone:'+1 (416) 555-1688', email:'p.mitchell@email.com',  emergency:'Robert Mitchell',  emergencyRel:'Father',  emergencyPhone:'+1 (416) 555-1689', notes:'' },
+    'ST-2002': { name:'José Ferreira',    rel:'Father',          phone:'+1 (647) 555-1754', email:'j.ferreira@email.com',  emergency:'Maria Ferreira',   emergencyRel:'Mother',  emergencyPhone:'+1 (647) 555-1755', notes:'' },
+    'ST-2003': { name:'Carmen Rivera',    rel:'Mother',          phone:'+1 (416) 555-1839', email:'c.rivera@email.com',    emergency:'Miguel Rivera',    emergencyRel:'Father',  emergencyPhone:'+1 (416) 555-1840', notes:'Family relocating end of term.' },
+    'ST-2004': { name:'Ngozi Okonkwo',    rel:'Mother',          phone:'+1 (514) 555-1912', email:'n.okonkwo@email.com',   emergency:'Chidi Okonkwo',    emergencyRel:'Father',  emergencyPhone:'+1 (514) 555-1913', notes:'' },
+    'ST-1131': { name:'Anika Sharma',     rel:'Mother',          phone:'+1 (604) 555-2031', email:'a.sharma@email.com',    emergency:'Raj Sharma',       emergencyRel:'Father',  emergencyPhone:'+1 (604) 555-2032', notes:'' },
+    'ST-1135': { name:'Brigid Murphy',    rel:'Mother',          phone:'+1 (416) 555-2148', email:'b.murphy@email.com',    emergency:'Patrick Murphy',   emergencyRel:'Father',  emergencyPhone:'+1 (416) 555-2149', notes:'' },
+    'ST-1142': { name:'Lucia Costa',      rel:'Mother',          phone:'+1 (647) 555-2234', email:'l.costa@email.com',     emergency:'Fernando Costa',   emergencyRel:'Father',  emergencyPhone:'+1 (647) 555-2235', notes:'Rafael has asthma — inhaler in nurse office.' },
+    'ST-1148': { name:'Ingrid Johansson', rel:'Mother',          phone:'+1 (514) 555-2371', email:'i.johansson@email.com', emergency:'Erik Johansson',   emergencyRel:'Father',  emergencyPhone:'+1 (514) 555-2372', notes:'' },
+  };
+
+  const STUDENT_RECORDS = {
+    'ST-1041': [
+      { icon:'fa-flask', iconBg:'#FFFBEB', iconColor:'#D97706', title:'Missed Chapter 5 lab introduction', title_fr:'A manqué l\'intro du laboratoire (ch. 5)', desc:'Period 2 — Mar 19. Makeup scheduled Mar 26.', desc_fr:'Période 2 — 19 mars. Rattrapage prévu le 26 mars.', status:'In progress', status_fr:'En cours', statusCls:'badge-pending' },
+      { icon:'fa-clock',  iconBg:'#EBF4FF', iconColor:'#2E7DD1', title:'Late arrival — parent reply pending', title_fr:'Arrivée tardive — réponse parent attendue', desc:'Period 3 — Mar 21. Parent notified 9:14 AM.', desc_fr:'Période 3 — 21 mars. Parent averti à 9 h 14.', status:'Awaiting', status_fr:'En attente', statusCls:'badge-pending' },
+    ],
+    'ST-1082': [
+      { icon:'fa-calendar-xmark', iconBg:'#FEF2F2', iconColor:'#DC2626', title:'Unjustified absence — Mar 22', title_fr:'Absence non motivée — 22 mars', desc:'No parent contact received within 24h window.', desc_fr:'Aucun contact du parent dans les 24 h.', status:'Pending', status_fr:'En attente', statusCls:'badge-pending' },
+    ],
+    'ST-1109': [
+      { icon:'fa-scale-balanced', iconBg:'#F3F4FF', iconColor:'#4F46E5', title:'Parent dispute — Mar 19 absence', title_fr:'Contestation parent — absence du 19 mars', desc:'Marco Esposito contested absence via portal. Review requested.', desc_fr:'Marco Esposito a contesté l\'absence via le portail. Examen demandé.', status:'Under review', status_fr:'En examen', statusCls:'badge-pending' },
+    ],
+  };
+
+  const STUDENT_ATTENDANCE = {
+    'ST-1041': [
+      { date:'Sat, Mar 21', periodNum:1, subject:'science', status:'late-just',   note:'Arrived 8:50 AM — bus delay' },
+      { date:'Thu, Mar 19', periodNum:2, subject:'science', status:'absent-just', note:"Doctor's note received" },
+      { date:'Wed, Mar 18', periodNum:2, subject:'science', status:'present',     note:'' },
+      { date:'Tue, Mar 17', periodNum:2, subject:'science', status:'present',     note:'' },
+      { date:'Sat, Mar 14', periodNum:2, subject:'science', status:'present',     note:'' },
+    ],
+    'ST-1082': [
+      { date:'Sat, Mar 22', periodNum:1, subject:'science', status:'absent',  note:'' },
+      { date:'Mon, Mar 17', periodNum:1, subject:'science', status:'absent',  note:'' },
+      { date:'Fri, Mar 14', periodNum:1, subject:'science', status:'present', note:'' },
+    ],
+    'ST-1074': [
+      { date:'Sat, Mar 21', periodNum:1, subject:'science', status:'late',        note:'Arrived 9:08 AM' },
+      { date:'Thu, Mar 19', periodNum:1, subject:'science', status:'present',     note:'' },
+      { date:'Wed, Mar 18', periodNum:1, subject:'science', status:'late',        note:'' },
+      { date:'Tue, Mar 17', periodNum:1, subject:'science', status:'absent-just', note:'Medical appointment' },
+      { date:'Sat, Mar 14', periodNum:1, subject:'science', status:'absent-just', note:'Family emergency' },
+    ],
+    'ST-1067': [
+      { date:'Sat, Mar 21', periodNum:1, subject:'science', status:'present', note:'' },
+      { date:'Thu, Mar 19', periodNum:1, subject:'science', status:'present', note:'' },
+      { date:'Wed, Mar 18', periodNum:1, subject:'science', status:'absent',  note:'' },
+    ],
+    'ST-1109': [
+      { date:'Sat, Mar 21', periodNum:2, subject:'science', status:'present',     note:'' },
+      { date:'Thu, Mar 19', periodNum:2, subject:'science', status:'absent',      note:'' },
+      { date:'Wed, Mar 18', periodNum:2, subject:'science', status:'absent-just', note:'Parent dispute filed' },
+      { date:'Tue, Mar 17', periodNum:2, subject:'science', status:'present',     note:'' },
+    ],
+    'ST-1131': [
+      { date:'Sat, Mar 21', periodNum:5, subject:'science', status:'present', note:'' },
+      { date:'Thu, Mar 19', periodNum:5, subject:'science', status:'present', note:'' },
+      { date:'Wed, Mar 18', periodNum:5, subject:'science', status:'late',    note:'' },
+    ],
+  };
+
+  const SUBJECT_SUMMARY = {
+    'ST-1041': [
+      { subject:'science', absences:2, tardies:1, threshold:'approaching' },
+    ],
+    'ST-1082': [
+      { subject:'science', absences:5, tardies:0, threshold:'exceeded' },
+    ],
+    'ST-1074': [
+      { subject:'science', absences:2, tardies:2, threshold:'approaching' },
+    ],
+    'ST-1067': [
+      { subject:'science', absences:1, tardies:0, threshold:'within' },
+    ],
+    'ST-1109': [
+      { subject:'science', absences:2, tardies:0, threshold:'approaching' },
+    ],
+    'ST-1131': [
+      { subject:'science', absences:0, tardies:1, threshold:'within' },
+    ],
+  };
+
+  const STUDENT_NOTES = {
+    'ST-1041': [
+      { meta:'Ms. S. Tremblay · Fri, Mar 20 · 11:30 AM', meta_fr:'Mme S. Tremblay · ven. 20 mars · 11 h 30', body:'Aaliyah missed the Chapter 5 lab introduction. Emailed the lab handout. She will complete the makeup during lunch recess on March 26 before the quiz.', body_fr:'Aaliyah a manqué l\'introduction au laboratoire du chapitre 5. Je lui ai envoyé le document par courriel. Elle fera le rattrapage pendant la récréation du dîner le 26 mars, avant le contrôle.' },
+      { meta:'Ms. S. Tremblay · Mon, Mar 16 · 2:45 PM',  meta_fr:'Mme S. Tremblay · lun. 16 mars · 14 h 45', body:'Strong in lab work but quiet during whole-class discussion. Will try smaller-group format next week.', body_fr:'Forte en laboratoire mais discrète en discussion plénière. J\'essaierai un format en petits groupes la semaine prochaine.' },
+    ],
+  };
+
+  /* ── Student list ──────────────────────────────────────────────── */
+  let currentClassFilter = 'all';
+  let currentStudentId = null;
+  let currentStudentTab = 'records';
+
+  function renderFilterBar() {
+    var classCounts = {};
+    ALL_STUDENTS.forEach(function(s){ classCounts[s.classKey] = (classCounts[s.classKey]||0)+1; });
+    var uniqueKeys = [];
+    ALL_STUDENTS.forEach(function(s){ if(uniqueKeys.indexOf(s.classKey)<0) uniqueKeys.push(s.classKey); });
+
+    var html = '<button class="filter-chip' + (currentClassFilter==='all'?' active':'') + '" onclick="setClassFilter(\'all\',this)">' +
+      T('all_classes') + ' <span class="chip-count">' + ALL_STUDENTS.length + '</span></button>';
+    uniqueKeys.forEach(function(k){
+      html += '<button class="filter-chip' + (currentClassFilter===k?' active':'') + '" onclick="setClassFilter(\'' + k + '\',this)">' +
+        T(k) + ' <span class="chip-count">' + classCounts[k] + '</span></button>';
+    });
+    document.getElementById('filterBar').innerHTML = html;
+  }
+
+  function setClassFilter(classKey, el) {
+    currentClassFilter = classKey;
+    document.querySelectorAll('.filter-chip').forEach(function(c){ c.classList.remove('active'); });
+    if (el) el.classList.add('active');
+    // Close drawer if current student is no longer in filtered list
+    if (currentStudentId && classKey!=='all') {
+      var s = ALL_STUDENTS.find(function(x){ return x.id===currentStudentId; });
+      if (s && s.classKey!==classKey) closeStudentDrawer(true);
+    }
+    renderStudentList();
+  }
+
+  function renderStudentList() {
+    var filtered = currentClassFilter==='all' ? ALL_STUDENTS : ALL_STUDENTS.filter(function(s){ return s.classKey===currentClassFilter; });
+    document.getElementById('studentCount').textContent = filtered.length;
+
+    // Update card title label
+    var titleLabel = currentClassFilter==='all' ? T('all_classes') : T(currentClassFilter);
+    document.querySelector('#sec-students .card__h .card__title span').textContent = titleLabel;
+
+    if (filtered.length===0) {
+      document.getElementById('studentListBody').innerHTML = '<div style="padding:40px;text-align:center;color:var(--c-ink-subtle);font-size:13px"><i class="fa-solid fa-users-slash" style="font-size:24px;display:block;margin-bottom:8px;opacity:.4"></i>' + T('no_students') + '</div>';
+      return;
+    }
+    document.getElementById('studentListBody').innerHTML = filtered.map(function(s){
+      var sel = s.id===currentStudentId ? ' is-selected' : '';
+      var rateColor = s.rate>=90?'var(--c-success)':s.rate>=80?'var(--c-warning)':'var(--c-danger)';
+      return '<div class="student-row' + sel + '" onclick="openStudent(\'' + s.id + '\')">' +
+        '<div class="stu-cell">' +
+          '<div class="stu-avatar" style="background:' + avatarColor(s.name) + '">' + initials(s.name) + '</div>' +
+          '<div>' +
+            '<div class="stu-name">' + s.name + '</div>' +
+            '<div class="stu-id">' + s.id + ' <span class="stu-class-tag">' + T(s.classKey) + '</span></div>' +
+          '</div>' +
+        '</div>' +
+        '<div style="display:flex;align-items:center;gap:6px">' +
+          '<div class="att-bar-wrap"><div class="att-bar-fill" style="width:' + s.rate + '%;background:' + rateColor + '"></div></div>' +
+          '<span style="font-size:12px;color:' + rateColor + ';font-weight:700;min-width:36px">' + s.rate + '%</span>' +
+        '</div>' +
+        '<span style="font-size:12px;color:var(--c-ink-subtle);white-space:nowrap">' + s.absences + ' abs</span>' +
+        '<i class="fa-solid fa-chevron-right cr-chevron"></i>' +
+      '</div>';
+    }).join('');
+  }
+
+  /* ── Student detail drawer ─────────────────────────────────────── */
+  function openStudent(id) {
+    currentStudentId = id;
+    currentStudentTab = 'records';
+    document.getElementById('studentDrawer').hidden = false;
+    document.getElementById('studentPanelArea').classList.add('has-drawer');
+    renderStudentDrawer();
+    renderStudentList();
+  }
+
+  /* Called from the class roster table — switches to My Students section first */
+  function openStudentFromClassDrawer(id, classKey) {
+    switchSection('students', document.querySelectorAll('.section-tab-btn')[1]);
+    currentClassFilter = classKey;
+    renderFilterBar();
+    renderStudentList();
+    openStudent(id);
+  }
+
+  function closeStudentDrawer(keepList) {
+    document.getElementById('studentDrawer').hidden = true;
+    document.getElementById('studentPanelArea').classList.remove('has-drawer');
+    currentStudentId = null;
+    if (!keepList) renderStudentList();
+  }
+
+  function setStudentTab(name, el) {
+    currentStudentTab = name;
+    var btns = document.querySelectorAll('.drawer-tab-btn');
+    btns.forEach(function(b){ b.classList.remove('active'); });
+    if (el) el.classList.add('active');
+    document.querySelectorAll('.drawer-tab-panel').forEach(function(p){ p.classList.remove('active'); });
+    var panel = document.getElementById('dsp-' + name);
+    if (panel) panel.classList.add('active');
+  }
+
+  function renderStudentDrawer() {
+    if (!currentStudentId) return;
+    var s = ALL_STUDENTS.find(function(x){ return x.id===currentStudentId; });
+    if (!s) return;
+    var g = GUARDIANS[s.id] || { name:'—', rel:'—', phone:'—', email:'—', emergency:'—', emergencyRel:'', emergencyPhone:'', notes:'' };
+    var rateColor = s.rate>=90?'var(--c-success)':s.rate>=80?'var(--c-warning)':'var(--c-danger)';
+
+    /* Hero */
+    document.getElementById('studentDrawerHero').innerHTML =
+      '<div class="stu-drawer-avatar" style="background:' + avatarColor(s.name) + '">' + initials(s.name) + '</div>' +
+      '<div style="flex:1;min-width:0">' +
+        '<div class="stu-drawer-name">' + s.name + '</div>' +
+        '<div class="stu-drawer-sub">' + s.id + ' · <span style="color:var(--c-brand-ink);font-weight:600">' + T(s.classKey) + '</span></div>' +
+      '</div>' +
+      '<div class="stu-quick-stats">' +
+        '<div class="stu-stat"><div class="stu-stat-val" style="color:' + rateColor + '">' + s.rate + '%</div><div class="stu-stat-lbl">' + T('rate_lbl') + '</div></div>' +
+        '<div class="stu-stat"><div class="stu-stat-val" style="color:var(--c-danger)">' + s.absences + '</div><div class="stu-stat-lbl">' + T('abs_lbl') + '</div></div>' +
+        '<div class="stu-stat"><div class="stu-stat-val" style="color:var(--c-warning)">' + s.lateCount + '</div><div class="stu-stat-lbl">' + T('late_lbl') + '</div></div>' +
+      '</div>' +
+      '<button class="btn btn--ghost" style="margin-left:var(--s-2);padding:6px 8px;" onclick="closeStudentDrawer()" aria-label="Close"><i class="fa-solid fa-xmark"></i></button>';
+
+    /* Tabs */
+    var tabs = [
+      { id:'records',    icon:'fa-clipboard-list',  labelKey:'tab_records' },
+      { id:'attendance', icon:'fa-calendar-days',   labelKey:'tab_attendance' },
+      { id:'notes',      icon:'fa-pen-to-square',   labelKey:'tab_notes' },
+      { id:'guardian',   icon:'fa-heart',           labelKey:'tab_guardian' },
+    ];
+    document.getElementById('studentDrawerTabs').innerHTML = tabs.map(function(t){
+      return '<button class="drawer-tab-btn' + (t.id===currentStudentTab?' active':'') + '" onclick="setStudentTab(\'' + t.id + '\',this)">' +
+        '<i class="fa-solid ' + t.icon + '"></i> ' + T(t.labelKey) + '</button>';
+    }).join('');
+
+    /* Tab panels */
+    document.getElementById('studentDrawerPanels').innerHTML =
+      renderRecordsPanel(s) +
+      renderAttendancePanel(s) +
+      renderNotesPanel(s) +
+      renderGuardianPanel(s, g);
+
+    /* Actions */
+    document.getElementById('studentDrawerActions').hidden = true;
+  }
+
+  function renderRecordsPanel(s) {
+    var records = STUDENT_RECORDS[s.id] || [];
+    var content;
+    if (records.length===0) {
+      content = '<div style="padding:20px 0;text-align:center;color:var(--c-ink-subtle);font-size:13px"><i class="fa-solid fa-circle-check" style="font-size:22px;display:block;margin-bottom:6px;color:var(--c-success)"></i>' + T('no_active_records') + '</div>';
+    } else {
+      var langR = (window.__ct_i18n && window.__ct_i18n.getLang()) || 'en';
+      content = records.map(function(r){
+        var rTitle  = (langR==='fr' && r.title_fr)  ? r.title_fr  : r.title;
+        var rDesc   = (langR==='fr' && r.desc_fr)   ? r.desc_fr   : r.desc;
+        var rStatus = (langR==='fr' && r.status_fr) ? r.status_fr : r.status;
+        return '<div class="dp-record">' +
+          '<div class="dp-rec-icon" style="background:' + r.iconBg + ';color:' + r.iconColor + '"><i class="fa-solid ' + r.icon + '"></i></div>' +
+          '<div style="flex:1;min-width:0">' +
+            '<div class="dp-rec-title">' + rTitle + '</div>' +
+            '<div class="dp-rec-desc">' + rDesc + '</div>' +
+            '<span class="dp-rec-badge ' + r.statusCls + '">' + rStatus + '</span>' +
+          '</div>' +
+        '</div>';
+      }).join('');
+    }
+    return '<div class="drawer-tab-panel' + (currentStudentTab==='records'?' active':'') + '" id="dsp-records">' + content + '</div>';
+  }
+
+  function renderAttendancePanel(s) {
+    var att = STUDENT_ATTENDANCE[s.id] || [];
+    var sum = SUBJECT_SUMMARY[s.id] || [];
+    var THRESH = 6;
+
+    function parseStatus(st) {
+      if (st==='absent-just') return { base:'absent', just:'y' };
+      if (st==='late-just')   return { base:'late',   just:'y' };
+      if (st==='absent')      return { base:'absent',  just:'n' };
+      if (st==='late')        return { base:'late',    just:'n' };
+      return { base:'present', just:null };
+    }
+
+    var statusDef = {
+      present: { dot:'var(--c-success)',  text:T('st_present'), color:'var(--c-success)' },
+      absent:  { dot:'var(--c-danger)',   text:T('st_absent'),  color:'var(--c-danger)' },
+      late:    { dot:'var(--c-warning)',  text:T('st_late'),    color:'var(--c-warning)' }
+    };
+
+    /* ── Threshold warning banner ── */
+    var issueSubjs = sum.filter(function(r){ return r.threshold==='approaching'||r.threshold==='exceeded'; });
+    var bannerHtml = '';
+    if (issueSubjs.length > 0) {
+      var issueText = issueSubjs.map(function(r){
+        return (T('subj_'+r.subject)||r.subject) + ' — ' + r.absences + ' abs';
+      }).join(', ');
+      bannerHtml = '<div class="att-thresh-banner">' +
+        '<div class="att-thresh-banner__h">' +
+          '<div class="att-thresh-banner__text"><i class="fa-solid fa-triangle-exclamation"></i> ' + issueText + T('grade_impact_approaching') + '</div>' +
+          '<button class="att-thresh-banner__btn" onclick="openGradeModal()" type="button">' + T('view_grade_impact') + '</button>' +
+        '</div>' +
+      '</div>';
+    }
+
+    /* ── Per-subject summary band ── */
+    var summaryHtml = '';
+    if (sum.length > 0) {
+      summaryHtml = '<div class="att-summary" style="margin-top:var(--s-3)">' +
+        '<div class="att-summary-hd"><i class="fa-solid fa-chart-bar"></i> ' + T('subj_summary') + '</div>' +
+        sum.map(function(row) {
+          var threshCls   = row.threshold==='exceeded' ? 'thresh-exceeded' : row.threshold==='approaching' ? 'thresh-approaching' : 'thresh-within';
+          var threshLabel = row.threshold==='exceeded' ? T('thresh_exceeded') : row.threshold==='approaching' ? T('thresh_approaching') : T('thresh_within');
+          var threshIcon  = row.threshold==='exceeded' ? 'fa-circle-xmark' : row.threshold==='approaching' ? 'fa-triangle-exclamation' : 'fa-circle-check';
+          var absColor    = row.absences > 0 ? 'color:var(--c-danger);font-weight:700' : '';
+          var tardColor   = row.tardies  > 0 ? 'color:var(--c-warning);font-weight:700' : '';
+          return '<div class="att-sum-row">' +
+            '<span class="subject-chip">' + (T('subj_'+row.subject)||row.subject) + '</span>' +
+            '<span class="att-sum-stats">' +
+              '<span style="' + absColor  + '">' + row.absences + ' ' + T('st_absent').toLowerCase() + '</span>' +
+              ' \xb7 ' +
+              '<span style="' + tardColor + '">' + row.tardies  + ' ' + T('st_late').toLowerCase()   + '</span>' +
+            '</span>' +
+            '<span class="thresh-badge ' + threshCls + '"><i class="fa-solid ' + threshIcon + '"></i> ' + threshLabel + '</span>' +
+          '</div>';
+        }).join('') +
+      '</div>';
+    }
+
+    /* ── Grade-impact modal HTML ── */
+    var modalHtml = '';
+    if (sum.length > 0) {
+      var subjCards = sum.map(function(row) {
+        var pct     = Math.min(Math.round((row.absences / THRESH) * 100), 100);
+        var isBad   = row.threshold==='exceeded';
+        var isWarn  = row.threshold==='approaching';
+        var cardCls = isBad ? 'gm__subj gm__subj--danger' : isWarn ? 'gm__subj gm__subj--warn' : 'gm__subj';
+        var chipCls = isBad ? 'gm__chip--danger' : isWarn ? 'gm__chip--warn' : 'gm__chip--ok';
+        var chipIco = isBad ? 'fa-circle-xmark' : isWarn ? 'fa-triangle-exclamation' : 'fa-circle-check';
+        var chipLbl = isBad ? T('thresh_exceeded') : isWarn ? T('thresh_approaching') : T('thresh_within');
+        var fillCls = isBad ? 'gm__bar-fill--danger' : isWarn ? 'gm__bar-fill--warn' : 'gm__bar-fill--ok';
+        return '<div class="' + cardCls + '">' +
+          '<div class="gm__subj-hdr">' +
+            '<span class="gm__subj-name">' + (T('subj_'+row.subject)||row.subject) + '</span>' +
+            '<span class="gm__chip ' + chipCls + '"><i class="fa-solid ' + chipIco + '"></i> ' + chipLbl + '</span>' +
+          '</div>' +
+          '<div class="gm__counts">' + row.absences + ' ' + T('st_absent').toLowerCase() + ' \xb7 ' + row.tardies + T('grade_impact_counts_suffix') + THRESH + ' abs)</div>' +
+          '<div class="gm__bar-row">' +
+            '<div class="gm__bar"><div class="gm__bar-fill ' + fillCls + '" style="width:' + pct + '%"></div></div>' +
+            '<span class="gm__bar-pct">' + pct + '%</span>' +
+          '</div>' +
+        '</div>';
+      }).join('');
+
+      modalHtml = '<div class="gm-overlay" id="dsp-att-modal" onclick="if(event.target===this)closeGradeModal()" role="dialog" aria-modal="true" aria-labelledby="gm-ttl">' +
+        '<div class="gm">' +
+          '<div class="gm__hdr">' +
+            '<span class="gm__title" id="gm-ttl"><i class="fa-solid fa-chart-pie" style="margin-right:5px"></i>' + T('grade_impact_title') + ' \xb7 ' + s.name + ' \xb7 ' + T('term_2') + '</span>' +
+            '<button class="gm__close" type="button" onclick="closeGradeModal()" aria-label="Close"><i class="fa-solid fa-xmark"></i></button>' +
+          '</div>' +
+          '<div class="gm__body">' + subjCards + '<p class="gm__note">' + T('grade_impact_policy') + '</p></div>' +
+        '</div>' +
+      '</div>';
+    }
+
+    /* ── Simplified row header ── */
+    var colHeader = '<div class="att-row2-hd">' +
+      '<span>' + T('att_col_date') + '</span>' +
+      '<span>' + T('subject') + '</span>' +
+      '<span>' + T('att_col_status') + '</span>' +
+      '<span>' + T('att_col_just') + '</span>' +
+    '</div>';
+
+    var content;
+    if (att.length===0) {
+      content = bannerHtml + summaryHtml + '<div style="padding:20px;text-align:center;color:var(--c-ink-subtle);font-size:13px">' + T('no_att_records') + '</div>';
+    } else {
+      var rows = att.map(function(a) {
+        var p  = parseStatus(a.status);
+        var sc = statusDef[p.base] || statusDef.present;
+        var dateShort = a.date.replace(/^(Mon|Tue|Wed|Thu|Fri|Sat|Sun),\s*/, '');
+        var noteText  = a.note ? ' \xb7 ' + a.note : '';
+        var justHtml;
+        if (p.just==='y') {
+          justHtml = '<span style="display:inline-flex;align-items:center;gap:4px;color:var(--c-success);font-size:11px"><i class="fa-solid fa-circle-check"></i> ' + T('just_y') + '<span style="color:var(--c-ink-subtle);font-weight:400">' + noteText + '</span></span>';
+        } else if (p.just==='n') {
+          justHtml = '<span style="display:inline-flex;align-items:center;gap:4px;color:var(--c-danger);font-size:11px"><i class="fa-solid fa-circle-xmark"></i> ' + T('just_n') + '<span style="color:var(--c-ink-subtle);font-weight:400">' + noteText + '</span></span>';
+        } else {
+          justHtml = '<span style="color:var(--c-ink-subtle);font-size:11px">—</span>';
+        }
+        return '<div class="att-row2">' +
+          '<div class="att-row2__date">' + dateShort + '<br><span style="font-size:10px">P' + (a.periodNum||'') + '</span></div>' +
+          '<span class="att-row2__subj">' + (T('subj_'+a.subject)||a.subject||'—') + '</span>' +
+          '<div class="att-row2__status"><span class="att-row2__status-dot" style="background:' + sc.dot + '"></span><span style="color:' + sc.color + ';font-weight:600;font-size:11px">' + sc.text + '</span></div>' +
+          justHtml +
+        '</div>';
+      }).join('');
+      content = bannerHtml + summaryHtml + colHeader + rows;
+    }
+
+    return '<div class="drawer-tab-panel' + (currentStudentTab==='attendance'?' active':'') + '" id="dsp-attendance" style="padding:0;position:relative">' + content + modalHtml + '</div>';
+  }
+
+  function renderNotesPanel(s) {
+    var notes = STUDENT_NOTES[s.id] || [];
+    var content;
+    if (notes.length===0) {
+      content = '<div style="padding:20px 0;text-align:center;color:var(--c-ink-subtle);font-size:13px">' + T('no_notes_yet') + '</div>';
+    } else {
+      var langN = (window.__ct_i18n && window.__ct_i18n.getLang()) || 'en';
+      content = notes.map(function(n){
+        var noteMeta = (langN==='fr' && n.meta_fr) ? n.meta_fr : n.meta;
+        var noteBody = (langN==='fr' && n.body_fr) ? n.body_fr : n.body;
+        return '<div class="dp-note">' +
+          '<div class="dp-note-meta"><i class="fa-solid fa-user-pen" style="margin-right:5px;color:var(--c-ink-subtle)"></i>' + noteMeta + '</div>' +
+          '<div class="dp-note-body">' + noteBody + '</div>' +
+        '</div>';
+      }).join('');
+    }
+    content += '<div style="margin-top:var(--s-3);padding-top:var(--s-3);border-top:1px solid var(--c-border-2)">' +
+      '<a class="btn btn--secondary" style="width:100%;justify-content:center" href="teacher-student-profile.html?id=' + s.id + '&tab=notes"><i class="fa-solid fa-pen-to-square"></i> ' + T('add_view_notes') + '</a>' +
+    '</div>';
+    return '<div class="drawer-tab-panel' + (currentStudentTab==='notes'?' active':'') + '" id="dsp-notes">' + content + '</div>';
+  }
+
+  function renderGuardianPanel(s, g) {
+    var guHtml =
+      '<div class="guardian-header">' +
+        '<div class="guardian-header-avatar">' + initials(g.name) + '</div>' +
+        '<div>' +
+          '<div class="guardian-header-name">' + g.name + '</div>' +
+          '<div class="guardian-header-rel">' + g.rel + '</div>' +
+        '</div>' +
+      '</div>' +
+      '<div class="guardian-field">' +
+        '<div class="gf-icon"><i class="fa-solid fa-phone"></i></div>' +
+        '<div><div class="gf-label">' + T('gf_phone') + '</div><div class="gf-value">' + g.phone + '</div></div>' +
+      '</div>' +
+      '<div class="guardian-field">' +
+        '<div class="gf-icon"><i class="fa-solid fa-envelope"></i></div>' +
+        '<div><div class="gf-label">' + T('gf_email') + '</div><a class="gf-link" href="mailto:' + g.email + '">' + g.email + '</a></div>' +
+      '</div>' +
+      '<div class="guardian-field">' +
+        '<div class="gf-icon"><i class="fa-solid fa-person"></i></div>' +
+        '<div><div class="gf-label">' + T('gf_relationship') + '</div><div class="gf-value">' + g.rel + ' ' + T('gf_of') + ' ' + s.name.split(' ')[0] + '</div></div>' +
+      '</div>';
+
+    if (g.emergency) {
+      guHtml += '<div class="guardian-emergency">' +
+        '<div class="emergency-banner">' +
+          '<i class="fa-solid fa-triangle-exclamation"></i>' +
+          '<div>' +
+            '<div class="emergency-label">' + T('gf_emergency') + '</div>' +
+            '<div class="emergency-value">' + g.emergency + (g.emergencyRel?' · '+g.emergencyRel:'') + '</div>' +
+            (g.emergencyPhone?'<div class="emergency-phone">' + g.emergencyPhone + '</div>':'') +
+          '</div>' +
+        '</div>' +
+      '</div>';
+    }
+
+    if (g.notes) {
+      guHtml += '<div style="margin-top:var(--s-4);padding:var(--s-3);background:var(--c-warning-tint);border:1px solid var(--c-warning-bord);border-radius:var(--r-md)">' +
+        '<div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--c-warning);margin-bottom:4px"><i class="fa-solid fa-note-sticky" style="margin-right:5px"></i>' + T('gf_notes') + '</div>' +
+        '<div style="font-size:var(--fs-sm);color:var(--c-ink)">' + g.notes + '</div>' +
+      '</div>';
+    }
+
+    return '<div class="drawer-tab-panel' + (currentStudentTab==='guardian'?' active':'') + '" id="dsp-guardian">' + guHtml + '</div>';
+  }
+
+  /* ── Grade-impact modal open/close ─────────────────────────────── */
+  function openGradeModal() {
+    var overlay = document.getElementById('dsp-att-modal');
+    if (overlay) {
+      overlay.classList.add('is-on');
+      var panels = document.getElementById('studentDrawerPanels');
+      if (panels) panels.style.overflow = 'hidden';
+    }
+  }
+  function closeGradeModal() {
+    var overlay = document.getElementById('dsp-att-modal');
+    if (overlay) {
+      overlay.classList.remove('is-on');
+      var panels = document.getElementById('studentDrawerPanels');
+      if (panels) panels.style.overflow = '';
+    }
+  }
+
+  /* ── Toast ─────────────────────────────────────────────────────── */
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg; t.classList.add('show');
+    setTimeout(function(){ t.classList.remove('show'); }, 2500);
+  }
+
+  /* ── Page re-render (i18n) ─────────────────────────────────────── */
+  function ctRerender() {
+    renderPeriodList();
+    if (currentClassId) renderDrawer();
+    if (currentSection==='students') {
+      renderFilterBar();
+      renderStudentList();
+      if (currentStudentId) renderStudentDrawer();
+    }
+  }
+  window.__ct_page_rerender = ctRerender;
+
+  /* ── Keyboard shortcuts ────────────────────────────────────────── */
+  document.addEventListener('keydown', function(e){
+    if (e.key==='Escape') { closeDrawer(); closeStudentDrawer(); }
+  });
+
+  /* ── Init ──────────────────────────────────────────────────────── */
+  renderPeriodList();
+</script>
+
+<!-- Prototype cross-portal switcher -->
+<div id="proto-switcher" style="position:fixed;bottom:16px;right:16px;z-index:9999;background:rgba(15,37,70,.95);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.1);padding:5px;border-radius:999px;box-shadow:0 8px 24px rgba(0,0,0,.25);font-family:'Segoe UI',system-ui,sans-serif;display:flex;gap:2px;align-items:center;"><span style="color:rgba(255,255,255,.4);font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:0 6px 0 10px;">Prototype</span><a href="index.html" style="display:inline-flex;align-items:center;gap:4px;padding:6px 12px;border-radius:999px;font-size:12px;font-weight:600;text-decoration:none;letter-spacing:.02em;transition:all .15s;background:transparent;color:#CBD5E0;">Index</a><a href="admin-dashboard.html" style="display:inline-flex;align-items:center;gap:4px;padding:6px 12px;border-radius:999px;font-size:12px;font-weight:600;text-decoration:none;letter-spacing:.02em;transition:all .15s;background:transparent;color:#CBD5E0;">Admin</a><a href="teacher-dashboard.html" style="display:inline-flex;align-items:center;gap:4px;padding:6px 12px;border-radius:999px;font-size:12px;font-weight:600;text-decoration:none;letter-spacing:.02em;transition:all .15s;background:#2E7DD1;color:#fff;">Teacher</a><a href="parent-app.html" style="display:inline-flex;align-items:center;gap:4px;padding:6px 12px;border-radius:999px;font-size:12px;font-weight:600;text-decoration:none;letter-spacing:.02em;transition:all .15s;background:transparent;color:#CBD5E0;">Parent</a><span style="color:rgba(255,255,255,.2);padding:0 4px;">|</span><a href="#" class="lang-btn" data-lang="en" onclick="event.preventDefault();window.__ct_i18n.setLang('en');" style="display:inline-flex;align-items:center;gap:4px;padding:6px 10px;border-radius:999px;font-size:11px;font-weight:700;text-decoration:none;letter-spacing:.04em;background:#2E7DD1;color:#fff;">EN</a><a href="#" class="lang-btn" data-lang="fr" onclick="event.preventDefault();window.__ct_i18n.setLang('fr');" style="display:inline-flex;align-items:center;gap:4px;padding:6px 10px;border-radius:999px;font-size:11px;font-weight:700;text-decoration:none;letter-spacing:.04em;background:transparent;color:#CBD5E0;">FR</a></div>
+
+<script id="i18n-core">
+(function(){
+  function getLang(){ var p=new URLSearchParams(window.location.search); return p.get('lang')==='fr'?'fr':'en'; }
+  function setLangUrl(href, lang){ if(!href||href.startsWith('http')||href.startsWith('#')||href.startsWith('javascript:'))return href; var base=href.split('?')[0].split('#')[0]; var hash=href.indexOf('#')>=0?href.substring(href.indexOf('#')):''; if(!base.endsWith('.html'))return href; return base+(lang==='fr'?'?lang=fr':'')+hash; }
+  function applyLang(){
+    var lang = getLang();
+    document.documentElement.lang = lang;
+    document.body && (document.body.dataset.lang = lang);
+    document.querySelectorAll('[data-en]').forEach(function(el){ var val=el.getAttribute('data-'+lang); if(val!==null){ if(el.hasAttribute('data-html')) el.innerHTML=val; else el.textContent=val; } });
+    document.querySelectorAll('[data-placeholder-en]').forEach(function(el){ var val=el.getAttribute('data-placeholder-'+lang); if(val!==null) el.setAttribute('placeholder',val); });
+    document.querySelectorAll('[data-title-en]').forEach(function(el){ var val=el.getAttribute('data-title-'+lang); if(val!==null) el.setAttribute('title',val); });
+    document.querySelectorAll('a[href]').forEach(function(a){ a.setAttribute('href',setLangUrl(a.getAttribute('href'),lang)); });
+    document.querySelectorAll('.lang-btn').forEach(function(btn){ var on=btn.getAttribute('data-lang')===lang; btn.style.background=on?'#2E7DD1':'transparent'; btn.style.color=on?'#fff':'#CBD5E0'; });
+    if(typeof window.__ct_page_rerender==='function') window.__ct_page_rerender();
+  }
+  function setLang(lang){ var p=new URLSearchParams(window.location.search); if(lang==='fr')p.set('lang','fr'); else p.delete('lang'); var qs=p.toString(); var newUrl=window.location.pathname+(qs?'?'+qs:'')+window.location.hash; window.history.replaceState({}, '', newUrl); applyLang(); }
+  window.__ct_i18n = { getLang:getLang, applyLang:applyLang, setLang:setLang };
+  if(document.readyState==='loading'){ document.addEventListener('DOMContentLoaded', applyLang); } else { applyLang(); }
+})();
+</script>
+
+</body>
+</html>

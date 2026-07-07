@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ClassTrack — Attendance Clerk Sign In</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <style>
+    :root {
+      --c-bg:            #F4F6FA;
+      --c-surface:       #FFFFFF;
+      --c-surface-2:     #F8FAFC;
+      --c-border:        #D6DBE2;
+      --c-border-2:      #E5E8EE;
+      --c-border-strong: #A6ADBB;
+      --c-ink:           #0F2546;
+      --c-ink-muted:     #475467;
+      --c-ink-subtle:    #5C6470;
+      --c-brand:         #1B5DAF;
+      --c-brand-ink:     #0E2E55;
+      --c-brand-tint:    #E8F0FA;
+      --c-sidebar:       #102a50;
+      --c-sidebar-2:     #0A1B36;
+      --c-focus:         #FFB400;
+      --s-3:12px; --s-4:16px; --s-5:24px; --s-6:32px; --s-7:48px;
+      --r-sm:4px; --r-md:6px; --r-lg:10px; --r-xl:14px; --r-pill:999px;
+      --ff: "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      --fs-xs:12px; --fs-sm:13px; --fs-md:14px; --fs-lg:16px; --fs-xl:20px; --fs-2xl:24px;
+      --shadow-xl: 0 16px 48px rgba(15,37,70,0.18);
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; }
+    body {
+      font-family: var(--ff);
+      background:
+        radial-gradient(ellipse at top right,  rgba(27,93,175,0.12), transparent 55%),
+        radial-gradient(ellipse at bottom left, rgba(10,27,54,0.10), transparent 55%),
+        var(--c-bg);
+      min-height: 100vh;
+      display: flex; align-items: center; justify-content: center;
+      padding: var(--s-5);
+      color: var(--c-ink); font-size: var(--fs-md); line-height: 1.55;
+      -webkit-font-smoothing: antialiased;
+    }
+    a { color: var(--c-brand); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    button { font-family: inherit; cursor: pointer; }
+    :focus-visible { outline: 3px solid var(--c-focus); outline-offset: 2px; border-radius: var(--r-sm); }
+
+    html[data-lang="fr"] .t-en { display: none !important; }
+    html[data-lang="en"] .t-fr { display: none !important; }
+
+    /* ── Shell ── */
+    .auth-shell {
+      width: 100%; max-width: 1060px;
+      background: var(--c-surface);
+      border: 1px solid var(--c-border);
+      border-radius: var(--r-xl);
+      overflow: hidden;
+      box-shadow: var(--shadow-xl);
+      display: grid;
+      grid-template-columns: 1.1fr 1fr;
+      min-height: 500px;
+    }
+    @media (max-width: 780px) {
+      .auth-shell { grid-template-columns: 1fr; }
+      .auth-hero  { display: none; }
+      body { padding: var(--s-4); align-items: flex-start; }
+    }
+
+    /* ── Hero ── */
+    .auth-hero {
+      background: linear-gradient(160deg, var(--c-sidebar) 0%, var(--c-sidebar-2) 100%);
+      color: #fff;
+      padding: var(--s-7) var(--s-6);
+      display: flex; flex-direction: column; justify-content: center;
+      position: relative; overflow: hidden;
+      order: 1;
+    }
+    .auth-hero::before {
+      content: ''; position: absolute;
+      width: 400px; height: 400px; border-radius: 50%;
+      background: rgba(255,255,255,0.03);
+      bottom: -160px; right: -140px;
+    }
+    .auth-hero::after {
+      content: ''; position: absolute;
+      width: 220px; height: 220px; border-radius: 50%;
+      background: rgba(27,93,175,0.2);
+      top: -60px; left: -60px;
+    }
+    .auth-hero > * { position: relative; }
+
+    .hero-logo { display: flex; align-items: center; gap: var(--s-3); }
+    .hero-logo__mark {
+      width: 42px; height: 42px;
+      background: rgba(255,255,255,0.12);
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: var(--r-lg);
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 800; font-size: var(--fs-xl); color: #fff;
+    }
+    .hero-logo__text { font-size: var(--fs-lg); font-weight: 700; }
+    .hero-logo__sub  { font-size: var(--fs-xs); color: rgba(255,255,255,0.6); margin-top: 2px; }
+
+    /* Stats strip */
+    .hero-stats {
+      display: grid; grid-template-columns: 1fr 1fr 1fr;
+      gap: var(--s-3); margin-top: var(--s-5);
+    }
+    .hero-stat {
+      padding: var(--s-3);
+      background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: var(--r-md); text-align: center;
+    }
+    .hero-stat__value {
+      font-size: var(--fs-xl); font-weight: 700;
+      font-variant-numeric: tabular-nums; line-height: 1;
+    }
+    .hero-stat__label {
+      font-size: 10px; font-weight: 600; text-transform: uppercase;
+      letter-spacing: 0.08em; color: rgba(255,255,255,0.55);
+      margin-top: 4px; line-height: 1.3;
+    }
+
+    .hero-headline {
+      margin-top: var(--s-6);
+      font-size: 30px; font-weight: 700;
+      line-height: 1.2; letter-spacing: -0.02em;
+    }
+    .hero-sub {
+      font-size: var(--fs-lg); color: rgba(255,255,255,0.75);
+      line-height: 1.55; max-width: 380px; margin-top: var(--s-3);
+    }
+
+    /* ── Form ── */
+    .auth-form {
+      padding: var(--s-7) var(--s-6);
+      display: flex; flex-direction: column; justify-content: center;
+      max-width: 440px; margin: 0 auto; width: 100%;
+      order: 2;
+    }
+
+    .portal-badge {
+      display: inline-flex; align-items: center; gap: var(--s-2);
+      padding: 3px 10px 3px 6px;
+      background: #FEF3C7; border: 1px solid #D9A84F;
+      border-radius: var(--r-pill);
+      font-size: var(--fs-xs); font-weight: 700; color: #7A4A00;
+      margin-bottom: var(--s-4); width: fit-content;
+    }
+    .portal-badge__dot {
+      width: 7px; height: 7px; border-radius: 50%;
+      background: #D97706; flex-shrink: 0;
+    }
+
+    .auth-title { font-size: var(--fs-2xl); font-weight: 700; letter-spacing: -0.01em; }
+    .auth-sub   { color: var(--c-ink-muted); font-size: var(--fs-md); margin-top: 4px; }
+
+    .sso-btn {
+      display: flex; align-items: center; gap: var(--s-3);
+      width: 100%; padding: 14px var(--s-4);
+      background: var(--c-brand); border: none;
+      border-radius: var(--r-md);
+      color: #fff; font-size: var(--fs-md); font-weight: 600;
+      text-decoration: none; margin-top: var(--s-5);
+      transition: background 0.12s;
+    }
+    .sso-btn:hover { background: var(--c-brand-ink); text-decoration: none; color: #fff; }
+    .sso-btn__icon {
+      width: 32px; height: 32px; flex-shrink: 0;
+      background: rgba(255,255,255,0.15); border-radius: var(--r-sm);
+      display: flex; align-items: center; justify-content: center; font-size: 18px;
+    }
+    .sso-btn__label { font-size: var(--fs-xs); font-weight: 400; color: rgba(255,255,255,0.75); display: block; margin-top: 1px; }
+    .sso-btn__arrow { margin-left: auto; color: rgba(255,255,255,0.65); font-size: var(--fs-sm); }
+
+    .auth-help {
+      margin-top: var(--s-4);
+      background: var(--c-surface-2);
+      border: 1px solid var(--c-border-2);
+      border-radius: var(--r-lg);
+      padding: var(--s-3) var(--s-4);
+      display: flex; align-items: flex-start; gap: var(--s-3);
+    }
+    .auth-help__icon { font-size: var(--fs-md); color: var(--c-ink-subtle); flex-shrink: 0; margin-top: 1px; }
+    .auth-help__title { font-weight: 600; color: var(--c-ink); font-size: var(--fs-sm); }
+    .auth-help__body  { color: var(--c-ink-muted); font-size: var(--fs-xs); margin-top: 3px; line-height: 1.5; }
+
+    .auth-links {
+      margin-top: var(--s-5);
+      display: flex; align-items: center; justify-content: center;
+      gap: var(--s-3); flex-wrap: wrap;
+      font-size: var(--fs-xs); color: var(--c-ink-subtle);
+    }
+    .auth-links a { color: var(--c-ink-subtle); }
+    .auth-links a:hover { color: var(--c-brand); }
+    .auth-links__sep { color: var(--c-border-strong); }
+    .lang { display: inline-flex; align-items: center; gap: 4px; }
+    .lang a { color: var(--c-ink-subtle); }
+    .lang a:hover { color: var(--c-brand); }
+    .lang .active { font-weight: 700; color: var(--c-brand); pointer-events: none; }
+  </style>
+</head>
+<body>
+
+<div class="auth-shell" role="main">
+
+  <!-- Hero -->
+  <aside class="auth-hero" aria-hidden="true">
+    <div>
+      <div class="hero-logo">
+        <div class="hero-logo__mark">CT</div>
+        <div>
+          <div class="hero-logo__text">ClassTrack</div>
+          <div class="hero-logo__sub">
+            <span class="t-en">EC Catholic · Attendance Clerk portal</span>
+            <span class="t-fr">EC Catholic · Portail du secrétariat</span>
+          </div>
+        </div>
+      </div>
+
+      <h1 class="hero-headline">
+        <span class="t-en">Every student<br>accounted for.</span>
+        <span class="t-fr">Chaque élève<br>est comptabilisé.</span>
+      </h1>
+      <p class="hero-sub">
+        <span class="t-en">School-wide absence management, parent reply reviews, and late sign-ins — all in one dashboard.</span>
+        <span class="t-fr">Gestion des absences à l'échelle de l'école, suivi des réponses parentales et accueil des retards — dans un seul tableau de bord.</span>
+      </p>
+    </div>
+  </aside>
+
+  <!-- Form -->
+  <section class="auth-form">
+
+    <div class="portal-badge">
+      <div class="portal-badge__dot"></div>
+      <i class="fa-solid fa-id-badge" style="font-size:10px;" aria-hidden="true"></i>
+      <span class="t-en">Attendance Clerk portal</span>
+      <span class="t-fr">Portail du secrétariat</span>
+    </div>
+
+    <h2 class="auth-title">
+      <span class="t-en">Sign in to ClassTrack</span>
+      <span class="t-fr">Connexion à ClassTrack</span>
+    </h2>
+    <p class="auth-sub">
+      <span class="t-en">Use your EC Catholic school account to continue.</span>
+      <span class="t-fr">Utilisez votre compte d'école EC Catholic pour continuer.</span>
+    </p>
+
+    <a href="dashboard.html" class="sso-btn">
+      <span class="sso-btn__icon" aria-hidden="true"><i class="fa-brands fa-microsoft"></i></span>
+      <span>
+        <span class="t-en">Continue with Microsoft</span>
+        <span class="t-fr">Continuer avec Microsoft</span>
+        <span class="sso-btn__label t-en">@ecolecatholique.ca account</span>
+        <span class="sso-btn__label t-fr">Compte @ecolecatholique.ca</span>
+      </span>
+      <i class="fa-solid fa-arrow-right sso-btn__arrow" aria-hidden="true"></i>
+    </a>
+
+    <div class="auth-help">
+      <i class="fa-solid fa-circle-question auth-help__icon" aria-hidden="true"></i>
+      <div>
+        <div class="auth-help__title">
+          <span class="t-en">Can't sign in?</span>
+          <span class="t-fr">Vous ne pouvez pas vous connecter ?</span>
+        </div>
+        <div class="auth-help__body">
+          <span class="t-en">Use the Microsoft account linked to your EC Catholic staff profile. If your role isn't set up, contact your school's IT administrator.</span>
+          <span class="t-fr">Utilisez le compte Microsoft lié à votre profil du personnel EC Catholic. Si votre rôle n'est pas configuré, contactez l'administrateur informatique de votre école.</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="auth-links">
+      <a href="#" class="t-en">Help</a><a href="#" class="t-fr">Aide</a>
+      <span class="auth-links__sep">·</span>
+      <a href="#" class="t-en">Privacy</a><a href="#" class="t-fr">Confidentialité</a>
+      <span class="auth-links__sep">·</span>
+      <a href="#" class="t-en">Terms</a><a href="#" class="t-fr">Conditions</a>
+      <span class="auth-links__sep">·</span>
+      <div class="lang">
+        <a href="#" onclick="setLang('en');return false;" id="lang-en" class="active">EN</a>
+        <span>/</span>
+        <a href="#" onclick="setLang('fr');return false;" id="lang-fr">FR</a>
+      </div>
+    </div>
+
+  </section>
+</div>
+
+<script>
+  function setLang(l) {
+    document.documentElement.setAttribute('data-lang', l);
+    document.getElementById('lang-en').className = l==='en'?'active':'';
+    document.getElementById('lang-fr').className = l==='fr'?'active':'';
+  }
+  setLang(new URLSearchParams(location.search).get('lang')==='fr'?'fr':'en');
+</script>
+</body>
+</html>

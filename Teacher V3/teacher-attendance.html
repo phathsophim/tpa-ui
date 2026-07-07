@@ -1,0 +1,1319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ClassTrack — Mark Attendance</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: #F0F4F9; color: #1A2B45;
+      display: flex; min-height: 100vh; font-size: 14px;
+    }
+    .sidebar {
+      width: 240px; min-height: 100vh; background: #0F2546;
+      display: flex; flex-direction: column; flex-shrink: 0;
+      position: fixed; top: 0; left: 0; bottom: 0; z-index: 100;
+    }
+    .sidebar-logo { padding: 28px 24px 20px; border-bottom: 1px solid rgba(255,255,255,0.08); }
+    .logo-mark { display: flex; align-items: center; gap: 10px; }
+    .logo-icon { width: 36px; height: 36px; background: #2E7DD1; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 16px; color: #fff; }
+    .logo-text { color: #fff; font-size: 17px; font-weight: 700; letter-spacing: -0.3px; }
+    .logo-sub { color: rgba(255,255,255,0.45); font-size: 11px; margin-top: 2px; }
+    .sidebar-nav { flex: 1; overflow-y: auto; padding: 12px 0; }
+    .sidebar-section { padding: 18px 12px 6px; }
+    .sidebar-section-label { text-transform: uppercase; font-size: 10px; font-weight: 600; letter-spacing: 1.2px; color: rgba(255,255,255,0.35); padding: 0 12px; margin-bottom: 6px; }
+    .nav-item { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 8px; cursor: pointer; color: rgba(255,255,255,0.6); font-size: 13.5px; font-weight: 500; transition: all 0.15s; text-decoration: none; margin-bottom: 2px; }
+    .nav-item:hover { background: rgba(255,255,255,0.07); color: #fff; }
+    .nav-item.active { background: #2E7DD1; color: #fff; }
+    .nav-item .nav-icon { font-size: 15px; width: 20px; text-align: center; color: inherit; }
+    .nav-badge { margin-left: auto; background: #E53E3E; color: #fff; font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 10px; }
+    .sidebar-footer { margin-top: auto; padding: 16px 12px; border-top: 1px solid rgba(255,255,255,0.08); }
+    .user-info { display: flex; align-items: center; gap: 10px; padding: 8px 12px; border-radius: 8px; cursor: pointer; transition: background 0.15s; }
+    .user-info:hover { background: rgba(255,255,255,0.07); }
+    .user-avatar { width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, #2E7DD1, #1A5FA8); color: #fff; font-weight: 700; font-size: 13px; display: flex; align-items: center; justify-content: center; }
+    .user-name { color: #fff; font-size: 13px; font-weight: 600; }
+    .user-role { color: rgba(255,255,255,0.45); font-size: 11px; }
+
+    .main { margin-left: 240px; flex: 1; display: flex; flex-direction: column; min-height: 100vh; }
+    .topbar { background: #fff; border-bottom: 1px solid #E2E8F0; padding: 0 32px; height: 64px; display: flex; align-items: center; gap: 16px; position: sticky; top: 0; z-index: 90; }
+    .topbar-left h1 { font-size: 18px; font-weight: 700; color: #0F2546; }
+    .topbar-left p { font-size: 12px; color: #718096; margin-top: 1px; }
+    .topbar-right { margin-left: auto; display: flex; align-items: center; gap: 12px; }
+    .autosave-indicator { display: flex; align-items: center; gap: 6px; font-size: 12.5px; color: #059669; font-weight: 500; }
+    .autosave-indicator i { font-size: 12px; }
+    .autosave-indicator.saving { color: #D97706; }
+    .icon-btn { width: 36px; height: 36px; border-radius: 8px; border: 1px solid #E2E8F0; background: #fff; display: flex; align-items: center; justify-content: center; color: #4A5568; cursor: pointer; font-size: 15px; position: relative; }
+    .icon-btn:hover { background: #F7FAFC; }
+    .notif-dot { position: absolute; top: 7px; right: 7px; width: 7px; height: 7px; border-radius: 50%; background: #E53E3E; border: 1.5px solid #fff; }
+    .page-body { padding: 28px 32px; flex: 1; }
+
+    /* Session selector */
+    .session-bar {
+      display: flex; align-items: center; gap: 12px; margin-bottom: 20px;
+      padding: 14px 20px; background: #fff; border-radius: 12px; border: 1px solid #E2E8F0;
+    }
+    .session-field { display: flex; flex-direction: column; gap: 3px; }
+    .session-field label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; color: #718096; }
+    .session-select {
+      padding: 7px 12px; border: 1px solid #E2E8F0; border-radius: 8px;
+      font-size: 13.5px; font-weight: 500; color: #1A2B45; background: #F8FAFC; cursor: pointer; outline: none;
+    }
+    .session-select:focus { border-color: #2E7DD1; background: #fff; }
+    .session-divider { width: 1px; height: 36px; background: #E2E8F0; margin: 0 4px; }
+    .progress-pill {
+      margin-left: auto; display: flex; align-items: center; gap: 8px;
+      background: #F0F4F9; border-radius: 20px; padding: 6px 14px;
+    }
+    .progress-pill span { font-size: 13px; font-weight: 600; color: #1A2B45; }
+    .progress-pill .pp-sub { font-size: 12px; color: #718096; font-weight: 400; }
+
+    /* Bulk actions bar */
+    .bulk-bar {
+      display: flex; align-items: center; gap: 10px; margin-bottom: 14px;
+    }
+    .bulk-btn {
+      display: inline-flex; align-items: center; gap: 7px;
+      padding: 8px 14px; border-radius: 8px; font-size: 13px; font-weight: 500;
+      cursor: pointer; border: 1px solid #E2E8F0; background: #fff; color: #1A2B45;
+      transition: all .15s;
+    }
+    .bulk-btn:hover { background: #F0F4F9; border-color: #CBD5E0; }
+    .bulk-btn.green { border-color: #059669; color: #059669; background: #ECFDF5; }
+    .bulk-btn.green:hover { background: #D1FAE5; }
+    .bulk-search {
+      display: flex; align-items: center; gap: 8px; background: #fff;
+      border: 1px solid #E2E8F0; border-radius: 8px; padding: 8px 12px; margin-left: auto; min-width: 240px;
+    }
+    .bulk-search i { color: #A0AEC0; font-size: 13px; }
+    .bulk-search input { border: none; outline: none; font-size: 13px; color: #1A2B45; background: transparent; width: 100%; }
+    .bulk-search input::placeholder { color: #A0AEC0; }
+
+    /* Attendance table */
+    .card { background: #fff; border-radius: 12px; border: 1px solid #E2E8F0; overflow: hidden; }
+    table { width: 100%; border-collapse: collapse; }
+    thead th {
+      padding: 12px 16px; text-align: left; font-size: 11.5px; font-weight: 700;
+      letter-spacing: .05em; text-transform: uppercase; color: #718096;
+      background: #F8FAFC; border-bottom: 1px solid #E2E8F0; white-space: nowrap;
+    }
+    tbody tr { border-bottom: 1px solid #F1F5F9; transition: background .12s; }
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:hover { background: #FAFBFD; }
+    td { padding: 10px 16px; font-size: 13.5px; color: #2D3748; vertical-align: middle; }
+
+    .student-cell { display: flex; align-items: center; gap: 12px; }
+    .s-avatar { width: 36px; height: 36px; border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; color: #fff; }
+    .s-name { font-weight: 600; color: #1A2B45; font-size: 13.5px; }
+    .s-id { font-size: 11.5px; color: #A0AEC0; margin-top: 1px; }
+
+    /* P/A/L toggle buttons */
+    .pal-group { display: flex; gap: 4px; }
+    .pal-btn {
+      width: 38px; height: 34px; border-radius: 7px; border: 1.5px solid #E2E8F0;
+      background: #fff; font-size: 12px; font-weight: 700; cursor: pointer;
+      transition: all .15s; color: #A0AEC0; display: flex; align-items: center; justify-content: center;
+    }
+    .pal-btn:hover { border-color: #CBD5E0; color: #718096; background: #F8FAFC; }
+    .pal-btn.active-p { background: #ECFDF5; border-color: #059669; color: #059669; }
+    .pal-btn.active-a { background: #FEF2F2; border-color: #DC2626; color: #DC2626; }
+    .pal-btn.active-l { background: #FFFBEB; border-color: #D97706; color: #D97706; }
+
+    /* Note field */
+    .note-input {
+      width: 200px; padding: 6px 10px; border: 1px solid #E2E8F0; border-radius: 7px;
+      font-size: 12.5px; color: #1A2B45; background: #F8FAFC; outline: none;
+    }
+    .note-input:focus { border-color: #2E7DD1; background: #fff; }
+    .note-input::placeholder { color: #A0AEC0; }
+
+    /* Submit footer */
+    .submit-footer {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 16px 20px; background: #fff; border-top: 1px solid #E2E8F0;
+      border-radius: 0 0 12px 12px; gap: 16px;
+    }
+    .submit-info { font-size: 13px; color: #718096; }
+    .submit-info strong { color: #1A2B45; }
+    .submit-btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 10px 24px; background: #2E7DD1; color: #fff;
+      border: none; border-radius: 9px; font-size: 14px; font-weight: 600;
+      cursor: pointer; transition: background .15s;
+    }
+    .submit-btn:hover { background: #2563EB; }
+    .submit-btn:disabled { background: #A0AEC0; cursor: not-allowed; }
+    .submit-btn.submitted { background: #059669; }
+
+    /* Completion indicator per row */
+    .row-done td { background: #FAFFFE !important; }
+    .check-col { width: 28px; text-align: center; }
+    .row-check { color: #D1D5DB; font-size: 14px; }
+    .row-check.done { color: #059669; }
+
+    .toast { position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%) translateY(20px); background: #1A2B45; color: #fff; padding: 10px 20px; border-radius: 8px; font-size: 13px; opacity: 0; transition: all .25s; pointer-events: none; z-index: 999; white-space: nowrap; }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    /* Submitted overlay */
+    .submitted-banner { display: none; align-items: center; gap: 12px; background: #ECFDF5; border: 1px solid #6EE7B7; border-radius: 10px; padding: 14px 20px; margin-bottom: 16px; }
+    .submitted-banner.show { display: flex; }
+    .submitted-banner i { font-size: 20px; color: #059669; }
+    .submitted-banner span { font-size: 14px; font-weight: 600; color: #065F46; }
+    .submitted-banner small { font-size: 12px; color: #047857; display: block; margin-top: 1px; }
+
+    /* ── Scenario alerts ── */
+    .scenario-alert { display: flex; align-items: center; gap: 14px; padding: 12px 18px; background: #FFFBEB; border: 1px solid #FDE68A; border-radius: 10px; margin-bottom: 14px; }
+    .scenario-alert .alert-icon { width: 36px; height: 36px; border-radius: 10px; background: #FEF3C7; color: #D97706; display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; }
+    .scenario-alert .alert-body { flex: 1; }
+    .scenario-alert .alert-title { font-size: 13.5px; font-weight: 700; color: #92400E; }
+    .scenario-alert .alert-desc { font-size: 12px; color: #B45309; margin-top: 2px; }
+    .scenario-alert.alert-danger { background: #FEF2F2; border-color: #FCA5A5; }
+    .scenario-alert.alert-danger .alert-icon { background: #FEE2E2; color: #DC2626; }
+    .scenario-alert.alert-danger .alert-title { color: #991B1B; }
+    .scenario-alert.alert-danger .alert-desc { color: #B91C1C; }
+
+    /* ── Row states ── */
+    .row-locked td { background: #FAFBFD !important; }
+    .row-awaiting td { background: #FFF8EB !important; }
+    .row-dnrc td { background: #FFF1F0 !important; }
+    .lock-chip { display: inline-flex; align-items: center; gap: 6px; padding: 6px 10px; border-radius: 7px; font-size: 12px; font-weight: 600; white-space: nowrap; }
+    .lock-chip i.lock-icon { font-size: 10px; opacity: .8; }
+    .lock-future { background: #EBF4FF; color: #1D4ED8; border: 1px solid #BFDBFE; }
+    .lock-event  { background: #F3F4FF; color: #4338CA; border: 1px solid #C7D2FE; }
+    .locked-reason { font-size: 12.5px; color: #4A5568; font-style: italic; }
+    .locked-reason small { display: block; font-size: 11px; color: #A0AEC0; font-style: normal; margin-top: 1px; }
+
+    /* ── Late-arrival awaiting check-in ── */
+    .checkin-btn { display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px; border-radius: 7px; background: #D97706; color: #fff; border: none; font-size: 12.5px; font-weight: 600; cursor: pointer; transition: background .15s; white-space: nowrap; }
+    .checkin-btn:hover { background: #B45309; }
+    .signed-in-meta { font-size: 11.5px; color: #92400E; font-weight: 500; margin-top: 3px; display: flex; align-items: center; gap: 4px; }
+    .signed-in-meta i { font-size: 10px; }
+
+    /* ── Master-detail split-pane ── */
+    .split { display: grid; grid-template-columns: 1fr; gap: 16px; transition: grid-template-columns .25s; }
+    .split.has-drawer { grid-template-columns: 1fr minmax(380px, 460px); }
+    @media (max-width: 1100px) { .split.has-drawer { grid-template-columns: 1fr; } }
+
+    /* ── Reason column ── */
+    .reason-cell { font-size: 12.5px; color: #4A5568; max-width: 220px; }
+    .reason-cell em { color: #A0AEC0; font-style: italic; }
+    .reason-cat { display: inline-flex; align-items: center; gap: 5px; padding: 3px 8px; border-radius: 99px; font-size: 11px; font-weight: 600; background: #EEF1F5; color: #475467; white-space: nowrap; }
+    .reason-cat i { font-size: 9px; opacity: .7; }
+    .reason-cat.reason-event { background: #F3F4FF; color: #4338CA; border: 1px solid #C7D2FE; }
+    .reason-text { font-size: 12px; color: #5C6470; margin-top: 4px; line-height: 1.4; }
+
+    /* ── Mark column ── */
+    .mark-cell { white-space: nowrap; }
+
+    /* ── Stage chip (workflow lifecycle) ── */
+    .stage-chip { display:inline-flex; align-items:center; gap:5px; padding:4px 10px; border-radius:99px; font-size:11.5px; font-weight:600; white-space:nowrap; border:1px solid transparent; }
+    .stage-chip i { font-size:10px; opacity:.85; }
+    .stage-await-checkin  { background:#FFFBEB; color:#92400E; border-color:#FDE68A; }
+    .stage-did-not-reach  { background:#FEF2F2; color:#991B1B; border-color:#FCA5A5; }
+    .stage-justified      { background:#ECFDF5; color:#065F46; border-color:#A7F3D0; }
+    .stage-unjustified    { background:#FEF2F2; color:#991B1B; border-color:#FCA5A5; }
+
+    /* ── State chips (drawer hero) ── */
+    .state-chip { display:inline-flex; align-items:center; gap:5px; padding:4px 10px; border-radius:99px; font-size:11.5px; font-weight:600; white-space:nowrap; }
+    .state-chip .sd { width:6px; height:6px; border-radius:50%; }
+    .chip-present     { background:#ECFDF5; color:#059669; } .chip-present .sd { background:#059669; }
+    .chip-absent      { background:#FEF2F2; color:#DC2626; } .chip-absent .sd { background:#DC2626; }
+    .chip-late        { background:#FFFBEB; color:#D97706; } .chip-late .sd { background:#D97706; }
+    .chip-signed-in   { background:#E3F1FA; color:#0E5C8A; } .chip-signed-in .sd { background:#0E5C8A; }
+    .chip-justified   { background:#ECFDF5; color:#065F46; } .chip-justified .sd { background:#10B981; }
+    .chip-unjustified { background:#FEF2F2; color:#991B1B; } .chip-unjustified .sd { background:#EF4444; }
+    .chip-none        { background:#F8FAFC; color:#A0AEC0; border:1px solid #E2E8F0; } .chip-none .sd { background:#CBD5E0; }
+
+    /* Highlighted row when drawer open — td-level override wins against other !important row states */
+    tbody tr.row-selected td { background: #EBF4FF !important; }
+    tbody tr.row-selected td:first-child { box-shadow: inset 4px 0 0 #2E7DD1; }
+    tbody tr { cursor: pointer; }
+
+    /* ── Drawer ── */
+    .drawer-card { background:#fff; border-radius:12px; border:1px solid #E2E8F0; display:flex; flex-direction:column; position:sticky; top:88px; max-height:calc(100vh - 110px); overflow:hidden; }
+    .drawer-empty { padding:60px 30px; text-align:center; color:#A0AEC0; }
+    .drawer-empty i { font-size:32px; margin-bottom:12px; display:block; }
+    .drawer-h { padding:14px 18px; border-bottom:1px solid #F1F5F9; display:flex; align-items:center; justify-content:space-between; background:#F8FAFC; }
+    .drawer-h h3 { font-size:14px; font-weight:700; color:#0F2546; }
+    .drawer-close { background:transparent; border:none; color:#718096; font-size:16px; cursor:pointer; padding:4px 8px; border-radius:6px; }
+    .drawer-close:hover { background:#E2E8F0; }
+    #drawerContent { display:flex; flex-direction:column; flex:1; min-height:0; overflow:hidden; }
+    .drawer-b { padding:18px; flex:1; overflow-y:auto; min-height:0; }
+    .drawer-hero { display:flex; gap:14px; align-items:center; padding-bottom:16px; border-bottom:1px solid #F1F5F9; margin-bottom:16px; }
+    .drawer-avatar { width:48px; height:48px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:17px; font-weight:700; color:#fff; flex-shrink:0; }
+    .drawer-name { font-size:16px; font-weight:700; color:#0F2546; }
+    .drawer-meta { font-size:12px; color:#718096; margin-top:2px; }
+    .drawer-id { font-size:11.5px; color:#A0AEC0; margin-top:2px; }
+    .drawer-actions { padding:14px 18px; border-top:1px solid #F1F5F9; background:#F8FAFC; display:flex; gap:8px; }
+    .drawer-btn { flex:1; padding:10px 14px; border-radius:8px; font-size:13.5px; font-weight:600; cursor:pointer; display:inline-flex; align-items:center; justify-content:center; gap:6px; border:1px solid transparent; transition:all .15s; }
+    .drawer-btn-p { background:#ECFDF5; color:#059669; border-color:#A7F3D0; }
+    .drawer-btn-p:hover, .drawer-btn-p.is-on { background:#059669; color:#fff; border-color:#059669; }
+    .drawer-btn-a { background:#FEF2F2; color:#DC2626; border-color:#FCA5A5; }
+    .drawer-btn-a:hover, .drawer-btn-a.is-on { background:#DC2626; color:#fff; border-color:#DC2626; }
+    .drawer-btn:disabled { opacity:.4; cursor:not-allowed; }
+
+    /* ── Audit timeline ── */
+    .audit-item { display:grid; grid-template-columns:24px 1fr; gap:10px; padding:8px 0; position:relative; }
+    .audit-item:not(:last-child)::before { content:''; position:absolute; left:11px; top:24px; bottom:-4px; width:2px; background:#E2E8F0; }
+    .audit-dot { width:24px; height:24px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:10px; flex-shrink:0; position:relative; z-index:1; }
+    .ad-blue   { background:#EBF4FF; color:#2E7DD1; border:2px solid #BFDBFE; }
+    .ad-green  { background:#ECFDF5; color:#059669; border:2px solid #A7F3D0; }
+    .ad-amber  { background:#FFFBEB; color:#D97706; border:2px solid #FDE68A; }
+    .ad-red    { background:#FEF2F2; color:#DC2626; border:2px solid #FCA5A5; }
+    .ad-purple { background:#F3F4FF; color:#4F46E5; border:2px solid #C7D2FE; }
+    .ad-gray   { background:#F8FAFC; color:#A0AEC0; border:2px solid #E2E8F0; }
+    .audit-event  { font-size:13px; font-weight:600; color:#1A2B45; }
+    .audit-detail { font-size:11.5px; color:#718096; margin-top:2px; line-height:1.5; }
+    .audit-time   { font-size:10.5px; color:#A0AEC0; margin-top:3px; }
+    .audit-note-body { font-size:12.5px; color:#2D3748; background:#F8FAFC; border:1px solid #E2E8F0; border-radius:7px; padding:8px 11px; margin-top:4px; line-height:1.5; }
+
+    /* ── Note form ── */
+    .note-form-area { padding:12px 14px; background:#F8FAFC; border:1px solid #E2E8F0; border-radius:9px; }
+    .note-form-area textarea { width:100%; border:1px solid #E2E8F0; background:#fff; border-radius:7px; padding:9px 11px; font-size:12.5px; font-family:inherit; min-height:60px; resize:vertical; outline:none; }
+    .note-form-area textarea:focus { border-color:#2E7DD1; box-shadow:0 0 0 3px rgba(46,125,209,.08); }
+    .note-form-foot { display:flex; justify-content:space-between; align-items:center; margin-top:8px; }
+    .note-form-foot small { font-size:11px; color:#A0AEC0; }
+    .note-save-btn { padding:7px 14px; background:#2E7DD1; color:#fff; border:none; border-radius:7px; font-size:12.5px; font-weight:600; cursor:pointer; display:inline-flex; align-items:center; gap:5px; }
+    .note-save-btn:hover { background:#2563EB; }
+    .note-save-btn:disabled { opacity:.5; cursor:not-allowed; }
+
+    /* ── Missing-attendance banner ── */
+    .missing-banner { display:flex; gap:12px; align-items:center; padding:10px 14px; border-radius:10px; margin-bottom:12px; transition:all .25s; }
+    .mb-yellow { background:#FEF9C3; border:1px solid #FDE68A; color:#854D0E; }
+    .mb-orange { background:#FFEDD5; border:1px solid #FDBA74; color:#9A3412; }
+    .mb-red    { background:#FEE2E2; border:1px solid #FCA5A5; color:#991B1B; }
+    .missing-banner .mb-icon { font-size:15px; flex-shrink:0; }
+    .missing-banner .mb-body { flex:1; font-size:12.5px; }
+    .missing-banner .mb-body strong { font-weight:700; }
+    .missing-banner a.mb-link { color:inherit; font-weight:700; text-decoration:underline; cursor:pointer; }
+    .missing-banner .mb-dismiss { background:transparent; border:none; color:inherit; opacity:.6; cursor:pointer; font-size:13px; padding:4px 8px; border-radius:6px; }
+    .missing-banner .mb-dismiss:hover { opacity:1; background:rgba(0,0,0,0.05); }
+
+    /* ── Session chips (Period + Subject) ── */
+    .session-chip { display:inline-flex; align-items:center; gap:4px; padding:2px 9px; border-radius:99px; font-size:11px; font-weight:700; border:1px solid transparent; white-space:nowrap; }
+    .sc-period  { background:#EBF4FF; color:#1D4ED8; border-color:#BFDBFE; }
+    .sc-subject { background:#F3F4FF; color:#4338CA; border-color:#C7D2FE; }
+    .sc-deviate { background:#FFFBEB; color:#92400E; border-color:#FDE68A; }
+    .lbl-badge { font-size:10px; padding:1px 6px; border-radius:99px; font-weight:600; letter-spacing:.03em; vertical-align:middle; margin-left:4px; }
+    .lbl-view { background:#EEF1F5; color:#718096; }
+    .lbl-key  { background:#EBF4FF; color:#1D4ED8; }
+    .deviation-note { font-size:11px; color:#B45309; margin-top:4px; display:none; align-items:center; gap:4px; }
+    .deviation-note i { font-size:9px; }
+
+    /* ── Clerk Portal-aligned drawer section components ── */
+    .ct-section { margin-top:20px; }
+    .ct-section h4 { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:#718096; margin-bottom:10px; display:flex; align-items:center; gap:7px; }
+    .ct-section h4 i { color:#A0AEC0; font-size:11px; }
+    .ct-period-cell { background:#F8FAFC; border:1px solid #2E7DD1; box-shadow:0 0 0 1px #2E7DD1; border-radius:8px; padding:12px 14px; display:flex; align-items:center; gap:12px; }
+    .ct-period-cell .ct-p-info { flex:1; }
+    .ct-period-cell .ct-p-label { font-size:10px; font-weight:700; text-transform:uppercase; color:#A0AEC0; letter-spacing:.06em; }
+    .ct-period-cell .ct-p-time { font-size:11px; color:#718096; margin-top:2px; }
+    .ct-chip { display:inline-flex; align-items:center; gap:4px; padding:2px 9px; border-radius:99px; font-size:11px; font-weight:700; letter-spacing:.02em; border:1px solid transparent; white-space:nowrap; }
+    .ct-chip i { font-size:9px; }
+    .ct-chip-absent      { background:#FEF2F2; color:#B42318; border-color:#FCA5A5; }
+    .ct-chip-late        { background:#FFFBEB; color:#9A4708; border-color:#FDE68A; }
+    .ct-chip-signed-in   { background:#E3F1FA; color:#0E5C8A; border-color:#5B96BC; }
+    .ct-chip-justified   { background:#ECFDF5; color:#065F46; border-color:#A7F3D0; }
+    .ct-chip-unjustified { background:#FEF2F2; color:#991B1B; border-color:#FCA5A5; }
+    .ct-chip-dnrc        { background:#FEF2F2; color:#991B1B; border-color:#FCA5A5; }
+  </style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-mark">
+      <div class="logo-icon">CT</div>
+      <div><div class="logo-text">ClassTrack</div><div class="logo-sub" data-en="Teacher Portal" data-fr="Portail enseignant">Teacher Portal</div></div>
+    </div>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="sidebar-section">
+      <div class="sidebar-section-label" data-en="Overview" data-fr="Vue d'ensemble">Overview</div>
+      <a class="nav-item" href="teacher-dashboard.html"><span class="nav-icon"><i class="fa-solid fa-gauge-high"></i></span> <span data-en="Dashboard" data-fr="Tableau de bord">Dashboard</span></a>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-section-label" data-en="Teaching" data-fr="Enseignement">Teaching</div>
+      <a class="nav-item active" href="teacher-attendance.html"><span class="nav-icon"><i class="fa-solid fa-clipboard-check"></i></span> <span data-en="Mark Attendance" data-fr="Saisir les présences">Mark Attendance</span><span class="nav-badge" id="pendingBadge">1</span></a>
+      <a class="nav-item" href="teacher-schedule-axon file.html"><span class="nav-icon"><i class="fa-solid fa-calendar-week"></i></span> <span data-en="My Classes" data-fr="Mes classes">My Classes</span></a>
+      <a class="nav-item" href="teacher-history.html"><span class="nav-icon"><i class="fa-solid fa-calendar-days"></i></span> <span data-en="Attendance History" data-fr="Historique des présences">Attendance History</span></a>
+      <a class="nav-item" href="teacher-disputes.html"><span class="nav-icon"><i class="fa-solid fa-scale-balanced"></i></span> <span data-en="Disputes" data-fr="Contestations">Disputes</span><span class="nav-badge" style="background:#4F46E5">2</span></a>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-section-label" data-en="System" data-fr="Système">System</div>
+      <a class="nav-item" onclick="showToast(T('settings_soon'))"><span class="nav-icon"><i class="fa-solid fa-gear"></i></span> <span data-en="Settings" data-fr="Paramètres">Settings</span></a>
+    </div>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="user-info">
+      <div class="user-avatar">ST</div>
+      <div><div class="user-name" data-en="Ms. S. Tremblay" data-fr="Mme S. Tremblay">Ms. S. Tremblay</div><div class="user-role" data-en="Science Dept · Grade 7–12" data-fr="Dépt. Sciences · 7e–12e">Science Dept · Grade 7–12</div></div>
+    </div>
+  </div>
+</aside>
+
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-left">
+      <h1 data-en="Mark Attendance" data-fr="Saisir les présences">Mark Attendance</h1>
+      <p data-en="Thursday, May 7, 2026" data-fr="jeudi 7 mai 2026">Thursday, May 7, 2026</p>
+    </div>
+    <div class="topbar-right">
+      <div class="autosave-indicator" id="autosaveIndicator">
+        <i class="fa-solid fa-cloud-arrow-up"></i> <span id="autosaveText">All changes saved</span>
+      </div>
+      <div class="icon-btn" title="Notifications"><i class="fa-solid fa-bell"></i><span class="notif-dot"></span></div>
+    </div>
+  </div>
+
+  <div class="page-body">
+
+    <!-- Submitted banner -->
+    <div class="submitted-banner" id="submittedBanner">
+      <i class="fa-solid fa-circle-check"></i>
+      <div>
+        <span data-en="Attendance submitted successfully" data-fr="Présences saisies avec succès">Attendance submitted successfully</span>
+        <small id="submitSmall">Period 2 · May 7, 2026 — submitted at <span id="submitTime"></span></small>
+      </div>
+    </div>
+
+    <!-- Missing-attendance reminder -->
+    <div id="missingPeriodContainer"></div>
+
+    <!-- Late arrival / Did not reach class alert banners -->
+    <div id="lateAlertContainer"></div>
+
+    <!-- Session selector -->
+    <div class="session-bar">
+      <!-- Period — view only (navigation, not a session key field) -->
+      <div class="session-field">
+        <label>
+          <i class="fa-solid fa-eye" style="font-size:10px;opacity:.6;margin-right:3px"></i>
+          <span data-en="Period" data-fr="Période">Period</span>
+          <span class="lbl-badge lbl-view" data-en="view only" data-fr="consultation">view only</span>
+        </label>
+        <select class="session-select" id="classSelect" onchange="switchPeriod(this.value)">
+          <option value="P1">P1 — 8:30–9:45</option>
+          <option value="P2" selected>P2 — 10:35–11:50 · active</option>
+          <option value="P3">P3 — 1:05–2:20 · upcoming</option>
+          <option value="P4">P4 — 2:25–3:40 · upcoming</option>
+        </select>
+      </div>
+      <div class="session-divider"></div>
+      <!-- Subject — session key (written to the attendance record) -->
+      <div class="session-field">
+        <label>
+          <span data-en="Subject" data-fr="Matière">Subject</span>
+          <span class="lbl-badge lbl-key" data-en="session key" data-fr="clé de session">session key</span>
+        </label>
+        <div style="display:flex;align-items:center;gap:8px">
+          <select class="session-select" id="subjectSelect" onchange="setSubject(this.value)">
+            <option value="Science">Science</option>
+            <option value="Math">Math</option>
+            <option value="Geography">Geography</option>
+            <option value="Spanish">Spanish</option>
+            <option value="Biology">Biology</option>
+          </select>
+          <span id="subjectDeviationFlag" style="display:none;color:#D97706;font-size:14px" title="Not your regular subject for this period"><i class="fa-solid fa-triangle-exclamation"></i></span>
+        </div>
+        <div class="deviation-note" id="subjectDeviationNote">
+          <i class="fa-solid fa-triangle-exclamation"></i><span id="deviationText">Not your regular subject for P2</span>
+        </div>
+      </div>
+      <div class="session-divider"></div>
+      <div class="session-field">
+        <label data-en="Date" data-fr="Date">Date</label>
+        <select class="session-select">
+          <option data-en="Thursday, May 7, 2026" data-fr="jeudi 7 mai 2026">Thursday, May 7, 2026</option>
+          <option data-en="Wednesday, May 6, 2026" data-fr="mercredi 6 mai 2026">Wednesday, May 6, 2026</option>
+        </select>
+      </div>
+      <div class="session-divider"></div>
+      <div class="session-field">
+        <label data-en="Session Status" data-fr="Statut de la session">Session Status</label>
+        <div style="padding:7px 0;font-size:13.5px;font-weight:600;color:#D97706" id="sessionStatusText">
+          <i class="fa-solid fa-clock" style="margin-right:5px"></i><span data-en="Not Submitted" data-fr="Non saisie">Not Submitted</span>
+        </div>
+      </div>
+      <div class="progress-pill" id="progressPill">
+        <span id="progressText">0 / 15</span>
+        <span class="pp-sub" data-en="marked" data-fr="saisis">marked</span>
+      </div>
+    </div>
+
+    <!-- Bulk actions -->
+    <div class="bulk-bar">
+      <button class="bulk-btn green" onclick="markAll('P')"><i class="fa-solid fa-check"></i> <span data-en="Mark All Present" data-fr="Tous présents">Mark All Present</span></button>
+      <button class="bulk-btn" onclick="markAll('A')" style="border-color:#DC2626;color:#DC2626;background:#FEF2F2"><i class="fa-solid fa-xmark"></i> <span data-en="Mark All Absent" data-fr="Tous absents">Mark All Absent</span></button>
+      <button class="bulk-btn" onclick="clearAll()"><i class="fa-solid fa-rotate-left"></i> <span data-en="Clear All" data-fr="Tout effacer">Clear All</span></button>
+      <div class="bulk-search">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <input type="text" id="attSearch" placeholder="Filter students…" data-placeholder-en="Filter students…" data-placeholder-fr="Filtrer les élèves…" oninput="renderTable()" />
+      </div>
+    </div>
+
+    <!-- Master-detail split-pane -->
+    <div class="split" id="splitPane">
+      <!-- LEFT: roster table -->
+      <div class="card">
+        <table>
+          <thead>
+            <tr>
+              <th data-en="Student" data-fr="Élève">Student</th>
+              <th data-en="Status" data-fr="Statut">Status</th>
+              <th data-en="Stage" data-fr="Étape">Stage</th>
+              <th data-en="Reason" data-fr="Motif">Reason</th>
+            </tr>
+          </thead>
+          <tbody id="attBody"></tbody>
+        </table>
+        <div class="submit-footer">
+          <div>
+            <div id="submitSessionChips" style="display:flex;gap:5px;align-items:center;flex-wrap:wrap;margin-bottom:6px"></div>
+            <div class="submit-info">
+              <strong id="markedCount">0</strong> <span data-en="of" data-fr="sur">of</span> <strong>15</strong> <span data-en="students marked" data-fr="élèves saisis">students marked</span>
+              &nbsp;·&nbsp; <span id="presentCount" style="color:#059669;font-weight:600">0 P</span>
+              &nbsp;<span id="absentCount" style="color:#DC2626;font-weight:600">0 A</span>
+              &nbsp;<span id="lateCount" style="color:#D97706;font-weight:600">0 L</span>
+            </div>
+          </div>
+          <button class="submit-btn" id="submitBtn" onclick="submitAttendance()" disabled>
+            <i class="fa-solid fa-paper-plane"></i> <span id="submitBtnText" data-en="Submit Attendance" data-fr="Soumettre les présences">Submit Attendance</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- RIGHT: drawer -->
+      <aside class="drawer-card" id="drawerCard" style="display:none">
+        <div id="drawerContent"></div>
+      </aside>
+    </div>
+
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  const AVATAR_COLORS = ['#2E7DD1','#6366F1','#10B981','#F59E0B','#EF4444','#8B5CF6','#EC4899','#0891B2'];
+
+  // ── Session key: (teacher_id, date, period, subject_id) ──────────────────
+  // PERIOD_SCHEDULE is the Aspen-published default subject for each period.
+  // TEACHER_SUBJECTS constrains what subjects can be selected.
+  const PERIOD_SCHEDULE = {
+    P1: { subject:'Science', time:'8:30–9:45',   room:'Room 204', grade:'Grade 7A' },
+    P2: { subject:'Science', time:'10:35–11:50', room:'Room 204', grade:'Grade 7A' },
+    P3: { subject:'Math',    time:'1:05–2:20',   room:'Room 110', grade:'Grade 7A' },
+    P4: { subject:'Science', time:'2:25–3:40',   room:'Room 312', grade:'Grade 8B' },
+  };
+  const TEACHER_SUBJECTS = ['Science','Math','Geography','Spanish','Biology'];
+
+  let currentPeriod  = 'P2';
+  let currentSubject = PERIOD_SCHEDULE['P2'].subject; // 'Science'
+
+  const STRINGS = {
+    en: {
+      all_saved:'All changes saved', saving:'Saving…', submitted:'Submitted',
+      present:'Present', absent:'Absent', late:'Late',
+      please_mark_all:'Please mark all students before submitting.',
+      submitted_for:'✓ Attendance submitted for Period 2 — May 7, 2026',
+      submit_meta:'Period 2 · May 7, 2026 — submitted at',
+      submit_btn:'Submitted',
+      settings_soon:'Settings coming soon',
+      signed_in_by_clerk:'Signed in by Attendance Clerk',
+      check_in:'Check in',
+      checked_in_msg:'✓ Student checked in — parent will be notified of late arrival',
+      late_arrivals_title:'Late arrival awaiting check-in',
+      late_arrivals_desc:'has been signed in by the Attendance Clerk and is waiting to be welcomed back to class.',
+      dnrc_title:'Did not reach class',
+      dnrc_desc:'was signed in by the Attendance Clerk but has not arrived in class. Location unknown.',
+      // Stage labels (teacher-visible only)
+      stage_await_checkin:'Awaiting check-in',
+      stage_did_not_reach:'Did not reach class',
+      stage_justified:'Justified',
+      stage_unjustified:'Unjustified',
+      // Drawer
+      drawer_current_period:'Current period',
+      drawer_audit_title:'Audit trail',
+      drawer_note_label:'Teacher note',
+      drawer_note_hint:'Notes append to the audit trail.',
+      drawer_note_placeholder:'Add a note (e.g., context for this attendance mark)…',
+      drawer_save_note:'Save Note',
+      drawer_mark_present:'Mark Present',
+      drawer_mark_absent:'Mark Absent',
+      drawer_note_added:'✓ Note saved · added to audit trail',
+      drawer_status_changed:'✓ Status updated',
+      // Missing-attendance
+      missing_orange:'Period 1 attendance has been pending for 25 minutes. Please submit when ready.',
+      missing_red:'Period 1 attendance is overdue. Please submit before end of day.',
+      missing_link:'Submit Period 1 →',
+      missing_dismiss:'Dismiss for this period',
+      not_marked:'Not marked',
+      signed_in:'Signed in',
+      absent_justified:'Absent · Justified',
+      absent_unjustified:'Absent · Unjustified',
+      late_justified:'Late · Justified',
+      unscheduled_subject:'Unscheduled subject',
+      dnrc_threshold_note:'10-min threshold exceeded. Student is in the building but location is unknown. Check in when they arrive, or contact the Attendance Clerk.',
+      justified_note:'This absence has been justified by the Attendance Clerk. No further action required.',
+      unjustified_note:'This absence was marked unjustified by the Attendance Clerk. Record is closed.',
+    },
+    fr: {
+      all_saved:'Modifications enregistrées', saving:'Enregistrement…', submitted:'Soumis',
+      present:'Présent', absent:'Absent', late:'En retard',
+      please_mark_all:'Veuillez saisir le statut de tous les élèves avant de soumettre.',
+      submitted_for:'✓ Présences soumises pour la période 2 — 7 mai 2026',
+      submit_meta:'Période 2 · 7 mai 2026 — soumis à',
+      submit_btn:'Soumis',
+      settings_soon:'Paramètres — bientôt disponibles',
+      signed_in_by_clerk:'Autorisé par la surveillante',
+      check_in:'Accepter en classe',
+      checked_in_msg:'✓ Élève accepté en classe — le parent sera averti du retard',
+      late_arrivals_title:'Arrivée tardive à accepter',
+      late_arrivals_desc:'a été autorisé par la surveillante et attend d\'être accepté en classe.',
+      dnrc_title:'N\'a pas rejoint la classe',
+      dnrc_desc:'a été autorisé par la surveillante mais n\'est pas arrivé en classe. Localisation inconnue.',
+      stage_await_checkin:'À accepter en classe',
+      stage_did_not_reach:'N\'a pas rejoint la classe',
+      stage_justified:'Motivée',
+      stage_unjustified:'Non motivée',
+      drawer_current_period:'Période actuelle',
+      drawer_audit_title:'Journal d\'audit',
+      drawer_note_label:'Note de l\'enseignant',
+      drawer_note_hint:'Les notes s\'ajoutent au journal d\'audit.',
+      drawer_note_placeholder:'Ajouter une note (p. ex. contexte du changement de statut)…',
+      drawer_save_note:'Enregistrer',
+      drawer_mark_present:'Marquer présent',
+      drawer_mark_absent:'Marquer absent',
+      drawer_note_added:'✓ Note enregistrée · ajoutée au journal',
+      drawer_status_changed:'✓ Statut mis à jour',
+      missing_orange:'La période 1 attend depuis 25 minutes. Veuillez la saisir.',
+      missing_red:'La période 1 est en retard. Veuillez la saisir avant la fin de la journée.',
+      missing_link:'Saisir la période 1 →',
+      missing_dismiss:'Ignorer pour cette période',
+      not_marked:'Non saisi',
+      signed_in:'Autorisé(e)',
+      absent_justified:'Absent · Motivée',
+      absent_unjustified:'Absent · Non motivée',
+      late_justified:'En retard · Motivé',
+      unscheduled_subject:'Matière non prévue',
+      dnrc_threshold_note:'Seuil de 10 min dépassé. L\'élève est dans le bâtiment mais sa localisation est inconnue. Acceptez-le en classe à son arrivée ou contactez la surveillante.',
+      justified_note:'Cette absence a été motivée par la surveillante. Aucune action supplémentaire n\'est requise.',
+      unjustified_note:'Cette absence a été marquée non motivée par la surveillante. Le dossier est clôturé.',
+    }
+  };
+  function T(k){ var lang=(window.__ct_i18n&&window.__ct_i18n.getLang())||'en'; return (STRINGS[lang]&&STRINGS[lang][k])||STRINGS.en[k]||k; }
+
+  // ── Student roster — mirrors Clerk Portal's Today's Records ──────────────
+  // 5 present students + 10 students from the Clerk Portal.
+  // Teacher-visible stages: await-checkin, did-not-reach, justified, unjustified.
+  // Clerk-only stages (awaitingParent, pendingApproval) → no stage shown to teacher.
+  const STUDENTS = [
+    // ── Present students ────────────────────────────────────────────────────
+    { id:'ST-1041',   name:'Aaliyah Carter',    grade:'Gr 10A', prevAbsences:2 },
+    { id:'ST-1079',   name:'Finn Bergström',    grade:'Gr 9B',  prevAbsences:0 },
+    { id:'ST-1083',   name:'Grace Osei',        grade:'Gr 10A', prevAbsences:3 },
+    { id:'ST-1088',   name:'Hassan Al-Amin',    grade:'Gr 9B',  prevAbsences:5 },
+    { id:'ST-1115',   name:'Noah Petersen',     grade:'Gr 10B', prevAbsences:5 },
+
+    // ── Clerk Portal students ────────────────────────────────────────────────
+    // NEW in Clerk Portal → teacher sees: Absent, no stage (awaiting parent reply = clerk-only)
+    { id:'ST-100341', name:'Camille Nguyen',    grade:'Gr 11A', prevAbsences:1,
+      period:'P1', periodTime:'8:30–9:45' },
+
+    // IN PROGRESS · Awaiting check-in → teacher sees: Signed in, Awaiting check-in
+    { id:'ST-100529', name:'Marcus Osei',       grade:'Gr 9B',  prevAbsences:2,
+      awaitingCheckIn:true, signedInAt:'10:42 AM', period:'P2', periodTime:'10:35–11:50' },
+
+    // IN PROGRESS · Did not reach class → teacher sees: Signed in, Did not reach class ⚠
+    { id:'ST-100673', name:'Isabelle Bouchard', grade:'Gr 10A', prevAbsences:1,
+      didNotReachClass:true, signedInAt:'10:36 AM', period:'P2', periodTime:'10:35–11:50' },
+
+    // IN PROGRESS · Awaiting parent reply (Late) → teacher sees: Late, no stage
+    { id:'ST-100788', name:'Ryan Kowalski',     grade:'Gr 12A', prevAbsences:3,
+      period:'P1', periodTime:'8:30–9:45' },
+
+    // RESOLVED · Justified (Absent) · School-sanctioned event
+    { id:'ST-100456', name:'Aisha Mahmoud',     grade:'Gr 8B',  prevAbsences:2,
+      justified:'absent', reasonCat:'school-sanctioned-event', period:'P2', periodTime:'10:35–11:50' },
+
+    // IN PROGRESS · Pending approval (Late) → teacher sees: Late, no stage; reason not yet visible (pending clerk approval)
+    { id:'ST-100631', name:'Emma Fontaine',     grade:'Gr 11B', prevAbsences:2,
+      period:'P1', periodTime:'8:30–9:45' },
+
+    // IN PROGRESS · Pending approval (Absent) → teacher sees: Absent, no stage; reason not yet visible (pending clerk approval)
+    { id:'ST-100287', name:'Théo Lavoie',       grade:'Gr 7A',  prevAbsences:4,
+      period:'P1', periodTime:'8:30–9:45' },
+
+    // RESOLVED · Justified (Absent) → teacher sees: Absent, Justified + reason category
+    { id:'ST-100862', name:'Zara Okonkwo',      grade:'Gr 12B', prevAbsences:1,
+      justified:'absent', period:'P1', periodTime:'8:30–9:45', reasonCat:'medical-appointment' },
+
+    // RESOLVED · Justified (Late) → teacher sees: Late, Justified + reason category
+    { id:'ST-100394', name:'Lucas Bergeron',    grade:'Gr 9A',  prevAbsences:2,
+      justified:'late', period:'P1', periodTime:'8:30–9:45', reasonCat:'medical-appointment' },
+
+    // RESOLVED · Unjustified (Absent) → teacher sees: Absent, Unjustified; no reason category
+    { id:'ST-100715', name:'Maya Sinclair',     grade:'Gr 10B', prevAbsences:3,
+      unjustified:true, period:'P1', periodTime:'8:30–9:45' },
+  ];
+
+  // ── Per-student audit trail data (teacher-visible events only) ────────────
+  const STUDENT_AUDIT_DATA = {
+    'ST-100341': [
+      { icon:'fa-bell',         cls:'ad-gray',  event:'Period 1 opened',         detail:'Bell rang — attendance window active.',             time:'8:30 AM' },
+      { icon:'fa-circle-xmark', cls:'ad-amber', event:'Marked absent',            detail:'Status set by Ms. Tremblay.',                      time:'8:33 AM' },
+      { icon:'fa-paper-plane',  cls:'ad-blue',  event:'Parent notified',          detail:'Automatic absence notification sent.',              time:'8:35 AM' },
+    ],
+    'ST-100529': [
+      { icon:'fa-bell',              cls:'ad-gray',  event:'Period 2 opened',            detail:'Bell rang — attendance window active.',                                time:'10:35 AM' },
+      { icon:'fa-circle-xmark',      cls:'ad-amber', event:'Marked absent',               detail:'Status set by Ms. Tremblay.',                                          time:'10:37 AM' },
+      { icon:'fa-right-to-bracket',  cls:'ad-green', event:'Signed in by Attendance Clerk', detail:'Marguerite T. authorized return to class at 10:42 AM.',              time:'10:42 AM' },
+      { icon:'fa-hourglass-half',    cls:'ad-blue',  event:'Awaiting your check-in',       detail:'Student is on the way to class. Timer running (8 min elapsed).',    time:'Now' },
+    ],
+    'ST-100673': [
+      { icon:'fa-bell',                     cls:'ad-gray',  event:'Period 2 opened',              detail:'Bell rang — attendance window active.',                                                 time:'10:35 AM' },
+      { icon:'fa-circle-xmark',             cls:'ad-amber', event:'Marked absent',                 detail:'Status set by Ms. Tremblay.',                                                          time:'10:36 AM' },
+      { icon:'fa-right-to-bracket',         cls:'ad-green', event:'Signed in by Attendance Clerk', detail:'Marguerite T. authorized return to class at 10:36 AM.',                               time:'10:36 AM' },
+      { icon:'fa-person-circle-exclamation',cls:'ad-red',   event:'Did not reach class',           detail:'10-min threshold elapsed. Isabelle signed in but has not arrived. Location unknown.', time:'10:46 AM' },
+    ],
+    'ST-100788': [
+      { icon:'fa-bell',       cls:'ad-gray',  event:'Period 1 opened', detail:'Bell rang — attendance window active.',            time:'8:30 AM' },
+      { icon:'fa-door-open',  cls:'ad-amber', event:'Marked late',     detail:'Ryan arrived mid-class. Status set by Ms. Tremblay.', time:'9:10 AM' },
+      { icon:'fa-paper-plane',cls:'ad-blue',  event:'Parent notified', detail:'Automatic late-arrival notification sent.',         time:'9:11 AM' },
+    ],
+    'ST-100456': [
+      { icon:'fa-bell',              cls:'ad-gray',  event:'Period 2 opened',              detail:'Bell rang — attendance window active.',                                   time:'10:35 AM' },
+      { icon:'fa-circle-xmark',      cls:'ad-amber', event:'Marked absent',                 detail:'Status set by Ms. Tremblay.',                                            time:'10:36 AM' },
+      { icon:'fa-right-to-bracket',  cls:'ad-green', event:'Signed in by Attendance Clerk', detail:'Marguerite T. authorized return to class at 10:40 AM.',                 time:'10:40 AM' },
+      { icon:'fa-circle-xmark',      cls:'ad-red',   event:'Status reverted to absent',     detail:'Attendance Clerk was unable to locate Aisha.',                           time:'10:55 AM' },
+      { icon:'fa-circle-check',      cls:'ad-purple',event:'Absence justified',             detail:'Clerk justified — school-sanctioned event. Parent notified.',            time:'11:15 AM' },
+    ],
+    'ST-100631': [
+      { icon:'fa-bell',             cls:'ad-gray',  event:'Period 1 opened',              detail:'Bell rang — attendance window active.',                    time:'8:30 AM' },
+      { icon:'fa-circle-xmark',     cls:'ad-amber', event:'Marked absent',                 detail:'Status set by Ms. Tremblay.',                             time:'8:32 AM' },
+      { icon:'fa-right-to-bracket', cls:'ad-green', event:'Signed in by Attendance Clerk', detail:'Marguerite T. authorized return to class at 9:00 AM.',   time:'9:00 AM' },
+      { icon:'fa-door-open',        cls:'ad-green', event:'Checked in',                    detail:'Ms. Tremblay confirmed Emma arrived in class.',           time:'9:06 AM' },
+    ],
+    'ST-100287': [
+      { icon:'fa-bell',         cls:'ad-gray',  event:'Period 1 opened', detail:'Bell rang — attendance window active.',  time:'8:30 AM' },
+      { icon:'fa-circle-xmark', cls:'ad-amber', event:'Marked absent',    detail:'Status set by Ms. Tremblay.',           time:'8:34 AM' },
+      { icon:'fa-paper-plane',  cls:'ad-blue',  event:'Parent notified',  detail:'Automatic absence notification sent.',  time:'8:36 AM' },
+    ],
+    'ST-100862': [
+      { icon:'fa-bell',         cls:'ad-gray',  event:'Period 1 opened',    detail:'Bell rang — attendance window active.',                                  time:'8:30 AM' },
+      { icon:'fa-circle-xmark', cls:'ad-amber', event:'Marked absent',       detail:'Status set by Ms. Tremblay.',                                           time:'8:34 AM' },
+      { icon:'fa-circle-check', cls:'ad-green', event:'Absence justified',   detail:'Justification accepted by Attendance Clerk · Medical appointment.',    time:'10:02 AM' },
+    ],
+    'ST-100394': [
+      { icon:'fa-bell',             cls:'ad-gray',  event:'Period 1 opened',              detail:'Bell rang — attendance window active.',                               time:'8:30 AM' },
+      { icon:'fa-circle-xmark',     cls:'ad-amber', event:'Marked absent',                 detail:'Status set by Ms. Tremblay.',                                        time:'8:33 AM' },
+      { icon:'fa-right-to-bracket', cls:'ad-green', event:'Signed in by Attendance Clerk', detail:'Marguerite T. authorized return to class at 9:45 AM.',              time:'9:45 AM' },
+      { icon:'fa-door-open',        cls:'ad-green', event:'Checked in',                    detail:'Ms. Tremblay confirmed Lucas arrived in class.',                    time:'9:52 AM' },
+      { icon:'fa-circle-check',     cls:'ad-green', event:'Late arrival justified',        detail:'Clerk justified on behalf — doctor\'s note attached · Medical appointment.', time:'9:55 AM' },
+    ],
+    'ST-100715': [
+      { icon:'fa-bell',         cls:'ad-gray',  event:'Period 1 opened',    detail:'Bell rang — attendance window active.',                                          time:'8:30 AM' },
+      { icon:'fa-circle-xmark', cls:'ad-amber', event:'Marked absent',       detail:'Status set by Ms. Tremblay.',                                                   time:'8:35 AM' },
+      { icon:'fa-paper-plane',  cls:'ad-blue',  event:'Parent notified',     detail:'Automatic absence notification sent.',                                          time:'8:37 AM' },
+      { icon:'fa-circle-xmark', cls:'ad-red',   event:'Marked unjustified',  detail:'Attendance Clerk override — no valid justification provided after follow-up.', time:'11:30 AM' },
+    ],
+  };
+
+  // ── Absence reason category labels (§6 Q11 enum — teacher sees category label only) ──
+  const REASON_LABELS = {
+    'medical-appointment':  'Medical appointment',
+    'illness':              'Illness',
+    'bereavement':          'Bereavement',
+    'religious-observance': 'Religious observance',
+    'school-sanctioned-event': 'School-sanctioned event',
+    'transportation':       'Transportation / weather',
+    'family-personal':      'Family / personal',
+    'other':                'Other',
+  };
+  const REASON_LABELS_FR = {
+    'medical-appointment':  'Rendez-vous médical',
+    'illness':              'Maladie',
+    'bereavement':          'Deuil',
+    'religious-observance': 'Observance religieuse',
+    'school-sanctioned-event': 'Activité scolaire officielle',
+    'transportation':       'Transport / météo',
+    'family-personal':      'Familial / personnel',
+    'other':                'Autre',
+  };
+  function getReasonLabel(cat) {
+    var lang = (window.__ct_i18n && window.__ct_i18n.getLang()) || 'en';
+    return lang === 'fr' ? (REASON_LABELS_FR[cat] || REASON_LABELS[cat]) : REASON_LABELS[cat];
+  }
+  // ── Audit trail phrase translations ──
+  const AUDIT_FR = {
+    'Period 1 opened':'Période 1 ouverte',
+    'Period 2 opened':'Période 2 ouverte',
+    'Period opened':'Période ouverte',
+    'Marked absent':'Marqué(e) absent(e)',
+    'Marked late':'Marqué(e) en retard',
+    'Marked unjustified':'Marqué non motivé',
+    'Parent notified':'Parent averti',
+    'Signed in by Attendance Clerk':'Autorisé(e) par la surveillante',
+    'Awaiting your check-in':'En attente de votre accueil',
+    'Did not reach class':'N\'a pas rejoint la classe',
+    'Status reverted to absent':'Statut rétabli à absent(e)',
+    'Absence justified':'Absence motivée',
+    'Checked in':'Accepté(e) en classe',
+    'Late arrival justified':'Retard motivé',
+    'Teacher note added':'Note de l\'enseignant ajoutée',
+    'Bell rang — attendance window active.':'Sonnerie — fenêtre de présences active.',
+    'Status set by Ms. Tremblay.':'Statut défini par Mme Tremblay.',
+    'Automatic absence notification sent.':'Notification d\'absence automatique envoyée.',
+    'Automatic late-arrival notification sent.':'Notification automatique de retard envoyée.',
+    'Marguerite T. authorized return to class at 10:42 AM.':'Marguerite T. a autorisé le retour en classe à 10 h 42.',
+    'Marguerite T. authorized return to class at 10:36 AM.':'Marguerite T. a autorisé le retour en classe à 10 h 36.',
+    'Marguerite T. authorized return to class at 10:40 AM.':'Marguerite T. a autorisé le retour en classe à 10 h 40.',
+    'Marguerite T. authorized return to class at 9:00 AM.':'Marguerite T. a autorisé le retour en classe à 9 h 00.',
+    'Marguerite T. authorized return to class at 9:45 AM.':'Marguerite T. a autorisé le retour en classe à 9 h 45.',
+    'Student is on the way to class. Timer running (8 min elapsed).':'L\'élève est en route. Minuterie en cours (8 min écoulées).',
+    '10-min threshold elapsed. Isabelle signed in but has not arrived. Location unknown.':'Seuil de 10 min dépassé. Isabelle a été autorisée mais n\'est pas arrivée. Localisation inconnue.',
+    'Attendance Clerk was unable to locate Aisha.':'La surveillante n\'a pas pu localiser Aisha.',
+    'Clerk justified — school-sanctioned event. Parent notified.':'Motivée par la surveillante — activité scolaire officielle. Parent averti.',
+    'Ms. Tremblay confirmed Emma arrived in class.':'Mme Tremblay a confirmé l\'arrivée d\'Emma en classe.',
+    'Ms. Tremblay confirmed Lucas arrived in class.':'Mme Tremblay a confirmé l\'arrivée de Lucas en classe.',
+    'Ms. Tremblay confirmed student arrived in class.':'Mme Tremblay a confirmé l\'arrivée de l\'élève en classe.',
+    'Justification accepted by Attendance Clerk · Medical appointment.':'Motivée par la surveillante · Rendez-vous médical.',
+    'Clerk justified on behalf — doctor\'s note attached · Medical appointment.':'Motivé par la surveillante — billet médical joint · Rendez-vous médical.',
+    'Ryan arrived mid-class. Status set by Ms. Tremblay.':'Ryan est arrivé en cours de période. Statut défini par Mme Tremblay.',
+    'Attendance Clerk override — no valid justification provided after follow-up.':'Décision de la surveillante — aucune justification valable après relance.',
+  };
+  function auditFr(text) {
+    var lang = (window.__ct_i18n && window.__ct_i18n.getLang()) || 'en';
+    return lang === 'fr' && AUDIT_FR[text] ? AUDIT_FR[text] : text;
+  }
+
+  // ── marks state ───────────────────────────────────────────────────────────
+  let marks = {};
+  let submitted = false;
+  STUDENTS.forEach(function(s){
+    // Pre-mark known present students (5 roster students + Camille present in this period)
+    if (['ST-1041','ST-1079','ST-1083','ST-1088','ST-1115','ST-100341'].includes(s.id)) {
+      marks[s.id] = { status: 'P', note: '' };
+    } else if (s.awaitingCheckIn || s.didNotReachClass) {
+      marks[s.id] = { status: 'L', note: '' }; // Signed in = Late transitional
+    } else if (s.justified === 'late') {
+      marks[s.id] = { status: 'L', note: '', locked: true }; // cycle closed
+    } else if (s.justified === 'absent' || s.unjustified) {
+      marks[s.id] = { status: 'A', note: '', locked: true }; // cycle closed
+    } else if (s.id === 'ST-100287') {
+      // Théo — absent, clerk-only stage
+      marks[s.id] = { status: 'A', note: '' };
+    } else if (['ST-100788','ST-100631'].includes(s.id)) {
+      // Ryan, Emma — late, clerk-only stage
+      marks[s.id] = { status: 'L', note: '' };
+    } else {
+      marks[s.id] = { status: null, note: '' };
+    }
+  });
+
+  let selectedId = null;
+  function isLocked(id) { return !!(marks[id] && marks[id].locked); }
+  function getStudent(id) { return STUDENTS.find(function(s){ return s.id === id; }); }
+  function initials(n) { return n.split(' ').map(w => w[0]).join('').slice(0,2).toUpperCase(); }
+  function avatarColor(n) {
+    let h = 0; for (let c of n) h = (h * 31 + c.charCodeAt(0)) & 0xFFFFFF;
+    return AVATAR_COLORS[Math.abs(h) % AVATAR_COLORS.length];
+  }
+
+  function markAll(status) {
+    STUDENTS.forEach(function(s){
+      if (isLocked(s.id)) return;
+      marks[s.id].status = status;
+    });
+    renderTable(); updateStats(); triggerAutosave();
+  }
+  function clearAll() {
+    STUDENTS.forEach(function(s){
+      if (isLocked(s.id)) return;
+      marks[s.id].status = null;
+    });
+    renderTable(); updateStats(); triggerAutosave();
+  }
+  function setStatus(id, status) {
+    if (submitted || isLocked(id)) return;
+    marks[id].status = marks[id].status === status ? null : status;
+    renderTable(); updateStats(); triggerAutosave();
+  }
+
+  // ── Teacher check-in (confirms student arrived in class) ─────────────────
+  function checkIn(id) {
+    if (submitted) return;
+    var s = getStudent(id);
+    if (!s) return;
+    s.awaitingCheckIn = false;
+    s.didNotReachClass = false;
+    marks[id].status = 'L';
+    // Add auto audit entry
+    var now = new Date();
+    var t = now.toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' });
+    if (!STUDENT_NOTES[id]) STUDENT_NOTES[id] = [];
+    // Push a system-style entry
+    if (!STUDENT_AUDIT_DATA[id]) STUDENT_AUDIT_DATA[id] = [];
+    STUDENT_AUDIT_DATA[id].push({ icon:'fa-door-open', cls:'ad-green', event:'Checked in', detail:'Ms. Tremblay confirmed student arrived in class.', time:t }); // auditFr() will translate event+detail
+    renderTable(); updateStats(); triggerAutosave();
+    showToast(T('checked_in_msg'));
+    if (selectedId === id) renderDrawer();
+  }
+
+  // ── Session management ────────────────────────────────────────────────────
+  function switchPeriod(val) {
+    currentPeriod = val;
+    var sched = PERIOD_SCHEDULE[val];
+    if (sched) {
+      currentSubject = sched.subject;
+      var sel = document.getElementById('subjectSelect');
+      if (sel) sel.value = currentSubject;
+    }
+    updateDeviationFlag();
+    renderSessionChips();
+    clearAll();
+  }
+
+  function setSubject(val) {
+    currentSubject = val;
+    updateDeviationFlag();
+    renderSessionChips();
+  }
+
+  function updateDeviationFlag() {
+    var sched = PERIOD_SCHEDULE[currentPeriod];
+    var isDeviation = sched && currentSubject !== sched.subject;
+    var flag = document.getElementById('subjectDeviationFlag');
+    var note = document.getElementById('subjectDeviationNote');
+    var text = document.getElementById('deviationText');
+    if (flag) flag.style.display = isDeviation ? 'inline-flex' : 'none';
+    if (note) note.style.display = isDeviation ? 'flex' : 'none';
+    if (text && isDeviation) text.textContent = 'Not your regular subject for ' + currentPeriod;
+  }
+
+  function renderSessionChips() {
+    var el = document.getElementById('submitSessionChips');
+    if (!el) return;
+    var sched = PERIOD_SCHEDULE[currentPeriod];
+    var isDeviation = sched && currentSubject !== sched.subject;
+    el.innerHTML =
+      '<span class="session-chip sc-period"><i class="fa-solid fa-hashtag" style="font-size:9px"></i> ' + currentPeriod + '</span>' +
+      '<span class="session-chip sc-subject"><i class="fa-solid fa-book" style="font-size:9px"></i> ' + currentSubject + '</span>' +
+      (isDeviation ? '<span class="session-chip sc-deviate"><i class="fa-solid fa-triangle-exclamation" style="font-size:9px"></i> ' + T('unscheduled_subject') + '</span>' : '');
+  }
+
+  function loadSession() { clearAll(); }
+
+  let autosaveTimer;
+  function triggerAutosave() {
+    const ind = document.getElementById('autosaveIndicator');
+    ind.className = 'autosave-indicator saving';
+    ind.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> ' + T('saving');
+    clearTimeout(autosaveTimer);
+    autosaveTimer = setTimeout(function(){
+      ind.className = 'autosave-indicator';
+      ind.innerHTML = '<i class="fa-solid fa-cloud-arrow-up"></i> ' + T('all_saved');
+    }, 900);
+  }
+
+  function updateStats() {
+    const values = Object.values(marks);
+    const p = values.filter(m => m.status === 'P').length;
+    const a = values.filter(m => m.status === 'A').length;
+    const l = values.filter(m => m.status === 'L').length;
+    const total = STUDENTS.length;
+    const marked = p + a + l;
+    document.getElementById('markedCount').textContent = marked;
+    document.getElementById('presentCount').textContent = p + ' P';
+    document.getElementById('absentCount').textContent = a + ' A';
+    document.getElementById('lateCount').textContent = l + ' L';
+    document.getElementById('progressText').textContent = marked + ' / ' + total;
+    const btn = document.getElementById('submitBtn');
+    btn.disabled = marked < total || submitted;
+    const badge = document.getElementById('pendingBadge');
+    badge.style.display = (marked === total && !submitted) ? 'inline' : (submitted ? 'none' : 'inline');
+  }
+
+  // ── Derive teacher-visible workflow stage ─────────────────────────────────
+  // Teacher only sees: await-checkin, did-not-reach, justified, unjustified.
+  // Clerk-only stages (awaiting-parent-reply, pending-approval) → null (show "—").
+  function deriveStage(s) {
+    if (s.didNotReachClass) return 'did-not-reach';
+    if (s.awaitingCheckIn)  return 'await-checkin';
+    if (s.justified)        return 'justified';
+    if (s.unjustified)      return 'unjustified';
+    return null;
+  }
+
+  function renderStageChip(stage) {
+    if (!stage) return '<span style="color:#A0AEC0;font-size:12.5px">—</span>';
+    var map = {
+      'await-checkin':  { cls:'stage-await-checkin', labelKey:'stage_await_checkin',  icon:'fa-right-to-bracket' },
+      'did-not-reach':  { cls:'stage-did-not-reach', labelKey:'stage_did_not_reach',  icon:'fa-person-circle-exclamation' },
+      'justified':      { cls:'stage-justified',     labelKey:'stage_justified',      icon:'fa-circle-check' },
+      'unjustified':    { cls:'stage-unjustified',   labelKey:'stage_unjustified',    icon:'fa-circle-xmark' },
+    };
+    var def = map[stage];
+    if (!def) return '<span style="color:#A0AEC0;font-size:12.5px">—</span>';
+    return '<span class="stage-chip ' + def.cls + '"><i class="fa-solid ' + def.icon + '"></i> ' + T(def.labelKey) + '</span>';
+  }
+
+  function renderTable() {
+    renderMissingPeriodBanner();
+    renderLateAlerts();
+    const q = (document.getElementById('attSearch').value || '').toLowerCase();
+    const list = STUDENTS.filter(function(s){ return !q || s.name.toLowerCase().includes(q) || s.id.toLowerCase().includes(q); });
+    document.getElementById('attBody').innerHTML = list.map(function(s){
+      var m = marks[s.id];
+      var stage = deriveStage(s);
+      var isSelected = s.id === selectedId;
+      var locked = (m && m.locked) || submitted;
+
+      var nameCell = '<td><div class="student-cell">' +
+        '<div class="s-avatar" style="background:' + avatarColor(s.name) + '">' + initials(s.name) + '</div>' +
+        '<div><div class="s-name">' + s.name + '</div>' +
+        '<div class="s-id">' + s.id + (s.grade ? ' · ' + s.grade : '') + '</div></div>' +
+        '</div></td>';
+
+      var pActive = m && m.status === 'P' ? 'active-p' : '';
+      var lActive = m && m.status === 'L' ? 'active-l' : '';
+      var aActive = m && m.status === 'A' ? 'active-a' : '';
+      var statusCell = '<td class="mark-cell">' +
+        '<div class="pal-group">' +
+        '<button class="pal-btn ' + pActive + '" onclick="event.stopPropagation();setStatus(\'' + s.id + '\',\'P\')" title="' + T('present') + '" ' + ((submitted||locked)?'disabled':'') + '>P</button>' +
+        '<button class="pal-btn ' + lActive + '" onclick="event.stopPropagation();setStatus(\'' + s.id + '\',\'L\')" title="' + T('late') + '" ' + ((submitted||locked)?'disabled':'') + '>L</button>' +
+        '<button class="pal-btn ' + aActive + '" onclick="event.stopPropagation();setStatus(\'' + s.id + '\',\'A\')" title="' + T('absent') + '" ' + ((submitted||locked)?'disabled':'') + '>A</button>' +
+        '</div></td>';
+
+      var stageCell = '<td>' + (m && m.status === 'P' ? '<span style="color:#A0AEC0;font-size:12.5px">—</span>' : renderStageChip(stage)) + '</td>';
+
+      // Reason column: show absence reason category label only (teacher privacy gradient — §2 table).
+      // Only show when a category is explicitly assigned via a completed justification.
+      // Awaiting-check-in, did-not-reach-class, and pending-approval records have no reason yet.
+      var reasonHtml = '<em>—</em>';
+      if (s.reasonCat && REASON_LABELS[s.reasonCat]) {
+        var isEventCat = (s.reasonCat === 'school-sanctioned-event');
+        reasonHtml = '<span class="reason-cat' + (isEventCat ? ' reason-event' : '') + '"><i class="fa-solid fa-tag"></i> ' + getReasonLabel(s.reasonCat) + '</span>';
+      }
+
+      var rowClasses = [];
+      if (s.awaitingCheckIn) rowClasses.push('row-awaiting');
+      else if (s.didNotReachClass) rowClasses.push('row-dnrc');
+      else if (m && m.status !== null) rowClasses.push('row-done');
+      if (isSelected) rowClasses.push('row-selected');
+
+      return '<tr class="' + rowClasses.join(' ') + '" onclick="selectStudent(\'' + s.id + '\')">' +
+        nameCell + statusCell + stageCell +
+        '<td class="reason-cell">' + reasonHtml + '</td>' +
+        '</tr>';
+    }).join('');
+  }
+
+  let STUDENT_NOTES = {};
+  STUDENTS.forEach(function(s){ STUDENT_NOTES[s.id] = []; });
+
+  function buildAuditTrail(s) {
+    var trail = [];
+    // Use per-student data if available, otherwise build generic trail
+    if (STUDENT_AUDIT_DATA[s.id]) {
+      trail = STUDENT_AUDIT_DATA[s.id].slice(); // copy
+    } else {
+      trail.push({ icon:'fa-bell', cls:'ad-gray', event:'Period opened', detail:'Bell rang — attendance window active.', time:'10:35 AM' });
+    }
+    // Append session notes
+    (STUDENT_NOTES[s.id] || []).forEach(function(n){
+      trail.push({ icon:'fa-pen-to-square', cls:'ad-gray', event:'Teacher note added', literalDetail:n.text, time:n.time });
+    });
+    return trail;
+  }
+
+  // ── Render late-arrival and did-not-reach-class alert banners ────────────
+  function renderLateAlerts() {
+    var container = document.getElementById('lateAlertContainer');
+    if (!container) return;
+    var html = '';
+    var awaiting = STUDENTS.filter(function(s){ return s.awaitingCheckIn; });
+    var dnrc     = STUDENTS.filter(function(s){ return s.didNotReachClass; });
+
+    awaiting.forEach(function(s){
+      html += '<div class="scenario-alert">' +
+        '<div class="alert-icon"><i class="fa-solid fa-right-to-bracket"></i></div>' +
+        '<div class="alert-body">' +
+          '<div class="alert-title">' + T('late_arrivals_title') + '</div>' +
+          '<div class="alert-desc"><strong>' + s.name + '</strong> ' + T('late_arrivals_desc') + '</div>' +
+        '</div>' +
+      '</div>';
+    });
+    dnrc.forEach(function(s){
+      html += '<div class="scenario-alert alert-danger">' +
+        '<div class="alert-icon"><i class="fa-solid fa-person-circle-exclamation"></i></div>' +
+        '<div class="alert-body">' +
+          '<div class="alert-title">' + T('dnrc_title') + '</div>' +
+          '<div class="alert-desc"><strong>' + s.name + '</strong> ' + T('dnrc_desc') + '</div>' +
+        '</div>' +
+      '</div>';
+    });
+    container.innerHTML = html;
+  }
+
+  // ── Enhanced drawer (Clerk Portal-aligned styling) ───────────────────────
+  function renderDrawer() {
+    var card  = document.getElementById('drawerCard');
+    var split = document.getElementById('splitPane');
+    if (!selectedId) { card.style.display='none'; split.classList.remove('has-drawer'); return; }
+    var s = getStudent(selectedId);
+    if (!s) { card.style.display='none'; split.classList.remove('has-drawer'); return; }
+    card.style.display = 'flex';
+    split.classList.add('has-drawer');
+
+    var stage = deriveStage(s);
+    var m = marks[s.id];
+    var trail = buildAuditTrail(s);
+
+    // ── Hero status chips ──────────────────────────────────────────────────
+    var baseChip = '';
+    if (!m || m.status === null) {
+      baseChip = '<span class="state-chip chip-none"><span class="sd"></span>' + T('not_marked') + '</span>';
+    } else if (m.status === 'P') {
+      baseChip = '<span class="state-chip chip-present"><span class="sd"></span>' + T('present') + '</span>';
+    } else if (m.status === 'A') {
+      if (s.justified)   baseChip = '<span class="state-chip chip-justified"><span class="sd"></span>' + T('absent') + '</span>';
+      else if (s.unjustified) baseChip = '<span class="state-chip chip-unjustified"><span class="sd"></span>' + T('absent') + '</span>';
+      else               baseChip = '<span class="state-chip chip-absent"><span class="sd"></span>' + T('absent') + '</span>';
+    } else if (m.status === 'L') {
+      if (s.awaitingCheckIn || s.didNotReachClass)
+        baseChip = '<span class="state-chip chip-signed-in"><span class="sd"></span>' + T('signed_in') + '</span>';
+      else if (s.justified) baseChip = '<span class="state-chip chip-justified"><span class="sd"></span>' + T('late') + '</span>';
+      else                  baseChip = '<span class="state-chip chip-late"><span class="sd"></span>' + T('late') + '</span>';
+    }
+    var stageChip = (m && m.status === 'P') ? '' : renderStageChip(stage);
+
+    // ── Current period cell ────────────────────────────────────────────────
+    var pLabel   = currentPeriod;
+    var pSched   = PERIOD_SCHEDULE[currentPeriod] || {};
+    var pTime    = pSched.time || '10:35–11:50';
+    var pRoom    = pSched.room || 'Room 204';
+    var isSessionDeviation = pSched.subject && currentSubject !== pSched.subject;
+    var periodStatusChip = '';
+    if (!m || m.status === null) {
+      periodStatusChip = '<span class="ct-chip" style="background:#F8FAFC;color:#A0AEC0;border-color:#E2E8F0">—</span>';
+    } else if (m.status === 'P') {
+      periodStatusChip = '<span class="ct-chip ct-chip-absent" style="background:#ECFDF5;color:#065F46;border-color:#A7F3D0"><i class="fa-solid fa-circle-check"></i> ' + T('present') + '</span>';
+    } else if (m.status === 'A') {
+      if (s.justified)       periodStatusChip = '<span class="ct-chip ct-chip-justified"><i class="fa-solid fa-circle-check"></i> ' + T('absent_justified') + '</span>';
+      else if (s.unjustified) periodStatusChip = '<span class="ct-chip ct-chip-unjustified"><i class="fa-solid fa-circle-xmark"></i> ' + T('absent_unjustified') + '</span>';
+      else                   periodStatusChip = '<span class="ct-chip ct-chip-absent"><i class="fa-solid fa-circle-xmark"></i> ' + T('absent') + '</span>';
+    } else if (m.status === 'L') {
+      if (s.awaitingCheckIn || s.didNotReachClass)
+        periodStatusChip = '<span class="ct-chip ct-chip-signed-in"><i class="fa-solid fa-right-to-bracket"></i> ' + T('signed_in') + '</span>';
+      else if (s.justified) periodStatusChip = '<span class="ct-chip ct-chip-justified"><i class="fa-solid fa-circle-check"></i> ' + T('late_justified') + '</span>';
+      else                  periodStatusChip = '<span class="ct-chip ct-chip-late"><i class="fa-solid fa-door-open"></i> ' + T('late') + '</span>';
+    }
+
+    // ── Contextual notes ───────────────────────────────────────────────────
+    var checkInBlock = (s.awaitingCheckIn || s.didNotReachClass)
+      ? '<button class="checkin-btn" style="width:100%;justify-content:center;margin-bottom:12px" onclick="checkIn(\'' + s.id + '\')" ' + (submitted?'disabled':'') + '><i class="fa-solid fa-door-open"></i> ' + T('check_in') + '</button>'
+      : '';
+    var dnrcNote = s.didNotReachClass
+      ? '<div style="font-size:12px;color:#991B1B;background:#FEF2F2;border:1px solid #FCA5A5;border-radius:7px;padding:9px 11px;margin-bottom:12px;display:flex;gap:8px;align-items:flex-start"><i class="fa-solid fa-person-circle-exclamation" style="margin-top:2px;flex-shrink:0"></i><span>' + T('dnrc_threshold_note') + '</span></div>'
+      : '';
+    var justifiedNote = s.justified
+      ? '<div style="font-size:12px;color:#065F46;background:#ECFDF5;border:1px solid #A7F3D0;border-radius:7px;padding:9px 11px;margin-bottom:12px;display:flex;gap:8px;align-items:flex-start"><i class="fa-solid fa-circle-check" style="margin-top:2px;flex-shrink:0"></i><span>' + T('justified_note') + '</span></div>'
+      : '';
+    var unjustifiedNote = s.unjustified
+      ? '<div style="font-size:12px;color:#991B1B;background:#FEF2F2;border:1px solid #FCA5A5;border-radius:7px;padding:9px 11px;margin-bottom:12px;display:flex;gap:8px;align-items:flex-start"><i class="fa-solid fa-circle-xmark" style="margin-top:2px;flex-shrink:0"></i><span>' + T('unjustified_note') + '</span></div>'
+      : '';
+
+    // ── Audit trail HTML ───────────────────────────────────────────────────
+    var auditHtml = trail.map(function(t){
+      var detailHtml = t.literalDetail
+        ? '<div class="audit-detail audit-note-body">' + t.literalDetail.replace(/</g,'&lt;') + '</div>'
+        : '<div class="audit-detail">' + auditFr(t.detail) + '</div>';
+      return '<div class="audit-item">' +
+        '<div class="audit-dot ' + t.cls + '"><i class="fa-solid ' + t.icon + '"></i></div>' +
+        '<div>' +
+          '<div class="audit-event">' + auditFr(t.event) + '</div>' +
+          detailHtml +
+          '<div class="audit-time">' + t.time + '</div>' +
+        '</div>' +
+      '</div>';
+    }).join('');
+
+    var disabled = (m && m.locked) || submitted;
+    var pOn = m && m.status === 'P' ? 'is-on' : '';
+    var aOn = m && m.status === 'A' ? 'is-on' : '';
+
+    document.getElementById('drawerContent').innerHTML =
+      '<div class="drawer-h">' +
+        '<h3>' + s.name + '</h3>' +
+        '<button class="drawer-close" onclick="closeDrawer()" title="Close"><i class="fa-solid fa-xmark"></i></button>' +
+      '</div>' +
+      '<div class="drawer-b">' +
+
+        // ── Student info hero ──────────────────────────────────────────────
+        '<div class="drawer-hero">' +
+          '<div class="drawer-avatar" style="background:' + avatarColor(s.name) + '">' + initials(s.name) + '</div>' +
+          '<div style="flex:1;min-width:0">' +
+            '<div class="drawer-name">' + s.name + '</div>' +
+            '<div class="drawer-meta">' + (s.grade || '') + ' · Ms. Tremblay · École Sainte-Croix</div>' +
+            '<div class="drawer-id">' + s.id + '</div>' +
+            '<div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap;align-items:center">' + baseChip + (stageChip ? '&nbsp;' + stageChip : '') + '</div>' +
+          '</div>' +
+        '</div>' +
+
+        // ── Contextual action / info blocks ────────────────────────────────
+        checkInBlock + dnrcNote + justifiedNote + unjustifiedNote +
+
+        // ── Current period section ──────────────────────────────────────────
+        '<div class="ct-section">' +
+          '<h4><i class="fa-solid fa-calendar-day"></i> ' + T('drawer_current_period') + '</h4>' +
+          '<div class="ct-period-cell">' +
+            '<div class="ct-p-info" style="flex:1">' +
+              '<div style="display:flex;gap:5px;align-items:center;flex-wrap:wrap;margin-bottom:6px">' +
+                '<span class="session-chip sc-period"><i class="fa-solid fa-hashtag" style="font-size:9px"></i> ' + pLabel + '</span>' +
+                '<span class="session-chip sc-subject"><i class="fa-solid fa-book" style="font-size:9px"></i> ' + currentSubject + '</span>' +
+                (isSessionDeviation ? '<span class="session-chip sc-deviate"><i class="fa-solid fa-triangle-exclamation" style="font-size:9px"></i> ' + T('unscheduled_subject') + '</span>' : '') +
+              '</div>' +
+              '<div class="ct-p-time">' + pTime + ' · Ms. Tremblay · ' + pRoom + '</div>' +
+            '</div>' +
+            '<div>' + periodStatusChip + '</div>' +
+          '</div>' +
+        '</div>' +
+
+        // ── Audit trail section ─────────────────────────────────────────────
+        '<div class="ct-section">' +
+          '<h4><i class="fa-solid fa-clock-rotate-left"></i> ' + T('drawer_audit_title') + '</h4>' +
+          auditHtml +
+        '</div>' +
+
+        // ── Teacher note section ────────────────────────────────────────────
+        '<div class="ct-section">' +
+          '<h4><i class="fa-solid fa-pen-to-square"></i> ' + T('drawer_note_label') + '</h4>' +
+          '<div class="note-form-area">' +
+            '<textarea id="drawerNoteInput" placeholder="' + T('drawer_note_placeholder') + '"></textarea>' +
+            '<div class="note-form-foot">' +
+              '<small>' + T('drawer_note_hint') + '</small>' +
+              '<button class="note-save-btn" onclick="saveDrawerNote()"><i class="fa-solid fa-floppy-disk"></i> ' + T('drawer_save_note') + '</button>' +
+            '</div>' +
+          '</div>' +
+        '</div>' +
+
+      '</div>' +
+      '<div class="drawer-actions">' +
+        '<button class="drawer-btn drawer-btn-p ' + pOn + '" onclick="drawerMark(\'P\')" ' + (disabled?'disabled':'') + '><i class="fa-solid fa-check"></i> ' + T('drawer_mark_present') + '</button>' +
+        '<button class="drawer-btn drawer-btn-a ' + aOn + '" onclick="drawerMark(\'A\')" ' + (disabled?'disabled':'') + '><i class="fa-solid fa-xmark"></i> ' + T('drawer_mark_absent') + '</button>' +
+      '</div>';
+  }
+
+  function selectStudent(id) { selectedId = id; renderTable(); renderDrawer(); }
+  function closeDrawer() { selectedId = null; renderTable(); renderDrawer(); }
+  function drawerMark(status) {
+    if (!selectedId) return;
+    if (marks[selectedId].locked || submitted) return;
+    marks[selectedId].status = status;
+    showToast(T('drawer_status_changed'));
+    renderTable(); renderDrawer(); updateStats(); triggerAutosave();
+  }
+  function saveDrawerNote() {
+    if (!selectedId) return;
+    var ta = document.getElementById('drawerNoteInput');
+    if (!ta) return;
+    var text = ta.value.trim(); if (!text) return;
+    var now = new Date();
+    var t = now.toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' });
+    STUDENT_NOTES[selectedId].push({ text: text, time: t });
+    ta.value = '';
+    showToast(T('drawer_note_added'));
+    renderDrawer();
+    triggerAutosave();
+  }
+
+  // ── Missing-attendance banner ─────────────────────────────────────────────
+  let missingLevel = 'orange';
+  let missingDismissed = false;
+  function renderMissingPeriodBanner() {
+    var c = document.getElementById('missingPeriodContainer');
+    if (!c || missingDismissed || !missingLevel) { if(c) c.innerHTML=''; return; }
+    var icon = missingLevel === 'red' ? 'fa-circle-exclamation' : 'fa-triangle-exclamation';
+    var msgKey = missingLevel === 'red' ? 'missing_red' : 'missing_orange';
+    c.innerHTML = '<div class="missing-banner mb-' + missingLevel + '">' +
+      '<i class="fa-solid ' + icon + ' mb-icon"></i>' +
+      '<div class="mb-body"><strong>' + T(msgKey) + '</strong> &nbsp;·&nbsp; <a class="mb-link" onclick="dismissMissing()">' + T('missing_link') + '</a></div>' +
+      '<button class="mb-dismiss" onclick="dismissMissing()"><i class="fa-solid fa-xmark"></i></button>' +
+    '</div>';
+  }
+  function dismissMissing() { missingDismissed = true; renderMissingPeriodBanner(); }
+
+  function submitAttendance() {
+    const values = Object.values(marks);
+    if (values.some(function(m){ return m.status === null; })) { showToast(T('please_mark_all')); return; }
+    submitted = true;
+    var btn = document.getElementById('submitBtn');
+    btn.className = 'submit-btn submitted';
+    btn.innerHTML = '<i class="fa-solid fa-circle-check"></i> <span>' + T('submit_btn') + '</span>';
+    btn.disabled = true;
+    document.getElementById('pendingBadge').style.display = 'none';
+    const now = new Date(); const t = now.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
+    document.getElementById('submitSmall').innerHTML = T('submit_meta') + ' ' + t;
+    document.getElementById('submittedBanner').classList.add('show');
+    renderTable(); updateStats();
+    showToast(T('submitted_for'));
+    const ind = document.getElementById('autosaveIndicator');
+    ind.innerHTML = '<i class="fa-solid fa-circle-check"></i> ' + T('submitted');
+    ind.style.color = '#059669';
+  }
+
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg; t.classList.add('show');
+    setTimeout(function(){ t.classList.remove('show'); }, 3000);
+  }
+
+  function ctRerender(){
+    renderTable(); renderDrawer();
+    var ind = document.getElementById('autosaveIndicator');
+    if(!ind.classList.contains('saving') && !submitted){
+      ind.innerHTML = '<i class="fa-solid fa-cloud-arrow-up"></i> ' + T('all_saved');
+    }
+  }
+  window.__ct_page_rerender = ctRerender;
+
+  // Initialise session state
+  (function(){
+    var sel = document.getElementById('subjectSelect');
+    if (sel) sel.value = currentSubject;
+    updateDeviationFlag();
+    renderSessionChips();
+  })();
+  renderTable();
+  renderDrawer();
+  updateStats();
+</script>
+
+<!-- Prototype cross-portal switcher -->
+<div id="proto-switcher" style="position:fixed;bottom:16px;right:16px;z-index:9999;background:rgba(15,37,70,.95);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.1);padding:5px;border-radius:999px;box-shadow:0 8px 24px rgba(0,0,0,.25);font-family:'Segoe UI',system-ui,sans-serif;display:flex;gap:2px;align-items:center;"><span style="color:rgba(255,255,255,.4);font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:0 6px 0 10px;">Prototype</span><a href="index.html" style="display:inline-flex;align-items:center;gap:4px;padding:6px 12px;border-radius:999px;font-size:12px;font-weight:600;text-decoration:none;letter-spacing:.02em;transition:all .15s;background:transparent;color:#CBD5E0;">Index</a><a href="admin-dashboard.html" style="display:inline-flex;align-items:center;gap:4px;padding:6px 12px;border-radius:999px;font-size:12px;font-weight:600;text-decoration:none;letter-spacing:.02em;transition:all .15s;background:transparent;color:#CBD5E0;">Admin</a><a href="teacher-dashboard.html" style="display:inline-flex;align-items:center;gap:4px;padding:6px 12px;border-radius:999px;font-size:12px;font-weight:600;text-decoration:none;letter-spacing:.02em;transition:all .15s;background:#2E7DD1;color:#fff;">Teacher</a><a href="parent-app.html" style="display:inline-flex;align-items:center;gap:4px;padding:6px 12px;border-radius:999px;font-size:12px;font-weight:600;text-decoration:none;letter-spacing:.02em;transition:all .15s;background:transparent;color:#CBD5E0;">Parent</a><span style="color:rgba(255,255,255,.2);padding:0 4px;">|</span><a href="#" class="lang-btn" data-lang="en" onclick="event.preventDefault();window.__ct_i18n.setLang('en');" style="display:inline-flex;align-items:center;gap:4px;padding:6px 10px;border-radius:999px;font-size:11px;font-weight:700;text-decoration:none;letter-spacing:.04em;background:#2E7DD1;color:#fff;">EN</a><a href="#" class="lang-btn" data-lang="fr" onclick="event.preventDefault();window.__ct_i18n.setLang('fr');" style="display:inline-flex;align-items:center;gap:4px;padding:6px 10px;border-radius:999px;font-size:11px;font-weight:700;text-decoration:none;letter-spacing:.04em;background:transparent;color:#CBD5E0;">FR</a></div>
+
+<script id="i18n-core">
+(function(){
+  function getLang(){ var p=new URLSearchParams(window.location.search); return p.get('lang')==='fr'?'fr':'en'; }
+  function setLangUrl(href,lang){ if(!href||href.startsWith('http')||href.startsWith('#')||href.startsWith('javascript:')) return href; var base=href.split('?')[0].split('#')[0]; var hash=href.indexOf('#')>=0?href.substring(href.indexOf('#')):''; if(!base.endsWith('.html')) return href; return base+(lang==='fr'?'?lang=fr':'')+hash; }
+  function applyLang(){
+    var lang=getLang(); document.documentElement.lang=lang; document.body&&(document.body.dataset.lang=lang);
+    document.querySelectorAll('[data-en]').forEach(function(el){ var val=el.getAttribute('data-'+lang); if(val!==null){ if(el.hasAttribute('data-html'))el.innerHTML=val; else el.textContent=val; } });
+    document.querySelectorAll('[data-placeholder-en]').forEach(function(el){ var val=el.getAttribute('data-placeholder-'+lang); if(val!==null)el.setAttribute('placeholder',val); });
+    document.querySelectorAll('[data-title-en]').forEach(function(el){ var val=el.getAttribute('data-title-'+lang); if(val!==null)el.setAttribute('title',val); });
+    document.querySelectorAll('a[href]').forEach(function(a){ a.setAttribute('href',setLangUrl(a.getAttribute('href'),lang)); });
+    document.querySelectorAll('.lang-btn').forEach(function(btn){ var on=btn.getAttribute('data-lang')===lang; btn.style.background=on?'#2E7DD1':'transparent'; btn.style.color=on?'#fff':'#CBD5E0'; });
+    if(typeof window.__ct_page_rerender==='function') window.__ct_page_rerender();
+  }
+  function setLang(lang){ var p=new URLSearchParams(window.location.search); if(lang==='fr')p.set('lang','fr');else p.delete('lang'); var qs=p.toString(); window.history.replaceState({},'',window.location.pathname+(qs?'?'+qs:'')+window.location.hash); applyLang(); }
+  window.__ct_i18n={getLang:getLang,applyLang:applyLang,setLang:setLang};
+  if(document.readyState==='loading'){ document.addEventListener('DOMContentLoaded',applyLang); } else { applyLang(); }
+})();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ClassTrack — My children</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="stylesheet" href="assets/styles.css">
+</head>
+<body>
+
+<a href="#main" class="skip-link" data-en="Skip to content" data-fr="Aller au contenu">Skip to content</a>
+
+<div class="app">
+<aside id="sidebar"></aside>
+<main id="main" class="shell">
+
+  <section class="hero-row">
+    <div>
+      <h1 class="hero-row__title" data-en="My children" data-fr="Mes enfants">My children</h1>
+      <p class="hero-row__sub" data-en="See how your kids' attendance is going across all their classes." data-fr="Voyez comment se passe la présence de vos enfants pour tous leurs cours.">See how your kids' attendance is going across all their classes.</p>
+    </div>
+  </section>
+
+  <div class="grid-2">
+
+    <a href="child-detail.html?child=aaliyah" class="child-card">
+      <div class="child-card__head">
+        <div class="avatar avatar--blue avatar--2xl">AC</div>
+        <div>
+          <div class="child-card__name">Aaliyah Carter</div>
+          <div class="child-card__sub" data-en="Grade 7A · Secondary · Ms. S. Tremblay" data-fr="7e A · Secondaire · Mme S. Tremblay">Grade 7A · Secondary · Ms. S. Tremblay</div>
+        </div>
+      </div>
+      <div class="child-card__status child-card__status--present">
+        <div class="child-card__status-icon"><i class="fa-solid fa-circle-check"></i></div>
+        <div class="child-card__status-text">
+          <div class="child-card__status-title" data-en="Present today" data-fr="Présente aujourd'hui">Present today</div>
+          <div class="child-card__status-sub" data-en="No issues to report." data-fr="Rien à signaler.">No issues to report.</div>
+        </div>
+      </div>
+      <div class="child-card__stats">
+        <div class="child-card__stat">
+          <div class="child-card__stat-n text-success">96%</div>
+          <div class="child-card__stat-l" data-en="This term" data-fr="Ce trimestre">This term</div>
+        </div>
+        <div class="child-card__stat">
+          <div class="child-card__stat-n">2</div>
+          <div class="child-card__stat-l" data-en="Absences" data-fr="Absences">Absences</div>
+        </div>
+        <div class="child-card__stat">
+          <div class="child-card__stat-n">1</div>
+          <div class="child-card__stat-l" data-en="Late" data-fr="Retards">Late</div>
+        </div>
+      </div>
+      <div class="child-card__cta">
+        <span data-en="View full attendance" data-fr="Voir la présence complète">View full attendance</span>
+        <i class="fa-solid fa-arrow-right"></i>
+      </div>
+    </a>
+
+    <a href="child-detail.html?child=jaylen" class="child-card">
+      <div class="child-card__head">
+        <div class="avatar avatar--orange avatar--2xl">JC</div>
+        <div>
+          <div class="child-card__name">Jaylen Carter</div>
+          <div class="child-card__sub" data-en="Grade 4B · Elementary · Mr. P. Côté" data-fr="4e B · Primaire · M. P. Côté">Grade 4B · Elementary · Mr. P. Côté</div>
+        </div>
+      </div>
+      <div class="child-card__status child-card__status--late">
+        <div class="child-card__status-icon"><i class="fa-solid fa-clock"></i></div>
+        <div class="child-card__status-text">
+          <div class="child-card__status-title" data-en="Late today · 22 min" data-fr="Retard aujourd'hui · 22 min">Late today · 22 min</div>
+          <div class="child-card__status-sub" data-en="A reason is still needed." data-fr="Un motif est encore requis.">A reason is still needed.</div>
+        </div>
+      </div>
+      <div class="child-card__stats">
+        <div class="child-card__stat">
+          <div class="child-card__stat-n text-success">92%</div>
+          <div class="child-card__stat-l" data-en="This term" data-fr="Ce trimestre">This term</div>
+        </div>
+        <div class="child-card__stat">
+          <div class="child-card__stat-n">2</div>
+          <div class="child-card__stat-l" data-en="Absences" data-fr="Absences">Absences</div>
+        </div>
+        <div class="child-card__stat">
+          <div class="child-card__stat-n">1</div>
+          <div class="child-card__stat-l" data-en="Late" data-fr="Retards">Late</div>
+        </div>
+      </div>
+      <div class="child-card__cta">
+        <span data-en="View full attendance" data-fr="Voir la présence complète">View full attendance</span>
+        <i class="fa-solid fa-arrow-right"></i>
+      </div>
+    </a>
+
+  </div>
+
+  <div class="banner banner--info">
+    <div class="banner__icon"><i class="fa-solid fa-graduation-cap"></i></div>
+    <div class="banner__body">
+      <div class="banner__title" data-en="Attendance counts toward final grades" data-fr="La présence compte dans la note finale">Attendance counts toward final grades</div>
+      <div class="banner__sub" data-en="As of September 2026, Ontario law requires attendance to count for up to 10% (Grades 7–9) or 12% (Grades 9–12) of your child's final grade. Justified absences don't impact this." data-fr="Depuis septembre 2026, la loi ontarienne exige que la présence compte jusqu'à 10 % (7e–9e) ou 12 % (9e–12e) de la note finale. Les absences motivées n'affectent pas ce pourcentage.">As of September 2026, Ontario law requires attendance to count for up to 10% (Grades 7–9) or 12% (Grades 9–12) of your child's final grade. Justified absences don't impact this.</div>
+    </div>
+  </div>
+
+</main>
+</div>
+
+<style>
+  .hero-row { display: flex; align-items: center; justify-content: space-between; gap: var(--s-4); flex-wrap: wrap; }
+  .hero-row__title { font-size: var(--fs-3xl); font-weight: 700; letter-spacing: -0.015em; }
+  .hero-row__sub { color: var(--c-ink-muted); font-size: var(--fs-lg); margin-top: 6px; }
+</style>
+
+<script src="assets/app.js"></script>
+<script>
+  __ct_mountSidebar('children');
+  __ct_mountProtoSwitcher('parent');
+</script>
+</body>
+</html>
